@@ -226,20 +226,22 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
 
   const provenance: ProvenanceRecord[] = [];
 
-  const selectedIds = [
-    state.selections.race,
-    state.selections.class,
-    ...((state.selections.feats as string[] | undefined) ?? []),
-    ...((state.selections.equipment as string[] | undefined) ?? [])
-  ].filter(Boolean) as string[];
+  const entityBuckets = context.resolvedData.entities;
 
-  for (const entities of Object.values(context.resolvedData.entities)) {
-    for (const entity of Object.values(entities)) {
-      if (selectedIds.includes(entity.id) || entity.entityType === "rules") {
-        for (const effect of entity.effects ?? []) {
-          applyEffect(effect, sheet, provenance, { packId: entity._source?.packId ?? "unknown", entityId: entity.id });
-        }
-      }
+  const ruleEntities = Object.values(entityBuckets.rules ?? {}).sort((a, b) => a.id.localeCompare(b.id));
+  for (const ruleEntity of ruleEntities) applyEntity(ruleEntity);
+
+  const raceId = state.selections.race as string | undefined;
+  applyEntity(raceId ? entityBuckets.races?.[raceId] : undefined);
+
+  const classId = state.selections.class as string | undefined;
+  applyEntity(classId ? entityBuckets.classes?.[classId] : undefined);
+
+  for (const featId of ((state.selections.feats as string[] | undefined) ?? [])) {
+    applyEntity(entityBuckets.feats?.[featId]);
+  }
+  for (const itemId of ((state.selections.equipment as string[] | undefined) ?? [])) {
+    applyEntity(entityBuckets.items?.[itemId]);
     }
   }
 
