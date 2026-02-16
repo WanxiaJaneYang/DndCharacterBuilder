@@ -57,82 +57,93 @@ export function App() {
       );
     }
 
-    if (currentStep.kind === 'metadata') {
-      return (
-        <section>
-          <h2>{currentStep.label}</h2>
-          <input
-            value={state.metadata.name ?? ''}
-            onChange={(e) => setState((s) => applyChoice(s, currentStep.id, e.target.value))}
-            placeholder="Enter character name"
-          />
-        </section>
-      );
-    }
-
-    if (currentStep.kind === 'abilities') {
-      return (
-        <section>
-          <h2>{currentStep.label} (Manual, 3-18)</h2>
-          <div className="grid">
-            {Object.entries(state.abilities).map(([key, value]) => (
-              <label key={key}>{key.toUpperCase()}
-                <input type="number" min={3} max={18} value={value} onChange={(e) => setAbility(key, Number(e.target.value))} />
-              </label>
-            ))}
-          </div>
-        </section>
-      );
-    }
-
-    if (currentStep.source.type === 'entityType') {
-      const stepChoice = choiceMap.get(currentStep.id);
-      const options = stepChoice?.options ?? [];
-      const limit = currentStep.source.limit ?? 1;
-
-      if (limit <= 1) {
-        const currentValue = currentStep.id === 'feat'
-          ? String(((state.selections.feats as string[] | undefined) ?? [])[0] ?? '')
-          : String(state.selections[currentStep.id] ?? '');
-
+    switch (currentStep.kind) {
+      case 'metadata':
         return (
-          <Picker
-            title={currentStep.label}
-            options={options}
-            value={currentValue}
-            onSelect={(id) => {
-              if (currentStep.id === 'feat') {
-                setState((s) => applyChoice(s, currentStep.id, [id]));
-                return;
-              }
-              setState((s) => applyChoice(s, currentStep.id, id));
-            }}
-          />
+          <section>
+            <h2>{currentStep.label}</h2>
+            <input
+              value={state.metadata.name ?? ''}
+              onChange={(e) => setState((s) => applyChoice(s, currentStep.id, e.target.value))}
+              placeholder="Enter character name"
+            />
+          </section>
         );
-      }
 
-      const selected = (state.selections[currentStep.id] as string[] | undefined) ?? [];
-      return (
-        <fieldset>
-          <legend>{currentStep.label}</legend>
-          {options.map((o) => (
-            <label key={o.id}>
-              <input
-                type="checkbox"
-                checked={selected.includes(o.id)}
-                onChange={(e) => {
-                  const next = e.target.checked ? [...selected, o.id] : selected.filter((item) => item !== o.id);
-                  setState((s) => applyChoice(s, currentStep.id, next));
+      case 'abilities':
+        return (
+          <section>
+            <h2>{currentStep.label} (Manual, 3-18)</h2>
+            <div className="grid">
+              {Object.entries(state.abilities).map(([key, value]) => (
+                <label key={key}>{key.toUpperCase()}
+                  <input type="number" min={3} max={18} value={value} onChange={(e) => setAbility(key, Number(e.target.value))} />
+                </label>
+              ))}
+            </div>
+          </section>
+        );
+
+      case 'race':
+      case 'class':
+      case 'feat':
+      case 'skill':
+        if (currentStep.source.type === 'entityType') {
+          const stepChoice = choiceMap.get(currentStep.id);
+          const options = stepChoice?.options ?? [];
+          const limit = currentStep.source.limit ?? 1;
+
+          if (limit <= 1) {
+            const currentValue = currentStep.id === 'feat'
+              ? String(((state.selections.feats as string[] | undefined) ?? [])[0] ?? '')
+              : String(state.selections[currentStep.id] ?? '');
+
+            return (
+              <Picker
+                title={currentStep.label}
+                options={options}
+                value={currentValue}
+                onSelect={(id) => {
+                  if (currentStep.id === 'feat') {
+                    setState((s) => applyChoice(s, currentStep.id, [id]));
+                    return;
+                  }
+                  setState((s) => applyChoice(s, currentStep.id, id));
                 }}
               />
-              {o.label}
-            </label>
-          ))}
-        </fieldset>
-      );
-    }
+            );
+          }
 
-    throw new Error(`Unknown flow step kind: ${currentStep.kind}`);
+          const selected = (state.selections[currentStep.id] as string[] | undefined) ?? [];
+          return (
+            <fieldset>
+              <legend>{currentStep.label}</legend>
+              {options.map((o) => (
+                <label key={o.id}>
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(o.id)}
+                    onChange={(e) => {
+                      const next = e.target.checked ? [...selected, o.id] : selected.filter((item) => item !== o.id);
+                      setState((s) => applyChoice(s, currentStep.id, next));
+                    }}
+                  />
+                  {o.label}
+                </label>
+              ))}
+            </fieldset>
+          );
+        }
+        throw new Error(`Unexpected source type for ${currentStep.kind}: ${currentStep.source.type}`);
+
+      case 'review':
+        return null; // Review step rendering not yet implemented
+
+      default: {
+        const _exhaustive: never = currentStep;
+        throw new Error(`Unknown flow step kind: ${(_exhaustive as any).kind}`);
+      }
+    }
   };
 
   return (

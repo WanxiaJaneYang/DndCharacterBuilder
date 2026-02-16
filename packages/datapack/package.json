@@ -2,7 +2,7 @@
   "name": "@dcb/datapack",
   "version": "0.1.0",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "src/core.ts",
   "exports": {
     ".": "./src/core.ts",
     "./node": "./src/node.ts"

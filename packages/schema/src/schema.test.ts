@@ -45,8 +45,6 @@ describe("flow schema", () => {
     ).toThrow();
   });
 
-
-
   it("rejects manual source for entity-selection kinds", () => {
     expect(() =>
       FlowSchema.parse({

@@ -25,7 +25,6 @@ function parseEntityList(filePath: string, entityType: string): Entity[] {
   }
 }
 
-
 export function loadPack(packPath: string): LoadedPack {
   const manifest = ManifestSchema.parse(JSON.parse(fs.readFileSync(path.join(packPath, "manifest.json"), "utf8")));
   const entities: Record<string, Entity[]> = {};

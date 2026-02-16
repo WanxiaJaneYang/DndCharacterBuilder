@@ -9,7 +9,6 @@ describe("pack contracts", () => {
     expect(() => runContracts(path.resolve(process.cwd(), "../../packs"))).not.toThrow();
   });
 
-
   it("ignores non-directory entries under packs root", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-contracts-"));
     const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");

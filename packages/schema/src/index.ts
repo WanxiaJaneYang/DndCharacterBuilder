@@ -93,7 +93,6 @@ const ChoiceStepSchema = z.object({
     });
   }
 
-
   const expectedSourceByKind: Record<
     z.infer<typeof ChoiceStepKindSchema>,
     z.infer<typeof ChoiceStepSourceSchema>["type"]

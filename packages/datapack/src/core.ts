@@ -120,7 +120,6 @@ function rotr(value: number, bits: number): number {
   return (value >>> bits) | (value << (32 - bits));
 }
 
-
 function getDefined(values: ReadonlyArray<number> | Uint32Array, index: number, label: string): number {
   const value = values[index];
   if (value === undefined) {
@@ -236,6 +235,8 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
         const entityBucket = entities[patch.entityType];
         const prev = entityBucket?.[patch.id];
         if (entityBucket && prev) {
+          // Note: Spread operation assumes patch.value properties are defined.
+          // A more robust implementation would filter out undefined values or validate patches.
           entityBucket[patch.id] = {
             ...prev,
             ...patch.value,

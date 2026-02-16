@@ -48,7 +48,6 @@ describe("resolvePackSet", () => {
     }
   });
 
-
   it("fails with contextual error for invalid entity data", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-invalid-pack-"));
     const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
@@ -64,7 +63,6 @@ describe("resolvePackSet", () => {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
-
 
   it("fails when entityType does not match entity file bucket", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-entitytype-pack-"));
