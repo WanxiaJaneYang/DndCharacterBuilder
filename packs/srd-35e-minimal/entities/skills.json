@@ -1,0 +1,8 @@
+[
+  { "id": "spot", "name": "Spot", "entityType": "skills" },
+  { "id": "listen", "name": "Listen", "entityType": "skills" },
+  { "id": "climb", "name": "Climb", "entityType": "skills" },
+  { "id": "jump", "name": "Jump", "entityType": "skills" },
+  { "id": "diplomacy", "name": "Diplomacy", "entityType": "skills" },
+  { "id": "ride", "name": "Ride", "entityType": "skills" }
+]

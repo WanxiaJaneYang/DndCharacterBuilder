@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; background: #f7f7fa; margin: 0; }
+.container { max-width: 920px; margin: 0 auto; background: white; padding: 1rem 1.5rem; min-height: 100vh; }
+.subtitle { color: #555; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.grid.two { grid-template-columns: repeat(2, 1fr); }
+.actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
+label { display: block; margin-bottom: 0.5rem; }
+.sheet { border: 1px solid #ccc; padding: 0.75rem; background: #fffdf4; }
+button { margin-right: 0.5rem; }

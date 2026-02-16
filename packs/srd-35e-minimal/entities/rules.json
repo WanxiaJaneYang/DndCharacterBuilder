@@ -1,0 +1,18 @@
+[
+  {
+    "id": "base-ac",
+    "name": "Base AC",
+    "entityType": "rules",
+    "effects": [
+      { "kind": "set", "targetPath": "stats.ac", "value": { "sum": [ {"const": 10 }, {"abilityMod": "dex"} ] } }
+    ]
+  },
+  {
+    "id": "initiative",
+    "name": "Initiative",
+    "entityType": "rules",
+    "effects": [
+      { "kind": "set", "targetPath": "stats.initiative", "value": { "abilityMod": "dex" } }
+    ]
+  }
+]
