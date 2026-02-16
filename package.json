@@ -1,0 +1,20 @@
+{
+  "name": "dnd-character-builder",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @dcb/web run dev",
+    "build": "npm --workspaces run build",
+    "typecheck": "npm --workspaces run typecheck",
+    "lint": "npm --workspaces run lint",
+    "test": "npm --workspaces run test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

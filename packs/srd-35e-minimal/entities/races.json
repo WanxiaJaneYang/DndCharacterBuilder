@@ -1,0 +1,11 @@
+[
+  {
+    "id": "human",
+    "name": "Human",
+    "entityType": "races",
+    "effects": [
+      { "kind": "set", "targetPath": "stats.speed", "value": { "const": 30 } }
+    ],
+    "data": { "size": "medium" }
+  }
+]

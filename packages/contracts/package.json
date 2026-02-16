@@ -1,0 +1,20 @@
+{
+  "name": "@dcb/contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@dcb/datapack": "file:../datapack",
+    "@dcb/engine": "file:../engine",
+    "@dcb/schema": "file:../schema"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}
