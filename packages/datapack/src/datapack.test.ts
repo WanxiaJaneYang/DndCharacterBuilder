@@ -1,7 +1,10 @@
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { LoadedPack } from "./index";
-import { resolveLoadedPacks, resolvePackSet, topoSortPacks } from "./index";
+import { resolveLoadedPacks, topoSortPacks } from "./core";
+import { resolvePackSet } from "./node";
 
 function makePack(id: string, priority: number, dependencies: string[] = []): LoadedPack {
   return {
@@ -26,7 +29,60 @@ describe("resolvePackSet", () => {
     const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
     expect(resolved.entities.races?.human?.name).toBe("Human");
     expect(resolved.entities.races?.human?._source.packId).toBe("srd-35e-minimal");
-    expect(resolved.fingerprint.length).toBe(64);
+    expect(resolved.fingerprint).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("ignores non-directory entries under packs root", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-packs-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.writeFileSync(path.join(tempRoot, "README.md"), "not a pack");
+
+    try {
+      const resolved = resolvePackSet(tempRoot, ["srd-35e-minimal"]);
+      expect(resolved.orderedPackIds).toContain("srd-35e-minimal");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+
+  it("fails with contextual error for invalid entity data", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-invalid-pack-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.writeFileSync(path.join(packDest, "entities", "races.json"), JSON.stringify([{ name: "Broken" }]));
+
+    try {
+      expect(() => resolvePackSet(tempRoot, ["srd-35e-minimal"]))
+        .toThrow(/invalid entity file.*races\.json/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+
+  it("fails when entityType does not match entity file bucket", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-entitytype-pack-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.writeFileSync(
+      path.join(packDest, "entities", "races.json"),
+      JSON.stringify([{ id: "oops", name: "Oops", entityType: "classes" }])
+    );
+
+    try {
+      expect(() => resolvePackSet(tempRoot, ["srd-35e-minimal"]))
+        .toThrow(/expected races/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
   });
 
   it("preserves dependency order even when priority conflicts", () => {
@@ -51,5 +107,6 @@ describe("resolvePackSet", () => {
     const resolved = resolveLoadedPacks([base, override], ["override"]);
     expect(resolved.entities.rules?.shared?.name).toBe("Overridden");
     expect(resolved.entities.rules?.shared?._source.packId).toBe("override");
+    expect(resolved.entities.rules?.shared?._source.entityId).toBe("shared");
   });
 });

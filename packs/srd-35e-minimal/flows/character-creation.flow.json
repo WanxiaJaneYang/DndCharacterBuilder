@@ -1,10 +1,68 @@
 {
   "steps": [
-    { "id": "name", "kind": "metadata", "label": "Name", "source": { "type": "manual" } },
-    { "id": "abilities", "kind": "abilities", "label": "Ability Scores", "source": { "type": "manual" } },
-    { "id": "race", "kind": "race", "label": "Race", "source": { "type": "entityType", "entityType": "races", "limit": 1 } },
-    { "id": "class", "kind": "class", "label": "Class", "source": { "type": "entityType", "entityType": "classes", "limit": 1 } },
-    { "id": "feat", "kind": "feat", "label": "Feat", "source": { "type": "entityType", "entityType": "feats", "limit": 1 } },
-    { "id": "equipment", "kind": "equipment", "label": "Equipment", "source": { "type": "entityType", "entityType": "items", "limit": 10 } }
+    {
+      "id": "name",
+      "kind": "metadata",
+      "label": "Name",
+      "source": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "abilities",
+      "kind": "abilities",
+      "label": "Ability Scores",
+      "source": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "race",
+      "kind": "race",
+      "label": "Race",
+      "source": {
+        "type": "entityType",
+        "entityType": "races",
+        "limit": 1
+      }
+    },
+    {
+      "id": "class",
+      "kind": "class",
+      "label": "Class",
+      "source": {
+        "type": "entityType",
+        "entityType": "classes",
+        "limit": 1
+      }
+    },
+    {
+      "id": "feat",
+      "kind": "feat",
+      "label": "Feat",
+      "source": {
+        "type": "entityType",
+        "entityType": "feats",
+        "limit": 1
+      }
+    },
+    {
+      "id": "equipment",
+      "kind": "equipment",
+      "label": "Equipment",
+      "source": {
+        "type": "entityType",
+        "entityType": "items",
+        "limit": 10
+      }
+    },
+    {
+      "id": "review",
+      "kind": "review",
+      "label": "Review",
+      "source": {
+        "type": "manual"
+      }
+    }
   ]
 }

@@ -12,9 +12,7 @@ export function App() {
   const [stepIndex, setStepIndex] = useState(0);
   const [showProv, setShowProv] = useState(false);
 
-  const flowSteps = context.resolvedData.flow.steps;
-  const reviewStep = { id: 'review', kind: 'review', label: 'Review', source: { type: 'manual' as const } };
-  const wizardSteps = [...flowSteps, reviewStep];
+  const wizardSteps = context.resolvedData.flow.steps;
   const currentStep = wizardSteps[stepIndex];
 
   const choices = useMemo(() => listChoices(state, context), [state]);
@@ -38,7 +36,7 @@ export function App() {
   const renderCurrentStep = () => {
     if (!currentStep) return null;
     
-    if (currentStep.id === 'review') {
+    if (currentStep.kind === 'review') {
       return (
         <section>
           <h2>Review</h2>
@@ -134,7 +132,7 @@ export function App() {
       );
     }
 
-    return null;
+    throw new Error(`Unknown flow step kind: ${currentStep.kind}`);
   };
 
   return (
