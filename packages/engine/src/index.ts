@@ -59,17 +59,23 @@ function setPath(obj: Record<string, any>, path: string, value: number): void {
   const keys = path.split(".");
   let current = obj;
   for (let i = 0; i < keys.length - 1; i += 1) {
-    current[keys[i]] ??= {};
-    current = current[keys[i]];
+    const key = keys[i];
+    if (key !== undefined) {
+      current[key] ??= {};
+      current = current[key];
+    }
   }
-  current[keys[keys.length - 1]] = value;
+  const lastKey = keys[keys.length - 1];
+  if (lastKey !== undefined) {
+    current[lastKey] = value;
+  }
 }
 
 function evalExpr(expr: Expr, sheet: Record<string, any>): any {
   if ("const" in expr) return expr.const;
   if ("path" in expr) return getPath(sheet, expr.path) ?? 0;
   if ("abilityMod" in expr) return abilityMod(getPath(sheet, `abilities.${expr.abilityMod}.score`) ?? 10);
-  if ("sum" in expr) return expr.sum.reduce((acc, e) => acc + Number(evalExpr(e, sheet)), 0);
+  if ("sum" in expr) return expr.sum.reduce((acc: number, e: Expr) => acc + Number(evalExpr(e, sheet)), 0);
   if ("multiply" in expr) return Number(evalExpr(expr.multiply[0], sheet)) * Number(evalExpr(expr.multiply[1], sheet));
   if ("if" in expr) return evalExpr(expr.if, sheet) ? evalExpr(expr.then, sheet) : evalExpr(expr.else, sheet);
   if ("op" in expr) {
@@ -144,7 +150,7 @@ export function validateState(state: CharacterState, context: EngineContext): Va
   if (!state.metadata.name) errors.push({ code: "NAME_REQUIRED", message: "Character name is required.", stepId: "name" });
   for (const ability of ["str", "dex", "con", "int", "wis", "cha"]) {
     const score = state.abilities[ability];
-    if (!Number.isInteger(score) || score < 3 || score > 18) errors.push({ code: "ABILITY_RANGE", message: `${ability.toUpperCase()} must be between 3 and 18.`, stepId: "abilities" });
+    if (score === undefined || !Number.isInteger(score) || score < 3 || score > 18) errors.push({ code: "ABILITY_RANGE", message: `${ability.toUpperCase()} must be between 3 and 18.`, stepId: "abilities" });
   }
 
   for (const [entityType, entities] of Object.entries(context.resolvedData.entities)) {
@@ -163,7 +169,7 @@ export function validateState(state: CharacterState, context: EngineContext): Va
 function applyEffect(effect: Effect, sheet: Record<string, any>, provenance: ProvenanceRecord[], source: ProvenanceRecord["source"]): void {
   if (effect.kind === "conditional") {
     const branch = evalExpr(effect.condition, sheet) ? effect.then : effect.else ?? [];
-    branch.forEach((child) => applyEffect(child, sheet, provenance, source));
+    branch.forEach((child: Effect) => applyEffect(child, sheet, provenance, source));
     return;
   }
   const nextValue = Number(evalExpr(effect.value, sheet));
@@ -250,9 +256,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     applyEntity(entityBuckets.items?.[itemId]);
   }
 
-  sheet.stats.initiative = abilities.dex.mod;
-  sheet.stats.attackBonus = (sheet.stats.bab as number) + abilities.str.mod;
-  sheet.stats.damageBonus = abilities.str.mod;
+  sheet.stats.initiative = abilities.dex?.mod ?? 0;
+  sheet.stats.attackBonus = (sheet.stats.bab as number) + (abilities.str?.mod ?? 0);
+  sheet.stats.damageBonus = abilities.str?.mod ?? 0;
 
   return {
     metadata: { name: sheet.metadata.name },

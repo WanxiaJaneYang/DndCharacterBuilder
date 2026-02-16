@@ -29,14 +29,14 @@ export const ExprSchema: z.ZodType<any> = z.lazy(() =>
   ])
 );
 
-export const EffectSchema = z.discriminatedUnion("kind", [
+export const EffectSchema: z.ZodType<any> = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("add"), targetPath: z.string(), value: ExprSchema }),
   z.object({ kind: z.literal("set"), targetPath: z.string(), value: ExprSchema }),
   z.object({ kind: z.literal("multiply"), targetPath: z.string(), value: ExprSchema }),
   z.object({ kind: z.literal("min"), targetPath: z.string(), value: ExprSchema }),
   z.object({ kind: z.literal("max"), targetPath: z.string(), value: ExprSchema }),
   z.object({ kind: z.literal("derive"), targetPath: z.string(), value: ExprSchema }),
-  z.object({ kind: z.literal("conditional"), condition: ExprSchema, then: z.array(z.lazy(() => EffectSchema)), else: z.array(z.lazy(() => EffectSchema)).optional() })
+  z.object({ kind: z.literal("conditional"), condition: ExprSchema, then: z.array(z.lazy((): z.ZodType<any> => EffectSchema)), else: z.array(z.lazy((): z.ZodType<any> => EffectSchema)).optional() })
 ]);
 
 export const ConstraintSchema = z.discriminatedUnion("kind", [
