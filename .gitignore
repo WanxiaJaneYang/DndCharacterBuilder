@@ -4,3 +4,4 @@ dist
 coverage
 .DS_Store
 apps/web/.vite
+package-lock.json
