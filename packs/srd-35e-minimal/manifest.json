@@ -1,0 +1,8 @@
+{
+  "id": "srd-35e-minimal",
+  "name": "D&D 3.5e SRD Minimal Pack",
+  "version": "0.1.0",
+  "priority": 10,
+  "dependencies": [],
+  "compatibleEngineRange": ">=0.1.0"
+}

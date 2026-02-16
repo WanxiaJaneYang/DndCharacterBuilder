@@ -1,0 +1,14 @@
+[
+  {
+    "id": "fighter-1",
+    "name": "Fighter (Level 1)",
+    "entityType": "classes",
+    "effects": [
+      { "kind": "set", "targetPath": "stats.hp", "value": { "sum": [ { "const": 10 }, { "abilityMod": "con" } ] } },
+      { "kind": "set", "targetPath": "stats.bab", "value": { "const": 1 } },
+      { "kind": "set", "targetPath": "stats.fort", "value": { "const": 2 } },
+      { "kind": "set", "targetPath": "stats.ref", "value": { "const": 0 } },
+      { "kind": "set", "targetPath": "stats.will", "value": { "const": 0 } }
+    ]
+  }
+]

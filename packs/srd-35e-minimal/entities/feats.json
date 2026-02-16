@@ -1,0 +1,24 @@
+[
+  {
+    "id": "power-attack",
+    "name": "Power Attack",
+    "entityType": "feats",
+    "constraints": [
+      { "kind": "abilityMin", "ability": "str", "score": 13 },
+      { "kind": "mutuallyExclusive", "groupId": "feat-slot-1" }
+    ],
+    "data": { "exclusiveGroup": "feat-slot-1" }
+  },
+  {
+    "id": "weapon-focus-longsword",
+    "name": "Weapon Focus (Longsword)",
+    "entityType": "feats",
+    "constraints": [
+      { "kind": "mutuallyExclusive", "groupId": "feat-slot-1" }
+    ],
+    "effects": [
+      { "kind": "add", "targetPath": "stats.attackBonus", "value": { "const": 1 } }
+    ],
+    "data": { "exclusiveGroup": "feat-slot-1" }
+  }
+]
