@@ -36,6 +36,8 @@ export function App() {
   };
 
   const renderCurrentStep = () => {
+    if (!currentStep) return null;
+    
     if (currentStep.id === 'review') {
       return (
         <section>
