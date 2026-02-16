@@ -121,7 +121,7 @@ function rotr(value: number, bits: number): number {
 }
 
 function sha256Hex(input: string): string {
-  const h = [
+  const h: [number, number, number, number, number, number, number, number] = [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
   ];
@@ -135,7 +135,7 @@ function sha256Hex(input: string): string {
     0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-  ];
+  ] as const;
 
   const bytes = new TextEncoder().encode(input);
   const bitLength = bytes.length * 8;
@@ -149,7 +149,7 @@ function sha256Hex(input: string): string {
   view.setUint32(paddedLength - 8, Math.floor(bitLength / 0x100000000), false);
   view.setUint32(paddedLength - 4, bitLength >>> 0, false);
 
-  const w = new Array<number>(64);
+  const w = new Uint32Array(64);
 
   for (let offset = 0; offset < paddedLength; offset += 64) {
     for (let t = 0; t < 16; t += 1) {
@@ -157,9 +157,9 @@ function sha256Hex(input: string): string {
     }
 
     for (let t = 16; t < 64; t += 1) {
-      const s0 = rotr(w[t - 15]!, 7) ^ rotr(w[t - 15]!, 18) ^ (w[t - 15]! >>> 3);
-      const s1 = rotr(w[t - 2]!, 17) ^ rotr(w[t - 2]!, 19) ^ (w[t - 2]! >>> 10);
-      w[t] = (((w[t - 16]! + s0) | 0) + ((w[t - 7]! + s1) | 0)) | 0;
+      const s0 = rotr(w[t - 15], 7) ^ rotr(w[t - 15], 18) ^ (w[t - 15] >>> 3);
+      const s1 = rotr(w[t - 2], 17) ^ rotr(w[t - 2], 19) ^ (w[t - 2] >>> 10);
+      w[t] = (((w[t - 16] + s0) | 0) + ((w[t - 7] + s1) | 0)) | 0;
     }
 
     let [a, b, c, d, e, f, g, hh] = h;
@@ -167,7 +167,7 @@ function sha256Hex(input: string): string {
     for (let t = 0; t < 64; t += 1) {
       const s1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
       const ch = (e & f) ^ (~e & g);
-      const temp1 = (((((hh + s1) | 0) + ((ch + k[t]!) | 0)) | 0) + w[t]!) | 0;
+      const temp1 = (((((hh + s1) | 0) + ((ch + k[t]) | 0)) | 0) + w[t]) | 0;
       const s0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
       const maj = (a & b) ^ (a & c) ^ (b & c);
       const temp2 = (s0 + maj) | 0;
@@ -182,14 +182,14 @@ function sha256Hex(input: string): string {
       a = (temp1 + temp2) | 0;
     }
 
-    h[0] = (h[0]! + a) | 0;
-    h[1] = (h[1]! + b) | 0;
-    h[2] = (h[2]! + c) | 0;
-    h[3] = (h[3]! + d) | 0;
-    h[4] = (h[4]! + e) | 0;
-    h[5] = (h[5]! + f) | 0;
-    h[6] = (h[6]! + g) | 0;
-    h[7] = (h[7]! + hh) | 0;
+    h[0] = (h[0] + a) | 0;
+    h[1] = (h[1] + b) | 0;
+    h[2] = (h[2] + c) | 0;
+    h[3] = (h[3] + d) | 0;
+    h[4] = (h[4] + e) | 0;
+    h[5] = (h[5] + f) | 0;
+    h[6] = (h[6] + g) | 0;
+    h[7] = (h[7] + hh) | 0;
   }
 
   return h.map((value) => (value >>> 0).toString(16).padStart(8, "0")).join("");
