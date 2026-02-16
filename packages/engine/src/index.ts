@@ -228,6 +228,12 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
 
   const entityBuckets = context.resolvedData.entities;
 
+  function applyEntity(entity: ResolvedEntity | undefined): void {
+    if (!entity?.effects) return;
+    const source = { packId: entity._source?.packId ?? "", entityId: entity.id };
+    entity.effects.forEach((effect) => applyEffect(effect, sheet, provenance, source));
+  }
+
   const ruleEntities = Object.values(entityBuckets.rules ?? {}).sort((a, b) => a.id.localeCompare(b.id));
   for (const ruleEntity of ruleEntities) applyEntity(ruleEntity);
 
@@ -242,7 +248,6 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   }
   for (const itemId of ((state.selections.equipment as string[] | undefined) ?? [])) {
     applyEntity(entityBuckets.items?.[itemId]);
-    }
   }
 
   sheet.stats.initiative = abilities.dex.mod;
