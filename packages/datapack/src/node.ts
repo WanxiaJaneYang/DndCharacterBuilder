@@ -25,7 +25,11 @@ export function loadPack(packPath: string): LoadedPack {
 }
 
 export function resolvePackSet(packsRoot: string, enabledPackIds: string[]): ResolvedPackSet {
-  const packDirs = fs.readdirSync(packsRoot).map((name) => path.join(packsRoot, name));
+  const packDirs = fs
+    .readdirSync(packsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => path.join(packsRoot, entry.name));
+
   const loaded = packDirs.map((dir) => loadPack(dir));
   return resolveLoadedPacks(loaded, enabledPackIds);
 }

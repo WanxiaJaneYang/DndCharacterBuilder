@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { LoadedPack } from "./index";
@@ -28,6 +30,22 @@ describe("resolvePackSet", () => {
     expect(resolved.entities.races?.human?.name).toBe("Human");
     expect(resolved.entities.races?.human?._source.packId).toBe("srd-35e-minimal");
     expect(resolved.fingerprint.length).toBeGreaterThan(0);
+  });
+
+  it("ignores non-directory entries under packs root", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-packs-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.writeFileSync(path.join(tempRoot, "README.md"), "not a pack");
+
+    try {
+      const resolved = resolvePackSet(tempRoot, ["srd-35e-minimal"]);
+      expect(resolved.orderedPackIds).toContain("srd-35e-minimal");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
   });
 
   it("preserves dependency order even when priority conflicts", () => {
