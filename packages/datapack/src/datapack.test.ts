@@ -49,7 +49,7 @@ describe("resolvePackSet", () => {
     override.patches = [{ op: "mergeEntity", entityType: "rules", id: "shared", value: { name: "Overridden" } }];
 
     const resolved = resolveLoadedPacks([base, override], ["override"]);
-    expect(resolved.entities.rules.shared.name).toBe("Overridden");
-    expect(resolved.entities.rules.shared._source.packId).toBe("override");
+    expect(resolved.entities.rules?.shared?.name).toBe("Overridden");
+    expect(resolved.entities.rules?.shared?._source.packId).toBe("override");
   });
 });
