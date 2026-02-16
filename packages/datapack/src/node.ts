@@ -5,12 +5,20 @@ import { resolveLoadedPacks, type LoadedPack, type ResolvedPackSet } from "./cor
 
 const ENTITY_FILES = ["races", "classes", "feats", "items", "skills", "rules"];
 
-function parseEntityList(filePath: string): Entity[] {
+function parseEntityList(filePath: string, entityType: string): Entity[] {
   if (!fs.existsSync(filePath)) return [];
 
   try {
     const raw = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    return EntitySchema.array().parse(raw);
+    const parsed = EntitySchema.array().parse(raw);
+
+    for (const entity of parsed) {
+      if (entity.entityType !== entityType) {
+        throw new Error(`Entity ${entity.id} has entityType=${entity.entityType}, expected ${entityType}`);
+      }
+    }
+
+    return parsed;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Invalid entity file at ${filePath}: ${message}`);
@@ -24,7 +32,7 @@ export function loadPack(packPath: string): LoadedPack {
 
   for (const entityFile of ENTITY_FILES) {
     const filePath = path.join(packPath, "entities", `${entityFile}.json`);
-    entities[entityFile] = parseEntityList(filePath);
+    entities[entityFile] = parseEntityList(filePath, entityFile);
   }
 
   const flow = FlowSchema.parse(JSON.parse(fs.readFileSync(path.join(packPath, "flows", "character-creation.flow.json"), "utf8")));

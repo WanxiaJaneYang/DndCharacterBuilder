@@ -65,6 +65,26 @@ describe("resolvePackSet", () => {
     }
   });
 
+
+  it("fails when entityType does not match entity file bucket", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-entitytype-pack-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.writeFileSync(
+      path.join(packDest, "entities", "races.json"),
+      JSON.stringify([{ id: "oops", name: "Oops", entityType: "classes" }])
+    );
+
+    try {
+      expect(() => resolvePackSet(tempRoot, ["srd-35e-minimal"]))
+        .toThrow(/expected races/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("preserves dependency order even when priority conflicts", () => {
     const base = makePack("base", 100);
     const addon = makePack("addon", 1, ["base"]);
