@@ -45,6 +45,28 @@ describe("flow schema", () => {
     ).toThrow();
   });
 
+
+
+  it("rejects manual source for entity-selection kinds", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          { id: "race", kind: "race", label: "Race", source: { type: "manual" } }
+        ]
+      })
+    ).toThrow(/expected entityType source/i);
+  });
+
+  it("rejects entityType source for manual-only kinds", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          { id: "review", kind: "review", label: "Review", source: { type: "entityType", entityType: "items" } }
+        ]
+      })
+    ).toThrow(/expected manual source/i);
+  });
+
   it("rejects entityType/limit fields on manual sources", () => {
     expect(() =>
       FlowSchema.parse({

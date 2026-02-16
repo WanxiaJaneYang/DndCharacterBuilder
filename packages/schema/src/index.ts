@@ -92,6 +92,24 @@ const ChoiceStepSchema = z.object({
       message: `Invalid step kind for ${step.id}. Expected ${expectedKind}, got ${step.kind}.`
     });
   }
+
+
+  const manualKinds: Array<z.infer<typeof ChoiceStepKindSchema>> = ["metadata", "abilities", "review"];
+  const entityKinds: Array<z.infer<typeof ChoiceStepKindSchema>> = ["race", "class", "feat", "equipment"];
+
+  if (manualKinds.includes(step.kind) && step.source.type !== "manual") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Invalid source for ${step.kind}. Expected manual source.`
+    });
+  }
+
+  if (entityKinds.includes(step.kind) && step.source.type !== "entityType") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Invalid source for ${step.kind}. Expected entityType source.`
+    });
+  }
 });
 
 export const FlowSchema = z.object({ steps: z.array(ChoiceStepSchema) });
