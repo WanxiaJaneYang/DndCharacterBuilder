@@ -60,10 +60,18 @@ function setPath(obj: Record<string, any>, path: string, value: number): void {
   let current = obj;
   for (let i = 0; i < keys.length - 1; i += 1) {
     const key = keys[i]!; // Non-null assertion: array access within bounds is always defined
+    // Guard against prototype pollution
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      throw new Error(`Invalid path key: ${key}`);
+    }
     current[key] ??= {};
     current = current[key];
   }
   const lastKey = keys[keys.length - 1]!; // Non-null assertion: array always has at least one element from split
+  // Guard against prototype pollution
+  if (lastKey === '__proto__' || lastKey === 'constructor' || lastKey === 'prototype') {
+    throw new Error(`Invalid path key: ${lastKey}`);
+  }
   current[lastKey] = value;
 }
 
