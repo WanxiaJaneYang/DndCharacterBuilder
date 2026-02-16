@@ -137,11 +137,12 @@ export function App() {
         throw new Error(`Unexpected source type for ${currentStep.kind}: ${currentStep.source.type}`);
 
       case 'review':
-        return null; // Review step rendering not yet implemented
+        // TODO: Implement review step rendering (summary of selections)
+        return null;
 
       default: {
         const _exhaustive: never = currentStep;
-        throw new Error(`Unknown flow step kind: ${(_exhaustive as any).kind}`);
+        throw new Error(`Unhandled flow step kind`);
       }
     }
   };
