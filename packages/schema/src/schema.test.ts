@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ManifestSchema } from "./index";
+import { FlowSchema, ManifestSchema } from "./index";
 
 describe("manifest schema", () => {
   it("validates minimal manifest", () => {
@@ -11,5 +11,17 @@ describe("manifest schema", () => {
       dependencies: []
     });
     expect(parsed.id).toBe("srd-35e-minimal");
+  });
+});
+
+describe("flow schema", () => {
+  it("rejects unknown step ids with a clear message", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          { id: "mystery", kind: "review", label: "Review", source: { type: "manual" } }
+        ]
+      })
+    ).toThrow(/unknown step id/i);
   });
 });

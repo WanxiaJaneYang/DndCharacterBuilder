@@ -18,5 +18,6 @@ jobs:
             npm install
           fi
       - run: npm test
+      - run: npm run contracts
       - run: npm run typecheck
       - run: npm run build

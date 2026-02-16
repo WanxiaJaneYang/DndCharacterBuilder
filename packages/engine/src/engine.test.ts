@@ -1,7 +1,8 @@
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { LoadedPack } from "@dcb/datapack";
-import { resolveLoadedPacks, resolvePackSet } from "@dcb/datapack";
+import { resolveLoadedPacks } from "@dcb/datapack";
+import { resolvePackSet } from "@dcb/datapack/node";
 import { finalizeCharacter, initialState, applyChoice, listChoices } from "./index";
 
 const resolved = resolvePackSet(path.resolve(process.cwd(), "../../packs"), ["srd-35e-minimal"]);

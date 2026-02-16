@@ -10,10 +10,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@dcb/schema": "file:../schema"
+    "@dcb/schema": "file:../schema",
+    "@dcb/datapack": "file:../datapack"
   },
   "devDependencies": {
-    "vitest": "^2.1.8",
-    "@dcb/datapack": "file:../datapack"
+    "vitest": "^2.1.8"
   }
 }

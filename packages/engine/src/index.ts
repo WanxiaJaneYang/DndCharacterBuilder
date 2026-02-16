@@ -1,4 +1,5 @@
 import type { Constraint, Effect, Entity, Expr } from "@dcb/schema";
+import type { ResolvedEntity, ResolvedPackSet } from "@dcb/datapack";
 
 export interface CharacterState {
   metadata: { name?: string };
@@ -6,15 +7,9 @@ export interface CharacterState {
   selections: Record<string, unknown>;
 }
 
-type ResolvedEntity = Entity & { _source?: { packId: string; version?: string } };
-
 export interface EngineContext {
   enabledPackIds: string[];
-  resolvedData: {
-    entities: Record<string, Record<string, ResolvedEntity>>;
-    flow: { steps: Array<{ id: string; kind: string; label: string; source: { type: string; entityType?: string; limit?: number } }> };
-    fingerprint: string;
-  };
+  resolvedData: ResolvedPackSet;
   predicates?: Record<string, (state: CharacterState, args?: Record<string, unknown>) => boolean>;
 }
 
@@ -240,7 +235,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
 
   function applyEntity(entity: ResolvedEntity | undefined): void {
     if (!entity?.effects) return;
-    const source = { packId: entity._source?.packId ?? "", entityId: entity.id };
+    const source = { packId: entity._source.packId, entityId: entity._source.entityId };
     entity.effects.forEach((effect) => applyEffect(effect, sheet, provenance, source));
   }
 

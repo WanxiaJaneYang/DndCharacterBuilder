@@ -47,12 +47,42 @@ export const ConstraintSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("predicate"), predicateId: z.string(), args: z.record(z.any()).optional() })
 ]);
 
+const AllowedChoiceStepIds = ["name", "abilities", "race", "class", "feat", "equipment", "review"] as const;
+const ChoiceStepIdSchema = z.string();
+const ChoiceStepKindSchema = z.enum(["metadata", "abilities", "race", "class", "feat", "equipment", "review"]);
+
 const ChoiceStepSchema = z.object({
-  id: z.string(),
-  kind: z.enum(["metadata", "abilities", "race", "class", "feat", "equipment"]),
+  id: ChoiceStepIdSchema,
+  kind: ChoiceStepKindSchema,
   label: z.string(),
   source: z.object({ type: z.enum(["entityType", "manual"]), entityType: z.string().optional(), limit: z.number().int().optional() })
+}).superRefine((step, ctx) => {
+  const expectedKinds: Record<(typeof AllowedChoiceStepIds)[number], z.infer<typeof ChoiceStepKindSchema>> = {
+    name: "metadata",
+    abilities: "abilities",
+    race: "race",
+    class: "class",
+    feat: "feat",
+    equipment: "equipment",
+    review: "review"
+  };
+
+  if (!AllowedChoiceStepIds.includes(step.id as (typeof AllowedChoiceStepIds)[number])) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Unknown step id: ${step.id}` });
+    return;
+  }
+
+  const normalizedStepId = step.id as (typeof AllowedChoiceStepIds)[number];
+  const expectedKind = expectedKinds[normalizedStepId];
+  if (step.kind !== expectedKind) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Invalid step kind for ${step.id}. Expected ${expectedKind}, got ${step.kind}.`
+    });
+  }
 });
+
+export const FlowSchema = z.object({ steps: z.array(ChoiceStepSchema) });
 
 export const ManifestSchema = z.object({
   id: z.string(),
@@ -72,8 +102,6 @@ export const EntitySchema = z.object({
   data: z.record(z.any()).optional()
 });
 
-export const FlowSchema = z.object({ steps: z.array(ChoiceStepSchema) });
-
 export const PackSchema = z.object({
   manifest: ManifestSchema,
   entities: z.record(z.array(EntitySchema)),
@@ -92,6 +120,8 @@ export const ContractFixtureSchema = z.object({
   })
 });
 
+export type ChoiceStepId = (typeof AllowedChoiceStepIds)[number];
+export type ChoiceStepKind = z.infer<typeof ChoiceStepKindSchema>;
 export type Expr = z.infer<typeof ExprSchema>;
 export type Effect = z.infer<typeof EffectSchema>;
 export type Constraint = z.infer<typeof ConstraintSchema>;
