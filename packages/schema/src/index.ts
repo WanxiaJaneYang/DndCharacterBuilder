@@ -48,16 +48,34 @@ export const ConstraintSchema = z.discriminatedUnion("kind", [
 ]);
 
 const AllowedChoiceStepIds = ["name", "abilities", "race", "class", "feat", "equipment", "review"] as const;
-const ChoiceStepIdSchema = z.string();
+const ChoiceStepIdSchema = z.enum(AllowedChoiceStepIds, {
+  errorMap: (issue, ctx) => {
+    if (issue.code === z.ZodIssueCode.invalid_enum_value) {
+      return { message: `Unknown step id: ${String(ctx.data)}` };
+    }
+    return { message: ctx.defaultError };
+  }
+});
 const ChoiceStepKindSchema = z.enum(["metadata", "abilities", "race", "class", "feat", "equipment", "review"]);
+
+const ChoiceStepSourceSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("entityType"),
+    entityType: z.string().min(1),
+    limit: z.number().int().min(1).optional()
+  }).strict(),
+  z.object({
+    type: z.literal("manual")
+  }).strict()
+]);
 
 const ChoiceStepSchema = z.object({
   id: ChoiceStepIdSchema,
   kind: ChoiceStepKindSchema,
   label: z.string(),
-  source: z.object({ type: z.enum(["entityType", "manual"]), entityType: z.string().optional(), limit: z.number().int().optional() })
+  source: ChoiceStepSourceSchema
 }).superRefine((step, ctx) => {
-  const expectedKinds: Record<(typeof AllowedChoiceStepIds)[number], z.infer<typeof ChoiceStepKindSchema>> = {
+  const expectedKinds: Record<z.infer<typeof ChoiceStepIdSchema>, z.infer<typeof ChoiceStepKindSchema>> = {
     name: "metadata",
     abilities: "abilities",
     race: "race",
@@ -67,13 +85,7 @@ const ChoiceStepSchema = z.object({
     review: "review"
   };
 
-  if (!AllowedChoiceStepIds.includes(step.id as (typeof AllowedChoiceStepIds)[number])) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Unknown step id: ${step.id}` });
-    return;
-  }
-
-  const normalizedStepId = step.id as (typeof AllowedChoiceStepIds)[number];
-  const expectedKind = expectedKinds[normalizedStepId];
+  const expectedKind = expectedKinds[step.id];
   if (step.kind !== expectedKind) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -120,7 +132,7 @@ export const ContractFixtureSchema = z.object({
   })
 });
 
-export type ChoiceStepId = (typeof AllowedChoiceStepIds)[number];
+export type ChoiceStepId = z.infer<typeof ChoiceStepIdSchema>;
 export type ChoiceStepKind = z.infer<typeof ChoiceStepKindSchema>;
 export type Expr = z.infer<typeof ExprSchema>;
 export type Effect = z.infer<typeof EffectSchema>;

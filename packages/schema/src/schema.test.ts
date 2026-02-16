@@ -22,6 +22,41 @@ describe("flow schema", () => {
           { id: "mystery", kind: "review", label: "Review", source: { type: "manual" } }
         ]
       })
-    ).toThrow(/unknown step id/i);
+    ).toThrow(/unknown step id: mystery/i);
+  });
+
+  it("rejects invalid kind for a known step id", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          { id: "review", kind: "metadata", label: "Review", source: { type: "manual" } }
+        ]
+      })
+    ).toThrow(/invalid step kind/i);
+  });
+
+  it("requires entityType for entityType sources", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType" } }
+        ]
+      })
+    ).toThrow();
+  });
+
+  it("rejects entityType/limit fields on manual sources", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "review",
+            kind: "review",
+            label: "Review",
+            source: { type: "manual", entityType: "items", limit: 1 }
+          }
+        ]
+      })
+    ).toThrow();
   });
 });
