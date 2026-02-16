@@ -10,10 +10,11 @@ describe('wizard e2e-ish happy path', () => {
 
     await user.type(screen.getByPlaceholderText('Enter character name'), 'Aric');
     await user.click(screen.getByText('Next'));
-    await user.clear(screen.getByDisplayValue('10'));
-    const strInput = screen.getAllByRole('spinbutton')[0];
+
+    const strInput = screen.getByLabelText('STR');
     await user.clear(strInput);
     await user.type(strInput, '16');
+
     await user.click(screen.getByText('Next'));
     await user.click(screen.getByLabelText('Human'));
     await user.click(screen.getByText('Next'));
