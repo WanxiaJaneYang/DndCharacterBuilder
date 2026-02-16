@@ -1,0 +1,18 @@
+{
+  "name": "@dcb/datapack",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@dcb/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  }
+}

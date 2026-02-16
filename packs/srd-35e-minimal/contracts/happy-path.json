@@ -1,0 +1,20 @@
+{
+  "enabledPacks": ["srd-35e-minimal"],
+  "initialState": {},
+  "actions": [
+    { "choiceId": "name", "selection": "Aric" },
+    { "choiceId": "abilities", "selection": { "str": 16, "dex": 12, "con": 14, "int": 10, "wis": 10, "cha": 8 } },
+    { "choiceId": "race", "selection": "human" },
+    { "choiceId": "class", "selection": "fighter-1" },
+    { "choiceId": "feat", "selection": ["power-attack"] },
+    { "choiceId": "equipment", "selection": ["longsword", "chainmail", "heavy-wooden-shield"] }
+  ],
+  "expected": {
+    "availableChoicesContains": ["human", "fighter-1", "power-attack", "chainmail"],
+    "validationErrorCodes": [],
+    "finalSheetSubset": {
+      "metadata": { "name": "Aric" },
+      "stats": { "ac": 18, "bab": 1 }
+    }
+  }
+}
