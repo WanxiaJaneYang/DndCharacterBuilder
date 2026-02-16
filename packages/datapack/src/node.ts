@@ -1,9 +1,22 @@
 import fs from "node:fs";
 import path from "node:path";
-import { FlowSchema, ManifestSchema, type Entity } from "@dcb/schema";
+import { EntitySchema, FlowSchema, ManifestSchema, type Entity } from "@dcb/schema";
 import { resolveLoadedPacks, type LoadedPack, type ResolvedPackSet } from "./core";
 
 const ENTITY_FILES = ["races", "classes", "feats", "items", "skills", "rules"];
+
+function parseEntityList(filePath: string): Entity[] {
+  if (!fs.existsSync(filePath)) return [];
+
+  try {
+    const raw = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return EntitySchema.array().parse(raw);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Invalid entity file at ${filePath}: ${message}`);
+  }
+}
+
 
 export function loadPack(packPath: string): LoadedPack {
   const manifest = ManifestSchema.parse(JSON.parse(fs.readFileSync(path.join(packPath, "manifest.json"), "utf8")));
@@ -11,8 +24,7 @@ export function loadPack(packPath: string): LoadedPack {
 
   for (const entityFile of ENTITY_FILES) {
     const filePath = path.join(packPath, "entities", `${entityFile}.json`);
-    const list = fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, "utf8")) : [];
-    entities[entityFile] = list;
+    entities[entityFile] = parseEntityList(filePath);
   }
 
   const flow = FlowSchema.parse(JSON.parse(fs.readFileSync(path.join(packPath, "flows", "character-creation.flow.json"), "utf8")));

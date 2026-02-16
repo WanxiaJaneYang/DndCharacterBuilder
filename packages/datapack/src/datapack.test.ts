@@ -29,7 +29,7 @@ describe("resolvePackSet", () => {
     const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
     expect(resolved.entities.races?.human?.name).toBe("Human");
     expect(resolved.entities.races?.human?._source.packId).toBe("srd-35e-minimal");
-    expect(resolved.fingerprint.length).toBeGreaterThan(0);
+    expect(resolved.fingerprint).toMatch(/^[a-f0-9]{64}$/);
   });
 
   it("ignores non-directory entries under packs root", () => {
@@ -43,6 +43,23 @@ describe("resolvePackSet", () => {
     try {
       const resolved = resolvePackSet(tempRoot, ["srd-35e-minimal"]);
       expect(resolved.orderedPackIds).toContain("srd-35e-minimal");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+
+  it("fails with contextual error for invalid entity data", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-invalid-pack-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.writeFileSync(path.join(packDest, "entities", "races.json"), JSON.stringify([{ name: "Broken" }]));
+
+    try {
+      expect(() => resolvePackSet(tempRoot, ["srd-35e-minimal"]))
+        .toThrow(/invalid entity file.*races\.json/i);
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
