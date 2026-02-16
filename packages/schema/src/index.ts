@@ -94,20 +94,24 @@ const ChoiceStepSchema = z.object({
   }
 
 
-  const manualKinds: Array<z.infer<typeof ChoiceStepKindSchema>> = ["metadata", "abilities", "review"];
-  const entityKinds: Array<z.infer<typeof ChoiceStepKindSchema>> = ["race", "class", "feat", "equipment"];
+  const expectedSourceByKind: Record<
+    z.infer<typeof ChoiceStepKindSchema>,
+    z.infer<typeof ChoiceStepSourceSchema>["type"]
+  > = {
+    metadata: "manual",
+    abilities: "manual",
+    race: "entityType",
+    class: "entityType",
+    feat: "entityType",
+    equipment: "entityType",
+    review: "manual"
+  };
 
-  if (manualKinds.includes(step.kind) && step.source.type !== "manual") {
+  const expectedSourceType = expectedSourceByKind[step.kind];
+  if (step.source.type !== expectedSourceType) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: `Invalid source for ${step.kind}. Expected manual source.`
-    });
-  }
-
-  if (entityKinds.includes(step.kind) && step.source.type !== "entityType") {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: `Invalid source for ${step.kind}. Expected entityType source.`
+      message: `Invalid source for ${step.kind}. Expected ${expectedSourceType} source, got ${step.source.type}.`
     });
   }
 });

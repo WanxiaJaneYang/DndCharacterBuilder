@@ -54,7 +54,7 @@ describe("flow schema", () => {
           { id: "race", kind: "race", label: "Race", source: { type: "manual" } }
         ]
       })
-    ).toThrow(/expected entityType source/i);
+    ).toThrow(/expected entityType source, got manual/i);
   });
 
   it("rejects entityType source for manual-only kinds", () => {
@@ -64,7 +64,7 @@ describe("flow schema", () => {
           { id: "review", kind: "review", label: "Review", source: { type: "entityType", entityType: "items" } }
         ]
       })
-    ).toThrow(/expected manual source/i);
+    ).toThrow(/expected manual source, got entityType/i);
   });
 
   it("rejects entityType/limit fields on manual sources", () => {
