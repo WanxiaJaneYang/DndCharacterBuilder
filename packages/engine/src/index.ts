@@ -59,16 +59,12 @@ function setPath(obj: Record<string, any>, path: string, value: number): void {
   const keys = path.split(".");
   let current = obj;
   for (let i = 0; i < keys.length - 1; i += 1) {
-    const key = keys[i];
-    if (key !== undefined) {
-      current[key] ??= {};
-      current = current[key];
-    }
+    const key = keys[i]!; // Non-null assertion: array access within bounds is always defined
+    current[key] ??= {};
+    current = current[key];
   }
-  const lastKey = keys[keys.length - 1];
-  if (lastKey !== undefined) {
-    current[lastKey] = value;
-  }
+  const lastKey = keys[keys.length - 1]!; // Non-null assertion: array always has at least one element from split
+  current[lastKey] = value;
 }
 
 function evalExpr(expr: Expr, sheet: Record<string, any>): any {
