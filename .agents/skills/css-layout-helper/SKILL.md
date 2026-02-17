@@ -1,6 +1,6 @@
 ---
 name: css-layout-helper
-description: Explain CSS layout issues and propose fixes. Use when a junior developer is struggling with alignment or spacing.
+description: Explain CSS layout issues and propose fixes. Use for alignment, spacing, overflow, and responsive layout problems.
 ---
 
 # CSS Layout Helper

@@ -35,9 +35,7 @@
 
 ## Workspace Notes (Current Migration)
 - Local guidance/skill artifacts are being tracked on branch: `chore/agent-guidance-and-local-skills`.
-- Keep these artifacts off `main` until explicitly reviewed:
-- `.codex/`
-- `.agents/`
+- Keep these artifacts off `main` until explicitly reviewed: `.codex/`, `.agents/`.
 - If interrupted mid-task, immediately:
 1. run `git status --short --branch`
 2. move work to a dedicated `chore/*` branch
@@ -47,3 +45,6 @@
 - Prefer repo-local skill prompts under `.agents/skills/` when they match the task.
 - Treat `.codex/skills/` as local experiments unless user asks to publish or promote them.
 - Before MR actions, check this file first for approval and flow preferences.
+
+## Platform Constraints
+- GitHub does not allow approving your own PR. If branch protection requires approval and no other approver is available, use admin merge only when user workflow explicitly allows it.

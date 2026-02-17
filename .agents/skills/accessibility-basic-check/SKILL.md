@@ -1,6 +1,6 @@
 ---
 name: accessibility-basic-check
-description: Run a basic accessibility checklist for UI changes. Use when a junior developer needs quick a11y guidance.
+description: Run a basic accessibility checklist for UI changes. Use for quick a11y validation during implementation or review.
 ---
 
 # Accessibility Basic Check

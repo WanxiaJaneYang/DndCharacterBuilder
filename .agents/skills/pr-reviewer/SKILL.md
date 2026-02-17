@@ -1,6 +1,6 @@
 ---
 name: pr-reviewer
-description: Review a pull request for correctness, regressions, and missing tests. Use when a mid-level developer needs structured review guidance.
+description: Review a pull request for correctness, regressions, and missing tests. Use for structured, risk-focused code review.
 ---
 
 # PR Reviewer

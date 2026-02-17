@@ -1,9 +1,12 @@
 ---
 name: repo-standards
-description: Use when changing code, writing PRs, or touching build/test/lint. Not for pure Q&A.
+description: Use when making repository changes, preparing PRs, or running build/test/lint workflows. Skip for pure Q&A.
 ---
 
-Always:
-- run format/lint/typecheck/tests (pick the right ones for this repo)
-- update docs/README if commands or behavior changed
-- keep changes minimal and consistent with existing style
+# Repo Standards
+
+1. Inspect repository state first (`git status`, current branch, pending local changes).
+2. Keep changes minimal and aligned with existing style and architecture.
+3. Run relevant validation for touched areas (format, lint, typecheck, tests).
+4. Update docs/README when commands, workflows, or behavior change.
+5. Summarize what changed, what was validated, and any remaining risk.
