@@ -38,12 +38,14 @@ test.describe('wizard visual regression', () => {
   test('list page', async ({ page }) => {
     await goToListPage(page);
     await waitForVisualStability(page);
+    // Capture full wizard context to detect layout shifts below the fold.
     await expect(page).toHaveScreenshot('list.png', { fullPage: true });
   });
 
   test('detail page', async ({ page }) => {
     await goToDetailPage(page);
     await waitForVisualStability(page);
+    // Full-page screenshot verifies complete review screen composition.
     await expect(page).toHaveScreenshot('detail.png', { fullPage: true });
   });
 });

@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/visual',
   snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}-{projectName}{ext}',
+  // Run visual tests sequentially to avoid flakiness from shared app/server state.
   fullyParallel: false,
   workers: 1,
   reporter: [['list'], ['html', { open: 'never' }]],
@@ -18,6 +19,7 @@ export default defineConfig({
     }
   },
   webServer: {
+    // apps/web dev server is intentionally configured to use 4173 in this repo.
     command: 'npm run dev',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
