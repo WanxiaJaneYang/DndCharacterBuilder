@@ -46,6 +46,7 @@ This updates baseline images in `tests/visual/*-snapshots`.
 - Keep animations disabled in screenshots (already configured in `playwright.config.ts`).
 - Prefer deterministic test data (fixed names/inputs).
 - Avoid capturing unstable UI content (timestamps, random values, ads, live feeds).
+- Keep baseline OS consistent with CI. CI uses Linux (`ubuntu-latest`), so generate or update baselines on Linux when possible.
 - Mask dynamic elements when needed:
 
 ```ts

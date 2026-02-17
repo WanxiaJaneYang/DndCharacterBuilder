@@ -24,19 +24,26 @@ async function goToDetailPage(page: Page) {
   await expect(page.getByRole('heading', { name: 'Review' })).toBeVisible();
 }
 
+async function waitForVisualStability(page: Page) {
+  await page.waitForLoadState('networkidle');
+}
+
 test.describe('wizard visual regression', () => {
   test('home page', async ({ page }) => {
     await page.goto('/');
+    await waitForVisualStability(page);
     await expect(page).toHaveScreenshot('home.png', { fullPage: true });
   });
 
   test('list page', async ({ page }) => {
     await goToListPage(page);
+    await waitForVisualStability(page);
     await expect(page).toHaveScreenshot('list.png', { fullPage: true });
   });
 
   test('detail page', async ({ page }) => {
     await goToDetailPage(page);
+    await waitForVisualStability(page);
     await expect(page).toHaveScreenshot('detail.png', { fullPage: true });
   });
 });
