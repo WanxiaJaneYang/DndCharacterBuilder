@@ -6,7 +6,7 @@ on:
 
 jobs:
   visual-regression:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     env:
       PLAYWRIGHT_BROWSERS_PATH: .playwright-browsers
     steps:
@@ -26,7 +26,7 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Build app
         run: npm run build
