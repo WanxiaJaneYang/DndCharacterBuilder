@@ -40,6 +40,8 @@ npm run build
 ```
 
 ### Visual regression tests (Playwright)
+Uses default Playwright browser install/cache path unless you explicitly set `PLAYWRIGHT_BROWSERS_PATH`.
+
 ```bash
 npm run playwright:install
 npm run test:visual

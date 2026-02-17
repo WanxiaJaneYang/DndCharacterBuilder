@@ -4,6 +4,8 @@ This repo uses Playwright screenshot assertions (`expect(page).toHaveScreenshot(
 
 ## Prerequisites
 
+`playwright.config.ts` does not force a custom browser path, so default Playwright install/cache behavior works out of the box.
+
 ```bash
 npm install
 npm run playwright:install
