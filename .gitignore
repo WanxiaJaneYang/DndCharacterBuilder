@@ -5,3 +5,7 @@ coverage
 .DS_Store
 apps/web/.vite
 package-lock.json
+.npm-cache
+.playwright-browsers
+playwright-report
+test-results

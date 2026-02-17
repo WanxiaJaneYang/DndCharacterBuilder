@@ -12,9 +12,13 @@
     "typecheck": "npm --workspaces run typecheck",
     "lint": "npm --workspaces run lint",
     "test": "npm --workspaces run test",
-    "contracts": "npm --workspace @dcb/contracts run test"
+    "contracts": "npm --workspace @dcb/contracts run test",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
+    "playwright:install": "playwright install chromium"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^22.10.2",
     "typescript": "^5.7.2"
   }

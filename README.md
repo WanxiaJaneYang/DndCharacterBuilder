@@ -39,6 +39,20 @@ npm run lint
 npm run build
 ```
 
+### Visual regression tests (Playwright)
+```bash
+npm run playwright:install
+npm run test:visual
+```
+
+Update visual baselines:
+
+```bash
+npm run test:visual:update
+```
+
+See `docs/playwright-visual-regression.md` for full workflow and stability tips.
+
 ## Pack system and how to add a pack
 1. Add `packs/<pack-id>/manifest.json` with id/version/priority/dependencies.
 2. Add entities (`races/classes/feats/items/skills/rules`).
