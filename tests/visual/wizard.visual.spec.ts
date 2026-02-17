@@ -4,6 +4,7 @@ async function goToListPage(page: Page) {
   await page.goto('/');
   await page.getByPlaceholder('Enter character name').fill('Snapshot Hero');
   await page.getByRole('button', { name: 'Next' }).click();
+  await expect(page.getByRole('heading', { name: 'Ability Scores (Manual, 3-18)' })).toBeVisible();
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.getByRole('heading', { name: 'Race' })).toBeVisible();
 }

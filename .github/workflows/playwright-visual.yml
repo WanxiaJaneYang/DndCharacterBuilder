@@ -6,9 +6,7 @@ on:
 
 jobs:
   visual-regression:
-    runs-on: ubuntu-latest
-    env:
-      PLAYWRIGHT_BROWSERS_PATH: .playwright-browsers
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -20,7 +18,7 @@ jobs:
       - run: npm ci
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Run visual regression tests
         run: npm run test:visual

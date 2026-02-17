@@ -1,7 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-process.env.PLAYWRIGHT_BROWSERS_PATH = process.env.PLAYWRIGHT_BROWSERS_PATH ?? '.playwright-browsers';
-
 export default defineConfig({
   testDir: './tests/visual',
   snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}-{projectName}{ext}',
