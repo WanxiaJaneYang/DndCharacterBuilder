@@ -1,15 +1,15 @@
-# UX Step 06 – Equipment Selection
+# UX Step 07 - Equipment Selection
 
 This document covers the **Equipment** step, where the user chooses starting weapons, armor and other gear for their character.  The exact options depend on the selected class and the starting equipment rules (kit vs gold) defined for the edition.
 
 ## Goal
 
-Allow the user to select appropriate starting equipment while respecting the rules for their class, race and chosen mode (kit or gold).  Provide clear categories (weapons, armor, adventuring gear) and ensure the user understands what they’re choosing.
+Allow the user to select appropriate starting equipment while respecting the rules for their class, race and chosen mode (kit or gold).  Provide clear categories (weapons, armor, adventuring gear) and ensure the user understands what they're choosing.
 
 ## User Intent
 
-- **New Player:** Needs to know which items their character can start with.  Should be offered a curated list or kit to avoid analysis paralysis.  Might appreciate a recommended kit based on class (e.g. fighter’s equipment kit).
-- **Returning Player:** May want to manually pick items within a starting budget or kit allowance.
+- **New Player:** Needs to know which items their character can start with.  Should be offered a curated list or kit to avoid analysis paralysis.  Might appreciate a recommended kit based on class (e.g. fighter's equipment kit).
+- **Returning Player:** May want to manually pick items within a starting budget or kit allowance.
 
 ## Layout & Interaction
 
@@ -18,7 +18,7 @@ The equipment step can be split into two parts:
 1. **Starting Equipment Mode:**
    - Choose between **Kit** and **Gold** (selectable from previous steps or on this page).
    - **Kit**: A predefined list of items per class (e.g. Fighter starts with chain mail, longsword and shield).  Show the kit contents and allow the user to accept it.
-   - **Gold**: The user receives starting gold (e.g. 150 gp) and can select items up to that value from a list or shop UI.  MVP may postpone this mode but must record the selection.
+   - **Gold**: The user receives starting gold (e.g. 150 gp) and can select items up to that value from a list or shop UI.  MVP may postpone this mode but must record the selection.
 2. **Item Selection:**
    - Display categories of items (weapons, armor, shields, miscellaneous gear) sourced from the pack JSON.
    - Show item name, cost, weight, and a short description.
@@ -29,21 +29,21 @@ The equipment step can be split into two parts:
 
 Items are defined in `entities/items.json`:
 
-- `id` – stable identifier.
-- `name` – display name.
-- `category` – weapon, armor, shield, gear, etc.
-- `cost` – cost in gold pieces.
-- `weight` – weight in pounds (optional; used in encumbrance calculations).
-- `summary` – short description.
-- `description` – detailed description (for details modal).
-- `rules` – any rules effects (e.g. proficiency requirement) – used by engine.
+- `id`: stable identifier.
+- `name`: display name.
+- `category`: weapon, armor, shield, gear, etc.
+- `cost`: cost in gold pieces.
+- `weight`: weight in pounds (optional; used in encumbrance calculations).
+- `summary`: short description.
+- `description`: detailed description (for details modal).
+- `rules`: any rules effects (e.g. proficiency requirement) -used by engine.
 
 Starting equipment kits may be defined in `rules.json` or a separate file, keyed by class and potentially race.
 
 ## Validation & Gating
 
 - In **Kit** mode: ensure the user accepts the predefined kit; no editing allowed in MVP.
-- In **Gold** mode: enforce that total cost ≤ starting gold; warn when approaching limit; block when exceeded.
+- In **Gold** mode: enforce that total cost <= starting gold; warn when approaching limit; block when exceeded.
 - Ensure that only items the character is proficient with or allowed to carry appear, based on class/race.
 
 ## Acceptance Criteria

@@ -6,14 +6,15 @@ This document summarizes the experience of a user creating a character using the
 
 | Step ID | Name                | Description                                                                      |
 |--------:|---------------------|----------------------------------------------------------------------------------|
-| 0       | Rules Setup         | User selects the edition and which rule sources (packs) to enable.               |
-| 1       | Race Selection      | Presents a card grid of available races. Each card shows an image and summary.   |
-| 2       | Class Selection     | Presents a card grid of available classes with images and summaries.             |
-| 3       | Ability Assignment  | User allocates ability scores using manual entry or point buy as defined by flow |
-| 4       | Feat Selection      | User chooses one or more feats, filtered by prerequisites.                       |
-| 5       | Skill Selection     | User allocates skill points according to basic 3.5 rules (budget & max rank).    |
-| 6       | Equipment Selection | User chooses weapons, armour and other gear; selects starting equipment mode.    |
-| 7       | Review & Export     | Shows derived stats with provenance; user can download JSON and view HTML sheet. |
+| 0       | Role Selection      | User chooses whether they are a DM or Player before entering the wizard.         |
+| 1       | Rules Setup         | Player users select edition and rule sources (packs) to enable.                  |
+| 2       | Race Selection      | Presents a card grid of available races. Each card shows an image and summary.   |
+| 3       | Class Selection     | Presents a card grid of available classes with images and summaries.             |
+| 4       | Ability Assignment  | User allocates ability scores using manual entry or point buy as defined by flow |
+| 5       | Feat Selection      | User chooses one or more feats, filtered by prerequisites.                       |
+| 6       | Skill Selection     | User allocates skill points according to basic 3.5 rules (budget & max rank).    |
+| 7       | Equipment Selection | User chooses weapons, armour and other gear; selects starting equipment mode.    |
+| 8       | Review & Export     | Shows derived stats with provenance; user can download JSON and view HTML sheet. |
 
 ## Edition Variability
 

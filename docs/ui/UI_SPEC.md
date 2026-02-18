@@ -18,14 +18,15 @@ On large screens the sidebar appears on the left with the main content on the ri
 
 The following pages correspond to flow steps defined in the pack.  Each page is described in detail in the relevant `ux/steps/*` file.
 
-1. **Rules Setup** – choose version and rule sources (see `ux/steps/00_rules_setup.md`).
-2. **Race Selection** – pick one race from cards with image and summary (`ux/steps/01_race_selection.md`).
-3. **Class Selection** – pick one class from cards (`ux/steps/02_class_selection.md`).
-4. **Ability Scores** – assign ability scores using point‑buy or manual entry (`ux/steps/03_ability_scores.md`).
-5. **Feats** – choose feats with prerequisite filtering (`ux/steps/04_feats.md`).
-6. **Skills** – allocate skill points (`ux/steps/05_skills.md`).
-7. **Equipment** – select starting kit or items (`ux/steps/06_equipment.md`).
-8. **Review & Export** – show final character summary and export options (`ux/steps/07_review_export.md`).
+1. **Role Selection** – choose DM or Player; DM shows unsupported message, Player enters wizard (`ux/steps/00_role_selection.md`).
+2. **Rules Setup** – choose version and rule sources (see `ux/steps/01_rules_setup.md`).
+3. **Race Selection** – pick one race from cards with image and summary (`ux/steps/02_race_selection.md`).
+4. **Class Selection** – pick one class from cards (`ux/steps/03_class_selection.md`).
+5. **Ability Scores** – assign ability scores using point‑buy or manual entry (`ux/steps/04_ability_scores.md`).
+6. **Feats** – choose feats with prerequisite filtering (`ux/steps/05_feats.md`).
+7. **Skills** – allocate skill points (`ux/steps/06_skills.md`).
+8. **Equipment** – select starting kit or items (`ux/steps/07_equipment.md`).
+9. **Review & Export** – show final character summary and export options (`ux/steps/08_review_export.md`).
 
 ## Component Requirements
 
@@ -99,3 +100,17 @@ Design tokens should be defined in `ui/tokens/DESIGN_TOKENS.md` and synchronised
 - [ ] Each UI component is documented with requirements.
 - [ ] Tokens are defined and referenced.
 - [ ] Flow between pages is clear and matches the user journey documents.
+
+### RoleSelectionTabs
+
+The initial entry component before the wizard proper. Requirements:
+
+- Display a bold prompt near the top-center of the page asking whether the user is DM or Player.
+- Render two equal-width tabs/panels across the page: DM on the left, Player on the right.
+- DM selection shows a non-blocking message: **Not supported in this version.**
+- Player selection transitions to the first wizard step.
+- Include clear hover and active states so users can immediately understand interactivity.
+- Use a fantasy-themed presentation (parchment/gold/serif accents) while maintaining readability and contrast.
+- All user-facing copy should come from JSON-backed UI text resources so language switching can be supported without code rewrites.
+- Provide a language switcher (MVP supports English and Chinese) on the entry screen and keep labels consistent across wizard pages.
+- Default language should auto-detect from browser locale (zh -> Chinese, otherwise English), with manual toggle override.

@@ -4,48 +4,48 @@ This checklist maps high‑level requirements from the Product Requirements Do
 
 ## Version & Source Selection
 
-- [ ] Implement Rules Setup step for selecting edition and packs (see `/ux/steps/00_rules_setup.md`).
+- [ ] Implement Rules Setup step for selecting edition and packs (see `/ux/steps/01_rules_setup.md`).
 - [ ] Display available packs and lock the base SRD pack (see `/product/DECISIONS.md`).
 - [ ] Validate selection and build context for engine (engine & UI).
 
 ## Race Selection
 
-- [ ] Render races as cards with summary and image (see `/ux/steps/01_race_selection.md`).
+- [ ] Render races as cards with summary and image (see `/ux/steps/02_race_selection.md`).
 - [ ] Load race data from packs; no hardcoded values.
 - [ ] Enforce selection of exactly one race and show details modal.
 
 ## Class Selection
 
-- [ ] Similar card UI for classes (see `/ux/steps/02_class_selection.md`).
+- [ ] Similar card UI for classes (see `/ux/steps/03_class_selection.md`).
 - [ ] Enforce exactly one class selection; handle class prerequisites.
 
 ## Ability Scores
 
-- [ ] Read method from flow (manual or point buy; see `/ux/steps/03_ability_scores.md`).
+- [ ] Read method from flow (manual or point buy; see `/ux/steps/04_ability_scores.md`).
 - [ ] Implement point‑buy logic (32 points for MVP) and validation.
 - [ ] Show ability modifiers and update engine state.
 
 ## Feats
 
-- [ ] Display feats with summary and details (see `/ux/steps/04_feats.md`).
+- [ ] Display feats with summary and details (see `/ux/steps/05_feats.md`).
 - [ ] Enforce prerequisites and limit number of feats (1 for MVP).
 - [ ] Update engine state and provenance.
 
 ## Skills
 
-- [ ] Add skills step to flow and implement SkillAllocator component (see `/ux/steps/05_skills.md` and `/ui/components/SkillAllocator.md`).
+- [ ] Add skills step to flow and implement SkillAllocator component (see `/ux/steps/06_skills.md` and `/ui/components/SkillAllocator.md`).
 - [ ] Enforce budget and max ranks for level 1.
 - [ ] Save allocations in engine state.
 
 ## Equipment
 
-- [ ] Provide equipment selection page (see `/ux/steps/06_equipment.md`).
+- [ ] Provide equipment selection page (see `/ux/steps/07_equipment.md`).
 - [ ] Allow choosing starting equipment mode (kit vs gold) and persist choice.
 - [ ] Validate selections against pack definitions and budget.
 
 ## Review & Export
 
-- [ ] Show summary of all selections and derived stats (see `/ux/steps/07_review_export.md`).
+- [ ] Show summary of all selections and derived stats (see `/ux/steps/08_review_export.md`).
 - [ ] Display provenance breakdown for derived values.
 - [ ] Implement JSON export conforming to `/data/EXPORT_SCHEMA.md`.
 

@@ -2,19 +2,107 @@ import { useMemo, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
 import { applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
+import uiTextJson from './uiText.json';
 
 const minimalPack = loadMinimalPack();
 const resolvedData = resolveLoadedPacks([minimalPack], ['srd-35e-minimal']);
 const context = { enabledPackIds: ['srd-35e-minimal'], resolvedData };
 
+type Language = 'en' | 'zh';
+type Role = 'dm' | 'player' | null;
+
+export type UIText = {
+  appTitle: string;
+  appSubtitle: string;
+  stepCounter: string;
+  back: string;
+  next: string;
+  review: string;
+  exportJson: string;
+  toggleProvenance: string;
+  printableSheet: string;
+  nameLabel: string;
+  raceLabel: string;
+  classLabel: string;
+  metadataPlaceholder: string;
+  abilitiesSuffix: string;
+  roleAria: string;
+  roleQuestion: string;
+  roleIntro: string;
+  dmTitle: string;
+  dmSubtitle: string;
+  playerTitle: string;
+  playerSubtitle: string;
+  dmUnsupported: string;
+  languageLabel: string;
+  english: string;
+  chinese: string;
+};
+
+const uiTextKeys: Array<keyof UIText> = [
+  'appTitle',
+  'appSubtitle',
+  'stepCounter',
+  'back',
+  'next',
+  'review',
+  'exportJson',
+  'toggleProvenance',
+  'printableSheet',
+  'nameLabel',
+  'raceLabel',
+  'classLabel',
+  'metadataPlaceholder',
+  'abilitiesSuffix',
+  'roleAria',
+  'roleQuestion',
+  'roleIntro',
+  'dmTitle',
+  'dmSubtitle',
+  'playerTitle',
+  'playerSubtitle',
+  'dmUnsupported',
+  'languageLabel',
+  'english',
+  'chinese',
+];
+
+function isUIText(value: unknown): value is UIText {
+  if (!value || typeof value !== 'object') return false;
+  return uiTextKeys.every((key) => typeof (value as Record<string, unknown>)[key] === 'string');
+}
+
+function parseUIText(input: unknown): Record<Language, UIText> {
+  if (!input || typeof input !== 'object') {
+    throw new Error('Invalid uiText.json format: expected object with en/zh keys.');
+  }
+  const record = input as Record<string, unknown>;
+  if (!isUIText(record.en) || !isUIText(record.zh)) {
+    throw new Error('Invalid uiText.json format: expected complete UIText payload for en and zh.');
+  }
+  return { en: record.en, zh: record.zh };
+}
+
+const uiText = parseUIText(uiTextJson);
+
+function detectDefaultLanguage(): Language {
+  if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('zh')) {
+    return 'zh';
+  }
+  return 'en';
+}
+
 export function App() {
   const [state, setState] = useState<CharacterState>(initialState);
   const [stepIndex, setStepIndex] = useState(0);
   const [showProv, setShowProv] = useState(false);
+  const [role, setRole] = useState<Role>(null);
+  const [language, setLanguage] = useState<Language>(detectDefaultLanguage);
 
   const wizardSteps = context.resolvedData.flow.steps;
   const currentStep = wizardSteps[stepIndex];
 
+  const t = uiText[language];
   const choices = useMemo(() => listChoices(state, context), [state]);
   const choiceMap = new Map(choices.map((c) => [c.stepId, c]));
   const sheet = useMemo(() => finalizeCharacter(state, context), [state]);
@@ -35,22 +123,22 @@ export function App() {
 
   const renderCurrentStep = () => {
     if (!currentStep) return null;
-    
+
     if (currentStep.kind === 'review') {
       return (
         <section>
-          <h2>Review</h2>
+          <h2>{t.review}</h2>
           <p><strong>{sheet.metadata.name}</strong></p>
           <div className="grid two">
             {Object.entries(sheet.stats).map(([k, v]) => <div key={k}><strong>{k}</strong>: {String(v)}</div>)}
           </div>
-          <button onClick={exportJson}>Export JSON</button>
-          <button onClick={() => setShowProv((s) => !s)}>Toggle provenance</button>
+          <button onClick={exportJson}>{t.exportJson}</button>
+          <button onClick={() => setShowProv((s) => !s)}>{t.toggleProvenance}</button>
           {showProv && <pre>{JSON.stringify(sheet.provenance, null, 2)}</pre>}
-          <h3>Printable HTML Character Sheet</h3>
+          <h3>{t.printableSheet}</h3>
           <article className="sheet">
-            <p>Name: {sheet.metadata.name}</p>
-            <p>Race: {String(state.selections.race ?? '-')} / Class: {String(state.selections.class ?? '-')}</p>
+            <p>{t.nameLabel}: {sheet.metadata.name}</p>
+            <p>{t.raceLabel}: {String(state.selections.race ?? '-')} / {t.classLabel}: {String(state.selections.class ?? '-')}</p>
             <p>AC: {String(sheet.stats.ac)} | HP: {String(sheet.stats.hp)} | BAB: {String(sheet.stats.bab)}</p>
           </article>
         </section>
@@ -61,10 +149,13 @@ export function App() {
       return (
         <section>
           <h2>{currentStep.label}</h2>
+          <label htmlFor="character-name-input">{t.nameLabel}</label>
           <input
+            id="character-name-input"
             value={state.metadata.name ?? ''}
             onChange={(e) => setState((s) => applyChoice(s, currentStep.id, e.target.value))}
-            placeholder="Enter character name"
+            placeholder={t.metadataPlaceholder}
+            aria-label={t.nameLabel}
           />
         </section>
       );
@@ -73,7 +164,7 @@ export function App() {
     if (currentStep.kind === 'abilities') {
       return (
         <section>
-          <h2>{currentStep.label} (Manual, 3-18)</h2>
+          <h2>{currentStep.label} {t.abilitiesSuffix}</h2>
           <div className="grid">
             {Object.entries(state.abilities).map(([key, value]) => (
               <label key={key}>{key.toUpperCase()}
@@ -135,17 +226,112 @@ export function App() {
     throw new Error(`Unknown flow step kind: ${currentStep.kind}`);
   };
 
+  if (role !== 'player') {
+    return (
+      <RoleSelectionGate
+        role={role}
+        onChange={setRole}
+        language={language}
+        onLanguageChange={setLanguage}
+        text={t}
+      />
+    );
+  }
+
   return (
-    <main className="container">
-      <h1>D&D 3.5 Beginner Character Builder (MVP)</h1>
-      <p className="subtitle">Data-driven SRD-only wizard with deterministic rules + provenance.</p>
-      <p>Step {stepIndex + 1} / {wizardSteps.length}</p>
+    <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
+      <LanguageSwitch language={language} onLanguageChange={setLanguage} text={t} />
+      <h1>{t.appTitle}</h1>
+      <p className="subtitle">{t.appSubtitle}</p>
+      <p>{t.stepCounter} {stepIndex + 1} / {wizardSteps.length}</p>
       {renderCurrentStep()}
       <footer className="actions">
-        <button disabled={stepIndex === 0} onClick={() => setStepIndex((s) => s - 1)}>Back</button>
-        <button disabled={stepIndex === wizardSteps.length - 1} onClick={() => setStepIndex((s) => s + 1)}>Next</button>
+        <button disabled={stepIndex === 0} onClick={() => setStepIndex((s) => s - 1)}>{t.back}</button>
+        <button disabled={stepIndex === wizardSteps.length - 1} onClick={() => setStepIndex((s) => s + 1)}>{t.next}</button>
       </footer>
     </main>
+  );
+}
+
+function RoleSelectionGate({
+  role,
+  onChange,
+  language,
+  onLanguageChange,
+  text,
+}: {
+  role: Role;
+  onChange: (value: Role) => void;
+  language: Language;
+  onLanguageChange: (language: Language) => void;
+  text: UIText;
+}) {
+  return (
+    <main className={`role-gate ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
+      <section className="role-tabs-root">
+        <LanguageSwitch language={language} onLanguageChange={onLanguageChange} text={text} />
+        <div className="role-tabs-grid" role="group" aria-label={text.roleAria}>
+          <button
+            type="button"
+            aria-pressed={role === 'dm'}
+            className={`role-tab role-tab-left ${role === 'dm' ? 'active' : ''}`}
+            onClick={() => onChange('dm')}
+          >
+            <span className="role-tab-title">{text.dmTitle}</span>
+            <span className="role-tab-subtitle">{text.dmSubtitle}</span>
+          </button>
+          <button
+            type="button"
+            aria-pressed={role === 'player'}
+            className={`role-tab role-tab-right ${role === 'player' ? 'active' : ''}`}
+            onClick={() => onChange('player')}
+          >
+            <span className="role-tab-title">{text.playerTitle}</span>
+            <span className="role-tab-subtitle">{text.playerSubtitle}</span>
+          </button>
+        </div>
+        <h1 className="role-question tabs-overlay">{text.roleQuestion}</h1>
+        <p className="role-intro tabs-intro">{text.roleIntro}</p>
+        {role === 'dm' && <p className="role-message" aria-live="polite">{text.dmUnsupported}</p>}
+      </section>
+    </main>
+  );
+}
+
+function LanguageSwitch({
+  language,
+  onLanguageChange,
+  text,
+}: {
+  language: Language;
+  onLanguageChange: (language: Language) => void;
+  text: UIText;
+}) {
+  return (
+    <div className="language-switch" role="radiogroup" aria-label={text.languageLabel}>
+      <label className={`lang-btn ${language === 'en' ? 'active' : ''}`}>
+        <input
+          className="lang-radio"
+          type="radio"
+          name="language-switch"
+          value="en"
+          checked={language === 'en'}
+          onChange={() => onLanguageChange('en')}
+        />
+        <span>{text.english}</span>
+      </label>
+      <label className={`lang-btn ${language === 'zh' ? 'active' : ''}`}>
+        <input
+          className="lang-radio"
+          type="radio"
+          name="language-switch"
+          value="zh"
+          checked={language === 'zh'}
+          onChange={() => onLanguageChange('zh')}
+        />
+        <span>{text.chinese}</span>
+      </label>
+    </div>
   );
 }
 
