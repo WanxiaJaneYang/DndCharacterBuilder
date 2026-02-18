@@ -217,3 +217,13 @@ input { border: 1px solid #bca57d; border-radius: 6px; padding: 0.35rem 0.5rem; 
   .role-tab-left { border-right: 1px solid var(--border-soft); border-bottom: 0; }
   .tabs-overlay { top: 8vh; transform: translateX(-50%); font-size: clamp(1rem, 2.1vw, 1.52rem); }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

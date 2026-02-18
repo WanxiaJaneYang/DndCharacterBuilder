@@ -1,4 +1,4 @@
-# Step 0: Rules Setup
+# Step 1: Rules Setup
 
 ## Goal
 

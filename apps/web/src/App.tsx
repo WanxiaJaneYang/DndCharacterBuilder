@@ -105,7 +105,9 @@ export function App() {
       return (
         <section>
           <h2>{currentStep.label}</h2>
+          <label htmlFor="character-name-input">{t.nameLabel}</label>
           <input
+            id="character-name-input"
             value={state.metadata.name ?? ''}
             onChange={(e) => setState((s) => applyChoice(s, currentStep.id, e.target.value))}
             placeholder={t.metadataPlaceholder}
@@ -192,7 +194,7 @@ export function App() {
   }
 
   return (
-    <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`}>
+    <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
       <LanguageSwitch language={language} onLanguageChange={setLanguage} text={t} />
       <h1>{t.appTitle}</h1>
       <p className="subtitle">{t.appSubtitle}</p>
@@ -220,14 +222,13 @@ function RoleSelectionGate({
   text: UIText;
 }) {
   return (
-    <main className={`role-gate ${language === 'zh' ? 'lang-zh' : ''}`}>
+    <main className={`role-gate ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
       <section className="role-tabs-root">
         <LanguageSwitch language={language} onLanguageChange={onLanguageChange} text={text} />
-        <div className="role-tabs-grid" role="tablist" aria-label={text.roleAria}>
+        <div className="role-tabs-grid" role="group" aria-label={text.roleAria}>
           <button
             type="button"
-            role="tab"
-            aria-selected={role === 'dm'}
+            aria-pressed={role === 'dm'}
             className={`role-tab role-tab-left ${role === 'dm' ? 'active' : ''}`}
             onClick={() => onChange('dm')}
           >
@@ -236,8 +237,7 @@ function RoleSelectionGate({
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={role === 'player'}
+            aria-pressed={role === 'player'}
             className={`role-tab role-tab-right ${role === 'player' ? 'active' : ''}`}
             onClick={() => onChange('player')}
           >
@@ -264,10 +264,20 @@ function LanguageSwitch({
 }) {
   return (
     <div className="language-switch" aria-label={text.languageLabel}>
-      <button type="button" className={`lang-btn ${language === 'en' ? 'active' : ''}`} onClick={() => onLanguageChange('en')}>
+      <button
+        type="button"
+        className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+        aria-pressed={language === 'en'}
+        onClick={() => onLanguageChange('en')}
+      >
         {text.english}
       </button>
-      <button type="button" className={`lang-btn ${language === 'zh' ? 'active' : ''}`} onClick={() => onLanguageChange('zh')}>
+      <button
+        type="button"
+        className={`lang-btn ${language === 'zh' ? 'active' : ''}`}
+        aria-pressed={language === 'zh'}
+        onClick={() => onLanguageChange('zh')}
+      >
         {text.chinese}
       </button>
     </div>

@@ -13,6 +13,7 @@ This living document tracks the engineering tasks required to implement the DnDC
    - [ ] Implement export generation conforming to `data/EXPORT_SCHEMA.md`.
 
 2. **Wizard UI & flow**
+   - [x] Add role-selection gate (DM vs Player) with EN/ZH language toggle and accessibility states.
    - [ ] Build the Rules Setup page with version and source selection.
    - [ ] Implement race, class, ability, feat, skill and equipment steps using card and allocator components.
    - [ ] Implement review & export step with provenance display.
@@ -63,4 +64,4 @@ This living document tracks the engineering tasks required to implement the DnDC
 - [ ] All wizard steps implemented and data‑driven.
 - [ ] Minimal pack fully populated with UI metadata.
 - [ ] Contract tests passing.
-- [ ] Work plan updated regularly.
+- [x] Work plan updated regularly.

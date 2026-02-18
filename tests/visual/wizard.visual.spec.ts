@@ -5,9 +5,9 @@ const nextButtonName = /Next|下一步/i;
 const namePlaceholder = /Enter character name|输入角色姓名/i;
 
 async function enterPlayerFlow(page: Page) {
-  const playerTab = page.getByRole('tab', { name: playerTabName });
-  if (await playerTab.isVisible()) {
-    await playerTab.click();
+  const playerButton = page.getByRole('button', { name: playerTabName });
+  if (await playerButton.isVisible()) {
+    await playerButton.click();
   }
 }
 
