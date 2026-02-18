@@ -1,6 +1,6 @@
-﻿# UX Step 05 - Feat Selection
+# UX Step 05 - Feat Selection
 
-This document describes the **Feat聽selection** step.  Feats are special abilities that grant bonuses or unique actions.  In D&D聽3.5 SRD, characters typically receive a feat at level聽1 and additional feats at later levels based on their class and race.
+This document describes the **Feat selection** step.  Feats are special abilities that grant bonuses or unique actions.  In D&D 3.5 SRD, characters typically receive a feat at level 1 and additional feats at later levels based on their class and race.
 
 ## Goal
 
@@ -8,8 +8,8 @@ Allow the user to select feats that enhance their character, while enforcing pre
 
 ## User Intent
 
-- **New聽Player:** Needs help understanding what feats do and which are appropriate.  Should see only feats they qualify for.  May need explanations of prerequisites (e.g. ability scores, other feats).
-- **Returning聽Player:** Wants to quickly filter or scroll to find their preferred feats.  Requires full descriptions on demand.
+- **New Player:** Needs help understanding what feats do and which are appropriate.  Should see only feats they qualify for.  May need explanations of prerequisites (e.g. ability scores, other feats).
+- **Returning Player:** Wants to quickly filter or scroll to find their preferred feats.  Requires full descriptions on demand.
 
 ## Layout & Interaction
 
@@ -18,7 +18,7 @@ The feats step should present a **list or card grid** of available feats:
 - Each feat displays:
   - Name.
   - Short summary of its effect.
-  - A call鈥憈o鈥慳ction to **View聽Details** showing the full description and prerequisites.
+  - A call-to-action to **View Details** showing the full description and prerequisites.
 - Feats can be selected via checkboxes or card toggles.  The allowed number of selections is determined by the engine (based on race, class or other factors).
 - The UI must disable feats for which the user does not meet prerequisites.  An explanation tooltip should indicate why a feat is not available.
 - Once the maximum number of feats is selected, additional feats should be disabled until the user deselects one.
@@ -27,14 +27,14 @@ The feats step should present a **list or card grid** of available feats:
 
 From each feat entity in `entities/feats.json`, the UI requires:
 
-- `id` 鈥?stable identifier.
-- `name` 鈥?display name.
-- `summary` 鈥?short description displayed in the list.
-- `description` 鈥?full text for details view.
-- `prerequisites` 鈥?conditions such as minimum ability scores, other feats or level.  The engine resolves these.
-- `effects` 鈥?modifiers applied to the character sheet when the feat is selected (not displayed directly in the UI).
+- `id`: stable identifier.
+- `name`: display name.
+- `summary`: short description displayed in the list.
+- `description`: full text for details view.
+- `prerequisites`: conditions such as minimum ability scores, other feats or level.  The engine resolves these.
+- `effects`: modifiers applied to the character sheet when the feat is selected (not displayed directly in the UI).
 
-The engine must know how many feats a character is allowed at level聽1.  This may depend on race or class (e.g. humans get an extra feat).
+The engine must know how many feats a character is allowed at level 1.  This may depend on race or class (e.g. humans get an extra feat).
 
 ## Validation & Gating
 
