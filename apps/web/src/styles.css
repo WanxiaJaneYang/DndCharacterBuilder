@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;700&family=Noto+Serif+SC:wght@400;700&display=swap');
+
 :root {
   --bg-parchment: #efe2c7;
   --parchment-light: #fff7e3;
@@ -52,6 +54,11 @@ button {
   padding: 0.45rem 0.8rem;
 }
 button:hover { filter: brightness(1.05); }
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
 
 input { border: 1px solid #bca57d; border-radius: 6px; padding: 0.35rem 0.5rem; background: #fffdfa; }
 
@@ -146,7 +153,7 @@ input { border: 1px solid #bca57d; border-radius: 6px; padding: 0.35rem 0.5rem; 
   border: 0;
   border-top: 1px solid var(--border-soft);
   cursor: pointer;
-  color: #fef4df;
+  color: #fffdf6;
   padding: clamp(1rem, 2vw, 2rem);
   display: flex;
   flex-direction: column;

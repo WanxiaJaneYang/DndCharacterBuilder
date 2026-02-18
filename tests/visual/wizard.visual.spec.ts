@@ -6,9 +6,8 @@ const namePlaceholder = /Enter character name|输入角色姓名/i;
 
 async function enterPlayerFlow(page: Page) {
   const playerButton = page.getByRole('button', { name: playerTabName });
-  if (await playerButton.isVisible()) {
-    await playerButton.click();
-  }
+  await expect(playerButton).toBeVisible();
+  await playerButton.click();
 }
 
 async function goToListPage(page: Page) {
@@ -40,7 +39,8 @@ async function waitForVisualStability(page: Page) {
   await page.waitForLoadState('networkidle');
 }
 
-const screenshotOptions = { fullPage: true, maxDiffPixels: 50 };
+// Small ratio threshold to tolerate platform anti-aliasing without hiding real regressions.
+const screenshotOptions = { fullPage: true, maxDiffPixelRatio: 0.0005 };
 
 test.describe('wizard visual regression', () => {
   test('home page', async ({ page }) => {

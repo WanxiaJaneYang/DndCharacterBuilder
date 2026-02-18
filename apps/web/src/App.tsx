@@ -39,10 +39,54 @@ type UIText = {
   chinese: string;
 };
 
-const uiText = uiTextJson as Record<Language, UIText>;
+const uiTextKeys: Array<keyof UIText> = [
+  'appTitle',
+  'appSubtitle',
+  'stepCounter',
+  'back',
+  'next',
+  'review',
+  'exportJson',
+  'toggleProvenance',
+  'printableSheet',
+  'nameLabel',
+  'raceLabel',
+  'classLabel',
+  'metadataPlaceholder',
+  'abilitiesSuffix',
+  'roleAria',
+  'roleQuestion',
+  'roleIntro',
+  'dmTitle',
+  'dmSubtitle',
+  'playerTitle',
+  'playerSubtitle',
+  'dmUnsupported',
+  'languageLabel',
+  'english',
+  'chinese',
+];
+
+function isUIText(value: unknown): value is UIText {
+  if (!value || typeof value !== 'object') return false;
+  return uiTextKeys.every((key) => typeof (value as Record<string, unknown>)[key] === 'string');
+}
+
+function parseUIText(input: unknown): Record<Language, UIText> {
+  if (!input || typeof input !== 'object') {
+    throw new Error('Invalid uiText.json format: expected object with en/zh keys.');
+  }
+  const record = input as Record<string, unknown>;
+  if (!isUIText(record.en) || !isUIText(record.zh)) {
+    throw new Error('Invalid uiText.json format: expected complete UIText payload for en and zh.');
+  }
+  return { en: record.en, zh: record.zh };
+}
+
+const uiText = parseUIText(uiTextJson);
 
 function detectDefaultLanguage(): Language {
-  if (typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('zh')) {
+  if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('zh')) {
     return 'zh';
   }
   return 'en';
@@ -111,6 +155,7 @@ export function App() {
             value={state.metadata.name ?? ''}
             onChange={(e) => setState((s) => applyChoice(s, currentStep.id, e.target.value))}
             placeholder={t.metadataPlaceholder}
+            aria-label={t.nameLabel}
           />
         </section>
       );
@@ -263,19 +308,21 @@ function LanguageSwitch({
   text: UIText;
 }) {
   return (
-    <div className="language-switch" aria-label={text.languageLabel}>
+    <div className="language-switch" role="radiogroup" aria-label={text.languageLabel}>
       <button
         type="button"
+        role="radio"
         className={`lang-btn ${language === 'en' ? 'active' : ''}`}
-        aria-pressed={language === 'en'}
+        aria-checked={language === 'en'}
         onClick={() => onLanguageChange('en')}
       >
         {text.english}
       </button>
       <button
         type="button"
+        role="radio"
         className={`lang-btn ${language === 'zh' ? 'active' : ''}`}
-        aria-pressed={language === 'zh'}
+        aria-checked={language === 'zh'}
         onClick={() => onLanguageChange('zh')}
       >
         {text.chinese}
