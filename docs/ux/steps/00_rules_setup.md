@@ -2,7 +2,7 @@
 
 ## Goal
 
-Allow the user to select the rules version (edition) and which rule sources (packs) are enabled. This step determines which data packs and flow configuration will be loaded for the rest of the wizard.
+Allow the player to select the rules version (edition) and which rule sources (packs) are enabled. This step appears after the role-selection gate and determines which data packs and flow configuration will be loaded for the rest of the wizard.
 
 ## User Intent
 

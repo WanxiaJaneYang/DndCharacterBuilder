@@ -8,6 +8,8 @@ describe('wizard e2e-ish happy path', () => {
     const user = userEvent.setup();
     render(<App />);
 
+    await user.click(screen.getByRole('button', { name: /Open the scroll|展开卷轴/i }));
+    await user.click(screen.getByRole('tab', { name: /Player/i }));
     await user.type(screen.getByPlaceholderText('Enter character name'), 'Aric');
     await user.click(screen.getByText('Next'));
 

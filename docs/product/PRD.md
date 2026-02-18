@@ -21,7 +21,8 @@ Creating a character in D&D can be intimidating. New players are overwhelmed by 
 
 ## High‑Level Functional Requirements
 
-- Version and source selection screen.
+- Initial role-selection screen (DM vs Player) before wizard entry.
+- Version and source selection screen for Player flow.
 - Step‑by‑step wizard for Race, Class, Ability Scores, Feats, Skills, Equipment and Review.
 - Each step must render options using data packs and include short descriptions and optional details.
 - Validation and gating for each step.

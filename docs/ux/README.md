@@ -5,7 +5,7 @@ This folder contains documents describing the user experience of the DnDCharacte
 ## Contents
 
 - `JOURNEY_OVERVIEW.md` – an end‑to‑end description of the user's journey through the wizard.
-- `steps/` – detailed descriptions of each wizard step.
+- `steps/` – detailed descriptions of each wizard step (including `00_role_selection.md` for initial DM/Player entry).
 - `edge_cases/` – documentation on how the product handles uncommon or complex situations (e.g., resetting the wizard or conflicting rule packs).
 
 ## Writing UX Docs
