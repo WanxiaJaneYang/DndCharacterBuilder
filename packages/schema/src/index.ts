@@ -127,13 +127,75 @@ export const ManifestSchema = z.object({
   compatibleEngineRange: z.string().optional()
 });
 
+const RacialModifierSchema = z.object({
+  target: z.string(),
+  bonus: z.number(),
+  type: z.string().optional(),
+  when: z.string().optional()
+}).strict();
+
+const SkillBonusSchema = z.object({
+  skill: z.string(),
+  bonus: z.number(),
+  type: z.string().optional(),
+  when: z.string().optional()
+}).strict();
+
+const RacialTraitSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string()
+}).strict();
+
+const InnateSpellLikeAbilitySchema = z.object({
+  spell: z.string(),
+  frequency: z.string(),
+  casterLevel: z.string().optional(),
+  scope: z.string().optional()
+}).strict();
+
+const RaceDataSchema = z.object({
+  size: z.enum(["small", "medium", "large"]),
+  baseSpeed: z.number().int().positive(),
+  abilityModifiers: z.record(AbilityIdSchema, z.number().int()),
+  vision: z.object({
+    lowLight: z.boolean(),
+    darkvisionFeet: z.number().int().min(0)
+  }).strict(),
+  automaticLanguages: z.array(z.string()),
+  bonusLanguages: z.array(z.string()),
+  favoredClass: z.string(),
+  racialTraits: z.array(RacialTraitSchema),
+  skillBonuses: z.array(SkillBonusSchema).optional(),
+  saveBonuses: z.array(RacialModifierSchema).optional(),
+  attackBonuses: z.array(RacialModifierSchema).optional(),
+  innateSpellLikeAbilities: z.array(InnateSpellLikeAbilitySchema).optional()
+}).strict();
+
 export const EntitySchema = z.object({
   id: z.string(),
   name: z.string(),
   entityType: z.string(),
+  summary: z.string().min(1),
+  description: z.string().min(1),
+  portraitUrl: z.string().min(1).nullable().optional(),
+  iconUrl: z.string().min(1).nullable().optional(),
   constraints: z.array(ConstraintSchema).optional(),
   effects: z.array(EffectSchema).optional(),
   data: z.record(z.any()).optional()
+}).superRefine((entity, ctx) => {
+  if (entity.entityType === "races") {
+    const result = RaceDataSchema.safeParse(entity.data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid races.data: ${issue.message}`,
+          path: ["data", ...issue.path]
+        });
+      });
+    }
+  }
 });
 
 export const PackSchema = z.object({

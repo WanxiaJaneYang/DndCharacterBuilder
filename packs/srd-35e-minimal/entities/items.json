@@ -3,23 +3,53 @@
     "id": "longsword",
     "name": "Longsword",
     "entityType": "items",
-    "effects": []
+    "effects": [],
+    "summary": "Longsword (item) option.",
+    "description": "Detailed reference entry for Longsword in the items dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
   },
   {
     "id": "chainmail",
     "name": "Chainmail",
     "entityType": "items",
     "effects": [
-      { "kind": "add", "targetPath": "stats.ac", "value": { "const": 5 } },
-      { "kind": "set", "targetPath": "stats.speed", "value": { "const": 20 } }
-    ]
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 5
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      }
+    ],
+    "summary": "Chainmail (item) option.",
+    "description": "Detailed reference entry for Chainmail in the items dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
   },
   {
     "id": "heavy-wooden-shield",
     "name": "Heavy Wooden Shield",
     "entityType": "items",
     "effects": [
-      { "kind": "add", "targetPath": "stats.ac", "value": { "const": 2 } }
-    ]
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Heavy Wooden Shield (item) option.",
+    "description": "Detailed reference entry for Heavy Wooden Shield in the items dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
   }
 ]
