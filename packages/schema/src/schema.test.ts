@@ -45,6 +45,16 @@ describe("flow schema", () => {
     ).toThrow();
   });
 
+  it("accepts skills as a manual step", () => {
+    const parsed = FlowSchema.parse({
+      steps: [
+        { id: "skills", kind: "skills", label: "Skills", source: { type: "manual" } }
+      ]
+    });
+
+    expect(parsed.steps[0]?.id).toBe("skills");
+  });
+
 
 
   it("rejects manual source for entity-selection kinds", () => {

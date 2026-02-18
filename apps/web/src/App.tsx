@@ -106,6 +106,19 @@ export function App() {
   const choices = useMemo(() => listChoices(state, context), [state]);
   const choiceMap = new Map(choices.map((c) => [c.stepId, c]));
   const sheet = useMemo(() => finalizeCharacter(state, context), [state]);
+  const skillEntities = useMemo(
+    () => Object.values(context.resolvedData.entities.skills ?? {}).sort((a, b) => a.name.localeCompare(b.name)),
+    []
+  );
+  const selectedFeats = ((state.selections.feats as string[] | undefined) ?? []);
+
+  const selectedStepValues = (stepId: string): string[] => {
+    if (stepId === 'feat') return selectedFeats;
+    const value = state.selections[stepId];
+    if (Array.isArray(value)) return value.map(String);
+    if (value === undefined || value === null || value === '') return [];
+    return [String(value)];
+  };
 
   const setAbility = (key: string, value: number) => {
     setState((prev) => applyChoice(prev, 'abilities', { ...prev.abilities, [key]: value }));
@@ -140,6 +153,17 @@ export function App() {
             <p>{t.nameLabel}: {sheet.metadata.name}</p>
             <p>{t.raceLabel}: {String(state.selections.race ?? '-')} / {t.classLabel}: {String(state.selections.class ?? '-')}</p>
             <p>AC: {String(sheet.stats.ac)} | HP: {String(sheet.stats.hp)} | BAB: {String(sheet.stats.bab)}</p>
+            <p>Favored class: {sheet.decisions.favoredClass ?? '-'} | XP penalty ignored: {sheet.decisions.ignoresMulticlassXpPenalty ? 'yes' : 'no'}</p>
+            <p>Skill points: {sheet.decisions.skillPoints.spent} / {sheet.decisions.skillPoints.total}</p>
+            <ul>
+              {Object.entries(sheet.skills)
+                .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
+                .map(([skillId, skill]) => (
+                  <li key={skillId}>
+                    {skill.name}: total {skill.total} (ranks {skill.ranks}, ability {skill.abilityMod >= 0 ? '+' : ''}{skill.abilityMod}, racial {skill.racialBonus >= 0 ? '+' : ''}{skill.racialBonus})
+                  </li>
+                ))}
+            </ul>
           </article>
         </section>
       );
@@ -176,14 +200,55 @@ export function App() {
       );
     }
 
+    if (currentStep.kind === 'skills') {
+      const selectedRanks = (state.selections.skills as Record<string, number> | undefined) ?? {};
+
+      return (
+        <section>
+          <h2>{currentStep.label}</h2>
+          <p>
+            Budget: {sheet.decisions.skillPoints.total} | Spent: {sheet.decisions.skillPoints.spent} | Remaining: {sheet.decisions.skillPoints.remaining}
+          </p>
+          <div className="grid">
+            {skillEntities.map((skill) => {
+              const detail = sheet.skills[skill.id];
+              const ranks = selectedRanks[skill.id] ?? 0;
+              const maxRanks = detail?.maxRanks ?? 2;
+              const classSkill = detail?.classSkill ?? false;
+              const costPerRank = detail?.costPerRank ?? 2;
+              const racialBonus = detail?.racialBonus ?? 0;
+
+              return (
+                <label key={skill.id}>
+                  {skill.name} ({classSkill ? 'Class' : 'Cross'} | cost {costPerRank}/rank | max {maxRanks} | racial {racialBonus >= 0 ? '+' : ''}{racialBonus})
+                  <input
+                    type="number"
+                    min={0}
+                    max={maxRanks}
+                    step={0.5}
+                    value={ranks}
+                    onChange={(e) => {
+                      const parsed = Number(e.target.value);
+                      const clamped = Number.isFinite(parsed) ? Math.min(maxRanks, Math.max(0, parsed)) : 0;
+                      setState((s) => applyChoice(s, 'skills', { ...selectedRanks, [skill.id]: clamped }));
+                    }}
+                  />
+                </label>
+              );
+            })}
+          </div>
+        </section>
+      );
+    }
+
     if (currentStep.source.type === 'entityType') {
       const stepChoice = choiceMap.get(currentStep.id);
       const options = stepChoice?.options ?? [];
-      const limit = currentStep.source.limit ?? 1;
+      const limit = stepChoice?.limit ?? currentStep.source.limit ?? 1;
 
       if (limit <= 1) {
         const currentValue = currentStep.id === 'feat'
-          ? String(((state.selections.feats as string[] | undefined) ?? [])[0] ?? '')
+          ? String(selectedFeats[0] ?? '')
           : String(state.selections[currentStep.id] ?? '');
 
         return (
@@ -202,7 +267,7 @@ export function App() {
         );
       }
 
-      const selected = (state.selections[currentStep.id] as string[] | undefined) ?? [];
+      const selected = selectedStepValues(currentStep.id);
       return (
         <fieldset>
           <legend>{currentStep.label}</legend>
@@ -211,6 +276,7 @@ export function App() {
               <input
                 type="checkbox"
                 checked={selected.includes(o.id)}
+                disabled={!selected.includes(o.id) && selected.length >= limit}
                 onChange={(e) => {
                   const next = e.target.checked ? [...selected, o.id] : selected.filter((item) => item !== o.id);
                   setState((s) => applyChoice(s, currentStep.id, next));

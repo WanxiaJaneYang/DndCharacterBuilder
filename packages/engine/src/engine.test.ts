@@ -54,6 +54,35 @@ describe("engine determinism", () => {
     expect(choices.find((c) => c.stepId === "race")?.options[0]?.id).toBe("human");
   });
 
+  it("applies race-driven feat limit for humans", () => {
+    const humanState = applyChoice(initialState, "race", "human");
+    const humanFeatLimit = listChoices(humanState, context).find((c) => c.stepId === "feat")?.limit;
+
+    const dwarfState = applyChoice(initialState, "race", "dwarf");
+    const dwarfFeatLimit = listChoices(dwarfState, context).find((c) => c.stepId === "feat")?.limit;
+
+    expect(humanFeatLimit).toBe(2);
+    expect(dwarfFeatLimit).toBe(1);
+  });
+
+  it("computes skill budget and racial skill bonuses from race/class data", () => {
+    let state = applyChoice(initialState, "name", "Lia");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "half-elf");
+    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "skills", { climb: 4, diplomacy: 2 });
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(sheet.decisions.skillPoints.total).toBe(8);
+    expect(sheet.decisions.skillPoints.spent).toBe(8);
+    expect(sheet.decisions.skillPoints.remaining).toBe(0);
+    expect(sheet.skills.diplomacy?.racialBonus).toBe(2);
+    expect(sheet.skills.diplomacy?.total).toBe(4);
+    expect(sheet.decisions.favoredClass).toBe("any");
+    expect(sheet.decisions.ignoresMulticlassXpPenalty).toBe(true);
+  });
+
   it("uses overriding pack id in provenance records", () => {
     const base = makePack("base", 1);
     const override = makePack("override", 2, ["base"]);

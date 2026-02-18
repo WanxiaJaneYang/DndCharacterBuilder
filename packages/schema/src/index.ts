@@ -47,7 +47,7 @@ export const ConstraintSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("predicate"), predicateId: z.string(), args: z.record(z.any()).optional() })
 ]);
 
-const AllowedChoiceStepIds = ["name", "abilities", "race", "class", "feat", "equipment", "review"] as const;
+const AllowedChoiceStepIds = ["name", "abilities", "race", "class", "feat", "skills", "equipment", "review"] as const;
 const ChoiceStepIdSchema = z.enum(AllowedChoiceStepIds, {
   errorMap: (issue, ctx) => {
     if (issue.code === z.ZodIssueCode.invalid_enum_value) {
@@ -56,7 +56,7 @@ const ChoiceStepIdSchema = z.enum(AllowedChoiceStepIds, {
     return { message: ctx.defaultError };
   }
 });
-const ChoiceStepKindSchema = z.enum(["metadata", "abilities", "race", "class", "feat", "equipment", "review"]);
+const ChoiceStepKindSchema = z.enum(["metadata", "abilities", "race", "class", "feat", "skills", "equipment", "review"]);
 
 const ChoiceStepSourceSchema = z.discriminatedUnion("type", [
   z.object({
@@ -81,6 +81,7 @@ const ChoiceStepSchema = z.object({
     race: "race",
     class: "class",
     feat: "feat",
+    skills: "skills",
     equipment: "equipment",
     review: "review"
   };
@@ -103,6 +104,7 @@ const ChoiceStepSchema = z.object({
     race: "entityType",
     class: "entityType",
     feat: "entityType",
+    skills: "manual",
     equipment: "entityType",
     review: "manual"
   };
