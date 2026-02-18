@@ -217,6 +217,7 @@ export function App() {
               const classSkill = detail?.classSkill ?? false;
               const costPerRank = detail?.costPerRank ?? 2;
               const racialBonus = detail?.racialBonus ?? 0;
+              const inputStep = classSkill ? 1 : 0.5;
 
               return (
                 <label key={skill.id}>
@@ -225,11 +226,14 @@ export function App() {
                     type="number"
                     min={0}
                     max={maxRanks}
-                    step={0.5}
+                    step={inputStep}
                     value={ranks}
                     onChange={(e) => {
                       const parsed = Number(e.target.value);
-                      const clamped = Number.isFinite(parsed) ? Math.min(maxRanks, Math.max(0, parsed)) : 0;
+                      const normalized = Number.isFinite(parsed)
+                        ? (classSkill ? Math.round(parsed) : Math.round(parsed * 2) / 2)
+                        : 0;
+                      const clamped = Math.min(maxRanks, Math.max(0, normalized));
                       setState((s) => applyChoice(s, 'skills', { ...selectedRanks, [skill.id]: clamped }));
                     }}
                   />

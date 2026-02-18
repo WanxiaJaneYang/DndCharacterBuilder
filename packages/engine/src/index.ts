@@ -260,7 +260,8 @@ function buildDecisionSummary(state: CharacterState, context: EngineContext, abi
   const intModifier = abilities.int?.mod ?? 0;
   const racialBonusAtLevel1 = getRaceSkillBonusAtLevel1(state, context);
   const racialBonusPerLevel = getRaceSkillBonusPerLevel(state, context);
-  const totalSkillPoints = Math.max(0, ((classSkillPointsPerLevel + intModifier) * FIRST_LEVEL_SKILL_MULTIPLIER) + racialBonusAtLevel1);
+  const baseSkillPointsPerLevelWithInt = Math.max(1, classSkillPointsPerLevel + intModifier);
+  const totalSkillPoints = Math.max(0, (baseSkillPointsPerLevelWithInt * FIRST_LEVEL_SKILL_MULTIPLIER) + racialBonusAtLevel1);
 
   let spentSkillPoints = 0;
   for (const [skillId, ranks] of Object.entries(selectedSkillRanks)) {
@@ -416,6 +417,9 @@ export function validateState(state: CharacterState, context: EngineContext): Va
       errors.push({ code: "SKILL_RANK_STEP", message: `${skillId} ranks must use 0.5 increments.`, stepId: "skills" });
     }
     const isClassSkill = decisions.classSkills.includes(skillId);
+    if (isClassSkill && !Number.isInteger(rank)) {
+      errors.push({ code: "SKILL_RANK_CLASS_INTEGER", message: `${skillId} class-skill ranks must be whole numbers.`, stepId: "skills" });
+    }
     const maxRanks = isClassSkill ? 4 : 2;
     if (rank > maxRanks) {
       errors.push({ code: "SKILL_RANK_MAX", message: `${skillId} exceeds max rank ${maxRanks}.`, stepId: "skills" });

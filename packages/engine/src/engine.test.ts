@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { LoadedPack } from "@dcb/datapack";
 import { resolveLoadedPacks } from "@dcb/datapack";
 import { resolvePackSet } from "@dcb/datapack/node";
-import { finalizeCharacter, initialState, applyChoice, listChoices } from "./index";
+import { finalizeCharacter, initialState, applyChoice, listChoices, validateState } from "./index";
 
 const resolved = resolvePackSet(path.resolve(process.cwd(), "../../packs"), ["srd-35e-minimal"]);
 const context = { enabledPackIds: ["srd-35e-minimal"], resolvedData: resolved };
@@ -81,6 +81,27 @@ describe("engine determinism", () => {
     expect(sheet.skills.diplomacy?.total).toBe(4);
     expect(sheet.decisions.favoredClass).toBe("any");
     expect(sheet.decisions.ignoresMulticlassXpPenalty).toBe(true);
+  });
+
+  it("applies minimum level-1 skill budget floor before multiplier", () => {
+    let state = applyChoice(initialState, "name", "LowInt");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 3, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "dwarf");
+    state = applyChoice(state, "class", "fighter-1");
+
+    const sheet = finalizeCharacter(state, context);
+    expect(sheet.decisions.skillPoints.total).toBe(4);
+  });
+
+  it("rejects fractional ranks for class skills", () => {
+    let state = applyChoice(initialState, "name", "Ranks");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "skills", { climb: 0.5 });
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "SKILL_RANK_CLASS_INTEGER")).toBe(true);
   });
 
   it("uses overriding pack id in provenance records", () => {
