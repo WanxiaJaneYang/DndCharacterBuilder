@@ -4,15 +4,42 @@
     "name": "Base AC",
     "entityType": "rules",
     "effects": [
-      { "kind": "set", "targetPath": "stats.ac", "value": { "sum": [ {"const": 10 }, {"abilityMod": "dex"} ] } }
-    ]
+      {
+        "kind": "set",
+        "targetPath": "stats.ac",
+        "value": {
+          "sum": [
+            {
+              "const": 10
+            },
+            {
+              "abilityMod": "dex"
+            }
+          ]
+        }
+      }
+    ],
+    "summary": "Base AC (rule) option.",
+    "description": "Detailed reference entry for Base AC in the rules dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
   },
   {
     "id": "initiative",
     "name": "Initiative",
     "entityType": "rules",
     "effects": [
-      { "kind": "set", "targetPath": "stats.initiative", "value": { "abilityMod": "dex" } }
-    ]
+      {
+        "kind": "set",
+        "targetPath": "stats.initiative",
+        "value": {
+          "abilityMod": "dex"
+        }
+      }
+    ],
+    "summary": "Initiative (rule) option.",
+    "description": "Detailed reference entry for Initiative in the rules dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
   }
 ]

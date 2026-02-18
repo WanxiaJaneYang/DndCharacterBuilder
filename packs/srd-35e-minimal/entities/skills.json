@@ -1,8 +1,56 @@
 [
-  { "id": "spot", "name": "Spot", "entityType": "skills" },
-  { "id": "listen", "name": "Listen", "entityType": "skills" },
-  { "id": "climb", "name": "Climb", "entityType": "skills" },
-  { "id": "jump", "name": "Jump", "entityType": "skills" },
-  { "id": "diplomacy", "name": "Diplomacy", "entityType": "skills" },
-  { "id": "ride", "name": "Ride", "entityType": "skills" }
+  {
+    "id": "spot",
+    "name": "Spot",
+    "entityType": "skills",
+    "summary": "Spot (skill) option.",
+    "description": "Detailed reference entry for Spot in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "listen",
+    "name": "Listen",
+    "entityType": "skills",
+    "summary": "Listen (skill) option.",
+    "description": "Detailed reference entry for Listen in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "climb",
+    "name": "Climb",
+    "entityType": "skills",
+    "summary": "Climb (skill) option.",
+    "description": "Detailed reference entry for Climb in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "jump",
+    "name": "Jump",
+    "entityType": "skills",
+    "summary": "Jump (skill) option.",
+    "description": "Detailed reference entry for Jump in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "diplomacy",
+    "name": "Diplomacy",
+    "entityType": "skills",
+    "summary": "Diplomacy (skill) option.",
+    "description": "Detailed reference entry for Diplomacy in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "ride",
+    "name": "Ride",
+    "entityType": "skills",
+    "summary": "Ride (skill) option.",
+    "description": "Detailed reference entry for Ride in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  }
 ]

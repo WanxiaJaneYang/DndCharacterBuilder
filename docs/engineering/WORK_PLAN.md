@@ -20,6 +20,7 @@ This living document tracks the engineering tasks required to implement the DnDC
 
 3. **Data packs**
    - [x] Create minimal SRD 3.5 pack (human, fighter, basic feats, skills, items).
+   - [x] Expand SRD race data to all core races with structured trait metadata (vision, ability modifiers, languages, favored class, racial traits).
    - [ ] Populate UI metadata (summary, description, images) for all entities.
    - [ ] Write example flows and exports in `data/examples/`.
 

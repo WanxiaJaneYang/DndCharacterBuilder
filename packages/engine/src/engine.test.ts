@@ -12,12 +12,12 @@ function makePack(id: string, priority: number, dependencies: string[] = []): Lo
   return {
     manifest: { id, name: id, version: "1.0.0", priority, dependencies },
     entities: {
-      races: [{ id: "human", name: "Human", entityType: "races", effects: [] }],
-      classes: [{ id: "fighter-1", name: "Fighter", entityType: "classes", effects: [] }],
+      races: [{ id: "human", name: "Human", entityType: "races", summary: "Human", description: "Human race", portraitUrl: "assets/races/human-portrait.png", iconUrl: "assets/icons/races/human.png", effects: [], data: { size: "medium", baseSpeed: 30, abilityModifiers: {}, vision: { lowLight: false, darkvisionFeet: 0 }, automaticLanguages: ["Common"], bonusLanguages: ["Any"], favoredClass: "any", racialTraits: [] } }],
+      classes: [{ id: "fighter-1", name: "Fighter", entityType: "classes", summary: "Fighter", description: "Fighter class", portraitUrl: "assets/classes/fighter-portrait.png", iconUrl: "assets/icons/classes/fighter.png", effects: [] }],
       feats: [],
       items: [],
       skills: [],
-      rules: [{ id: "base-ac", name: "Base AC", entityType: "rules", effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }] }]
+      rules: [{ id: "base-ac", name: "Base AC", entityType: "rules", summary: "Base AC", description: "Base AC rule", portraitUrl: "assets/rules/base-ac-portrait.png", iconUrl: "assets/icons/rules/base-ac.png", effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }] }]
     },
     flow: {
       steps: [
