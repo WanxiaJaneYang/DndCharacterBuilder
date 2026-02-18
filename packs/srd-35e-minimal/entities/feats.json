@@ -4,21 +4,49 @@
     "name": "Power Attack",
     "entityType": "feats",
     "constraints": [
-      { "kind": "abilityMin", "ability": "str", "score": 13 },
-      { "kind": "mutuallyExclusive", "groupId": "feat-slot-1" }
+      {
+        "kind": "abilityMin",
+        "ability": "str",
+        "score": 13
+      },
+      {
+        "kind": "mutuallyExclusive",
+        "groupId": "feat-slot-1"
+      }
     ],
-    "data": { "exclusiveGroup": "feat-slot-1" }
+    "data": {
+      "exclusiveGroup": "feat-slot-1"
+    },
+    "summary": "Power Attack (feat) option.",
+    "description": "Detailed reference entry for Power Attack in the feats dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
   },
   {
     "id": "weapon-focus-longsword",
     "name": "Weapon Focus (Longsword)",
     "entityType": "feats",
     "constraints": [
-      { "kind": "mutuallyExclusive", "groupId": "feat-slot-1" }
+      {
+        "kind": "mutuallyExclusive",
+        "groupId": "feat-slot-1"
+      }
     ],
     "effects": [
-      { "kind": "add", "targetPath": "stats.attackBonus", "value": { "const": 1 } }
+      {
+        "kind": "add",
+        "targetPath": "stats.attackBonus",
+        "value": {
+          "const": 1
+        }
+      }
     ],
-    "data": { "exclusiveGroup": "feat-slot-1" }
+    "data": {
+      "exclusiveGroup": "feat-slot-1"
+    },
+    "summary": "Weapon Focus (Longsword) (feat) option.",
+    "description": "Detailed reference entry for Weapon Focus (Longsword) in the feats dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
   }
 ]

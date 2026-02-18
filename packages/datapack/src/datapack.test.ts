@@ -15,7 +15,7 @@ function makePack(id: string, priority: number, dependencies: string[] = []): Lo
       feats: [],
       items: [],
       skills: [],
-      rules: [{ id: `${id}-rule`, name: `${id}-rule`, entityType: "rules", effects: [] }]
+      rules: [{ id: `${id}-rule`, name: `${id}-rule`, entityType: "rules", summary: "Rule summary", description: "Rule description", portraitUrl: "assets/rules/rule-portrait.png", iconUrl: "assets/icons/rules/rule.png", effects: [] }]
     },
     flow: { steps: [{ id: "name", kind: "metadata", label: "Name", source: { type: "manual" } }] },
     patches: [],
@@ -30,6 +30,67 @@ describe("resolvePackSet", () => {
     expect(resolved.entities.races?.human?.name).toBe("Human");
     expect(resolved.entities.races?.human?._source.packId).toBe("srd-35e-minimal");
     expect(resolved.fingerprint).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("ensures all entities expose required UI metadata", () => {
+    const root = path.resolve(process.cwd(), "../../packs");
+    const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
+
+    const buckets = ["races", "classes", "feats", "items", "skills", "rules"] as const;
+    for (const bucket of buckets) {
+      const entities = Object.values(resolved.entities[bucket] ?? {});
+      expect(entities.length).toBeGreaterThan(0);
+      for (const entity of entities) {
+        expect(entity.summary).toEqual(expect.any(String));
+        expect(entity.description).toEqual(expect.any(String));
+        expect(["string", "object", "undefined"]).toContain(typeof entity.portraitUrl);
+        expect(["string", "object", "undefined"]).toContain(typeof entity.iconUrl);
+      }
+    }
+  });
+
+  it("includes all SRD 3.5 core races with baseline movement data", () => {
+    const root = path.resolve(process.cwd(), "../../packs");
+    const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
+
+    const raceIds = Object.keys(resolved.entities.races ?? {}).sort();
+    expect(raceIds).toEqual([
+      "dwarf",
+      "elf",
+      "gnome",
+      "half-elf",
+      "half-orc",
+      "halfling",
+      "human"
+    ]);
+
+    expect(resolved.entities.races?.dwarf?.data?.size).toBe("medium");
+    expect(resolved.entities.races?.dwarf?.data?.vision?.darkvisionFeet).toBe(60);
+    expect(resolved.entities.races?.elf?.data?.size).toBe("medium");
+    expect(resolved.entities.races?.elf?.data?.vision?.lowLight).toBe(true);
+    expect(resolved.entities.races?.elf?.data?.abilityModifiers).toEqual({ dex: 2, con: -2 });
+    expect(resolved.entities.races?.elf?.data?.innateSpellLikeAbilities).toEqual([]);
+    expect(resolved.entities.races?.gnome?.data?.size).toBe("small");
+    expect(resolved.entities.races?.["half-elf"]?.data?.size).toBe("medium");
+    expect(resolved.entities.races?.["half-orc"]?.data?.size).toBe("medium");
+    expect(resolved.entities.races?.halfling?.data?.size).toBe("small");
+    expect(resolved.entities.races?.human?.data?.size).toBe("medium");
+
+    expect(resolved.entities.races?.dwarf?.effects).toContainEqual({
+      kind: "set",
+      targetPath: "stats.speed",
+      value: { const: 20 }
+    });
+    expect(resolved.entities.races?.human?.effects).toContainEqual({
+      kind: "set",
+      targetPath: "stats.speed",
+      value: { const: 30 }
+    });
+    expect(resolved.entities.races?.elf?.effects).toContainEqual({
+      kind: "add",
+      targetPath: "abilities.dex.score",
+      value: { const: 2 }
+    });
   });
 
   it("ignores non-directory entries under packs root", () => {
@@ -74,7 +135,7 @@ describe("resolvePackSet", () => {
     fs.cpSync(packsSrc, packDest, { recursive: true });
     fs.writeFileSync(
       path.join(packDest, "entities", "races.json"),
-      JSON.stringify([{ id: "oops", name: "Oops", entityType: "classes" }])
+      JSON.stringify([{ id: "oops", name: "Oops", entityType: "classes", summary: "s", description: "d", portraitUrl: "p", iconUrl: "i" }])
     );
 
     try {
@@ -99,7 +160,7 @@ describe("resolvePackSet", () => {
 
   it("tracks source pack metadata for overriding patches", () => {
     const base = makePack("base", 1);
-    base.entities.rules = [{ id: "shared", name: "Shared", entityType: "rules", effects: [] }];
+    base.entities.rules = [{ id: "shared", name: "Shared", entityType: "rules", summary: "Shared rule", description: "Shared rule desc", portraitUrl: "assets/rules/shared-portrait.png", iconUrl: "assets/icons/rules/shared.png", effects: [] }];
 
     const override = makePack("override", 2, ["base"]);
     override.patches = [{ op: "mergeEntity", entityType: "rules", id: "shared", value: { name: "Overridden" } }];

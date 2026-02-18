@@ -4,8 +4,628 @@
     "name": "Human",
     "entityType": "races",
     "effects": [
-      { "kind": "set", "targetPath": "stats.speed", "value": { "const": 30 } }
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 30
+        }
+      }
     ],
-    "data": { "size": "medium" }
+    "data": {
+      "size": "medium",
+      "baseSpeed": 30,
+      "abilityModifiers": {},
+      "vision": {
+        "lowLight": false,
+        "darkvisionFeet": 0
+      },
+      "automaticLanguages": [
+        "Common"
+      ],
+      "bonusLanguages": [
+        "Any (except secret languages)"
+      ],
+      "favoredClass": "any",
+      "racialTraits": [
+        {
+          "id": "bonus-feat",
+          "name": "Bonus Feat",
+          "description": "Humans select one extra feat at 1st level."
+        },
+        {
+          "id": "extra-skill-points",
+          "name": "Extra Skill Points",
+          "description": "Humans gain 4 extra skill points at 1st level and 1 extra point at each additional level."
+        }
+      ]
+    },
+    "summary": "Human (race) option.",
+    "description": "Detailed reference entry for Human in the races dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "dwarf",
+    "name": "Dwarf",
+    "entityType": "races",
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.con.score",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.cha.score",
+        "value": {
+          "const": -2
+        }
+      }
+    ],
+    "data": {
+      "size": "medium",
+      "baseSpeed": 20,
+      "abilityModifiers": {
+        "con": 2,
+        "cha": -2
+      },
+      "vision": {
+        "lowLight": false,
+        "darkvisionFeet": 60
+      },
+      "automaticLanguages": [
+        "Common",
+        "Dwarven"
+      ],
+      "bonusLanguages": [
+        "Giant",
+        "Gnome",
+        "Goblin",
+        "Orc",
+        "Terran",
+        "Undercommon"
+      ],
+      "favoredClass": "fighter",
+      "saveBonuses": [
+        {
+          "target": "poison",
+          "bonus": 2,
+          "type": "racial"
+        },
+        {
+          "target": "spellsAndSpellLikeEffects",
+          "bonus": 2,
+          "type": "racial"
+        }
+      ],
+      "racialTraits": [
+        {
+          "id": "stonecunning",
+          "name": "Stonecunning",
+          "description": "+2 bonus on Search checks to notice unusual stonework and automatic checks when within 10 feet."
+        },
+        {
+          "id": "stability",
+          "name": "Stability",
+          "description": "+4 bonus on ability checks made to resist being bull rushed or tripped when standing on the ground."
+        },
+        {
+          "id": "weapon-familiarity",
+          "name": "Weapon Familiarity",
+          "description": "Dwarven waraxe and dwarven urgrosh are treated as martial weapons."
+        }
+      ],
+      "skillBonuses": [
+        {
+          "skill": "appraise",
+          "bonus": 2,
+          "type": "racial",
+          "when": "related to stone or metal items"
+        },
+        {
+          "skill": "craft",
+          "bonus": 2,
+          "type": "racial",
+          "when": "related to stone or metal"
+        }
+      ]
+    },
+    "summary": "Dwarf (race) option.",
+    "description": "Detailed reference entry for Dwarf in the races dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "elf",
+    "name": "Elf",
+    "entityType": "races",
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 30
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.dex.score",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.con.score",
+        "value": {
+          "const": -2
+        }
+      }
+    ],
+    "data": {
+      "size": "medium",
+      "baseSpeed": 30,
+      "abilityModifiers": {
+        "dex": 2,
+        "con": -2
+      },
+      "vision": {
+        "lowLight": true,
+        "darkvisionFeet": 0
+      },
+      "automaticLanguages": [
+        "Common",
+        "Elven"
+      ],
+      "bonusLanguages": [
+        "Draconic",
+        "Gnoll",
+        "Gnome",
+        "Goblin",
+        "Orc",
+        "Sylvan"
+      ],
+      "favoredClass": "wizard",
+      "saveBonuses": [
+        {
+          "target": "enchantmentSpellsAndEffects",
+          "bonus": 2,
+          "type": "racial"
+        }
+      ],
+      "racialTraits": [
+        {
+          "id": "immune-sleep",
+          "name": "Immunity to Magic Sleep",
+          "description": "Elves are immune to magic sleep effects."
+        },
+        {
+          "id": "secret-door-sense",
+          "name": "Keen Senses",
+          "description": "An elf passing within 5 feet of a secret or concealed door is entitled to a Search check as if actively looking."
+        },
+        {
+          "id": "weapon-proficiency",
+          "name": "Weapon Proficiency",
+          "description": "Proficient with longsword, rapier, longbow, and shortbow (including composite variants)."
+        }
+      ],
+      "skillBonuses": [
+        {
+          "skill": "listen",
+          "bonus": 2,
+          "type": "racial"
+        },
+        {
+          "skill": "search",
+          "bonus": 2,
+          "type": "racial"
+        },
+        {
+          "skill": "spot",
+          "bonus": 2,
+          "type": "racial"
+        }
+      ],
+      "innateSpellLikeAbilities": []
+    },
+    "summary": "Elf (race) option.",
+    "description": "Detailed reference entry for Elf in the races dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "gnome",
+    "name": "Gnome",
+    "entityType": "races",
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.con.score",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.str.score",
+        "value": {
+          "const": -2
+        }
+      }
+    ],
+    "data": {
+      "size": "small",
+      "baseSpeed": 20,
+      "abilityModifiers": {
+        "con": 2,
+        "str": -2
+      },
+      "vision": {
+        "lowLight": false,
+        "darkvisionFeet": 60
+      },
+      "automaticLanguages": [
+        "Common",
+        "Gnome"
+      ],
+      "bonusLanguages": [
+        "Draconic",
+        "Dwarven",
+        "Elven",
+        "Giant",
+        "Goblin",
+        "Orc"
+      ],
+      "favoredClass": "bard",
+      "racialTraits": [
+        {
+          "id": "defensive-training",
+          "name": "Defensive Training",
+          "description": "+4 dodge bonus to AC against giants."
+        },
+        {
+          "id": "weapon-familiarity",
+          "name": "Weapon Familiarity",
+          "description": "Gnome hooked hammer is treated as a martial weapon."
+        }
+      ],
+      "skillBonuses": [
+        {
+          "skill": "listen",
+          "bonus": 2,
+          "type": "racial"
+        },
+        {
+          "skill": "craft:alchemy",
+          "bonus": 2,
+          "type": "racial"
+        }
+      ],
+      "attackBonuses": [
+        {
+          "target": "kobolds",
+          "bonus": 1,
+          "type": "racial"
+        },
+        {
+          "target": "goblinoids",
+          "bonus": 1,
+          "type": "racial"
+        }
+      ],
+      "saveBonuses": [
+        {
+          "target": "illusions",
+          "bonus": 1,
+          "type": "racial"
+        }
+      ],
+      "innateSpellLikeAbilities": [
+        {
+          "spell": "dancing lights",
+          "frequency": "1/day",
+          "casterLevel": "class-level"
+        },
+        {
+          "spell": "ghost sound",
+          "frequency": "1/day",
+          "casterLevel": "class-level"
+        },
+        {
+          "spell": "prestidigitation",
+          "frequency": "1/day",
+          "casterLevel": "class-level"
+        },
+        {
+          "spell": "speak with animals",
+          "frequency": "1/day",
+          "casterLevel": "class-level",
+          "scope": "burrowing mammals"
+        }
+      ]
+    },
+    "summary": "Gnome (race) option.",
+    "description": "Detailed reference entry for Gnome in the races dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "half-elf",
+    "name": "Half-Elf",
+    "entityType": "races",
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 30
+        }
+      }
+    ],
+    "data": {
+      "size": "medium",
+      "baseSpeed": 30,
+      "abilityModifiers": {},
+      "vision": {
+        "lowLight": true,
+        "darkvisionFeet": 0
+      },
+      "automaticLanguages": [
+        "Common",
+        "Elven"
+      ],
+      "bonusLanguages": [
+        "Any (except secret languages)"
+      ],
+      "favoredClass": "any",
+      "saveBonuses": [
+        {
+          "target": "enchantmentSpellsAndEffects",
+          "bonus": 2,
+          "type": "racial"
+        }
+      ],
+      "racialTraits": [
+        {
+          "id": "elf-blood",
+          "name": "Elf Blood",
+          "description": "Half-elves count as both elves and humans for effects related to race."
+        },
+        {
+          "id": "immunity-sleep",
+          "name": "Immunity to Sleep",
+          "description": "Immune to magical sleep effects."
+        }
+      ],
+      "skillBonuses": [
+        {
+          "skill": "listen",
+          "bonus": 1,
+          "type": "racial"
+        },
+        {
+          "skill": "search",
+          "bonus": 1,
+          "type": "racial"
+        },
+        {
+          "skill": "spot",
+          "bonus": 1,
+          "type": "racial"
+        },
+        {
+          "skill": "diplomacy",
+          "bonus": 2,
+          "type": "racial"
+        },
+        {
+          "skill": "gather-information",
+          "bonus": 2,
+          "type": "racial"
+        }
+      ]
+    },
+    "summary": "Half-Elf (race) option.",
+    "description": "Detailed reference entry for Half-Elf in the races dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "half-orc",
+    "name": "Half-Orc",
+    "entityType": "races",
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 30
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.str.score",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.int.score",
+        "value": {
+          "const": -2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.cha.score",
+        "value": {
+          "const": -2
+        }
+      }
+    ],
+    "data": {
+      "size": "medium",
+      "baseSpeed": 30,
+      "abilityModifiers": {
+        "str": 2,
+        "int": -2,
+        "cha": -2
+      },
+      "vision": {
+        "lowLight": false,
+        "darkvisionFeet": 60
+      },
+      "automaticLanguages": [
+        "Common",
+        "Orc"
+      ],
+      "bonusLanguages": [
+        "Draconic",
+        "Giant",
+        "Gnoll",
+        "Goblin",
+        "Abyssal"
+      ],
+      "favoredClass": "barbarian",
+      "racialTraits": [
+        {
+          "id": "orc-blood",
+          "name": "Orc Blood",
+          "description": "Half-orcs count as both orcs and humans for effects related to race."
+        }
+      ]
+    },
+    "summary": "Half-Orc (race) option.",
+    "description": "Detailed reference entry for Half-Orc in the races dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "halfling",
+    "name": "Halfling",
+    "entityType": "races",
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.dex.score",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "abilities.str.score",
+        "value": {
+          "const": -2
+        }
+      }
+    ],
+    "data": {
+      "size": "small",
+      "baseSpeed": 20,
+      "abilityModifiers": {
+        "dex": 2,
+        "str": -2
+      },
+      "vision": {
+        "lowLight": false,
+        "darkvisionFeet": 0
+      },
+      "automaticLanguages": [
+        "Common",
+        "Halfling"
+      ],
+      "bonusLanguages": [
+        "Dwarven",
+        "Elven",
+        "Gnome",
+        "Goblin",
+        "Orc"
+      ],
+      "favoredClass": "rogue",
+      "racialTraits": [
+        {
+          "id": "fearless",
+          "name": "Fearless",
+          "description": "+2 racial bonus on all saving throws against fear."
+        },
+        {
+          "id": "halfling-throwing",
+          "name": "Thrown Weapon Bonus",
+          "description": "+1 racial bonus on attack rolls with thrown weapons and slings."
+        },
+        {
+          "id": "surefooted",
+          "name": "Surefooted",
+          "description": "+2 racial bonus on Climb, Jump, and Move Silently checks."
+        }
+      ],
+      "skillBonuses": [
+        {
+          "skill": "climb",
+          "bonus": 2,
+          "type": "racial"
+        },
+        {
+          "skill": "jump",
+          "bonus": 2,
+          "type": "racial"
+        },
+        {
+          "skill": "listen",
+          "bonus": 2,
+          "type": "racial"
+        },
+        {
+          "skill": "move-silently",
+          "bonus": 2,
+          "type": "racial"
+        }
+      ],
+      "saveBonuses": [
+        {
+          "target": "fear",
+          "bonus": 2,
+          "type": "racial"
+        }
+      ],
+      "attackBonuses": [
+        {
+          "target": "thrown-weapons-and-slings",
+          "bonus": 1,
+          "type": "racial"
+        }
+      ]
+    },
+    "summary": "Halfling (race) option.",
+    "description": "Detailed reference entry for Halfling in the races dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
   }
 ]
