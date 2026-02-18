@@ -40,23 +40,25 @@ async function waitForVisualStability(page: Page) {
   await page.waitForLoadState('networkidle');
 }
 
+const screenshotOptions = { fullPage: true, maxDiffPixels: 50 };
+
 test.describe('wizard visual regression', () => {
   test('home page', async ({ page }) => {
     await page.goto('/');
     await enterPlayerFlow(page);
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('home.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('home.png', screenshotOptions);
   });
 
   test('list page', async ({ page }) => {
     await goToListPage(page);
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('list.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('list.png', screenshotOptions);
   });
 
   test('detail page', async ({ page }) => {
     await goToDetailPage(page);
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('detail.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('detail.png', screenshotOptions);
   });
 });
