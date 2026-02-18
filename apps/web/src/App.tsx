@@ -269,23 +269,26 @@ export function App() {
 
       const selected = selectedStepValues(currentStep.id);
       return (
-        <fieldset>
-          <legend>{currentStep.label}</legend>
-          {options.map((o) => (
-            <label key={o.id}>
-              <input
-                type="checkbox"
-                checked={selected.includes(o.id)}
-                disabled={!selected.includes(o.id) && selected.length >= limit}
-                onChange={(e) => {
-                  const next = e.target.checked ? [...selected, o.id] : selected.filter((item) => item !== o.id);
-                  setState((s) => applyChoice(s, currentStep.id, next));
-                }}
-              />
-              {o.label}
-            </label>
-          ))}
-        </fieldset>
+        <section>
+          <h2>{currentStep.label}</h2>
+          <fieldset>
+            <legend>{currentStep.label}</legend>
+            {options.map((o) => (
+              <label key={o.id}>
+                <input
+                  type="checkbox"
+                  checked={selected.includes(o.id)}
+                  disabled={!selected.includes(o.id) && selected.length >= limit}
+                  onChange={(e) => {
+                    const next = e.target.checked ? [...selected, o.id] : selected.filter((item) => item !== o.id);
+                    setState((s) => applyChoice(s, currentStep.id, next));
+                  }}
+                />
+                {o.label}
+              </label>
+            ))}
+          </fieldset>
+        </section>
       );
     }
 
