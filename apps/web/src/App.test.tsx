@@ -4,19 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { App } from './App';
 import uiTextJson from './uiText.json';
 
-type TestUIText = {
-  playerTitle: string;
-  dmTitle: string;
-  next: string;
-  nameLabel: string;
-  review: string;
-  dmUnsupported: string;
-  roleQuestion: string;
-  languageLabel: string;
-  english: string;
-};
-
-const uiText = uiTextJson as Record<'en' | 'zh', TestUIText>;
+const uiText = uiTextJson;
 const en = uiText.en;
 const zh = uiText.zh;
 
@@ -94,7 +82,7 @@ describe('role and language behavior', () => {
       const languageRadioGroup = screen.getByRole('radiogroup', { name: new RegExp(`${en.languageLabel}|${zh.languageLabel}`, 'i') });
       const englishRadio = within(languageRadioGroup).getByRole('radio', { name: en.english });
       englishRadio.focus();
-      await user.keyboard('{Enter}');
+      await user.keyboard(' ');
 
       expect(screen.getByText(en.roleQuestion)).toBeTruthy();
     });

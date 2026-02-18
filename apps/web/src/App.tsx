@@ -11,7 +11,7 @@ const context = { enabledPackIds: ['srd-35e-minimal'], resolvedData };
 type Language = 'en' | 'zh';
 type Role = 'dm' | 'player' | null;
 
-type UIText = {
+export type UIText = {
   appTitle: string;
   appSubtitle: string;
   stepCounter: string;
@@ -309,24 +309,28 @@ function LanguageSwitch({
 }) {
   return (
     <div className="language-switch" role="radiogroup" aria-label={text.languageLabel}>
-      <button
-        type="button"
-        role="radio"
-        className={`lang-btn ${language === 'en' ? 'active' : ''}`}
-        aria-checked={language === 'en'}
-        onClick={() => onLanguageChange('en')}
-      >
-        {text.english}
-      </button>
-      <button
-        type="button"
-        role="radio"
-        className={`lang-btn ${language === 'zh' ? 'active' : ''}`}
-        aria-checked={language === 'zh'}
-        onClick={() => onLanguageChange('zh')}
-      >
-        {text.chinese}
-      </button>
+      <label className={`lang-btn ${language === 'en' ? 'active' : ''}`}>
+        <input
+          className="lang-radio"
+          type="radio"
+          name="language-switch"
+          value="en"
+          checked={language === 'en'}
+          onChange={() => onLanguageChange('en')}
+        />
+        <span>{text.english}</span>
+      </label>
+      <label className={`lang-btn ${language === 'zh' ? 'active' : ''}`}>
+        <input
+          className="lang-radio"
+          type="radio"
+          name="language-switch"
+          value="zh"
+          checked={language === 'zh'}
+          onChange={() => onLanguageChange('zh')}
+        />
+        <span>{text.chinese}</span>
+      </label>
     </div>
   );
 }
