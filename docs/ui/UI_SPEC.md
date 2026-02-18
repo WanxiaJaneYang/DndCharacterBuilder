@@ -19,14 +19,14 @@ On large screens the sidebar appears on the left with the main content on the ri
 The following pages correspond to flow steps defined in the pack.  Each page is described in detail in the relevant `ux/steps/*` file.
 
 1. **Role Selection** – choose DM or Player; DM shows unsupported message, Player enters wizard (`ux/steps/00_role_selection.md`).
-2. **Rules Setup** – choose version and rule sources (see `ux/steps/00_rules_setup.md`).
-3. **Race Selection** – pick one race from cards with image and summary (`ux/steps/01_race_selection.md`).
-4. **Class Selection** – pick one class from cards (`ux/steps/02_class_selection.md`).
-5. **Ability Scores** – assign ability scores using point‑buy or manual entry (`ux/steps/03_ability_scores.md`).
-6. **Feats** – choose feats with prerequisite filtering (`ux/steps/04_feats.md`).
-7. **Skills** – allocate skill points (`ux/steps/05_skills.md`).
-8. **Equipment** – select starting kit or items (`ux/steps/06_equipment.md`).
-9. **Review & Export** – show final character summary and export options (`ux/steps/07_review_export.md`).
+2. **Rules Setup** – choose version and rule sources (see `ux/steps/01_rules_setup.md`).
+3. **Race Selection** – pick one race from cards with image and summary (`ux/steps/02_race_selection.md`).
+4. **Class Selection** – pick one class from cards (`ux/steps/03_class_selection.md`).
+5. **Ability Scores** – assign ability scores using point‑buy or manual entry (`ux/steps/04_ability_scores.md`).
+6. **Feats** – choose feats with prerequisite filtering (`ux/steps/05_feats.md`).
+7. **Skills** – allocate skill points (`ux/steps/06_skills.md`).
+8. **Equipment** – select starting kit or items (`ux/steps/07_equipment.md`).
+9. **Review & Export** – show final character summary and export options (`ux/steps/08_review_export.md`).
 
 ## Component Requirements
 

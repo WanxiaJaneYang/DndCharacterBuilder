@@ -1,6 +1,6 @@
-# UX Step 07 – Review & Export
+﻿# UX Step 08 - Review & Export
 
-This document specifies the **Review & Export** step, where the user examines their completed character, checks all selections and derived stats, and downloads the final output.  This is the last step in the level‑1 character creation flow.
+This document specifies the **Review聽&聽Export** step, where the user examines their completed character, checks all selections and derived stats, and downloads the final output.  This is the last step in the level鈥? character creation flow.
 
 ## Goal
 
@@ -8,8 +8,8 @@ Present a comprehensive summary of the character, including selected race, class
 
 ## User Intent
 
-- **New Player:** Needs reassurance that their character is valid.  Wants to see where each number comes from and may need guidance on what everything means.
-- **Returning Player:** Wants to quickly scan the final sheet, adjust any mistakes and download the file.
+- **New聽Player:** Needs reassurance that their character is valid.  Wants to see where each number comes from and may need guidance on what everything means.
+- **Returning聽Player:** Wants to quickly scan the final sheet, adjust any mistakes and download the file.
 
 ## Layout & Interaction
 
@@ -18,12 +18,12 @@ The review page should display sections summarising each aspect of the character
 - **Identity:** Character name, level, race, class, alignment (if chosen), background (if applicable).
 - **Abilities:** A table showing each ability score and its modifier.  Hovering or tapping on a modifier reveals the calculation and racial/class bonuses (provenance).
 - **Feats:** List of selected feats with brief reminders of their effects; clicking a feat reveals full text.
-- **Skills:** List of skills with ranks, modifiers, class/cross‑class indicators and ability dependencies.
+- **Skills:** List of skills with ranks, modifiers, class/cross鈥慶lass indicators and ability dependencies.
 - **Equipment:** Items selected, starting equipment mode (kit vs gold), total weight and cost (if applicable).
 - **Derived Stats:** HP, AC (with breakdown by armor, shield, Dex, size, etc.), initiative, BAB, saves (Fort/Ref/Will), speed, etc.  Each stat should have a provenance breakdown when hovered.
-- **Pack Info:** Display the selected edition/version and the list of enabled rule packs with versions.  Show the pack fingerprint hash for reproducibility.
+- **Pack聽Info:** Display the selected edition/version and the list of enabled rule packs with versions.  Show the pack fingerprint hash for reproducibility.
 - **Actions:**
-  - **Edit** buttons for each section allow the user to go back and modify previous steps.  The wizard should support non‑linear edits (e.g. go back from review to feats step, adjust selection and return to review).
+  - **Edit** buttons for each section allow the user to go back and modify previous steps.  The wizard should support non鈥憀inear edits (e.g. go back from review to feats step, adjust selection and return to review).
   - **Export JSON:** Download the character sheet as a JSON file including selections, derived stats, enabled packs, fingerprint and starting equipment mode.
   - **Export HTML:** (optional) Download or print a formatted character sheet in HTML or PDF.  This is not required in MVP but may be included as a future enhancement.
 
@@ -54,7 +54,7 @@ The UI must be able to render these structures and provide interactive provenanc
 ## TODO
 
 - Design the review layout for clarity and readability.
-- Implement provenance tooltips or panels that reference the engine’s provenance data.
+- Implement provenance tooltips or panels that reference the engine鈥檚 provenance data.
 - Ensure that editing previous steps correctly updates the review content.
 - Define the JSON export format in the data schema and implement the export logic.
 - Consider implementing a basic HTML export template.
