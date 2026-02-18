@@ -113,5 +113,4 @@ The initial entry component before the wizard proper. Requirements:
 - Use a fantasy-themed presentation (parchment/gold/serif accents) while maintaining readability and contrast.
 - All user-facing copy should come from JSON-backed UI text resources so language switching can be supported without code rewrites.
 - Provide a language switcher (MVP supports English and Chinese) on the entry screen and keep labels consistent across wizard pages.
-- Add an intro animation: a scroll appears/unfurls (with mist ambience) showing the prompt; after click, it transitions to the DM/Player split tabs.
-- Respect reduced-motion preferences by disabling non-essential animation when users request it.
+- Default language should auto-detect from browser locale (zh -> Chinese, otherwise English), with manual toggle override.

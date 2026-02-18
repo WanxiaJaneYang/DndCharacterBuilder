@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
 import { applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
@@ -7,7 +7,6 @@ import uiTextJson from './uiText.json';
 const minimalPack = loadMinimalPack();
 const resolvedData = resolveLoadedPacks([minimalPack], ['srd-35e-minimal']);
 const context = { enabledPackIds: ['srd-35e-minimal'], resolvedData };
-const EXIT_MS = 950;
 
 type Language = 'en' | 'zh';
 type Role = 'dm' | 'player' | null;
@@ -30,7 +29,6 @@ type UIText = {
   roleAria: string;
   roleQuestion: string;
   roleIntro: string;
-  roleEnterCta: string;
   dmTitle: string;
   dmSubtitle: string;
   playerTitle: string;
@@ -43,12 +41,19 @@ type UIText = {
 
 const uiText = uiTextJson as Record<Language, UIText>;
 
+function detectDefaultLanguage(): Language {
+  if (typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('zh')) {
+    return 'zh';
+  }
+  return 'en';
+}
+
 export function App() {
   const [state, setState] = useState<CharacterState>(initialState);
   const [stepIndex, setStepIndex] = useState(0);
   const [showProv, setShowProv] = useState(false);
   const [role, setRole] = useState<Role>(null);
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>(detectDefaultLanguage);
 
   const wizardSteps = context.resolvedData.flow.steps;
   const currentStep = wizardSteps[stepIndex];
@@ -214,111 +219,37 @@ function RoleSelectionGate({
   onLanguageChange: (language: Language) => void;
   text: UIText;
 }) {
-  const [phase, setPhase] = useState<'scroll' | 'exiting' | 'tabs'>('scroll');
-  const exitTimerRef = useRef<number | null>(null);
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    if (typeof window.matchMedia !== 'function') {
-      setReduceMotion(false);
-      return;
-    }
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const sync = () => setReduceMotion(media.matches);
-    sync();
-    media.addEventListener('change', sync);
-    return () => media.removeEventListener('change', sync);
-  }, []);
-
-  useEffect(() => () => {
-    if (exitTimerRef.current != null) {
-      window.clearTimeout(exitTimerRef.current);
-    }
-  }, []);
-
-  const startExit = () => {
-    if (phase !== 'scroll') return;
-    setPhase('exiting');
-    const isTest = typeof import.meta !== 'undefined' && import.meta.env.MODE === 'test';
-    const timeoutMs = isTest ? 0 : (reduceMotion ? 260 : EXIT_MS);
-    exitTimerRef.current = window.setTimeout(() => setPhase('tabs'), timeoutMs);
-  };
-
   return (
     <main className={`role-gate ${language === 'zh' ? 'lang-zh' : ''}`}>
       <section className="role-tabs-root">
         <LanguageSwitch language={language} onLanguageChange={onLanguageChange} text={text} />
-
-        {(phase === 'scroll' || phase === 'exiting') && (
-          <section className={`scroll-stage ${phase === 'exiting' ? 'exiting' : ''}`} aria-label={text.roleAria}>
-            <FogOverlay phase={phase} reducedMotion={reduceMotion} />
-            <button className="scroll-card" type="button" aria-label={`${text.roleEnterCta}. ${text.roleAria}`} onClick={startExit}>
-              <h1 className="role-question">{text.roleQuestion}</h1>
-              <p className="role-intro">{text.roleIntro}</p>
-              <span className="scroll-cta">{text.roleEnterCta}</span>
-            </button>
-          </section>
-        )}
-
-        {phase === 'tabs' && (
-          <>
-            <div className="role-tabs-grid" role="tablist" aria-label={text.roleAria}>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={role === 'dm'}
-                className={`role-tab role-tab-left ${role === 'dm' ? 'active' : ''}`}
-                onClick={() => onChange('dm')}
-              >
-                <span className="role-tab-title">{text.dmTitle}</span>
-                <span className="role-tab-subtitle">{text.dmSubtitle}</span>
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={role === 'player'}
-                className={`role-tab role-tab-right ${role === 'player' ? 'active' : ''}`}
-                onClick={() => onChange('player')}
-              >
-                <span className="role-tab-title">{text.playerTitle}</span>
-                <span className="role-tab-subtitle">{text.playerSubtitle}</span>
-              </button>
-            </div>
-            <h1 className="role-question tabs-overlay">{text.roleQuestion}</h1>
-            {role === 'dm' && <p className="role-message" aria-live="polite">{text.dmUnsupported}</p>}
-          </>
-        )}
+        <div className="role-tabs-grid" role="tablist" aria-label={text.roleAria}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={role === 'dm'}
+            className={`role-tab role-tab-left ${role === 'dm' ? 'active' : ''}`}
+            onClick={() => onChange('dm')}
+          >
+            <span className="role-tab-title">{text.dmTitle}</span>
+            <span className="role-tab-subtitle">{text.dmSubtitle}</span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={role === 'player'}
+            className={`role-tab role-tab-right ${role === 'player' ? 'active' : ''}`}
+            onClick={() => onChange('player')}
+          >
+            <span className="role-tab-title">{text.playerTitle}</span>
+            <span className="role-tab-subtitle">{text.playerSubtitle}</span>
+          </button>
+        </div>
+        <h1 className="role-question tabs-overlay">{text.roleQuestion}</h1>
+        <p className="role-intro tabs-intro">{text.roleIntro}</p>
+        {role === 'dm' && <p className="role-message" aria-live="polite">{text.dmUnsupported}</p>}
       </section>
     </main>
-  );
-}
-
-function FogOverlay({ phase, reducedMotion }: { phase: 'scroll' | 'exiting'; reducedMotion: boolean }) {
-  return (
-    <div className={`fog-overlay ${phase === 'exiting' ? 'exiting' : ''} ${reducedMotion ? 'reduced' : ''}`} aria-hidden="true">
-      <svg className="fog-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <defs>
-          <filter id="fogFilter1" x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.012 0.04" numOctaves="3" seed="7" result="noise1">
-              {!reducedMotion && (
-                <animate attributeName="baseFrequency" dur="18s" values="0.011 0.038;0.016 0.042;0.011 0.038" repeatCount="indefinite" />
-              )}
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" in2="noise1" scale="28" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-          <filter id="fogFilter2" x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.018 0.055" numOctaves="2" seed="11" result="noise2">
-              {!reducedMotion && (
-                <animate attributeName="baseFrequency" dur="13s" values="0.02 0.05;0.014 0.06;0.02 0.05" repeatCount="indefinite" />
-              )}
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" in2="noise2" scale="18" xChannelSelector="B" yChannelSelector="R" />
-          </filter>
-        </defs>
-        <rect className="fog-layer-1" x="0" y="0" width="100" height="100" filter="url(#fogFilter1)" />
-        <rect className="fog-layer-2" x="0" y="0" width="100" height="100" filter="url(#fogFilter2)" />
-      </svg>
-    </div>
   );
 }
 

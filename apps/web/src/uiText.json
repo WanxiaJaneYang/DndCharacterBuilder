@@ -24,8 +24,7 @@
     "dmUnsupported": "DM flow is not supported in this version yet. Please choose Player to start building a character.",
     "languageLabel": "Language",
     "english": "EN",
-    "chinese": "中文",
-    "roleEnterCta": "Open the scroll"
+    "chinese": "中文"
   },
   "zh": {
     "appTitle": "D&D 3.5 新手角色创建器（MVP）",
@@ -52,7 +51,6 @@
     "dmUnsupported": "当前版本暂不支持地下城主流程。请选择“玩家”进入角色创建。",
     "languageLabel": "语言",
     "english": "EN",
-    "chinese": "中文",
-    "roleEnterCta": "展开卷轴"
+    "chinese": "中文"
   }
 }
