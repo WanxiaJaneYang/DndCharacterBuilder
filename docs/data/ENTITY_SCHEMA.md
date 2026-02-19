@@ -43,17 +43,43 @@ For `entityType = "races"`, `data` is validated with a strict race schema:
 - Race entries can still express engine-ready mechanics in `effects`.
 - Rich metadata in `data` is intended for details modal + rules expansion.
 
+## Class `data` model
+
+For `entityType = "classes"`, `data` is validated with a strict class schema:
+
+- `skillPointsPerLevel`: integer >= 0
+- `classSkills`: string[]
+- `hitDie`: positive integer
+- `baseAttackProgression`: `full | threeQuarters | half`
+- `baseSaveProgression`:
+  - `fort`: `good | poor`
+  - `ref`: `good | poor`
+  - `will`: `good | poor`
+- `deferredMechanics` (optional): list of not-yet-implemented class-linked rules that should be revisited when dependencies land:
+  - `id`: stable identifier for the deferred rule/mechanic
+  - `category`: grouping tag (e.g. `alignment`, `proficiency`, `starter-pack`, `spellcasting`)
+  - `description`: clear rule statement and current limitation
+  - `dependsOn`: one or more dependency ids/names (subsystems or features that must be implemented first)
+  - `sourceRefs` (optional): source links/ids for authenticity traceability
+  - `impactPaths` (optional): expected model/engine areas impacted when implemented
+- `levelTable` (optional, descriptive metadata): list of
+  - `{ level, bab, fort, ref, will, features?, specialLabel? }`
+- `progression` (optional, engine-facing dynamic model):
+  - `levelGains`: ordered list of level entries (`level` unique/ascending, must include level 1)
+  - each level gain must include at least one of:
+    - `effects`: list of engine `Effect` records applied when that level is active
+    - `grants`: list of grant events (feature slots, unlocks, feature grants, etc.)
+
+At least one of `levelTable` or `progression.levelGains` must be present.
+
+Engine note:
+- `progression.levelGains[*].effects` is the adaptive source of truth for dynamic sheet changes by level.
+- `levelTable` remains useful as display/reference metadata.
+- `deferredMechanics` is the backlog bridge: use it to quickly identify and complete class updates when dependent systems are added.
+
 ## Planned Extensions For Sheet Parity
 
-To support a more complete SRD-style final character sheet, the following entity `data` fields should be added in future phases.
-
-### Class `data` (planned additions)
-
-- `hitDie`: number (example: `10` for Fighter d10)
-- `baseAttackProgression`: enum (`full`, `threeQuarters`, `half`) or explicit table
-- `baseSaveProgression`: object keyed by `fort`, `ref`, `will` with progression enum
-- `classFeaturesByLevel`: list of `{ level, featureId }`
-- `spellcasting` (optional): caster ability, spells-per-day table, known/prepared model
+To support a more complete SRD-style final character sheet, additional entity `data` fields should be added in future phases.
 
 ### Item `data` (planned additions)
 
