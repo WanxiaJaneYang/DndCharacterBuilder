@@ -1,6 +1,8 @@
 import uiTextJson from './uiText.json';
 
 export type Language = 'en' | 'zh';
+export type AbilityCode = 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha';
+export type AbilityLabels = Record<AbilityCode, string>;
 
 export type UIText = {
   appTitle: string;
@@ -85,7 +87,7 @@ export type UIText = {
   skillsMaxLabel: string;
   skillsRacialLabel: string;
   skillsPerRankUnit: string;
-  abilityLabels: Record<string, string>;
+  abilityLabels: AbilityLabels;
 };
 
 const uiTextKeys: Array<keyof UIText> = [
@@ -173,9 +175,12 @@ const uiTextKeys: Array<keyof UIText> = [
   'skillsPerRankUnit',
 ];
 
-function isAbilityLabels(value: unknown): value is Record<string, string> {
+const abilityLabelKeys: AbilityCode[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+
+function isAbilityLabels(value: unknown): value is AbilityLabels {
   if (!value || typeof value !== 'object') return false;
-  return Object.values(value as Record<string, unknown>).every((label) => typeof label === 'string');
+  const record = value as Record<string, unknown>;
+  return abilityLabelKeys.every((key) => typeof record[key] === 'string');
 }
 
 function isUIText(value: unknown): value is UIText {
