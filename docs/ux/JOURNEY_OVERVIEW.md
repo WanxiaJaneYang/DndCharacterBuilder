@@ -8,7 +8,7 @@ This document summarizes the experience of a user creating a character using the
 |--------:|------|-------------|
 | 0 | Role Selection | User chooses whether they are a DM or Player before entering character creation. |
 | 1 | Rules Setup | Player selects edition and rule sources (packs). This determines `enabledPackIds` and resolves the runtime wizard flow. |
-| 2+ | Runtime Flow Steps | Step order comes from the resolved flow JSON of the selected packs. For the current `srd-35e-minimal` pack, the flow is: Race -> Class -> Ability Scores -> Name -> Feat -> Skills -> Equipment -> Review. |
+| 2+ | Runtime Flow Steps | Step order comes from the resolved flow JSON of the selected packs. For the current `srd-35e-minimal` pack, the flow is: Race -> Class -> Ability Scores -> Feat -> Skills -> Equipment -> Name -> Review. |
 
 ## Edition Variability
 

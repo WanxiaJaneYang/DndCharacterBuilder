@@ -29,14 +29,6 @@
       }
     },
     {
-      "id": "name",
-      "kind": "metadata",
-      "label": "Name",
-      "source": {
-        "type": "manual"
-      }
-    },
-    {
       "id": "feat",
       "kind": "feat",
       "label": "Feat",
@@ -62,6 +54,14 @@
         "type": "entityType",
         "entityType": "items",
         "limit": 10
+      }
+    },
+    {
+      "id": "name",
+      "kind": "metadata",
+      "label": "Name",
+      "source": {
+        "type": "manual"
       }
     },
     {

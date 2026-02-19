@@ -46,13 +46,13 @@ describe('wizard e2e-ish happy path', () => {
     await user.clear(strInput);
     await user.type(strInput, '16');
     await user.click(screen.getByRole('button', { name: nextPattern }));
-    await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), 'Aric');
-    await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText('Power Attack'));
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText('Chainmail'));
     await user.click(screen.getByLabelText('Heavy Wooden Shield'));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), 'Aric');
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();

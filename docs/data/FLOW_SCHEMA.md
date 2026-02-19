@@ -30,7 +30,8 @@ For 3.5 core packs, the runtime flow should start from ancestry/class decisions:
 
 - `race` first
 - `class` second
-- then remaining core build steps (`abilities`, `name`, `feat`, `skills`, `equipment`, `review`)
+- then remaining core build steps with `name` as the final input step before review:
+  (`abilities`, `feat`, `skills`, `equipment`, `name`, `review`)
 
 For future 3.5 extension packs:
 
