@@ -1,4 +1,4 @@
-import type { Constraint, Effect, Entity, Expr } from "@dcb/schema";
+import { EffectSchema, type Constraint, type Effect, type Entity, type Expr } from "@dcb/schema";
 import type { ResolvedEntity, ResolvedPackSet } from "@dcb/datapack";
 
 type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
@@ -284,7 +284,13 @@ function getClassProgressionEffects(classEntity: ResolvedEntity | undefined, cla
 
   progression.levelGains
     .filter((gain): gain is Record<string, unknown> => Boolean(gain) && typeof gain === "object")
-    .map((gain) => ({ level: Number(gain.level), effects: Array.isArray(gain.effects) ? (gain.effects as Effect[]) : [] }))
+    .map((gain) => ({
+      level: Number(gain.level),
+      effects: (Array.isArray(gain.effects) ? gain.effects : [])
+        .map((effect) => EffectSchema.safeParse(effect))
+        .filter((result): result is { success: true; data: Effect } => result.success)
+        .map((result) => result.data)
+    }))
     .filter((gain) => Number.isFinite(gain.level) && gain.level >= 1 && gain.level <= selectedLevel)
     .sort((a, b) => a.level - b.level)
     .forEach((gain) => effects.push(...gain.effects));
