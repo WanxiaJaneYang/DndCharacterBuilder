@@ -9,52 +9,107 @@
         "climb",
         "jump",
         "ride"
-      ]
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 10
-            },
-            {
-              "abilityMod": "con"
-            }
+      ],
+      "hitDie": 10,
+      "baseAttackProgression": "full",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "poor",
+        "will": "poor"
+      },
+      "deferredMechanics": [
+        {
+          "id": "fighter-proficiency-modeling",
+          "category": "proficiency",
+          "description": "Fighter weapon and armor proficiency rules are not yet enforced mechanically in engine/equipment validation.",
+          "dependsOn": [
+            "equipment-proficiency-model",
+            "equipment-validation-engine"
+          ],
+          "impactPaths": [
+            "selections.equipment",
+            "validation.class.proficiency",
+            "stats.attackBonus"
           ]
         }
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 10
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 1
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 0
+                }
+              }
+            ],
+            "grants": [
+              {
+                "kind": "featureSlot",
+                "slotType": "feat",
+                "count": 1
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "bonus-fighter-feat",
+                "label": "Fighter bonus feat"
+              }
+            ]
+          }
+        ]
       },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 1
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 1,
+          "fort": 2,
+          "ref": 0,
+          "will": 0,
+          "features": [
+            "bonus-fighter-feat"
+          ],
+          "specialLabel": "Fighter bonus feat"
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 0
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Fighter (Level 1) (class) option.",
     "description": "Detailed reference entry for Fighter (Level 1) in the classes dataset.",
     "portraitUrl": null,

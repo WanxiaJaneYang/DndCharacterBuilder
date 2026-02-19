@@ -135,7 +135,23 @@ describe("resolvePackSet", () => {
     fs.cpSync(packsSrc, packDest, { recursive: true });
     fs.writeFileSync(
       path.join(packDest, "entities", "races.json"),
-      JSON.stringify([{ id: "oops", name: "Oops", entityType: "classes", summary: "s", description: "d", portraitUrl: "p", iconUrl: "i" }])
+      JSON.stringify([{
+        id: "oops",
+        name: "Oops",
+        entityType: "classes",
+        summary: "s",
+        description: "d",
+        portraitUrl: "p",
+        iconUrl: "i",
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: [],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          levelTable: [{ level: 1, bab: 1, fort: 2, ref: 0, will: 0 }]
+        }
+      }])
     );
 
     try {

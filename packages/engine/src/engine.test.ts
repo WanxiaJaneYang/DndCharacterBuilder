@@ -61,8 +61,12 @@ describe("engine determinism", () => {
     const dwarfState = applyChoice(initialState, "race", "dwarf");
     const dwarfFeatLimit = listChoices(dwarfState, context).find((c) => c.stepId === "feat")?.limit;
 
+    const dwarfFighterState = applyChoice(dwarfState, "class", "fighter-1");
+    const dwarfFighterFeatLimit = listChoices(dwarfFighterState, context).find((c) => c.stepId === "feat")?.limit;
+
     expect(humanFeatLimit).toBe(2);
     expect(dwarfFeatLimit).toBe(1);
+    expect(dwarfFighterFeatLimit).toBe(2);
   });
 
   it("computes skill budget and racial skill bonuses from race/class data", () => {
@@ -168,12 +172,12 @@ describe("engine determinism", () => {
     expect(errors.some((error) => error.code === "SKILL_POINTS_EXCEEDED")).toBe(true);
   });
 
-  it("returns STEP_LIMIT_EXCEEDED when selections exceed feat limit", () => {
+  it("returns STEP_LIMIT_EXCEEDED when selections exceed dynamic feat limit", () => {
     let state = applyChoice(initialState, "name", "FeatLimit");
     state = applyChoice(state, "abilities", { str: 16, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "dwarf");
     state = applyChoice(state, "class", "fighter-1");
-    state = applyChoice(state, "feat", ["power-attack", "weapon-focus-longsword"]);
+    state = applyChoice(state, "feat", ["power-attack", "weapon-focus-longsword", "unknown-feat"]);
 
     const errors = validateState(state, context);
     expect(errors.some((error) => error.code === "STEP_LIMIT_EXCEEDED")).toBe(true);

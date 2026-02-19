@@ -5,6 +5,7 @@ type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
 const ABILITY_KEYS: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 const FIRST_LEVEL_SKILL_MULTIPLIER = 4;
+const FEAT_SLOT_TYPE = "feat";
 
 function normalizeSkillId(id: string): string {
   return id.trim().toLowerCase();
@@ -204,7 +205,8 @@ function getStepSelectionLimit(step: EntityTypeFlowStep, state: CharacterState, 
   const baseLimit = step.source.limit;
   if (step.id === "feat") {
     const racialBonusFeats = getRaceTraitCount(state, context, "bonus-feat");
-    return (baseLimit ?? 0) + racialBonusFeats;
+    const classBonusFeats = getClassProgressionFeatSlotBonus(state, context);
+    return (baseLimit ?? 0) + racialBonusFeats + classBonusFeats;
   }
   return baseLimit;
 }
@@ -263,6 +265,65 @@ function getSelectionCountForStep(step: EntityTypeFlowStep, state: CharacterStat
 function classIdBase(classId: string | undefined): string | undefined {
   if (!classId) return undefined;
   return classId.replace(/-\d+$/, "");
+}
+
+function classIdLevel(classId: string | undefined): number {
+  if (!classId) return 0;
+  const match = classId.match(/-(\d+)$/);
+  if (!match?.[1]) return 1;
+  const parsed = Number(match[1]);
+  if (!Number.isFinite(parsed) || parsed < 1) return 1;
+  return Math.floor(parsed);
+}
+
+type ClassProgressionGrant = {
+  kind: string;
+  slotType?: string;
+  count?: number;
+};
+
+type ClassLevelGain = {
+  level: number;
+  effects: Effect[];
+  grants: ClassProgressionGrant[];
+};
+
+function parseClassProgressionGains(classEntity: ResolvedEntity | undefined): ClassLevelGain[] {
+  const progression = classEntity?.data?.progression as { levelGains?: unknown } | undefined;
+  if (!progression || !Array.isArray(progression.levelGains)) return [];
+
+  return progression.levelGains
+    .map((rawGain): ClassLevelGain | null => {
+      if (!rawGain || typeof rawGain !== "object") return null;
+      const record = rawGain as Record<string, unknown>;
+      const level = Number(record.level);
+      if (!Number.isFinite(level) || level < 1) return null;
+      const effects = Array.isArray(record.effects) ? (record.effects as Effect[]) : [];
+      const grants = Array.isArray(record.grants) ? (record.grants as ClassProgressionGrant[]) : [];
+      return { level: Math.floor(level), effects, grants };
+    })
+    .filter((gain): gain is ClassLevelGain => Boolean(gain))
+    .sort((a, b) => a.level - b.level);
+}
+
+function getApplicableClassGains(state: CharacterState, context: EngineContext): ClassLevelGain[] {
+  const selectedClass = getSelectedClass(state, context);
+  if (!selectedClass) return [];
+  const selectedLevel = classIdLevel(String(state.selections.class ?? ""));
+  return parseClassProgressionGains(selectedClass).filter((gain) => gain.level <= selectedLevel);
+}
+
+function getClassProgressionFeatSlotBonus(state: CharacterState, context: EngineContext): number {
+  return getApplicableClassGains(state, context).reduce((total, gain) => {
+    const gainBonus = gain.grants.reduce((count, grant) => {
+      if (grant.kind !== "featureSlot") return count;
+      if (String(grant.slotType ?? "").trim().toLowerCase() !== FEAT_SLOT_TYPE) return count;
+      const slotCount = Number(grant.count ?? 0);
+      if (!Number.isFinite(slotCount) || slotCount < 1) return count;
+      return count + Math.floor(slotCount);
+    }, 0);
+    return total + gainBonus;
+  }, 0);
 }
 
 function buildRacialSkillBonusMap(state: CharacterState, context: EngineContext): Record<string, number> {
@@ -536,6 +597,24 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     entity.effects.forEach((effect) => applyEffect(effect, sheet, provenance, source));
   }
 
+  function applyClassProgressionEffects(entity: ResolvedEntity | undefined): boolean {
+    if (!entity) return false;
+    const selectedLevel = classIdLevel(String(state.selections.class ?? ""));
+    const gains = parseClassProgressionGains(entity).filter((gain) => gain.level <= selectedLevel);
+    let appliedAny = false;
+    for (const gain of gains) {
+      if (gain.effects.length === 0) continue;
+      const source = {
+        packId: entity._source.packId,
+        entityId: entity._source.entityId,
+        choiceStepId: `class-level-${gain.level}`
+      };
+      gain.effects.forEach((effect) => applyEffect(effect, sheet, provenance, source));
+      appliedAny = true;
+    }
+    return appliedAny;
+  }
+
   const ruleEntities = Object.values(entityBuckets.rules ?? {}).sort((a, b) => a.id.localeCompare(b.id));
   for (const ruleEntity of ruleEntities) applyEntity(ruleEntity);
 
@@ -543,7 +622,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   applyEntity(raceId ? entityBuckets.races?.[raceId] : undefined);
 
   const classId = state.selections.class as string | undefined;
-  applyEntity(classId ? entityBuckets.classes?.[classId] : undefined);
+  const selectedClass = classId ? entityBuckets.classes?.[classId] : undefined;
+  const appliedClassProgression = applyClassProgressionEffects(selectedClass);
+  if (!appliedClassProgression) applyEntity(selectedClass);
 
   for (const featId of getSelectedFeatIds(state)) {
     applyEntity(entityBuckets.feats?.[featId]);
