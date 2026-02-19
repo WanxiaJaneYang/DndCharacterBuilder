@@ -20,7 +20,7 @@
       "halfling": "半身人"
     },
     "classes": {
-      "fighter-1": "战士（1级）"
+      "fighter-1": "战士"
     },
     "feats": {
       "power-attack": "强力攻击",
@@ -55,7 +55,7 @@
       "halfling": { "name": "半身人" }
     },
     "classes": {
-      "fighter-1": { "name": "战士（1级）" }
+      "fighter-1": { "name": "战士" }
     },
     "feats": {
       "power-attack": { "name": "强力攻击" },

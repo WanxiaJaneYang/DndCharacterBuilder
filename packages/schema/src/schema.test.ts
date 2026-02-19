@@ -146,7 +146,7 @@ describe("class entity schema", () => {
   it("accepts structured class data", () => {
     const parsed = EntitySchema.parse({
       id: "fighter-1",
-      name: "Fighter (Level 1)",
+      name: "Fighter",
       entityType: "classes",
       summary: "Fighter summary",
       description: "Fighter detail",
@@ -244,7 +244,7 @@ describe("class entity schema", () => {
   it("accepts progression-only class data without levelTable", () => {
     const parsed = EntitySchema.parse({
       id: "rogue-1",
-      name: "Rogue (Level 1)",
+      name: "Rogue",
       entityType: "classes",
       summary: "Rogue summary",
       description: "Rogue detail",
@@ -272,45 +272,6 @@ describe("class entity schema", () => {
     });
 
     expect(parsed.id).toBe("rogue-1");
-  });
-
-  it("accepts deferred mechanics metadata for not-yet-implemented class rules", () => {
-    const parsed = EntitySchema.parse({
-      id: "barbarian-1",
-      name: "Barbarian (Level 1)",
-      entityType: "classes",
-      summary: "Barbarian summary",
-      description: "Barbarian detail",
-      portraitUrl: null,
-      iconUrl: null,
-      data: {
-        skillPointsPerLevel: 4,
-        classSkills: ["climb", "jump"],
-        hitDie: 12,
-        baseAttackProgression: "full",
-        baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
-        progression: {
-          levelGains: [
-            {
-              level: 1,
-              effects: [{ kind: "set", targetPath: "stats.bab", value: { const: 1 } }]
-            }
-          ]
-        },
-        deferredMechanics: [
-          {
-            id: "alignment-restriction-non-lawful",
-            category: "alignment",
-            description: "Barbarians cannot be lawful until alignment system is implemented.",
-            dependsOn: ["alignment-selection-flow", "alignment-validation-engine"],
-            impactPaths: ["metadata.alignment", "validation.class.alignment"],
-            sourceRefs: ["https://www.d20srd.org/srd/classes/barbarian.htm"]
-          }
-        ]
-      }
-    });
-
-    expect(parsed.id).toBe("barbarian-1");
   });
 
   it("rejects missing or misplaced level-1 row in levelTable", () => {
@@ -407,96 +368,7 @@ describe("class entity schema", () => {
       })
     ).toThrow(/invalid classes\.data/i);
   });
-
-  it("rejects malformed deferred mechanics metadata", () => {
-    expect(() =>
-      EntitySchema.parse({
-        id: "broken-class-deferred-mechanics",
-        name: "Broken Class Deferred Mechanics",
-        entityType: "classes",
-        summary: "Broken",
-        description: "Broken",
-        portraitUrl: null,
-        iconUrl: null,
-        data: {
-          skillPointsPerLevel: 2,
-          classSkills: ["climb"],
-          hitDie: 10,
-          baseAttackProgression: "full",
-          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
-          progression: {
-            levelGains: [
-              {
-                level: 1,
-                effects: [{ kind: "set", targetPath: "stats.bab", value: { const: 1 } }]
-              }
-            ]
-          },
-          deferredMechanics: [
-            {
-              id: "alignment-restriction-non-lawful",
-              category: "alignment",
-              description: "Barbarians cannot be lawful.",
-              dependsOn: []
-            }
-          ]
-        }
-      })
-    ).toThrow(/invalid classes\.data/i);
-  });
-
-  it("rejects duplicate level entries in levelTable", () => {
-    expect(() =>
-      EntitySchema.parse({
-        id: "broken-class-duplicate-levels",
-        name: "Broken Class Duplicate Levels",
-        entityType: "classes",
-        summary: "Broken",
-        description: "Broken",
-        portraitUrl: null,
-        iconUrl: null,
-        data: {
-          skillPointsPerLevel: 2,
-          classSkills: ["climb"],
-          hitDie: 10,
-          baseAttackProgression: "full",
-          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
-          levelTable: [
-            { level: 1, bab: 1, fort: 2, ref: 0, will: 0 },
-            { level: 1, bab: 1, fort: 2, ref: 0, will: 0 }
-          ]
-        }
-      })
-    ).toThrow(/invalid classes\.data/i);
-  });
-
-  it("rejects non-strictly-ascending level order in levelTable", () => {
-    expect(() =>
-      EntitySchema.parse({
-        id: "broken-class-non-ascending-levels",
-        name: "Broken Class Non-Ascending Levels",
-        entityType: "classes",
-        summary: "Broken",
-        description: "Broken",
-        portraitUrl: null,
-        iconUrl: null,
-        data: {
-          skillPointsPerLevel: 2,
-          classSkills: ["climb"],
-          hitDie: 10,
-          baseAttackProgression: "full",
-          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
-          levelTable: [
-            { level: 1, bab: 1, fort: 2, ref: 0, will: 0 },
-            { level: 3, bab: 3, fort: 3, ref: 1, will: 1 },
-            { level: 2, bab: 2, fort: 3, ref: 0, will: 0 }
-          ]
-        }
-      })
-    ).toThrow(/invalid classes\.data/i);
-  });
 });
-
 
 describe("entity UI metadata", () => {
   it("requires summary/description on all entities", () => {

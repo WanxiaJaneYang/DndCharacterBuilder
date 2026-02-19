@@ -14,6 +14,7 @@ const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
 const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
 const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
 const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
+const fighterClassPattern = /Fighter(?: \(Level 1\))?|战士(?:（1级）)?/i;
 
 afterEach(() => {
   cleanup();
@@ -39,7 +40,7 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByRole('button', { name: startWizardPattern }));
     await user.click(screen.getByLabelText('Human'));
     await user.click(screen.getByRole('button', { name: nextPattern }));
-    await user.click(screen.getByLabelText('Fighter (Level 1)'));
+    await user.click(screen.getByLabelText(fighterClassPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     const strInput = screen.getByLabelText('STR');
@@ -57,7 +58,7 @@ describe('wizard e2e-ish happy path', () => {
 
     expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'AC' })).toBeTruthy();
-    expect(screen.getByText('Fighter (Level 1)', { selector: 'strong' })).toBeTruthy();
+    expect(screen.getByText(fighterClassPattern, { selector: 'strong' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.reviewAbilityBreakdown })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.reviewCombatBreakdown })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.reviewPackInfo })).toBeTruthy();
@@ -114,7 +115,7 @@ describe('role and language behavior', () => {
       await user.click(screen.getByLabelText('人类'));
       await user.click(screen.getByRole('button', { name: zh.next }));
       expect(screen.getByRole('heading', { name: '职业' })).toBeTruthy();
-      expect(screen.getByLabelText('战士（1级）')).toBeTruthy();
+      expect(screen.getByLabelText(fighterClassPattern)).toBeTruthy();
     });
   });
 
@@ -129,7 +130,7 @@ describe('role and language behavior', () => {
       await user.click(screen.getByLabelText('人类'));
       await user.click(screen.getByRole('button', { name: zh.next }));
 
-      await user.click(screen.getByLabelText('战士（1级）'));
+      await user.click(screen.getByLabelText(fighterClassPattern));
       await user.click(screen.getByRole('button', { name: zh.next }));
 
       expect(screen.getByLabelText('力量')).toBeTruthy();
@@ -150,7 +151,7 @@ describe('role and language behavior', () => {
     expect(screen.getByLabelText(/Human|人类/)).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: nextPattern }));
-    expect(screen.getByLabelText(/Fighter \(Level 1\)|战士（1级）/)).toBeTruthy();
+    expect(screen.getByLabelText(fighterClassPattern)).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
     expect(screen.getByLabelText(/Human|人类/)).toBeTruthy();
@@ -171,7 +172,7 @@ describe('role and language behavior', () => {
       await user.click(screen.getByRole('button', { name: startWizardPattern }));
       await user.click(screen.getByLabelText(/Human|人类/));
       await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.click(screen.getByLabelText(/Fighter \(Level 1\)|战士（1级）/));
+      await user.click(screen.getByLabelText(fighterClassPattern));
       await user.click(screen.getByRole('button', { name: nextPattern }));
       await user.click(screen.getByRole('button', { name: nextPattern }));
       const featFieldset = screen.getByRole('group', { name: /Feat|专长/i });
