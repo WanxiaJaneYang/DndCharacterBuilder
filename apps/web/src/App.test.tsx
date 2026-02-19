@@ -91,4 +91,23 @@ describe('role and language behavior', () => {
       expect(screen.getByText(en.roleQuestion)).toBeTruthy();
     });
   });
+
+  it('supports back navigation from rules setup and from first wizard step', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    expect(screen.getByLabelText('STR')).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
+    expect(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i'))).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
+    expect(screen.getByText(rulesSetupTitlePattern)).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
+    expect(screen.getByRole('button', { name: playerNamePattern })).toBeTruthy();
+  });
 });

@@ -369,6 +369,10 @@ export function App() {
         onOptionalPackToggle={(packId) => {
           setSelectedOptionalPackIds((current) => (current.includes(packId) ? current.filter((id) => id !== packId) : [...current, packId]));
         }}
+        onBack={() => {
+          setRulesReady(false);
+          setRole(null);
+        }}
         onStart={() => {
           setState(initialState);
           setStepIndex(0);
@@ -387,7 +391,17 @@ export function App() {
       <p>{t.stepCounter} {stepIndex + 1} / {wizardSteps.length}</p>
       {renderCurrentStep()}
       <footer className="actions">
-        <button disabled={stepIndex === 0} onClick={() => setStepIndex((s) => s - 1)}>{t.back}</button>
+        <button
+          onClick={() => {
+            if (stepIndex === 0) {
+              setRulesReady(false);
+              return;
+            }
+            setStepIndex((s) => s - 1);
+          }}
+        >
+          {t.back}
+        </button>
         <button disabled={stepIndex === wizardSteps.length - 1} onClick={() => setStepIndex((s) => s + 1)}>{t.next}</button>
       </footer>
     </main>
@@ -403,6 +417,7 @@ function RulesSetupGate({
   onEditionChange,
   selectedOptionalPackIds,
   onOptionalPackToggle,
+  onBack,
   onStart,
 }: {
   language: Language;
@@ -413,6 +428,7 @@ function RulesSetupGate({
   onEditionChange: (editionId: string) => void;
   selectedOptionalPackIds: string[];
   onOptionalPackToggle: (packId: string) => void;
+  onBack: () => void;
   onStart: () => void;
 }) {
   const selectedEdition = editions.find((edition) => edition.id === selectedEditionId) ?? editions[0] ?? fallbackEdition;
@@ -455,6 +471,7 @@ function RulesSetupGate({
         ))}
       </section>
       <footer className="actions">
+        <button onClick={onBack}>{text.back}</button>
         <button onClick={onStart}>{text.startWizard}</button>
       </footer>
     </main>
