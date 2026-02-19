@@ -102,15 +102,15 @@ export function App() {
       const statOrder = ['hp', 'ac', 'initiative', 'speed', 'bab', 'fort', 'ref', 'will', 'attackBonus', 'damageBonus'] as const;
       const statLabels: Record<(typeof statOrder)[number], string> = {
         hp: 'HP',
-        ac: 'Armor Class',
-        initiative: 'Initiative',
-        speed: 'Speed',
-        bab: 'Base Attack Bonus',
-        fort: 'Fort Save',
-        ref: 'Ref Save',
-        will: 'Will Save',
-        attackBonus: 'Melee Attack Bonus',
-        damageBonus: 'Melee Damage Bonus',
+        ac: 'AC',
+        initiative: t.reviewInitiativeLabel,
+        speed: 'SPD',
+        bab: 'BAB',
+        fort: 'FORT',
+        ref: 'REF',
+        will: 'WILL',
+        attackBonus: 'ATK',
+        damageBonus: 'DMG',
       };
       const statBaseDefaults: Record<(typeof statOrder)[number], number> = {
         hp: 0,
@@ -128,6 +128,14 @@ export function App() {
       for (const bucket of Object.values(context.resolvedData.entities)) {
         for (const entity of Object.values(bucket)) {
           sourceNameByEntityId.set(entity.id, entity.name);
+        }
+      }
+      const packVersionById = new Map<string, string>();
+      for (const bucket of Object.values(context.resolvedData.entities)) {
+        for (const entity of Object.values(bucket)) {
+          if (!packVersionById.has(entity._source.packId)) {
+            packVersionById.set(entity._source.packId, entity._source.version ?? t.reviewUnknownVersion);
+          }
         }
       }
       const byTargetPath = new Map<string, typeof sheet.provenance>();
@@ -148,13 +156,17 @@ export function App() {
       const reviewSkills = Object.entries(sheet.skills)
         .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
         .sort((a, b) => b[1].total - a[1].total || a[1].name.localeCompare(b[1].name));
+      const enabledPackDetails = enabledPackIds.map((packId) => ({
+        packId,
+        version: packVersionById.get(packId) ?? t.reviewUnknownVersion,
+      }));
 
       return (
         <section className="review-page">
           <h2>{t.review}</h2>
           <header className="review-hero">
             <div>
-              <p className="review-character-name">{sheet.metadata.name || 'Unnamed Character'}</p>
+              <p className="review-character-name">{sheet.metadata.name || t.unnamedCharacter}</p>
               <p className="review-character-meta">
                 {t.raceLabel}: <strong>{selectedRaceName}</strong> | {t.classLabel}: <strong>{selectedClassName}</strong>
               </p>
@@ -179,21 +191,21 @@ export function App() {
               <p>{String(sheet.stats.bab)}</p>
             </article>
             <article className="review-card">
-              <h3>Initiative</h3>
+              <h3>{t.reviewInitiativeLabel}</h3>
               <p>{String(sheet.stats.initiative)}</p>
             </article>
           </div>
 
           <article className="sheet">
-            <h3>Ability Score Breakdown</h3>
+            <h3>{t.reviewAbilityBreakdown}</h3>
             <table className="review-table">
               <thead>
                 <tr>
-                  <th>Ability</th>
-                  <th>Base</th>
-                  <th>Adjustments</th>
-                  <th>Final</th>
-                  <th>Modifier</th>
+                  <th>{t.reviewAbilityColumn}</th>
+                  <th>{t.reviewBaseColumn}</th>
+                  <th>{t.reviewAdjustmentsColumn}</th>
+                  <th>{t.reviewFinalColumn}</th>
+                  <th>{t.reviewModifierColumn}</th>
                 </tr>
               </thead>
               <tbody>
@@ -233,14 +245,14 @@ export function App() {
           </article>
 
           <article className="sheet">
-            <h3>Combat and Defense Breakdown</h3>
+            <h3>{t.reviewCombatBreakdown}</h3>
             <table className="review-table">
               <thead>
                 <tr>
-                  <th>Stat</th>
-                  <th>Base</th>
-                  <th>Adjustments</th>
-                  <th>Final</th>
+                  <th>{t.reviewStatColumn}</th>
+                  <th>{t.reviewBaseColumn}</th>
+                  <th>{t.reviewAdjustmentsColumn}</th>
+                  <th>{t.reviewFinalColumn}</th>
                 </tr>
               </thead>
               <tbody>
@@ -249,14 +261,14 @@ export function App() {
                   const records = byTargetPath.get(targetPath) ?? [];
                   const derivedRows: Array<{ label: string; value: number }> = [];
                   if (statKey === 'initiative') {
-                    derivedRows.push({ label: 'DEX modifier', value: sheet.abilities.dex?.mod ?? 0 });
+                    derivedRows.push({ label: t.reviewDexModifierLabel, value: sheet.abilities.dex?.mod ?? 0 });
                   }
                   if (statKey === 'attackBonus') {
                     derivedRows.push({ label: 'BAB', value: Number(sheet.stats.bab ?? 0) });
-                    derivedRows.push({ label: 'STR modifier', value: sheet.abilities.str?.mod ?? 0 });
+                    derivedRows.push({ label: t.reviewStrModifierLabel, value: sheet.abilities.str?.mod ?? 0 });
                   }
                   if (statKey === 'damageBonus') {
-                    derivedRows.push({ label: 'STR modifier', value: sheet.abilities.str?.mod ?? 0 });
+                    derivedRows.push({ label: t.reviewStrModifierLabel, value: sheet.abilities.str?.mod ?? 0 });
                   }
 
                   return (
@@ -292,20 +304,20 @@ export function App() {
           </article>
 
           <article className="sheet">
-            <h3>Skills and Point Spending</h3>
+            <h3>{t.reviewSkillsBreakdown}</h3>
             <p>
-              Points spent {sheet.decisions.skillPoints.spent} / {sheet.decisions.skillPoints.total}
-              {' '}({sheet.decisions.skillPoints.remaining} remaining)
+              {t.reviewPointsSpentLabel} {sheet.decisions.skillPoints.spent} / {sheet.decisions.skillPoints.total}
+              {' '}({sheet.decisions.skillPoints.remaining} {t.reviewRemainingLabel})
             </p>
             <table className="review-table">
               <thead>
                 <tr>
-                  <th>Skill</th>
-                  <th>Ranks</th>
-                  <th>Ability</th>
-                  <th>Racial</th>
-                  <th>Total</th>
-                  <th>Point Cost</th>
+                  <th>{t.reviewSkillColumn}</th>
+                  <th>{t.reviewRanksColumn}</th>
+                  <th>{t.reviewAbilityColumn}</th>
+                  <th>{t.reviewRacialColumn}</th>
+                  <th>{t.reviewTotalColumn}</th>
+                  <th>{t.reviewPointCostColumn}</th>
                 </tr>
               </thead>
               <tbody>
@@ -324,15 +336,27 @@ export function App() {
           </article>
 
           <article className="sheet review-decisions">
-            <h3>Rules Decisions</h3>
-            <p>Favored class: {sheet.decisions.favoredClass ?? '-'}</p>
-            <p>Multiclass XP penalty ignored: {sheet.decisions.ignoresMulticlassXpPenalty ? 'yes' : 'no'}</p>
-            <p>Feat slots available: {sheet.decisions.featSelectionLimit}</p>
+            <h3>{t.reviewRulesDecisions}</h3>
+            <p>{t.reviewFavoredClassLabel}: {sheet.decisions.favoredClass ?? '-'}</p>
+            <p>{t.reviewMulticlassXpIgnoredLabel}: {sheet.decisions.ignoresMulticlassXpPenalty ? t.reviewYes : t.reviewNo}</p>
+            <p>{t.reviewFeatSlotsLabel}: {sheet.decisions.featSelectionLimit}</p>
+          </article>
+
+          <article className="sheet review-decisions">
+            <h3>{t.reviewPackInfo}</h3>
+            <p>{t.reviewSelectedEditionLabel}: {selectedEdition.label || selectedEdition.id || '-'}</p>
+            <p>{t.reviewEnabledPacksLabel}:</p>
+            <ul>
+              {enabledPackDetails.map((pack) => (
+                <li key={pack.packId}>{pack.packId} ({pack.version})</li>
+              ))}
+            </ul>
+            <p>{t.reviewFingerprintLabel}: <code>{context.resolvedData.fingerprint}</code></p>
           </article>
 
           {showProv && (
             <article className="sheet">
-              <h3>Raw Provenance</h3>
+              <h3>{t.reviewRawProvenance}</h3>
               <pre>{JSON.stringify(sheet.provenance, null, 2)}</pre>
             </article>
           )}

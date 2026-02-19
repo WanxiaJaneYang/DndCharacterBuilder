@@ -71,8 +71,8 @@ The UI must be able to render these structures and provide interactive provenanc
 
 ## Checklist
 
-- [ ] Review page implemented with sections for all character aspects.
-- [ ] Provenance display implemented (tooltips or panels).
-- [ ] Export JSON logic implemented and tested.
+- [x] Review page implemented with sections for identity, abilities, combat/defense, skills, rules decisions, and pack info.
+- [x] Provenance display implemented (calculation rows plus raw provenance panel toggle).
+- [x] Export JSON logic implemented and tested.
 - [ ] Navigation back to previous steps and forward again works without data loss.
-- [ ] Pack fingerprint displayed.
+- [x] Pack fingerprint displayed.

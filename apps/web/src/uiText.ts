@@ -33,6 +33,38 @@ export type UIText = {
   languageLabel: string;
   english: string;
   chinese: string;
+  unnamedCharacter: string;
+  reviewAbilityBreakdown: string;
+  reviewCombatBreakdown: string;
+  reviewSkillsBreakdown: string;
+  reviewRulesDecisions: string;
+  reviewRawProvenance: string;
+  reviewPackInfo: string;
+  reviewAbilityColumn: string;
+  reviewBaseColumn: string;
+  reviewAdjustmentsColumn: string;
+  reviewFinalColumn: string;
+  reviewModifierColumn: string;
+  reviewStatColumn: string;
+  reviewSkillColumn: string;
+  reviewRanksColumn: string;
+  reviewRacialColumn: string;
+  reviewTotalColumn: string;
+  reviewPointCostColumn: string;
+  reviewPointsSpentLabel: string;
+  reviewRemainingLabel: string;
+  reviewFavoredClassLabel: string;
+  reviewMulticlassXpIgnoredLabel: string;
+  reviewFeatSlotsLabel: string;
+  reviewYes: string;
+  reviewNo: string;
+  reviewInitiativeLabel: string;
+  reviewDexModifierLabel: string;
+  reviewStrModifierLabel: string;
+  reviewSelectedEditionLabel: string;
+  reviewEnabledPacksLabel: string;
+  reviewFingerprintLabel: string;
+  reviewUnknownVersion: string;
 };
 
 const uiTextKeys: Array<keyof UIText> = [
@@ -66,6 +98,38 @@ const uiTextKeys: Array<keyof UIText> = [
   'languageLabel',
   'english',
   'chinese',
+  'unnamedCharacter',
+  'reviewAbilityBreakdown',
+  'reviewCombatBreakdown',
+  'reviewSkillsBreakdown',
+  'reviewRulesDecisions',
+  'reviewRawProvenance',
+  'reviewPackInfo',
+  'reviewAbilityColumn',
+  'reviewBaseColumn',
+  'reviewAdjustmentsColumn',
+  'reviewFinalColumn',
+  'reviewModifierColumn',
+  'reviewStatColumn',
+  'reviewSkillColumn',
+  'reviewRanksColumn',
+  'reviewRacialColumn',
+  'reviewTotalColumn',
+  'reviewPointCostColumn',
+  'reviewPointsSpentLabel',
+  'reviewRemainingLabel',
+  'reviewFavoredClassLabel',
+  'reviewMulticlassXpIgnoredLabel',
+  'reviewFeatSlotsLabel',
+  'reviewYes',
+  'reviewNo',
+  'reviewInitiativeLabel',
+  'reviewDexModifierLabel',
+  'reviewStrModifierLabel',
+  'reviewSelectedEditionLabel',
+  'reviewEnabledPacksLabel',
+  'reviewFingerprintLabel',
+  'reviewUnknownVersion',
 ];
 
 function isUIText(value: unknown): value is UIText {
