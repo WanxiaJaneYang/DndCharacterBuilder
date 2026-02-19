@@ -6,6 +6,8 @@
 
 **Architecture:** Changes include pack data updates (`packs/srd-35e-minimal`), schema validation updates, and engine interpretation updates for class progression gains. UI flow remains unchanged. Class rules are expressed via class `data`, especially `data.progression.levelGains`, consumed through the existing flow and engine.
 
+**Scope clarification:** This plan includes engine updates in `packages/engine/src/index.ts` to interpret class progression gains and derive dynamic feature-slot limits from class grants. It is not data-only.
+
 **Tech Stack:** Node/TypeScript monorepo, JSON packs. Validation via `npm test`, `npm run contracts`, and relevant typechecks.
 
 ---
@@ -46,8 +48,10 @@
   - `features`: at least a minimal list (e.g. `"bonus-feat"`, `"bonus-fighter-feat"`) or an empty list if not yet modeled.
   - `specialLabel`: short summary string (e.g. `"Bonus feat"`).
 
-**Step 2: Ensure existing fighter effects stay aligned**
-- Confirm `effects` for `stats.hp`, `stats.bab`, and saves still match the level-1 row in `data.levelTable`.
+**Step 2: Define progression effects as the single source of truth**
+- Add `data.progression.levelGains` for level 1.
+- Put level-1 class stat mechanics (`hp`, `bab`, `fort`, `ref`, `will`) in `data.progression.levelGains[0].effects`.
+- Do not duplicate the same mechanics in both `data.progression.levelGains[*].effects` and top-level `effects` for the same class entity.
 
 **Step 3: Run tests**
 - Run: `npm test`.
@@ -79,7 +83,7 @@
     - `levelTable`: a single level-1 entry with correct BAB and saves:
       - `bab`: 1 for `baseAttackProgression: "full"`, 0 for `"threeQuarters"` and `"half"` at level 1.
       - `fort/ref/will`: +2 for good saves, +0 for poor saves at level 1.
-  - Add `effects`:
+  - Add `data.progression.levelGains[*].effects`:
     - `stats.hp`: set to `max(hitDie) + Con modifier`.
     - `stats.bab`: set to level-1 BAB.
     - `stats.fort`, `stats.ref`, `stats.will`: set to level-1 base saves.

@@ -107,9 +107,12 @@ Structural / future-proof fields (minimal but extensible):
 
 The `data` block is intentionally descriptive and forward-looking; the engine will not depend on `levelTable` yet, but its presence makes later leveling work purely data-focused.
 
-### 2.3 `effects` block (engine-facing mechanics)
+### 2.3 `data.progression.levelGains[*].effects` (engine-facing mechanics)
 
-For each class we define deterministic effects for the stats the engine and contracts currently assert:
+The primary engine-facing source for class stat mechanics is `data.progression.levelGains[*].effects`.
+When progression gains are present, the engine applies those effects and does not apply the top-level class `effects` array for that entity.
+
+For each class we define deterministic progression effects for the stats the engine and contracts currently assert:
 
 - HP at level 1:
   - `stats.hp` is set to `max(hitDie) + Con modifier` for that class.
@@ -127,7 +130,9 @@ For each class we define deterministic effects for the stats the engine and cont
   - `stats.fort`, `stats.ref`, `stats.will` set to the canonical level-1 base saves.
   - For `good` saves: +2; for `poor` saves: +0 at level 1.
 
-We continue to use the existing DSL (`kind: "set"`, `targetPath`, `value`) so that the engine remains unchanged and all behaviour is visible in pack data.
+We continue to use the existing DSL (`kind: "set"`, `targetPath`, `value`) so behaviour remains data-driven.
+
+Top-level `effects` on class entities are now considered fallback/backward-compatibility for legacy class data that does not yet define progression gains. New class entries should keep a single source of truth in `data.progression.levelGains[*].effects` to avoid duplication.
 
 We do not, in this phase, encode:
 
@@ -157,8 +162,9 @@ No changes are required to the flow:
 
 - Engine already:
   - Pulls `skillPointsPerLevel` and `classSkills` from the selected class entity to determine skill budgets/validation.
-  - Applies `effects` to derive final `stats.*` used in the review/export.
-- By standardizing the class `data` model, we avoid new engine code while making future engine changes (e.g. reading `levelTable` for leveling) straightforward and deterministic.
+  - Applies class progression gain effects first (up to selected class level) to derive final `stats.*` used in the review/export.
+  - Falls back to top-level class `effects` only when progression effects are not present.
+- By standardizing the class `data` model around progression gains, later leveling work remains straightforward and deterministic.
 
 ### 3.3 Contracts
 
