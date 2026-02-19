@@ -56,6 +56,8 @@ npm run lint
 npm run build
 ```
 
+`npm test` includes contract checks for packs, including authenticity lock verification for official SRD datasets.
+
 ### Visual regression tests (Playwright)
 Uses default Playwright browser install/cache path unless you explicitly set `PLAYWRIGHT_BROWSERS_PATH`.
 

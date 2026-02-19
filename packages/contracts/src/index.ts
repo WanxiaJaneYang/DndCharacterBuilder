@@ -3,6 +3,7 @@ import path from "node:path";
 import { ContractFixtureSchema } from "@dcb/schema";
 import { resolvePackSet } from "@dcb/datapack/node";
 import { applyChoice, finalizeCharacter, initialState, listChoices, validateState, type CharacterState } from "@dcb/engine";
+export { runAuthenticityChecks } from "./authenticity";
 
 function containsSubset(target: Record<string, unknown>, subset: Record<string, unknown>): boolean {
   return Object.entries(subset).every(([k, v]) => {

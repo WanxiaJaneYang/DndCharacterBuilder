@@ -1,0 +1,46 @@
+{
+  "packId": "srd-35e-minimal",
+  "officialRuleset": true,
+  "generatedAt": "2026-02-19T09:40:00.000Z",
+  "generatedBy": "research/srd-authenticity-auto-validation baseline",
+  "sourceAuthorities": [
+    {
+      "title": "D&D 3.5 System Reference Document",
+      "url": "https://www.d20srd.org/"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "manifest.json",
+      "sha256": "1faa8333e85b7f8fcd1ce7a3d8bf994ca457854594d4830038032539b610a2dc"
+    },
+    {
+      "path": "flows/character-creation.flow.json",
+      "sha256": "b85dcbaf69a6e3aadcf05d4418be1692c7b1ac3bf8dd57164c8850542fa67d23"
+    },
+    {
+      "path": "entities/races.json",
+      "sha256": "43ed458a946b666234d7b720a7c62750f4cbaa9e0e300afb32b8907b83b3cd6f"
+    },
+    {
+      "path": "entities/classes.json",
+      "sha256": "0e1aff1fc2215c23a8c68debb41e549d0095b4b350df3d4786c2a55bfd120fe4"
+    },
+    {
+      "path": "entities/feats.json",
+      "sha256": "ab2973c1e4c503c3468f4b4a8e67ed7c9b3af628d901f716873343a30e4f93c4"
+    },
+    {
+      "path": "entities/skills.json",
+      "sha256": "29cb0ac702f75d93addb1567f8a19d68932dada9598880570c03433328c74856"
+    },
+    {
+      "path": "entities/items.json",
+      "sha256": "9389e8e12ef4ec48601be87d5fc0a00e34326e0fe27d5eb00fed96b6f6e40eb2"
+    },
+    {
+      "path": "entities/rules.json",
+      "sha256": "e59a27a756e4fb39a15733791b699dc0d9da90620c086c2e2ce0900dccb5e4a4"
+    }
+  ]
+}

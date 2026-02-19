@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EntitySchema, FlowSchema, ManifestSchema } from "./index";
+import { AuthenticityLockSchema, EntitySchema, FlowSchema, ManifestSchema } from "./index";
 
 describe("manifest schema", () => {
   it("validates minimal manifest", () => {
@@ -177,5 +177,33 @@ describe("entity UI metadata", () => {
     });
 
     expect(parsedOmitted.id).toBe("shield");
+  });
+});
+
+describe("authenticity lock schema", () => {
+  it("accepts a valid lock file", () => {
+    const parsed = AuthenticityLockSchema.parse({
+      packId: "srd-35e-minimal",
+      officialRuleset: true,
+      generatedAt: "2026-02-19T09:40:00.000Z",
+      generatedBy: "unit-test",
+      sourceAuthorities: [{ title: "SRD", url: "https://www.d20srd.org/" }],
+      artifacts: [{ path: "entities/races.json", sha256: "d7070ecc0f6291cecfe3ef4c90d62801e7254b2d3ac6fe1e6bb652e99f26da64" }]
+    });
+
+    expect(parsed.packId).toBe("srd-35e-minimal");
+  });
+
+  it("rejects malformed hash values", () => {
+    expect(() =>
+      AuthenticityLockSchema.parse({
+        packId: "srd-35e-minimal",
+        officialRuleset: true,
+        generatedAt: "2026-02-19T09:40:00.000Z",
+        generatedBy: "unit-test",
+        sourceAuthorities: [{ title: "SRD", url: "https://www.d20srd.org/" }],
+        artifacts: [{ path: "entities/races.json", sha256: "not-a-real-hash" }]
+      })
+    ).toThrow();
   });
 });
