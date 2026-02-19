@@ -52,17 +52,24 @@ describe("pack contracts", () => {
       data?: {
         hitDie?: number;
         classSkills?: string[];
+        progression?: {
+          levelGains?: Array<{
+            level?: number;
+            effects?: Array<{ kind?: string; targetPath?: string; value?: { const?: number; sum?: Array<{ const?: number }> } }>;
+          }>;
+        };
         levelTable?: Array<{ features?: string[]; specialLabel?: string }>;
       };
-      effects?: Array<{ kind?: string; targetPath?: string; value?: { const?: number; sum?: Array<{ const?: number }> } }>;
     }>;
 
     const byId = (id: string) => classes.find((entry) => entry.id === id);
-    const effectConst = (entry: (typeof classes)[number] | undefined, targetPath: string) =>
-      entry?.effects?.find((effect) => effect.kind === "set" && effect.targetPath === targetPath)?.value?.const ??
-      entry?.effects
-        ?.find((effect) => effect.kind === "set" && effect.targetPath === targetPath)
-        ?.value?.sum?.find((segment) => typeof segment.const === "number")?.const;
+    const effectConst = (entry: (typeof classes)[number] | undefined, targetPath: string) => {
+      const level1Effects = entry?.data?.progression?.levelGains
+        ?.find((gain) => gain.level === 1)
+        ?.effects;
+      const match = level1Effects?.find((effect) => effect.kind === "set" && effect.targetPath === targetPath);
+      return match?.value?.const ?? match?.value?.sum?.find((segment) => typeof segment.const === "number")?.const;
+    };
 
     const bard = byId("bard-1");
     expect(bard?.data?.hitDie).toBe(6);

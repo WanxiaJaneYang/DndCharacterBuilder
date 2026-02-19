@@ -276,54 +276,20 @@ function classIdLevel(classId: string | undefined): number {
   return Math.floor(parsed);
 }
 
-type ClassProgressionGrant = {
-  kind: string;
-  slotType?: string;
-  count?: number;
-};
-
-type ClassLevelGain = {
-  level: number;
-  effects: Effect[];
-  grants: ClassProgressionGrant[];
-};
-
-function parseClassProgressionGains(classEntity: ResolvedEntity | undefined): ClassLevelGain[] {
+function getClassProgressionEffects(classEntity: ResolvedEntity | undefined, classId: string | undefined): Effect[] {
   const progression = classEntity?.data?.progression as { levelGains?: unknown } | undefined;
   if (!progression || !Array.isArray(progression.levelGains)) return [];
+  const selectedLevel = classIdLevel(classId);
+  const effects: Effect[] = [];
 
-  return progression.levelGains
-    .map((rawGain): ClassLevelGain | null => {
-      if (!rawGain || typeof rawGain !== "object") return null;
-      const record = rawGain as Record<string, unknown>;
-      const level = Number(record.level);
-      if (!Number.isFinite(level) || level < 1) return null;
-      const effects = Array.isArray(record.effects) ? (record.effects as Effect[]) : [];
-      const grants = Array.isArray(record.grants) ? (record.grants as ClassProgressionGrant[]) : [];
-      return { level: Math.floor(level), effects, grants };
-    })
-    .filter((gain): gain is ClassLevelGain => Boolean(gain))
-    .sort((a, b) => a.level - b.level);
-}
+  progression.levelGains
+    .filter((gain): gain is Record<string, unknown> => Boolean(gain) && typeof gain === "object")
+    .map((gain) => ({ level: Number(gain.level), effects: Array.isArray(gain.effects) ? (gain.effects as Effect[]) : [] }))
+    .filter((gain) => Number.isFinite(gain.level) && gain.level >= 1 && gain.level <= selectedLevel)
+    .sort((a, b) => a.level - b.level)
+    .forEach((gain) => effects.push(...gain.effects));
 
-function getApplicableClassGains(state: CharacterState, context: EngineContext): ClassLevelGain[] {
-  const selectedClass = getSelectedClass(state, context);
-  if (!selectedClass) return [];
-  const selectedLevel = classIdLevel(String(state.selections.class ?? ""));
-  return parseClassProgressionGains(selectedClass).filter((gain) => gain.level <= selectedLevel);
-}
-
-function getClassProgressionFeatSlotBonus(state: CharacterState, context: EngineContext): number {
-  return getApplicableClassGains(state, context).reduce((total, gain) => {
-    const gainBonus = gain.grants.reduce((count, grant) => {
-      if (grant.kind !== "featureSlot") return count;
-      if (String(grant.slotType ?? "").trim().toLowerCase() !== FEAT_SLOT_TYPE) return count;
-      const slotCount = Number(grant.count ?? 0);
-      if (!Number.isFinite(slotCount) || slotCount < 1) return count;
-      return count + Math.floor(slotCount);
-    }, 0);
-    return total + gainBonus;
-  }, 0);
+  return effects;
 }
 
 function buildRacialSkillBonusMap(state: CharacterState, context: EngineContext): Record<string, number> {
@@ -597,22 +563,12 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     entity.effects.forEach((effect) => applyEffect(effect, sheet, provenance, source));
   }
 
-  function applyClassProgressionEffects(entity: ResolvedEntity | undefined): boolean {
-    if (!entity) return false;
-    const selectedLevel = classIdLevel(String(state.selections.class ?? ""));
-    const gains = parseClassProgressionGains(entity).filter((gain) => gain.level <= selectedLevel);
-    let appliedAny = false;
-    for (const gain of gains) {
-      if (gain.effects.length === 0) continue;
-      const source = {
-        packId: entity._source.packId,
-        entityId: entity._source.entityId,
-        choiceStepId: `class-level-${gain.level}`
-      };
-      gain.effects.forEach((effect) => applyEffect(effect, sheet, provenance, source));
-      appliedAny = true;
-    }
-    return appliedAny;
+  function applyClassEntity(entity: ResolvedEntity | undefined, selectedClassId: string | undefined): void {
+    if (!entity) return;
+    const source = { packId: entity._source.packId, entityId: entity._source.entityId };
+    const progressionEffects = getClassProgressionEffects(entity, selectedClassId);
+    const effectsToApply = progressionEffects.length > 0 ? progressionEffects : (entity.effects ?? []);
+    effectsToApply.forEach((effect) => applyEffect(effect, sheet, provenance, source));
   }
 
   const ruleEntities = Object.values(entityBuckets.rules ?? {}).sort((a, b) => a.id.localeCompare(b.id));
@@ -622,9 +578,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   applyEntity(raceId ? entityBuckets.races?.[raceId] : undefined);
 
   const classId = state.selections.class as string | undefined;
-  const selectedClass = classId ? entityBuckets.classes?.[classId] : undefined;
-  const appliedClassProgression = applyClassProgressionEffects(selectedClass);
-  if (!appliedClassProgression) applyEntity(selectedClass);
+  applyClassEntity(classId ? entityBuckets.classes?.[classId] : undefined, classId);
 
   for (const featId of getSelectedFeatIds(state)) {
     applyEntity(entityBuckets.feats?.[featId]);
