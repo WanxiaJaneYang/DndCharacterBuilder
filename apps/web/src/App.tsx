@@ -17,7 +17,8 @@ const ABILITY_SCORE_MAX = 18;
 
 function clampAbilityScore(value: number): number {
   if (!Number.isFinite(value)) return ABILITY_SCORE_MIN;
-  return Math.min(ABILITY_SCORE_MAX, Math.max(ABILITY_SCORE_MIN, value));
+  const clamped = Math.min(ABILITY_SCORE_MAX, Math.max(ABILITY_SCORE_MIN, value));
+  return Math.round(clamped);
 }
 
 export function App() {
@@ -156,6 +157,7 @@ export function App() {
                 type="number"
                 min={ABILITY_SCORE_MIN}
                 max={ABILITY_SCORE_MAX}
+                step={1}
                 value={value}
                 onChange={(e) => setAbility(key, Number(e.target.value))}
                 onBlur={() => clampAbilityOnBlur(key)}
