@@ -6,6 +6,11 @@ import { AuthenticityLockSchema, type AuthenticityLock } from "@dcb/schema";
 const LOCK_FILE = "authenticity.lock.json";
 
 function sha256File(filePath: string): string {
+  if (filePath.toLowerCase().endsWith(".json")) {
+    // Normalize line endings so checksum validation is stable across Windows/Linux checkouts.
+    const normalized = fs.readFileSync(filePath, "utf8").replace(/\r\n/g, "\n");
+    return createHash("sha256").update(Buffer.from(normalized, "utf8")).digest("hex");
+  }
   const buffer = fs.readFileSync(filePath);
   return createHash("sha256").update(buffer).digest("hex");
 }
@@ -58,4 +63,3 @@ export function runAuthenticityChecks(packsRoot: string): void {
     }
   }
 }
-

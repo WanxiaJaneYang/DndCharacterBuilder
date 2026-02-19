@@ -12,35 +12,35 @@
   "artifacts": [
     {
       "path": "manifest.json",
-      "sha256": "4653f72cfc5610d5b0c050244e611bad61c3dd030f9287d90c4c2ea7e8d2ac9b"
+      "sha256": "1faa8333e85b7f8fcd1ce7a3d8bf994ca457854594d4830038032539b610a2dc"
     },
     {
       "path": "flows/character-creation.flow.json",
-      "sha256": "19f456be9c6d156a98adf320b95826e746814b2060b78e796db710539a3503c9"
+      "sha256": "b85dcbaf69a6e3aadcf05d4418be1692c7b1ac3bf8dd57164c8850542fa67d23"
     },
     {
       "path": "entities/races.json",
-      "sha256": "d7070ecc0f6291cecfe3ef4c90d62801e7254b2d3ac6fe1e6bb652e99f26da64"
+      "sha256": "43ed458a946b666234d7b720a7c62750f4cbaa9e0e300afb32b8907b83b3cd6f"
     },
     {
       "path": "entities/classes.json",
-      "sha256": "34b2c136d0293be137062692a03dca7c61574e9774d21946ae65571f7fe49de0"
+      "sha256": "0e1aff1fc2215c23a8c68debb41e549d0095b4b350df3d4786c2a55bfd120fe4"
     },
     {
       "path": "entities/feats.json",
-      "sha256": "9194b0f9f504bf5266c2ee0d1c73bb370f613f54a39a29e2b687deb800942790"
+      "sha256": "ab2973c1e4c503c3468f4b4a8e67ed7c9b3af628d901f716873343a30e4f93c4"
     },
     {
       "path": "entities/skills.json",
-      "sha256": "2ef2c8ee4ea84e9c9ef51b2e2bfcba6cb12d9b17a08e500da27d4820d2ec45ec"
+      "sha256": "29cb0ac702f75d93addb1567f8a19d68932dada9598880570c03433328c74856"
     },
     {
       "path": "entities/items.json",
-      "sha256": "28a5cb79c82e78c33fae1c69bcbd834333171e0f341c7313d622846834aa5d7a"
+      "sha256": "9389e8e12ef4ec48601be87d5fc0a00e34326e0fe27d5eb00fed96b6f6e40eb2"
     },
     {
       "path": "entities/rules.json",
-      "sha256": "0d681f60d82533cdb648b4887c5bb115f7d4a7ebc4bb54300ccc42f197dcfcf2"
+      "sha256": "e59a27a756e4fb39a15733791b699dc0d9da90620c086c2e2ce0900dccb5e4a4"
     }
   ]
 }
