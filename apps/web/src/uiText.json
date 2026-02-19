@@ -29,7 +29,7 @@
     "startWizard": "Start Wizard",
     "languageLabel": "Language",
     "english": "EN",
-    "chinese": "ZH"
+    "chinese": "Chinese"
   },
   "zh": {
     "appTitle": "D&D 3.5 Beginner Character Builder (MVP) [ZH]",
@@ -61,6 +61,6 @@
     "startWizard": "Start Wizard [ZH]",
     "languageLabel": "Language [ZH]",
     "english": "EN",
-    "chinese": "ZH"
+    "chinese": "Chinese"
   }
 }

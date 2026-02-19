@@ -11,6 +11,8 @@ const labels = {
   skillsHeading: /Skills|\u6280\u80fd/i,
   equipmentHeading: /Equipment|\u88c5\u5907/i,
   reviewHeading: /Review|\u603b\u89c8/i,
+  rulesSetupHeading: /Rules Setup|\u89c4\u5219\u8bbe\u7f6e/i,
+  startWizard: /Start Wizard|\u5f00\u59cb\u521b\u5efa/i,
   english: /EN|English/i,
   chinese: /\u4e2d\u6587|Chinese/i,
 };
@@ -32,6 +34,9 @@ async function goToHomePage(page: Page, locale: Locale) {
   await page.goto('/');
   await chooseLanguage(page, locale);
   await enterPlayerFlow(page);
+  await expect(page.getByRole('heading', { name: labels.rulesSetupHeading })).toBeVisible();
+  await page.getByRole('button', { name: labels.startWizard }).click();
+  await expect(page.getByPlaceholder(labels.namePlaceholder)).toBeVisible();
 }
 
 async function goToListPage(page: Page, locale: Locale) {
