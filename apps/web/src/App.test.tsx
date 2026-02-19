@@ -56,7 +56,8 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
-    expect(screen.getByText(/AC:/).textContent).toContain('BAB: 1');
+    expect(screen.getByRole('heading', { name: 'AC' })).toBeTruthy();
+    expect(screen.getByText('Fighter (Level 1)', { selector: 'strong' })).toBeTruthy();
   });
 });
 
