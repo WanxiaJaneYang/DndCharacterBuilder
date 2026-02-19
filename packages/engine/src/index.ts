@@ -313,7 +313,7 @@ function buildSkillBreakdown(
     const rawAbility = String(skillEntity.data?.ability ?? "int").toLowerCase() as AbilityKey;
     const ability: AbilityKey = ABILITY_KEYS.includes(rawAbility) ? rawAbility : "int";
     const classSkill = decisions.classSkills.includes(normalizeSkillId(skillEntity.id));
-    const ranks = selectedRanks[skillEntity.id] ?? 0;
+    const ranks = selectedRanks[normalizeSkillId(skillEntity.id)] ?? 0;
     const maxRanks = classSkill ? 4 : 2;
     const costPerRank = classSkill ? 1 : 2;
     const costSpent = ranks * costPerRank;
