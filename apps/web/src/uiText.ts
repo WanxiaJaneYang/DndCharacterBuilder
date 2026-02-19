@@ -85,6 +85,7 @@ export type UIText = {
   skillsMaxLabel: string;
   skillsRacialLabel: string;
   skillsPerRankUnit: string;
+  abilityLabels: Record<string, string>;
 };
 
 const uiTextKeys: Array<keyof UIText> = [
@@ -172,9 +173,15 @@ const uiTextKeys: Array<keyof UIText> = [
   'skillsPerRankUnit',
 ];
 
+function isAbilityLabels(value: unknown): value is Record<string, string> {
+  if (!value || typeof value !== 'object') return false;
+  return Object.values(value as Record<string, unknown>).every((label) => typeof label === 'string');
+}
+
 function isUIText(value: unknown): value is UIText {
   if (!value || typeof value !== 'object') return false;
-  return uiTextKeys.every((key) => typeof (value as Record<string, unknown>)[key] === 'string');
+  const record = value as Record<string, unknown>;
+  return uiTextKeys.every((key) => typeof record[key] === 'string') && isAbilityLabels(record.abilityLabels);
 }
 
 function parseUIText(input: unknown): Record<Language, UIText> {
