@@ -23,3 +23,19 @@ The parser rejects unknown step ids and mismatched `kind` or `source.type`.
 - `skills` is a manual allocator step:
   - Budget uses selected class + ability modifiers + race traits.
   - Cross-class cost/max-rank rules are validated by the engine.
+
+## 3.5 Core Ordering Convention
+
+For 3.5 core packs, the runtime flow should start from ancestry/class decisions:
+
+- `race` first
+- `class` second
+- then remaining core build steps with `name` as the final input step before review:
+  (`abilities`, `feat`, `skills`, `equipment`, `name`, `review`)
+
+For future 3.5 extension packs:
+
+- `subrace` should appear immediately after `race`
+- `subclass` should appear immediately after `class`
+
+This keeps downstream options logically scoped to their parent selections.
