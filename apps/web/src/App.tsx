@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
 import { DEFAULT_STATS, applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
@@ -62,7 +62,7 @@ export function App() {
   }, [stepIndex, wizardSteps.length]);
 
   const t = uiText[language];
-  const localizeEntityText = (entityType: string, entityId: string, path: string, fallback: string): string => {
+  const localizeEntityText = useCallback((entityType: string, entityId: string, path: string, fallback: string): string => {
     const text = activeLocale?.entityText?.[entityType]?.[entityId]?.[path];
     if (typeof text === 'string' && text.length > 0) return text;
     if (path === 'name') {
@@ -70,7 +70,7 @@ export function App() {
       if (typeof name === 'string' && name.length > 0) return name;
     }
     return fallback;
-  };
+  }, [activeLocale]);
   const choices = useMemo(() => listChoices(state, context), [context, state]);
   const localizedChoices = useMemo(
     () =>

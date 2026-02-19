@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { EntitySchema, FlowSchema, ManifestSchema, type Entity } from "@dcb/schema";
+import { EntitySchema, FlowSchema, ManifestSchema, PackLocaleSchema, type Entity } from "@dcb/schema";
 import { resolveLoadedPacks, type LoadedPack, type PackLocale, type ResolvedPackSet } from "./core";
 
 const ENTITY_FILES = ["races", "classes", "feats", "items", "skills", "rules"];
@@ -42,11 +42,20 @@ export function loadPack(packPath: string): LoadedPack {
   const patches = patchFiles.flatMap((file) => JSON.parse(fs.readFileSync(path.join(patchesDir, file), "utf8")));
 
   const localesDir = path.join(packPath, "locales");
-  const localeFiles = fs.existsSync(localesDir) ? fs.readdirSync(localesDir).filter((f) => f.endsWith(".json")) : [];
+  const localeFiles = fs.existsSync(localesDir)
+    ? fs.readdirSync(localesDir).filter((f) => f.endsWith(".json") && !f.endsWith(".template.json"))
+    : [];
   const locales: Record<string, PackLocale> = {};
   for (const file of localeFiles) {
     const language = path.basename(file, ".json");
-    locales[language] = JSON.parse(fs.readFileSync(path.join(localesDir, file), "utf8")) as PackLocale;
+    const filePath = path.join(localesDir, file);
+    try {
+      const raw = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      locales[language] = PackLocaleSchema.parse(raw);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Invalid locale file at ${filePath}: ${message}`);
+    }
   }
 
   return { manifest, entities, flow, patches, locales, packPath };

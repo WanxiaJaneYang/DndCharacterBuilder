@@ -1,10 +1,5 @@
-import { type Entity, type Flow, type Manifest } from "@dcb/schema";
-
-export interface PackLocale {
-  flowStepLabels?: Record<string, string>;
-  entityNames?: Record<string, Record<string, string>>;
-  entityText?: Record<string, Record<string, Record<string, string>>>;
-}
+import { type Entity, type Flow, type Manifest, type PackLocale } from "@dcb/schema";
+export type { PackLocale } from "@dcb/schema";
 
 export interface LoadedPack {
   manifest: Manifest;
