@@ -2,7 +2,7 @@
 
 **Goal:** Represent core D&D 3.5e SRD base classes at level 1 in the `srd-35e-minimal` pack, in a way that is correct for level-1 creation today and structurally ready for future leveling work, without overcommitting to unused 2–20 data.
 
-**Architecture:** Class rules remain fully data-driven in pack entities under `packs/srd-35e-minimal/entities/classes.json`. The engine consumes class entities via existing flow steps and entity-type loading (no engine or UI hard-coding). We extend the `classes` entity `data` block with a small, focused class schema that encodes hit die and level-1 progression details, plus a minimal `levelTable` that can be extended to 2–20 later. Engine-facing mechanics for level-1 HP, BAB, and base saves are expressed via `effects`, derived from the same class data.
+**Architecture:** Class rules remain fully data-driven in pack entities under `packs/srd-35e-minimal/entities/classes.json`. The engine consumes class entities via existing flow steps and entity-type loading (no engine or UI hard-coding). We extend the `classes` entity `data` block with a focused class schema that encodes hit die and level progression details. `data.progression.levelGains` is the adaptive, engine-facing source for level-derived sheet changes; `data.levelTable` is optional display/reference metadata.
 
 **Tech Stack:** JSON packs validated by `@dcb/schema` entity schemas, interpreted by `@dcb/engine` via flow/pack resolution in `@dcb/datapack`.
 
@@ -20,7 +20,7 @@
   - The engine already:
     - Applies `effects` to derive stats (HP, BAB, saves).
     - Uses `data.skillPointsPerLevel` and `data.classSkills` for skills budgeting/validation.
-  - No UI or engine code changes for this phase; all work is within pack data and contracts.
+- UI flow remains unchanged; engine now supports class progression gains from class data.
 
 Non-goals for this phase:
 

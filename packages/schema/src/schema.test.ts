@@ -241,6 +241,39 @@ describe("class entity schema", () => {
     ).toThrow(/invalid classes\.data/i);
   });
 
+  it("accepts progression-only class data without levelTable", () => {
+    const parsed = EntitySchema.parse({
+      id: "rogue-1",
+      name: "Rogue (Level 1)",
+      entityType: "classes",
+      summary: "Rogue summary",
+      description: "Rogue detail",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        skillPointsPerLevel: 8,
+        classSkills: ["climb", "jump"],
+        hitDie: 6,
+        baseAttackProgression: "threeQuarters",
+        baseSaveProgression: { fort: "poor", ref: "good", will: "poor" },
+        progression: {
+          levelGains: [
+            {
+              level: 1,
+              effects: [
+                { kind: "set", targetPath: "stats.bab", value: { const: 0 } },
+                { kind: "set", targetPath: "stats.ref", value: { const: 2 } }
+              ],
+              grants: [{ kind: "grantFeature", featureId: "sneak-attack", label: "Sneak Attack +1d6" }]
+            }
+          ]
+        }
+      }
+    });
+
+    expect(parsed.id).toBe("rogue-1");
+  });
+
   it("rejects missing or misplaced level-1 row in levelTable", () => {
     expect(() =>
       EntitySchema.parse({
@@ -281,6 +314,56 @@ describe("class entity schema", () => {
             { level: 2, bab: 2, fort: 3, ref: 0, will: 0 },
             { level: 1, bab: 1, fort: 2, ref: 0, will: 0 }
           ]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
+
+  it("rejects class data missing both levelTable and progression", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-missing-all-progression",
+        name: "Broken Class Missing Progression",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" }
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
+
+  it("rejects progression missing level 1 gain", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-missing-level1-gain",
+        name: "Broken Class Missing Level 1 Gain",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          progression: {
+            levelGains: [
+              {
+                level: 2,
+                effects: [{ kind: "set", targetPath: "stats.bab", value: { const: 2 } }]
+              }
+            ]
+          }
         }
       })
     ).toThrow(/invalid classes\.data/i);

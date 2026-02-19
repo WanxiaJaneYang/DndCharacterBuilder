@@ -4,7 +4,7 @@
 
 **Goal:** Add level-1 entities for all core D&D 3.5 SRD base classes to `packs/srd-35e-minimal/entities/classes.json`, extend the class `data` model as per the design doc, and validate behaviour via existing and new contracts.
 
-**Architecture:** All changes are confined to pack data (`packs/srd-35e-minimal`), plus new/updated contracts. No engine or UI code changes. Class rules are expressed via `data` and `effects` on `classes` entities, consumed through the existing flow and engine.
+**Architecture:** Changes include pack data updates (`packs/srd-35e-minimal`), schema validation updates, and engine interpretation updates for class progression gains. UI flow remains unchanged. Class rules are expressed via class `data`, especially `data.progression.levelGains`, consumed through the existing flow and engine.
 
 **Tech Stack:** Node/TypeScript monorepo, JSON packs. Validation via `npm test`, `npm run contracts`, and relevant typechecks.
 

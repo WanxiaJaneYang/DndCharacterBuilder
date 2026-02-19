@@ -17,6 +17,69 @@
         "ref": "poor",
         "will": "poor"
       },
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 10
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 1
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 0
+                }
+              }
+            ],
+            "grants": [
+              {
+                "kind": "featureSlot",
+                "slotType": "feat",
+                "count": 1
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "bonus-fighter-feat",
+                "label": "Fighter bonus feat"
+              }
+            ]
+          }
+        ]
+      },
       "levelTable": [
         {
           "level": 1,

@@ -186,6 +186,81 @@ const ClassLevelRowSchema = z.object({
   specialLabel: z.string().min(1).optional()
 }).strict();
 
+const ClassProgressionGrantSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("featureSlot"),
+    slotType: z.string().min(1),
+    count: z.number().int().min(1)
+  }).strict(),
+  z.object({
+    kind: z.literal("enableChoiceStep"),
+    stepId: z.string().min(1)
+  }).strict(),
+  z.object({
+    kind: z.literal("grantFeature"),
+    featureId: z.string().min(1),
+    label: z.string().min(1).optional()
+  }).strict(),
+  z.object({
+    kind: z.literal("unlockEntityType"),
+    entityType: z.string().min(1)
+  }).strict(),
+  z.object({
+    kind: z.literal("abilityIncrease"),
+    points: z.number().int().min(1),
+    abilities: z.array(AbilityIdSchema).min(1).optional()
+  }).strict()
+]);
+
+const ClassLevelGainSchema = z.object({
+  level: z.number().int().min(1),
+  effects: z.array(EffectSchema).optional(),
+  grants: z.array(ClassProgressionGrantSchema).optional(),
+  notes: z.string().min(1).optional()
+}).strict().superRefine((gain, ctx) => {
+  if (!gain.effects?.length && !gain.grants?.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Class level gain must define at least one effect or grant."
+    });
+  }
+});
+
+const ClassProgressionSchema = z.object({
+  levelGains: z.array(ClassLevelGainSchema).min(1)
+}).strict().superRefine((progression, ctx) => {
+  const seenLevels = new Set<number>();
+  for (let index = 0; index < progression.levelGains.length; index += 1) {
+    const gain = progression.levelGains[index]!;
+    if (seenLevels.has(gain.level)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Duplicate progression level gain for level ${gain.level}.`,
+        path: ["levelGains", index, "level"]
+      });
+    } else {
+      seenLevels.add(gain.level);
+    }
+    if (index > 0) {
+      const previous = progression.levelGains[index - 1]!;
+      if (gain.level <= previous.level) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "progression.levelGains must be strictly ordered by ascending level.",
+          path: ["levelGains", index, "level"]
+        });
+      }
+    }
+  }
+  if (!progression.levelGains.some((gain) => gain.level === 1)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "progression.levelGains must include a level 1 entry.",
+      path: ["levelGains"]
+    });
+  }
+});
+
 const ClassDataSchema = z.object({
   skillPointsPerLevel: z.number().int().min(0),
   classSkills: z.array(z.string()),
@@ -196,8 +271,18 @@ const ClassDataSchema = z.object({
     ref: ClassSaveProgressSchema,
     will: ClassSaveProgressSchema
   }).strict(),
-  levelTable: z.array(ClassLevelRowSchema).min(1)
+  levelTable: z.array(ClassLevelRowSchema).min(1).optional(),
+  progression: ClassProgressionSchema.optional()
 }).strict().superRefine((classData, ctx) => {
+  if (!classData.levelTable?.length && !classData.progression?.levelGains.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Class data must define at least one of levelTable or progression.levelGains."
+    });
+    return;
+  }
+
+  if (!classData.levelTable?.length) return;
   const levelValues = classData.levelTable.map((row) => row.level);
   const seenLevels = new Set<number>();
   levelValues.forEach((level, index) => {
