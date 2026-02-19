@@ -3,7 +3,7 @@ import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
 import { DEFAULT_STATS, applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
 import { EDITIONS, FALLBACK_EDITION, type EditionOption, defaultEditionId } from './editions';
-import { detectDefaultLanguage, uiText, type Language, type UIText } from './uiText';
+import { detectDefaultLanguage, uiText, type AbilityCode, type Language, type UIText } from './uiText';
 
 const embeddedPacks = [loadMinimalPack()];
 type Role = 'dm' | 'player' | null;
@@ -62,6 +62,9 @@ export function App() {
   }, [stepIndex, wizardSteps.length]);
 
   const t = uiText[language];
+  const localizeAbilityLabel = useCallback((ability: string): string => {
+    return t.abilityLabels[ability as AbilityCode] ?? ability.toUpperCase();
+  }, [t.abilityLabels]);
   const localizeEntityText = useCallback((entityType: string, entityId: string, path: string, fallback: string): string => {
     const text = activeLocale?.entityText?.[entityType]?.[entityId]?.[path];
     if (typeof text === 'string' && text.length > 0) return text;
@@ -265,6 +268,7 @@ export function App() {
               </thead>
               <tbody>
                 {abilityOrder.map((ability) => {
+                  const abilityLabel = localizeAbilityLabel(ability);
                   const baseScore = Number(state.abilities[ability] ?? 10);
                   const targetPath = `abilities.${ability}.score`;
                   const records = provenanceByTargetPath.get(targetPath) ?? [];
@@ -273,7 +277,7 @@ export function App() {
 
                   return (
                     <tr key={ability}>
-                      <td className="review-cell-key">{ability.toUpperCase()}</td>
+                      <td className="review-cell-key">{abilityLabel}</td>
                       <td>{baseScore}</td>
                       <td>
                         {records.length === 0 ? (
@@ -371,7 +375,7 @@ export function App() {
                   <tr key={skillId}>
                     <td className="review-cell-key">{localizeEntityText('skills', skillId, 'name', skill.name)}</td>
                     <td>{skill.ranks}</td>
-                    <td>{formatSigned(skill.abilityMod)} ({skill.ability.toUpperCase()})</td>
+                    <td>{formatSigned(skill.abilityMod)} ({localizeAbilityLabel(skill.ability)})</td>
                     <td>{formatSigned(skill.racialBonus)}</td>
                     <td>{skill.total}</td>
                     <td>{skill.costSpent} ({skill.costPerRank}{t.reviewPerRankUnit})</td>
@@ -431,19 +435,23 @@ export function App() {
         <section>
           <h2>{currentStep.label} {t.abilitiesSuffix}</h2>
           <div className="grid">
-            {Object.entries(state.abilities).map(([key, value]) => (
-              <label key={key}>{key.toUpperCase()}
-              <input
-                type="number"
-                min={ABILITY_SCORE_MIN}
-                max={ABILITY_SCORE_MAX}
-                step={1}
-                value={value}
-                onChange={(e) => setAbility(key, Number(e.target.value))}
-                onBlur={() => clampAbilityOnBlur(key)}
-              />
-              </label>
-            ))}
+            {Object.entries(state.abilities).map(([key, value]) => {
+              const label = localizeAbilityLabel(key);
+              return (
+                <label key={key}>
+                  {label}
+                  <input
+                    type="number"
+                    min={ABILITY_SCORE_MIN}
+                    max={ABILITY_SCORE_MAX}
+                    step={1}
+                    value={value}
+                    onChange={(e) => setAbility(key, Number(e.target.value))}
+                    onBlur={() => clampAbilityOnBlur(key)}
+                  />
+                </label>
+              );
+            })}
           </div>
         </section>
       );

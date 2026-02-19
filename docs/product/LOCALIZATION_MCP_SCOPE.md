@@ -1,6 +1,8 @@
-#+ Localization & MCP Services – Scope
+# Localization & MCP Services - Scope
 
 This document defines the scope and initial requirements for MCP-based localization and data-generation services that support the DnDCharacterBuilder product.
+
+Note: this is forward-looking architecture documentation. The UI-text localization delivered in this PR remains `apps/web/src/uiText.json`-based and independent of the future MCP rollout.
 
 ## Goals
 
@@ -8,7 +10,7 @@ This document defines the scope and initial requirements for MCP-based localizat
 - **Scalable content ingestion**: Convert SRD-like datasets and, in future, rulebook PDFs into our canonical pack format without hardcoding rules in the UI or engine.
 - **Model evolution support**: Detect mechanics that do not fit the current data model and propose schema and flow/review updates instead of ad-hoc exceptions.
 
-## In-Scope (Phase 1 – Localization MCP)
+## In-Scope (Phase 1 - Localization MCP)
 
 - **Pack locale extraction**
   - Input: a resolved pack (manifest, entities, flows).
@@ -29,7 +31,7 @@ This document defines the scope and initial requirements for MCP-based localizat
 
 ## Future Scope (Not in Phase 1 but Recorded)
 
-- **SRD → Pack conversion MCP**
+- **SRD -> Pack conversion MCP**
   - Import structured SRD datasets and emit packs that conform to `@dcb/schema`.
   - Support reusable mapping profiles per source (e.g. "3.5e SRD JSON v1").
 
@@ -41,11 +43,10 @@ This document defines the scope and initial requirements for MCP-based localizat
   - Analyse extracted mechanics to detect gaps in the current data model.
   - Propose schema updates and corresponding changes to flows and review surfaces in data (no hardcoded UI rules).
 
-## Acceptance Checklist (Phase 1 – Localization MCP)
+## Acceptance Checklist (Phase 1 - Localization MCP)
 
 - [ ] MCP tool can extract a locale template from the existing minimal 3.5e pack.
 - [ ] MCP tool can generate a deterministic `PackLocale` for zh using a glossary.
 - [ ] Engine can merge MCP-produced `PackLocale` with existing pack locales without code changes to the web app.
 - [ ] Localization flow works for at least one user-uploaded pack that follows the same schema.
 - [ ] Documentation updated to describe how product and packs depend on MCP localization.
-
