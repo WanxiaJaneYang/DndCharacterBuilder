@@ -24,8 +24,10 @@
           "fort": 2,
           "ref": 0,
           "will": 0,
-          "features": [],
-          "specialLabel": "Bonus feat"
+          "features": [
+            "bonus-fighter-feat"
+          ],
+          "specialLabel": "Fighter bonus feat"
         }
       ]
     },

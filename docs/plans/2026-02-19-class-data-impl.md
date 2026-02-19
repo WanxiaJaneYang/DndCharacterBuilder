@@ -24,6 +24,7 @@
 - Open `packs/srd-35e-minimal/entities/skills.json`.
 - Note the canonical skill ids and names (e.g. `climb`, `listen`, `search`, `gather-information`, etc.).
 - Map SRD class skill lists to these ids for each core class.
+- Document any SRD skills that are not yet present in `skills.json` as an explicit phase limitation (instead of adding ad-hoc fields in class entities).
 
 ---
 
@@ -76,7 +77,7 @@
     - `baseAttackProgression`: `"full" | "threeQuarters" | "half"`.
     - `baseSaveProgression`: `{ fort, ref, will }` with `"good" | "poor"`.
     - `levelTable`: a single level-1 entry with correct BAB and saves:
-      - `bab`: 1 for full BAB, 0 otherwise.
+      - `bab`: 1 for `baseAttackProgression: "full"`, 0 for `"threeQuarters"` and `"half"` at level 1.
       - `fort/ref/will`: +2 for good saves, +0 for poor saves at level 1.
   - Add `effects`:
     - `stats.hp`: set to `max(hitDie) + Con modifier`.

@@ -190,6 +190,9 @@ These fixtures give us quick regression coverage that the new class data is wire
 - **Text-first class features:**
   - Class features are referenced by id and summarized in `specialLabel`, but not mechanically encoded in DSL yet.
   - This keeps the engine simple until we have clear product requirements for how features must impact the sheet.
+- **Current skill catalog limits class-skill completeness:**
+  - Some SRD class skills are not yet present in `entities/skills.json`.
+  - Class skill lists in this phase map only to currently available skill ids; missing SRD skills are tracked as follow-up data work.
 - **SRD / OGL-safe text:**
   - Descriptions and special labels are written as paraphrases, not PHB verbatim text, to stay within SRD/OGL constraints.
 

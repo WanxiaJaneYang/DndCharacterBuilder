@@ -142,6 +142,62 @@ describe("race entity schema", () => {
   });
 });
 
+describe("class entity schema", () => {
+  it("accepts structured class data", () => {
+    const parsed = EntitySchema.parse({
+      id: "fighter-1",
+      name: "Fighter (Level 1)",
+      entityType: "classes",
+      summary: "Fighter summary",
+      description: "Fighter detail",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        skillPointsPerLevel: 2,
+        classSkills: ["climb", "jump", "ride"],
+        hitDie: 10,
+        baseAttackProgression: "full",
+        baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+        levelTable: [
+          {
+            level: 1,
+            bab: 1,
+            fort: 2,
+            ref: 0,
+            will: 0,
+            features: ["bonus-fighter-feat"],
+            specialLabel: "Fighter bonus feat"
+          }
+        ]
+      }
+    });
+
+    expect(parsed.id).toBe("fighter-1");
+  });
+
+  it("rejects classes with malformed class data", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class",
+        name: "Broken Class",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "invalid",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          levelTable: [{ level: 1, bab: 1, fort: 2, ref: 0, will: 0 }]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
+});
+
 
 describe("entity UI metadata", () => {
   it("requires summary/description on all entities", () => {

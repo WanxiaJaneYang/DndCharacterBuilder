@@ -174,6 +174,31 @@ const RaceDataSchema = z.object({
   innateSpellLikeAbilities: z.array(InnateSpellLikeAbilitySchema).optional()
 }).strict();
 
+const ClassSaveProgressSchema = z.enum(["good", "poor"]);
+
+const ClassLevelRowSchema = z.object({
+  level: z.number().int().min(1),
+  bab: z.number().int(),
+  fort: z.number().int(),
+  ref: z.number().int(),
+  will: z.number().int(),
+  features: z.array(z.string()).optional(),
+  specialLabel: z.string().min(1).optional()
+}).strict();
+
+const ClassDataSchema = z.object({
+  skillPointsPerLevel: z.number().int().min(0),
+  classSkills: z.array(z.string()),
+  hitDie: z.number().int().positive(),
+  baseAttackProgression: z.enum(["full", "threeQuarters", "half"]),
+  baseSaveProgression: z.object({
+    fort: ClassSaveProgressSchema,
+    ref: ClassSaveProgressSchema,
+    will: ClassSaveProgressSchema
+  }).strict(),
+  levelTable: z.array(ClassLevelRowSchema).min(1)
+}).strict();
+
 export const EntitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -193,6 +218,19 @@ export const EntitySchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Invalid races.data: ${issue.message}`,
+          path: ["data", ...issue.path]
+        });
+      });
+    }
+  }
+
+  if (entity.entityType === "classes") {
+    const result = ClassDataSchema.safeParse(entity.data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid classes.data: ${issue.message}`,
           path: ["data", ...issue.path]
         });
       });
