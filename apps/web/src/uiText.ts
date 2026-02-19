@@ -51,6 +51,7 @@ export type UIText = {
   reviewRacialColumn: string;
   reviewTotalColumn: string;
   reviewPointCostColumn: string;
+  reviewPerRankUnit: string;
   reviewPointsSpentLabel: string;
   reviewRemainingLabel: string;
   reviewFavoredClassLabel: string;
@@ -126,6 +127,7 @@ const uiTextKeys: Array<keyof UIText> = [
   'reviewRacialColumn',
   'reviewTotalColumn',
   'reviewPointCostColumn',
+  'reviewPerRankUnit',
   'reviewPointsSpentLabel',
   'reviewRemainingLabel',
   'reviewFavoredClassLabel',

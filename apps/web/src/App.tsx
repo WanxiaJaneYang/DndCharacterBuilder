@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
-import { applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
+import { DEFAULT_STATS, applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
 import { EDITIONS, FALLBACK_EDITION, type EditionOption, defaultEditionId } from './editions';
 import { detectDefaultLanguage, uiText, type Language, type UIText } from './uiText';
 
@@ -140,14 +140,14 @@ export function App() {
         will: t.reviewWillLabel,
       };
       const statBaseDefaults: Record<(typeof statOrder)[number], number> = {
-        hp: 0,
-        ac: 10,
-        initiative: 0,
-        speed: 30,
-        bab: 0,
-        fort: 0,
-        ref: 0,
-        will: 0,
+        hp: DEFAULT_STATS.hp,
+        ac: DEFAULT_STATS.ac,
+        initiative: DEFAULT_STATS.initiative,
+        speed: DEFAULT_STATS.speed,
+        bab: DEFAULT_STATS.bab,
+        fort: DEFAULT_STATS.fort,
+        ref: DEFAULT_STATS.ref,
+        will: DEFAULT_STATS.will,
       };
       const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
       const formatSourceLabel = (packId: string, entityId: string) =>
@@ -323,7 +323,7 @@ export function App() {
                     <td>{formatSigned(skill.abilityMod)} ({skill.ability.toUpperCase()})</td>
                     <td>{formatSigned(skill.racialBonus)}</td>
                     <td>{skill.total}</td>
-                    <td>{skill.costSpent} ({skill.costPerRank}/rank)</td>
+                    <td>{skill.costSpent} ({skill.costPerRank}{t.reviewPerRankUnit})</td>
                   </tr>
                 ))}
               </tbody>
