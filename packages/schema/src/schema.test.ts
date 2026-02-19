@@ -368,6 +368,57 @@ describe("class entity schema", () => {
       })
     ).toThrow(/invalid classes\.data/i);
   });
+
+  it("rejects duplicate level entries in levelTable", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-duplicate-levels",
+        name: "Broken Class Duplicate Levels",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          levelTable: [
+            { level: 1, bab: 1, fort: 2, ref: 0, will: 0 },
+            { level: 1, bab: 1, fort: 2, ref: 0, will: 0 }
+          ]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
+
+  it("rejects non-strictly-ascending level order in levelTable", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-non-ascending-levels",
+        name: "Broken Class Non-Ascending Levels",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          levelTable: [
+            { level: 1, bab: 1, fort: 2, ref: 0, will: 0 },
+            { level: 3, bab: 3, fort: 3, ref: 1, will: 1 },
+            { level: 2, bab: 2, fort: 3, ref: 0, will: 0 }
+          ]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
 });
 
 
