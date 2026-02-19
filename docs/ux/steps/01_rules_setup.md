@@ -36,6 +36,13 @@ Allow the player to select the rules version (edition) and which rule sources (p
 - UI correctly builds the context (`enabledPackIds` and `packSet`).
 - On submission, the wizard flow loads with steps defined by the selected packs.
 
+## Current Implementation Notes
+
+- Current web app provides a rules setup gate immediately after Player role selection.
+- Edition list is currently static and contains `D&D 3.5 SRD`.
+- Base pack (`srd-35e-minimal`) is always enabled and locked.
+- Runtime flow is resolved from selected packs before wizard step rendering.
+
 ## To‑Do
 
 - Decide how to discover available packs (static list vs dynamic discovery).

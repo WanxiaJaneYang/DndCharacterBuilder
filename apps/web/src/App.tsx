@@ -4,9 +4,23 @@ import { loadMinimalPack } from './loadMinimalPack';
 import { applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
 import uiTextJson from './uiText.json';
 
-const minimalPack = loadMinimalPack();
-const resolvedData = resolveLoadedPacks([minimalPack], ['srd-35e-minimal']);
-const context = { enabledPackIds: ['srd-35e-minimal'], resolvedData };
+const embeddedPacks = [loadMinimalPack()];
+
+type EditionOption = {
+  id: string;
+  label: string;
+  basePackId: string;
+  optionalPackIds: string[];
+};
+
+const editions: EditionOption[] = [
+  {
+    id: 'dnd-3.5-srd',
+    label: 'D&D 3.5 SRD',
+    basePackId: 'srd-35e-minimal',
+    optionalPackIds: [],
+  },
+];
 
 type Language = 'en' | 'zh';
 type Role = 'dm' | 'player' | null;
@@ -34,6 +48,11 @@ export type UIText = {
   playerTitle: string;
   playerSubtitle: string;
   dmUnsupported: string;
+  rulesSetupTitle: string;
+  editionLabel: string;
+  sourcesLabel: string;
+  baseSourceLockedLabel: string;
+  startWizard: string;
   languageLabel: string;
   english: string;
   chinese: string;
@@ -62,6 +81,11 @@ const uiTextKeys: Array<keyof UIText> = [
   'playerTitle',
   'playerSubtitle',
   'dmUnsupported',
+  'rulesSetupTitle',
+  'editionLabel',
+  'sourcesLabel',
+  'baseSourceLockedLabel',
+  'startWizard',
   'languageLabel',
   'english',
   'chinese',
@@ -98,6 +122,20 @@ export function App() {
   const [showProv, setShowProv] = useState(false);
   const [role, setRole] = useState<Role>(null);
   const [language, setLanguage] = useState<Language>(detectDefaultLanguage);
+  const [selectedEditionId, setSelectedEditionId] = useState<string>(editions[0]!.id);
+  const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<string[]>([]);
+  const [rulesReady, setRulesReady] = useState(false);
+
+  const selectedEdition = useMemo(
+    () => editions.find((edition) => edition.id === selectedEditionId) ?? editions[0]!,
+    [selectedEditionId]
+  );
+  const enabledPackIds = useMemo(
+    () => [selectedEdition.basePackId, ...selectedOptionalPackIds.filter((packId) => selectedEdition.optionalPackIds.includes(packId))],
+    [selectedEdition, selectedOptionalPackIds]
+  );
+  const resolvedData = useMemo(() => resolveLoadedPacks(embeddedPacks, enabledPackIds), [enabledPackIds]);
+  const context = useMemo(() => ({ enabledPackIds, resolvedData }), [enabledPackIds, resolvedData]);
 
   const wizardSteps = context.resolvedData.flow.steps;
   const currentStep = wizardSteps[stepIndex];
@@ -309,6 +347,32 @@ export function App() {
     );
   }
 
+  if (!rulesReady) {
+    return (
+      <RulesSetupGate
+        language={language}
+        onLanguageChange={setLanguage}
+        text={t}
+        editions={editions}
+        selectedEditionId={selectedEditionId}
+        onEditionChange={(editionId) => {
+          setSelectedEditionId(editionId);
+          setSelectedOptionalPackIds([]);
+        }}
+        selectedOptionalPackIds={selectedOptionalPackIds}
+        onOptionalPackToggle={(packId) => {
+          setSelectedOptionalPackIds((current) => (current.includes(packId) ? current.filter((id) => id !== packId) : [...current, packId]));
+        }}
+        onStart={() => {
+          setState(initialState);
+          setStepIndex(0);
+          setShowProv(false);
+          setRulesReady(true);
+        }}
+      />
+    );
+  }
+
   return (
     <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
       <LanguageSwitch language={language} onLanguageChange={setLanguage} text={t} />
@@ -319,6 +383,68 @@ export function App() {
       <footer className="actions">
         <button disabled={stepIndex === 0} onClick={() => setStepIndex((s) => s - 1)}>{t.back}</button>
         <button disabled={stepIndex === wizardSteps.length - 1} onClick={() => setStepIndex((s) => s + 1)}>{t.next}</button>
+      </footer>
+    </main>
+  );
+}
+
+function RulesSetupGate({
+  language,
+  onLanguageChange,
+  text,
+  editions,
+  selectedEditionId,
+  onEditionChange,
+  selectedOptionalPackIds,
+  onOptionalPackToggle,
+  onStart,
+}: {
+  language: Language;
+  onLanguageChange: (language: Language) => void;
+  text: UIText;
+  editions: EditionOption[];
+  selectedEditionId: string;
+  onEditionChange: (editionId: string) => void;
+  selectedOptionalPackIds: string[];
+  onOptionalPackToggle: (packId: string) => void;
+  onStart: () => void;
+}) {
+  const selectedEdition = editions.find((edition) => edition.id === selectedEditionId) ?? editions[0]!;
+
+  return (
+    <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
+      <LanguageSwitch language={language} onLanguageChange={onLanguageChange} text={text} />
+      <h1>{text.rulesSetupTitle}</h1>
+      <section>
+        <label htmlFor="edition-select">{text.editionLabel}</label>
+        <select id="edition-select" value={selectedEditionId} onChange={(event) => onEditionChange(event.target.value)}>
+          {editions.map((edition) => (
+            <option key={edition.id} value={edition.id}>
+              {edition.label}
+            </option>
+          ))}
+        </select>
+      </section>
+      <section>
+        <h2>{text.sourcesLabel}</h2>
+        <label>
+          <input type="checkbox" checked disabled />
+          {selectedEdition.basePackId} ({text.baseSourceLockedLabel})
+        </label>
+        {selectedEdition.optionalPackIds.length === 0 && <p>-</p>}
+        {selectedEdition.optionalPackIds.map((packId) => (
+          <label key={packId}>
+            <input
+              type="checkbox"
+              checked={selectedOptionalPackIds.includes(packId)}
+              onChange={() => onOptionalPackToggle(packId)}
+            />
+            {packId}
+          </label>
+        ))}
+      </section>
+      <footer className="actions">
+        <button onClick={onStart}>{text.startWizard}</button>
       </footer>
     </main>
   );
