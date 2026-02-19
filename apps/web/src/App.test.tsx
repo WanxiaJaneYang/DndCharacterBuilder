@@ -56,7 +56,17 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
-    expect(screen.getByText(/AC:/).textContent).toContain('BAB: 1');
+    expect(screen.getByRole('heading', { name: 'AC' })).toBeTruthy();
+    expect(screen.getByText('Fighter (Level 1)', { selector: 'strong' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.reviewAbilityBreakdown })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.reviewCombatBreakdown })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.reviewPackInfo })).toBeTruthy();
+    expect(screen.getAllByRole('columnheader', { name: en.reviewBaseColumn }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('columnheader', { name: en.reviewAdjustmentsColumn }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('columnheader', { name: en.reviewFinalColumn }).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Chainmail/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(new RegExp(en.reviewFingerprintLabel, 'i'))).toBeTruthy();
+    expect(document.body.textContent).toMatch(/[a-f0-9]{64}/);
   });
 });
 
@@ -110,5 +120,37 @@ describe('role and language behavior', () => {
 
     await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
     expect(screen.getByRole('button', { name: playerNamePattern })).toBeTruthy();
+  });
+
+  it('renders localized review labels in zh flow', async () => {
+    await withNavigatorLanguage('zh-CN', async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      await user.click(screen.getByRole('button', { name: playerNamePattern }));
+      await user.click(screen.getByRole('button', { name: startWizardPattern }));
+      await user.click(screen.getByLabelText('Human'));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByLabelText('Fighter (Level 1)'));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      const featFieldset = screen.getByRole('group', { name: /Feat/i });
+      const featChoices = within(featFieldset).getAllByRole('checkbox');
+      expect(featChoices.length).toBeGreaterThan(0);
+      await user.click(featChoices[0]!);
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByLabelText('Chainmail'));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), '赵云');
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+
+      expect(screen.getAllByRole('heading', { name: zh.reviewAbilityBreakdown }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('heading', { name: zh.reviewCombatBreakdown }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('heading', { name: zh.reviewPackInfo }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('columnheader', { name: zh.reviewBaseColumn }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('columnheader', { name: zh.reviewAdjustmentsColumn }).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.reviewFingerprintLabel, { exact: false }).length).toBeGreaterThan(0);
+    });
   });
 });

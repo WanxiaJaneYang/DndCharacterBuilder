@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
-import { applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
+import { DEFAULT_STATS, applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
 import { EDITIONS, FALLBACK_EDITION, type EditionOption, defaultEditionId } from './editions';
 import { detectDefaultLanguage, uiText, type Language, type UIText } from './uiText';
 
@@ -62,6 +62,34 @@ export function App() {
     [context.resolvedData.entities.skills]
   );
   const selectedFeats = ((state.selections.feats as string[] | undefined) ?? []);
+  const sourceNameByEntityId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const bucket of Object.values(context.resolvedData.entities)) {
+      for (const entity of Object.values(bucket)) {
+        map.set(`${entity._source.packId}:${entity.id}`, entity.name);
+      }
+    }
+    return map;
+  }, [context.resolvedData.entities]);
+  const packVersionById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const manifest of context.resolvedData.manifests) {
+      map.set(manifest.id, manifest.version || t.reviewUnknownVersion);
+    }
+    return map;
+  }, [context.resolvedData.manifests, t.reviewUnknownVersion]);
+  const provenanceByTargetPath = useMemo(() => {
+    const map = new Map<string, typeof sheet.provenance>();
+    for (const record of sheet.provenance) {
+      const existing = map.get(record.targetPath);
+      if (existing) {
+        existing.push(record);
+      } else {
+        map.set(record.targetPath, [record]);
+      }
+    }
+    return map;
+  }, [sheet.provenance]);
 
   const selectedStepValues = (stepId: string): string[] => {
     if (stepId === STEP_ID_FEAT) return selectedFeats;
@@ -99,33 +127,234 @@ export function App() {
     if (!currentStep) return null;
 
     if (currentStep.kind === 'review') {
+      const abilityOrder = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
+      const statOrder = ['hp', 'ac', 'initiative', 'speed', 'bab', 'fort', 'ref', 'will'] as const;
+      const statLabels: Record<(typeof statOrder)[number], string> = {
+        hp: t.reviewHpLabel,
+        ac: t.reviewAcLabel,
+        initiative: t.reviewInitiativeLabel,
+        speed: t.reviewSpeedLabel,
+        bab: t.reviewBabLabel,
+        fort: t.reviewFortLabel,
+        ref: t.reviewRefLabel,
+        will: t.reviewWillLabel,
+      };
+      const statBaseDefaults: Record<(typeof statOrder)[number], number> = {
+        hp: DEFAULT_STATS.hp,
+        ac: DEFAULT_STATS.ac,
+        initiative: DEFAULT_STATS.initiative,
+        speed: DEFAULT_STATS.speed,
+        bab: DEFAULT_STATS.bab,
+        fort: DEFAULT_STATS.fort,
+        ref: DEFAULT_STATS.ref,
+        will: DEFAULT_STATS.will,
+      };
+      const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
+      const formatSourceLabel = (packId: string, entityId: string) =>
+        sourceNameByEntityId.get(`${packId}:${entityId}`) ?? entityId;
+      const selectedRaceId = String(state.selections.race ?? '');
+      const selectedClassId = String(state.selections.class ?? '');
+      const selectedRaceName = context.resolvedData.entities.races?.[selectedRaceId]?.name ?? (selectedRaceId || '-');
+      const selectedClassName = context.resolvedData.entities.classes?.[selectedClassId]?.name ?? (selectedClassId || '-');
+      const reviewSkills = Object.entries(sheet.skills)
+        .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
+        .sort((a, b) => b[1].total - a[1].total || a[1].name.localeCompare(b[1].name));
+      const enabledPackDetails = enabledPackIds.map((packId) => ({
+        packId,
+        version: packVersionById.get(packId) ?? t.reviewUnknownVersion,
+      }));
+
       return (
-        <section>
+        <section className="review-page">
           <h2>{t.review}</h2>
-          <p><strong>{sheet.metadata.name}</strong></p>
-          <div className="grid two">
-            {Object.entries(sheet.stats).map(([k, v]) => <div key={k}><strong>{k}</strong>: {String(v)}</div>)}
+          <header className="review-hero">
+            <div>
+              <h3 className="review-character-name">{sheet.metadata.name || t.unnamedCharacter}</h3>
+              <p className="review-character-meta">
+                {t.raceLabel}: <strong>{selectedRaceName}</strong> | {t.classLabel}: <strong>{selectedClassName}</strong>
+              </p>
+            </div>
+            <div className="review-actions">
+              <button onClick={exportJson}>{t.exportJson}</button>
+              <button onClick={() => setShowProv((s) => !s)}>{t.toggleProvenance}</button>
+            </div>
+          </header>
+
+          <div className="review-stat-cards">
+            <article className="review-card">
+              <h3>{t.reviewAcLabel}</h3>
+              <p>{String(sheet.stats.ac)}</p>
+            </article>
+            <article className="review-card">
+              <h3>{t.reviewHpLabel}</h3>
+              <p>{String(sheet.stats.hp)}</p>
+            </article>
+            <article className="review-card">
+              <h3>{t.reviewBabLabel}</h3>
+              <p>{String(sheet.stats.bab)}</p>
+            </article>
+            <article className="review-card">
+              <h3>{t.reviewInitiativeLabel}</h3>
+              <p>{String(sheet.stats.initiative)}</p>
+            </article>
           </div>
-          <button onClick={exportJson}>{t.exportJson}</button>
-          <button onClick={() => setShowProv((s) => !s)}>{t.toggleProvenance}</button>
-          {showProv && <pre>{JSON.stringify(sheet.provenance, null, 2)}</pre>}
-          <h3>{t.printableSheet}</h3>
+
           <article className="sheet">
-            <p>{t.nameLabel}: {sheet.metadata.name}</p>
-            <p>{t.raceLabel}: {String(state.selections.race ?? '-')} / {t.classLabel}: {String(state.selections.class ?? '-')}</p>
-            <p>AC: {String(sheet.stats.ac)} | HP: {String(sheet.stats.hp)} | BAB: {String(sheet.stats.bab)}</p>
-            <p>Favored class: {sheet.decisions.favoredClass ?? '-'} | XP penalty ignored: {sheet.decisions.ignoresMulticlassXpPenalty ? 'yes' : 'no'}</p>
-            <p>Skill points: {sheet.decisions.skillPoints.spent} / {sheet.decisions.skillPoints.total}</p>
-            <ul>
-              {Object.entries(sheet.skills)
-                .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
-                .map(([skillId, skill]) => (
-                  <li key={skillId}>
-                    {skill.name}: total {skill.total} (ranks {skill.ranks}, ability {skill.abilityMod >= 0 ? '+' : ''}{skill.abilityMod}, racial {skill.racialBonus >= 0 ? '+' : ''}{skill.racialBonus})
-                  </li>
-                ))}
-            </ul>
+            <h3>{t.reviewAbilityBreakdown}</h3>
+            <table className="review-table">
+              <caption className="sr-only">{t.reviewAbilityTableCaption}</caption>
+              <thead>
+                <tr>
+                  <th>{t.reviewAbilityColumn}</th>
+                  <th>{t.reviewBaseColumn}</th>
+                  <th>{t.reviewAdjustmentsColumn}</th>
+                  <th>{t.reviewFinalColumn}</th>
+                  <th>{t.reviewModifierColumn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {abilityOrder.map((ability) => {
+                  const baseScore = Number(state.abilities[ability] ?? 10);
+                  const targetPath = `abilities.${ability}.score`;
+                  const records = provenanceByTargetPath.get(targetPath) ?? [];
+                  const finalScore = sheet.abilities[ability]?.score ?? baseScore;
+                  const finalMod = sheet.abilities[ability]?.mod ?? 0;
+
+                  return (
+                    <tr key={ability}>
+                      <td className="review-cell-key">{ability.toUpperCase()}</td>
+                      <td>{baseScore}</td>
+                      <td>
+                        {records.length === 0 ? (
+                          <span className="review-muted">-</span>
+                        ) : (
+                          <ul className="calc-list">
+                            {records.map((record, index) => (
+                              <li key={`${targetPath}-${index}`}>
+                                <code>{record.delta !== undefined ? formatSigned(record.delta) : `= ${record.setValue ?? 0}`}</code>
+                                {' '}
+                                {formatSourceLabel(record.source.packId, record.source.entityId)}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </td>
+                      <td>{finalScore}</td>
+                      <td>{formatSigned(finalMod)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </article>
+
+          <article className="sheet">
+            <h3>{t.reviewCombatBreakdown}</h3>
+            <table className="review-table">
+              <caption className="sr-only">{t.reviewCombatTableCaption}</caption>
+              <thead>
+                <tr>
+                  <th>{t.reviewStatColumn}</th>
+                  <th>{t.reviewBaseColumn}</th>
+                  <th>{t.reviewAdjustmentsColumn}</th>
+                  <th>{t.reviewFinalColumn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {statOrder.map((statKey) => {
+                  const targetPath = `stats.${statKey}`;
+                  const records = provenanceByTargetPath.get(targetPath) ?? [];
+                  const firstSetIndex = records.findIndex((record) => record.setValue !== undefined);
+                  const baseValue = firstSetIndex >= 0
+                    ? Number(records[firstSetIndex]?.setValue ?? statBaseDefaults[statKey])
+                    : statBaseDefaults[statKey];
+                  const adjustmentRecords = records.filter((_, index) => index !== firstSetIndex);
+
+                  return (
+                    <tr key={statKey}>
+                      <td className="review-cell-key">{statLabels[statKey]}</td>
+                      <td>{baseValue}</td>
+                      <td>
+                        {adjustmentRecords.length === 0 ? (
+                          <span className="review-muted">-</span>
+                        ) : (
+                          <ul className="calc-list">
+                            {adjustmentRecords.map((record, index) => (
+                              <li key={`${targetPath}-${index}`}>
+                                <code>{record.delta !== undefined ? formatSigned(record.delta) : `= ${record.setValue ?? 0}`}</code>
+                                {' '}
+                                {formatSourceLabel(record.source.packId, record.source.entityId)}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </td>
+                      <td>{String(sheet.stats[statKey])}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </article>
+
+          <article className="sheet">
+            <h3>{t.reviewSkillsBreakdown}</h3>
+            <p>
+              {t.reviewPointsSpentLabel} {sheet.decisions.skillPoints.spent} / {sheet.decisions.skillPoints.total}
+              {' '}({sheet.decisions.skillPoints.remaining} {t.reviewRemainingLabel})
+            </p>
+            <table className="review-table">
+              <caption className="sr-only">{t.reviewSkillsTableCaption}</caption>
+              <thead>
+                <tr>
+                  <th>{t.reviewSkillColumn}</th>
+                  <th>{t.reviewRanksColumn}</th>
+                  <th>{t.reviewAbilityColumn}</th>
+                  <th>{t.reviewRacialColumn}</th>
+                  <th>{t.reviewTotalColumn}</th>
+                  <th>{t.reviewPointCostColumn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviewSkills.map(([skillId, skill]) => (
+                  <tr key={skillId}>
+                    <td className="review-cell-key">{skill.name}</td>
+                    <td>{skill.ranks}</td>
+                    <td>{formatSigned(skill.abilityMod)} ({skill.ability.toUpperCase()})</td>
+                    <td>{formatSigned(skill.racialBonus)}</td>
+                    <td>{skill.total}</td>
+                    <td>{skill.costSpent} ({skill.costPerRank}{t.reviewPerRankUnit})</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </article>
+
+          <article className="sheet review-decisions">
+            <h3>{t.reviewRulesDecisions}</h3>
+            <p>{t.reviewFavoredClassLabel}: {sheet.decisions.favoredClass ?? '-'}</p>
+            <p>{t.reviewMulticlassXpIgnoredLabel}: {sheet.decisions.ignoresMulticlassXpPenalty ? t.reviewYes : t.reviewNo}</p>
+            <p>{t.reviewFeatSlotsLabel}: {sheet.decisions.featSelectionLimit}</p>
+          </article>
+
+          <article className="sheet review-decisions">
+            <h3>{t.reviewPackInfo}</h3>
+            <p>{t.reviewSelectedEditionLabel}: {selectedEdition.label || selectedEdition.id || '-'}</p>
+            <p>{t.reviewEnabledPacksLabel}:</p>
+            <ul>
+              {enabledPackDetails.map((pack) => (
+                <li key={pack.packId}>{pack.packId} ({pack.version})</li>
+              ))}
+            </ul>
+            <p>{t.reviewFingerprintLabel}: <code>{context.resolvedData.fingerprint}</code></p>
+          </article>
+
+          {showProv && (
+            <article className="sheet">
+              <h3>{t.reviewRawProvenance}</h3>
+              <pre>{JSON.stringify(sheet.provenance, null, 2)}</pre>
+            </article>
+          )}
         </section>
       );
     }

@@ -22,11 +22,15 @@ This step should be implemented in phases aligned with `docs/product/PRD.md`:
 The review page should display sections summarising each aspect of the character:
 
 - **Identity:** Character name, level, race, class, alignment (if chosen), background (if applicable).
-- **Abilities:** A table showing each ability score and its modifier.  Hovering or tapping on a modifier reveals the calculation and racial/class bonuses (provenance).
+- **Abilities:** A breakdown table with `Ability | Base | Adjustments | Final | Modifier`.  
+  - `Base`: user-entered score.  
+  - `Adjustments`: each racial/class/rule/item modifier from provenance.  
+  - `Final` + `Modifier`: computed end result.
 - **Feats:** List of selected feats with brief reminders of their effects; clicking a feat reveals full text.
 - **Skills:** List of skills with ranks, modifiers, class/cross-class indicators and ability dependencies.
 - **Equipment:** Items selected, starting equipment mode (kit vs gold), total weight and cost (if applicable).
-- **Derived Stats:** HP, AC (with breakdown by armor, shield, Dex, size, etc.), initiative, BAB, saves (Fort/Ref/Will), speed, etc.  Each stat should have a provenance breakdown when hovered.
+- **Derived Stats:** HP, AC, initiative, speed, BAB, saves (Fort/Ref/Will); shown in a table with `Base | Adjustments | Final`.
+- **Calculation Trace:** adjustments must be listed as readable rows (`+2 Elf`, `=10 Fighter`, etc.) so users can follow the formula without opening raw JSON.
 - **Pack Info:** Display the selected edition/version and the list of enabled rule packs with versions.  Show the pack fingerprint hash for reproducibility.
 - **Actions:**
   - **Edit** buttons for each section allow the user to go back and modify previous steps.  The wizard should support non-linear edits (e.g. go back from review to feats step, adjust selection and return to review).
@@ -67,8 +71,8 @@ The UI must be able to render these structures and provide interactive provenanc
 
 ## Checklist
 
-- [ ] Review page implemented with sections for all character aspects.
-- [ ] Provenance display implemented (tooltips or panels).
-- [ ] Export JSON logic implemented and tested.
+- [x] Review page implemented with sections for identity, abilities, combat/defense, skills, rules decisions, and pack info.
+- [x] Provenance display implemented (calculation rows plus raw provenance panel toggle).
+- [x] Export JSON logic implemented and tested.
 - [ ] Navigation back to previous steps and forward again works without data loss.
-- [ ] Pack fingerprint displayed.
+- [x] Pack fingerprint displayed.

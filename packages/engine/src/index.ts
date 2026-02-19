@@ -82,6 +82,22 @@ export interface CharacterSheet {
   packSetFingerprint: string;
 }
 
+export const DEFAULT_STATS = {
+  hp: 0,
+  ac: 10,
+  initiative: 0,
+  speed: 30,
+  bab: 0,
+  fort: 0,
+  ref: 0,
+  will: 0,
+  attackBonus: 0,
+  damageBonus: 0,
+} as const satisfies Record<
+  "hp" | "ac" | "initiative" | "speed" | "bab" | "fort" | "ref" | "will" | "attackBonus" | "damageBonus",
+  number
+>;
+
 function abilityMod(score: number): number {
   return Math.floor((score - 10) / 2);
 }
@@ -507,18 +523,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   const sheet: Record<string, any> = {
     metadata: { name: state.metadata.name ?? "" },
     abilities,
-    stats: {
-      hp: 0,
-      ac: 10,
-      initiative: 0,
-      speed: 30,
-      bab: 0,
-      fort: 0,
-      ref: 0,
-      will: 0,
-      attackBonus: 0,
-      damageBonus: 0
-    },
+    stats: { ...DEFAULT_STATS },
     selections: state.selections
   };
 
