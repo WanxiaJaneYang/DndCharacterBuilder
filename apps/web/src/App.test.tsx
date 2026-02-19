@@ -191,6 +191,12 @@ describe('role and language behavior', () => {
       expect(screen.getAllByRole('columnheader', { name: zh.reviewBaseColumn }).length).toBeGreaterThan(0);
       expect(screen.getAllByRole('columnheader', { name: zh.reviewAdjustmentsColumn }).length).toBeGreaterThan(0);
       expect(screen.getAllByText(zh.reviewFingerprintLabel, { exact: false }).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.abilityLabels.str).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.abilityLabels.dex).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.abilityLabels.con).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.abilityLabels.int).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.abilityLabels.wis).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.abilityLabels.cha).length).toBeGreaterThan(0);
     });
   });
 });

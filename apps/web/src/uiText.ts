@@ -90,7 +90,8 @@ export type UIText = {
   abilityLabels: AbilityLabels;
 };
 
-const uiTextKeys: Array<keyof UIText> = [
+// Keep only primitive string keys here; composite keys (like abilityLabels) are validated separately.
+const uiTextStringKeys: Array<Exclude<keyof UIText, 'abilityLabels'>> = [
   'appTitle',
   'appSubtitle',
   'stepCounter',
@@ -186,7 +187,7 @@ function isAbilityLabels(value: unknown): value is AbilityLabels {
 function isUIText(value: unknown): value is UIText {
   if (!value || typeof value !== 'object') return false;
   const record = value as Record<string, unknown>;
-  return uiTextKeys.every((key) => typeof record[key] === 'string') && isAbilityLabels(record.abilityLabels);
+  return uiTextStringKeys.every((key) => typeof record[key] === 'string') && isAbilityLabels(record.abilityLabels);
 }
 
 function parseUIText(input: unknown): Record<Language, UIText> {
