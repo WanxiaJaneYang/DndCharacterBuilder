@@ -52,6 +52,7 @@ To support a more complete SRD-style final character sheet, the following entity
 - `hitDie`: number (example: `10` for Fighter d10)
 - `baseAttackProgression`: enum (`full`, `threeQuarters`, `half`) or explicit table
 - `baseSaveProgression`: object keyed by `fort`, `ref`, `will` with progression enum
+- `levelTable`: list of `{ level, bab, fort, ref, will, features?, specialLabel? }`
 - `classFeaturesByLevel`: list of `{ level, featureId }`
 - `spellcasting` (optional): caster ability, spells-per-day table, known/prepared model
 
