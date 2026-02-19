@@ -18,14 +18,15 @@
 
 ## Standard MR Flow
 1. Identify latest/open MR tied to current branch.
-2. Check CI status and review state (including Copilot/reviewer status when used in this repo).
-3. Pull unresolved review threads/comments.
-4. Address unaddressed comments in code/docs/workflows.
-5. Resolve addressed threads.
-6. Re-request review (Copilot/reviewer) using direct reviewer-request APIs and re-check CI.
-7. Iterate steps 3-6 until review threads are resolved and checks pass.
-8. Merge MR (prefer normal merge; use `--admin` only when required by policy/workflow).
-9. Verify merged state and report merge commit SHA.
+2. Check merge conflict state first (`mergeStateStatus` / `gh pr view`).
+3. If conflict/dirty, resolve conflicts on the MR branch **before** requesting/rerunning CI.
+4. Pull unresolved review threads/comments.
+5. Address unaddressed comments in code/docs/workflows.
+6. Resolve addressed threads.
+7. Re-request review (Copilot/reviewer) using direct reviewer-request APIs and re-check CI.
+8. Iterate steps 4-7 until review threads are resolved and checks pass.
+9. Merge MR (prefer normal merge; use `--admin` only when required by policy/workflow).
+10. Verify merged state and report merge commit SHA.
 
 ## Copilot Review Trigger Rules
 - Use direct reviewer requests, not comments:
