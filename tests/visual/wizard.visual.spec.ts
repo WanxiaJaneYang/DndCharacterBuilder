@@ -16,7 +16,7 @@ const labels = {
   english: /EN|English/i,
   chinese: /\u4e2d\u6587|Chinese/i,
   human: /Human|\u4eba\u7c7b/i,
-  fighter: /Fighter \(Level 1\)|\u6218\u58eb\uff081\u7ea7\uff09/i,
+  fighter: /Fighter(?: \(Level 1\))?|\u6218\u58eb(?:\uff081\u7ea7\uff09)?/i,
   weaponFocusLongsword: /Weapon Focus \(Longsword\)|\u6b66\u5668\u4e13\u653b\uff08\u957f\u5251\uff09/i,
 };
 
