@@ -62,6 +62,10 @@ export type UIText = {
   reviewHpLabel: string;
   reviewBabLabel: string;
   reviewInitiativeLabel: string;
+  reviewSpeedLabel: string;
+  reviewFortLabel: string;
+  reviewRefLabel: string;
+  reviewWillLabel: string;
   reviewDexModifierLabel: string;
   reviewStrModifierLabel: string;
   reviewSelectedEditionLabel: string;
@@ -133,6 +137,10 @@ const uiTextKeys: Array<keyof UIText> = [
   'reviewHpLabel',
   'reviewBabLabel',
   'reviewInitiativeLabel',
+  'reviewSpeedLabel',
+  'reviewFortLabel',
+  'reviewRefLabel',
+  'reviewWillLabel',
   'reviewDexModifierLabel',
   'reviewStrModifierLabel',
   'reviewSelectedEditionLabel',

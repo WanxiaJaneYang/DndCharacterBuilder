@@ -129,14 +129,14 @@ export function App() {
       const abilityOrder = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
       const statOrder = ['hp', 'ac', 'initiative', 'speed', 'bab', 'fort', 'ref', 'will'] as const;
       const statLabels: Record<(typeof statOrder)[number], string> = {
-        hp: 'HP',
-        ac: 'AC',
+        hp: t.reviewHpLabel,
+        ac: t.reviewAcLabel,
         initiative: t.reviewInitiativeLabel,
-        speed: 'SPD',
-        bab: 'BAB',
-        fort: 'FORT',
-        ref: 'REF',
-        will: 'WILL',
+        speed: t.reviewSpeedLabel,
+        bab: t.reviewBabLabel,
+        fort: t.reviewFortLabel,
+        ref: t.reviewRefLabel,
+        will: t.reviewWillLabel,
       };
       const statBaseDefaults: Record<(typeof statOrder)[number], number> = {
         hp: 0,
@@ -263,17 +263,22 @@ export function App() {
                 {statOrder.map((statKey) => {
                   const targetPath = `stats.${statKey}`;
                   const records = provenanceByTargetPath.get(targetPath) ?? [];
+                  const firstSetIndex = records.findIndex((record) => record.setValue !== undefined);
+                  const baseValue = firstSetIndex >= 0
+                    ? Number(records[firstSetIndex]?.setValue ?? statBaseDefaults[statKey])
+                    : statBaseDefaults[statKey];
+                  const adjustmentRecords = records.filter((_, index) => index !== firstSetIndex);
 
                   return (
                     <tr key={statKey}>
                       <td className="review-cell-key">{statLabels[statKey]}</td>
-                      <td>{statBaseDefaults[statKey]}</td>
+                      <td>{baseValue}</td>
                       <td>
-                        {records.length === 0 ? (
+                        {adjustmentRecords.length === 0 ? (
                           <span className="review-muted">-</span>
                         ) : (
                           <ul className="calc-list">
-                            {records.map((record, index) => (
+                            {adjustmentRecords.map((record, index) => (
                               <li key={`${targetPath}-${index}`}>
                                 <code>{record.delta !== undefined ? formatSigned(record.delta) : `= ${record.setValue ?? 0}`}</code>
                                 {' '}
