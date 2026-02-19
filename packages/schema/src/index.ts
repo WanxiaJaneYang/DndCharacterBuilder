@@ -198,8 +198,51 @@ const ClassDataSchema = z.object({
   }).strict(),
   levelTable: z.array(ClassLevelRowSchema).min(1)
 }).strict().superRefine((classData, ctx) => {
-  const firstLevel = classData.levelTable[0];
-  if (!firstLevel || firstLevel.level !== 1) return;
+  const levelValues = classData.levelTable.map((row) => row.level);
+  const seenLevels = new Set<number>();
+  levelValues.forEach((level, index) => {
+    if (seenLevels.has(level)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Duplicate levelTable entry for level ${level}.`,
+        path: ["levelTable", index, "level"]
+      });
+      return;
+    }
+    seenLevels.add(level);
+  });
+
+  for (let index = 1; index < levelValues.length; index += 1) {
+    const previous = levelValues[index - 1];
+    const current = levelValues[index];
+    if (previous !== undefined && current !== undefined && current <= previous) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "levelTable must be strictly ordered by ascending level.",
+        path: ["levelTable", index, "level"]
+      });
+    }
+  }
+
+  const levelOneIndex = classData.levelTable.findIndex((row) => row.level === 1);
+  if (levelOneIndex < 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "levelTable must include a level 1 row.",
+      path: ["levelTable"]
+    });
+    return;
+  }
+  if (levelOneIndex !== 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "levelTable level 1 row must be the first entry.",
+      path: ["levelTable", levelOneIndex, "level"]
+    });
+    return;
+  }
+  const firstLevel = classData.levelTable[levelOneIndex];
+  if (!firstLevel) return;
 
   const expectedBabByProgression = {
     full: 1,
@@ -211,7 +254,7 @@ const ClassDataSchema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `Level 1 BAB (${firstLevel.bab}) does not match baseAttackProgression "${classData.baseAttackProgression}" (expected ${expectedBab}).`,
-      path: ["levelTable", 0, "bab"]
+      path: ["levelTable", levelOneIndex, "bab"]
     });
   }
 
@@ -226,7 +269,7 @@ const ClassDataSchema = z.object({
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: `Level 1 ${saveKey} save (${actualSave}) does not match ${saveKey} baseSaveProgression "${progression}" (expected ${expectedSave}).`,
-        path: ["levelTable", 0, saveKey]
+        path: ["levelTable", levelOneIndex, saveKey]
       });
     }
   });

@@ -240,6 +240,51 @@ describe("class entity schema", () => {
       })
     ).toThrow(/invalid classes\.data/i);
   });
+
+  it("rejects missing or misplaced level-1 row in levelTable", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-missing-level-1",
+        name: "Broken Class Missing Level 1",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          levelTable: [{ level: 2, bab: 2, fort: 3, ref: 0, will: 0 }]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-misplaced-level-1",
+        name: "Broken Class Misplaced Level 1",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          levelTable: [
+            { level: 2, bab: 2, fort: 3, ref: 0, will: 0 },
+            { level: 1, bab: 1, fort: 2, ref: 0, will: 0 }
+          ]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
 });
 
 
