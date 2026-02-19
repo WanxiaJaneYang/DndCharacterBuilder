@@ -1,7 +1,7 @@
 {
   "packId": "srd-35e-minimal",
   "officialRuleset": true,
-  "generatedAt": "2026-02-19T10:16:00.000Z",
+  "generatedAt": "2026-02-19T00:00:00.000Z",
   "generatedBy": "research/srd-authenticity-auto-validation baseline",
   "sourceAuthorities": [
     {
@@ -24,7 +24,7 @@
     },
     {
       "path": "entities/classes.json",
-      "sha256": "92c1df77f2dbeb62788bc0ce6392aea50fb4c139c2c9c0c2db996969695bbb55"
+      "sha256": "76847874d5c1c41fe590f08c5299bc325e7732093b5146618370c99d9d80caea"
     },
     {
       "path": "entities/feats.json",
