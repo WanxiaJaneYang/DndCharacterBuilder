@@ -9,6 +9,24 @@
         "climb",
         "jump",
         "ride"
+      ],
+      "hitDie": 10,
+      "baseAttackProgression": "full",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "poor",
+        "will": "poor"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 1,
+          "fort": 2,
+          "ref": 0,
+          "will": 0,
+          "features": [],
+          "specialLabel": "Bonus feat"
+        }
       ]
     },
     "effects": [
