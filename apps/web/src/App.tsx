@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
 import { applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
@@ -145,6 +145,12 @@ export function App() {
 
   const wizardSteps = context.resolvedData.flow.steps;
   const currentStep = wizardSteps[stepIndex];
+
+  useEffect(() => {
+    if (stepIndex >= wizardSteps.length) {
+      setStepIndex(0);
+    }
+  }, [stepIndex, wizardSteps.length]);
 
   const t = uiText[language];
   const choices = useMemo(() => listChoices(state, context), [state]);
@@ -575,10 +581,12 @@ export function App() {
         onEditionChange={(editionId) => {
           setSelectedEditionId(editionId);
           setSelectedOptionalPackIds([]);
+          setStepIndex(0);
         }}
         selectedOptionalPackIds={selectedOptionalPackIds}
         onOptionalPackToggle={(packId) => {
           setSelectedOptionalPackIds((current) => (current.includes(packId) ? current.filter((id) => id !== packId) : [...current, packId]));
+          setStepIndex(0);
         }}
         onBack={() => {
           setRulesReady(false);
