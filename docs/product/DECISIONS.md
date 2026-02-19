@@ -28,6 +28,17 @@ The flow JSON can specify either manual entry or a point‑buy system. We start 
 
 **Rationale:** Balances guidance for beginners with flexibility for veterans.
 
+### MCP-Based Data Services for Localization and Content Ingestion
+
+We will treat localization and all large-scale data generation as responsibilities of external MCP servers rather than ad-hoc scripts inside the app. MCP services will:
+
+- Extract and translate pack-localizable strings into `PackLocale` data using an official-terms glossary where available.
+- Convert SRD-like structured datasets into our canonical pack format.
+- In future, read rulebook sources (e.g. PDFs) to propose structured entities and flows.
+- Detect mechanics that are not expressible in the current data model and propose schema and flow/review updates instead of hardcoding special cases.
+
+**Rationale:** Keeps the core engine and UI purely data-driven, scales to large and user-uploaded datasets, and centralises complex automation and model evolution logic behind a deterministic service boundary.
+
 ## Pending Decisions (TODO)
 
 - Determine whether to include racial ability adjustments in the point‑buy calculation or apply them separately.
@@ -40,5 +51,6 @@ The flow JSON can specify either manual entry or a point‑buy system. We start 
 - [x] Edition selection decision recorded.
 - [x] Race/class UI decision recorded.
 - [x] Ability method decision recorded.
+- [x] MCP-based localization and data services decision recorded.
 - [ ] Pending decisions listed.
 - [ ] Future decisions to be updated here.

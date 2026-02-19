@@ -28,6 +28,16 @@ Creating a character in D&D can be intimidating. New players are overwhelmed by 
 - Validation and gating for each step.
 - Export of the character sheet with pack fingerprint and provenance.
 
+## Localization & Data Services (MCP)
+
+To support large, extensible datasets and user-provided packs, the product relies on external MCP-based services to automate data generation:
+
+- A localization service that can extract translatable strings from packs and generate `PackLocale` data for supported languages (starting with zh), applying a curated glossary for official D&D terms.
+- A content ingestion service that can convert SRD-like structured data into our pack format, and in future parse rulebooks (e.g. PDFs) into structured entities and flows.
+- A model-evolution service that can analyse new mechanics (e.g. feats, classes, races) that are not representable in the current data model and propose schema and flow/review-surface updates.
+
+These services must keep the engine and UI data-driven and deterministic: packs and locales remain the single source of truth; MCP servers only produce JSON artifacts consumed by the existing engine and web app.
+
 ## Non-Functional Requirements
 
 - Deterministic engine and pure business logic.
