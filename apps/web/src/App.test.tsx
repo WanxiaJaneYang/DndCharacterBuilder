@@ -11,8 +11,9 @@ const zh = uiText.zh;
 const playerNamePattern = new RegExp(`${en.playerTitle}|${zh.playerTitle}`, 'i');
 const dmNamePattern = new RegExp(`${en.dmTitle}|${zh.dmTitle}`, 'i');
 const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
-const nameLabelPattern = new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i');
 const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
+const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
+const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
 
 afterEach(() => {
   cleanup();
@@ -34,7 +35,9 @@ describe('wizard e2e-ish happy path', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: playerNamePattern }));
-    await user.type(screen.getByLabelText(nameLabelPattern), 'Aric');
+    expect(screen.getByText(rulesSetupTitlePattern)).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.type(screen.getByLabelText(en.nameLabel), 'Aric');
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     const strInput = screen.getByLabelText('STR');
@@ -53,7 +56,7 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByLabelText('Heavy Wooden Shield'));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    expect(screen.getByText(reviewPattern)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
     expect(screen.getByText(/AC:/).textContent).toContain('BAB: 1');
   });
 });
@@ -70,7 +73,7 @@ describe('role and language behavior', () => {
     expect(screen.queryByLabelText('STR')).toBeNull();
 
     await user.click(screen.getByRole('button', { name: playerNamePattern }));
-    expect(screen.getByLabelText(nameLabelPattern)).toBeTruthy();
+    expect(screen.getByText(rulesSetupTitlePattern)).toBeTruthy();
   });
 
   it('defaults to zh when browser locale starts with zh and supports keyboard language switching', async () => {
