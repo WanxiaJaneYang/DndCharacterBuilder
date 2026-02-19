@@ -58,6 +58,9 @@ export type UIText = {
   reviewFeatSlotsLabel: string;
   reviewYes: string;
   reviewNo: string;
+  reviewAcLabel: string;
+  reviewHpLabel: string;
+  reviewBabLabel: string;
   reviewInitiativeLabel: string;
   reviewDexModifierLabel: string;
   reviewStrModifierLabel: string;
@@ -65,6 +68,9 @@ export type UIText = {
   reviewEnabledPacksLabel: string;
   reviewFingerprintLabel: string;
   reviewUnknownVersion: string;
+  reviewAbilityTableCaption: string;
+  reviewCombatTableCaption: string;
+  reviewSkillsTableCaption: string;
 };
 
 const uiTextKeys: Array<keyof UIText> = [
@@ -123,6 +129,9 @@ const uiTextKeys: Array<keyof UIText> = [
   'reviewFeatSlotsLabel',
   'reviewYes',
   'reviewNo',
+  'reviewAcLabel',
+  'reviewHpLabel',
+  'reviewBabLabel',
   'reviewInitiativeLabel',
   'reviewDexModifierLabel',
   'reviewStrModifierLabel',
@@ -130,6 +139,9 @@ const uiTextKeys: Array<keyof UIText> = [
   'reviewEnabledPacksLabel',
   'reviewFingerprintLabel',
   'reviewUnknownVersion',
+  'reviewAbilityTableCaption',
+  'reviewCombatTableCaption',
+  'reviewSkillsTableCaption',
 ];
 
 function isUIText(value: unknown): value is UIText {

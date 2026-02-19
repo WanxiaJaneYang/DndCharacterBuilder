@@ -61,7 +61,13 @@
     "reviewSelectedEditionLabel": "Selected edition",
     "reviewEnabledPacksLabel": "Enabled packs",
     "reviewFingerprintLabel": "Fingerprint",
-    "reviewUnknownVersion": "unknown version"
+    "reviewUnknownVersion": "unknown version",
+    "reviewAcLabel": "AC",
+    "reviewHpLabel": "HP",
+    "reviewBabLabel": "BAB",
+    "reviewAbilityTableCaption": "Ability score calculation table",
+    "reviewCombatTableCaption": "Combat and defense calculation table",
+    "reviewSkillsTableCaption": "Skills and point-spending table"
   },
   "zh": {
     "appTitle": "D&D 3.5 新手角色创建器（MVP）",
@@ -125,6 +131,12 @@
     "reviewSelectedEditionLabel": "????",
     "reviewEnabledPacksLabel": "?????",
     "reviewFingerprintLabel": "??",
-    "reviewUnknownVersion": "????"
+    "reviewUnknownVersion": "????",
+    "reviewAcLabel": "AC",
+    "reviewHpLabel": "HP",
+    "reviewBabLabel": "BAB",
+    "reviewAbilityTableCaption": "?????",
+    "reviewCombatTableCaption": "????????",
+    "reviewSkillsTableCaption": "????????"
   }
 }

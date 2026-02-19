@@ -61,6 +61,38 @@ export function App() {
     [context.resolvedData.entities.skills]
   );
   const selectedFeats = ((state.selections.feats as string[] | undefined) ?? []);
+  const sourceNameByEntityId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const bucket of Object.values(context.resolvedData.entities)) {
+      for (const entity of Object.values(bucket)) {
+        map.set(entity.id, entity.name);
+      }
+    }
+    return map;
+  }, [context.resolvedData.entities]);
+  const packVersionById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const bucket of Object.values(context.resolvedData.entities)) {
+      for (const entity of Object.values(bucket)) {
+        if (!map.has(entity._source.packId)) {
+          map.set(entity._source.packId, entity._source.version ?? t.reviewUnknownVersion);
+        }
+      }
+    }
+    return map;
+  }, [context.resolvedData.entities, t.reviewUnknownVersion]);
+  const provenanceByTargetPath = useMemo(() => {
+    const map = new Map<string, typeof sheet.provenance>();
+    for (const record of sheet.provenance) {
+      const existing = map.get(record.targetPath);
+      if (existing) {
+        existing.push(record);
+      } else {
+        map.set(record.targetPath, [record]);
+      }
+    }
+    return map;
+  }, [sheet.provenance]);
 
   const selectedStepValues = (stepId: string): string[] => {
     if (stepId === STEP_ID_FEAT) return selectedFeats;
@@ -124,29 +156,6 @@ export function App() {
         attackBonus: 0,
         damageBonus: 0,
       };
-      const sourceNameByEntityId = new Map<string, string>();
-      for (const bucket of Object.values(context.resolvedData.entities)) {
-        for (const entity of Object.values(bucket)) {
-          sourceNameByEntityId.set(entity.id, entity.name);
-        }
-      }
-      const packVersionById = new Map<string, string>();
-      for (const bucket of Object.values(context.resolvedData.entities)) {
-        for (const entity of Object.values(bucket)) {
-          if (!packVersionById.has(entity._source.packId)) {
-            packVersionById.set(entity._source.packId, entity._source.version ?? t.reviewUnknownVersion);
-          }
-        }
-      }
-      const byTargetPath = new Map<string, typeof sheet.provenance>();
-      for (const record of sheet.provenance) {
-        const existing = byTargetPath.get(record.targetPath);
-        if (existing) {
-          existing.push(record);
-        } else {
-          byTargetPath.set(record.targetPath, [record]);
-        }
-      }
       const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
       const formatSourceLabel = (entityId: string) => sourceNameByEntityId.get(entityId) ?? entityId;
       const selectedRaceId = String(state.selections.race ?? '');
@@ -166,7 +175,7 @@ export function App() {
           <h2>{t.review}</h2>
           <header className="review-hero">
             <div>
-              <p className="review-character-name">{sheet.metadata.name || t.unnamedCharacter}</p>
+              <h3 className="review-character-name">{sheet.metadata.name || t.unnamedCharacter}</h3>
               <p className="review-character-meta">
                 {t.raceLabel}: <strong>{selectedRaceName}</strong> | {t.classLabel}: <strong>{selectedClassName}</strong>
               </p>
@@ -179,15 +188,15 @@ export function App() {
 
           <div className="review-stat-cards">
             <article className="review-card">
-              <h3>AC</h3>
+              <h3>{t.reviewAcLabel}</h3>
               <p>{String(sheet.stats.ac)}</p>
             </article>
             <article className="review-card">
-              <h3>HP</h3>
+              <h3>{t.reviewHpLabel}</h3>
               <p>{String(sheet.stats.hp)}</p>
             </article>
             <article className="review-card">
-              <h3>BAB</h3>
+              <h3>{t.reviewBabLabel}</h3>
               <p>{String(sheet.stats.bab)}</p>
             </article>
             <article className="review-card">
@@ -199,6 +208,7 @@ export function App() {
           <article className="sheet">
             <h3>{t.reviewAbilityBreakdown}</h3>
             <table className="review-table">
+              <caption className="sr-only">{t.reviewAbilityTableCaption}</caption>
               <thead>
                 <tr>
                   <th>{t.reviewAbilityColumn}</th>
@@ -212,7 +222,7 @@ export function App() {
                 {abilityOrder.map((ability) => {
                   const baseScore = Number(state.abilities[ability] ?? 10);
                   const targetPath = `abilities.${ability}.score`;
-                  const records = byTargetPath.get(targetPath) ?? [];
+                  const records = provenanceByTargetPath.get(targetPath) ?? [];
                   const finalScore = sheet.abilities[ability]?.score ?? baseScore;
                   const finalMod = sheet.abilities[ability]?.mod ?? 0;
 
@@ -247,6 +257,7 @@ export function App() {
           <article className="sheet">
             <h3>{t.reviewCombatBreakdown}</h3>
             <table className="review-table">
+              <caption className="sr-only">{t.reviewCombatTableCaption}</caption>
               <thead>
                 <tr>
                   <th>{t.reviewStatColumn}</th>
@@ -258,7 +269,7 @@ export function App() {
               <tbody>
                 {statOrder.map((statKey) => {
                   const targetPath = `stats.${statKey}`;
-                  const records = byTargetPath.get(targetPath) ?? [];
+                  const records = provenanceByTargetPath.get(targetPath) ?? [];
                   const derivedRows: Array<{ label: string; value: number }> = [];
                   if (statKey === 'initiative') {
                     derivedRows.push({ label: t.reviewDexModifierLabel, value: sheet.abilities.dex?.mod ?? 0 });
@@ -310,6 +321,7 @@ export function App() {
               {' '}({sheet.decisions.skillPoints.remaining} {t.reviewRemainingLabel})
             </p>
             <table className="review-table">
+              <caption className="sr-only">{t.reviewSkillsTableCaption}</caption>
               <thead>
                 <tr>
                   <th>{t.reviewSkillColumn}</th>
