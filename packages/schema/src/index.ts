@@ -218,6 +218,25 @@ export const ContractFixtureSchema = z.object({
   })
 });
 
+export const OfficialSourceSchema = z.object({
+  title: z.string().min(1),
+  url: z.string().url()
+});
+
+export const AuthenticityArtifactSchema = z.object({
+  path: z.string().min(1),
+  sha256: z.string().regex(/^[a-f0-9]{64}$/)
+});
+
+export const AuthenticityLockSchema = z.object({
+  packId: z.string().min(1),
+  officialRuleset: z.boolean(),
+  generatedAt: z.string().datetime(),
+  generatedBy: z.string().min(1),
+  sourceAuthorities: z.array(OfficialSourceSchema).min(1),
+  artifacts: z.array(AuthenticityArtifactSchema).min(1)
+});
+
 export type ChoiceStepId = z.infer<typeof ChoiceStepIdSchema>;
 export type ChoiceStepKind = z.infer<typeof ChoiceStepKindSchema>;
 export type Expr = z.infer<typeof ExprSchema>;
@@ -228,3 +247,4 @@ export type Manifest = z.infer<typeof ManifestSchema>;
 export type Flow = z.infer<typeof FlowSchema>;
 export type Pack = z.infer<typeof PackSchema>;
 export type ContractFixture = z.infer<typeof ContractFixtureSchema>;
+export type AuthenticityLock = z.infer<typeof AuthenticityLockSchema>;

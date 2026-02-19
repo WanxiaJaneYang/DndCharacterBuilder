@@ -6,6 +6,7 @@ This section documents the JSON pack and schema contract used by the builder.
 - `ENTITY_SCHEMA.md`: shared entity fields and type-specific data models.
 - `FLOW_SCHEMA.md`: flow step schema and constraints.
 - `EXPORT_SCHEMA.md`: export payload expectations.
+- `SRD_AUTHENTICITY_VALIDATION.md`: automatic authenticity strategy for official SRD datasets.
 
 ## Recent updates
 

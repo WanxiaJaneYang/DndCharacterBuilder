@@ -5,6 +5,7 @@ Pack folders must follow:
 ```text
 packs/<pack-id>/
   manifest.json
+  authenticity.lock.json (required for official rulesets)
   entities/
     races.json
     classes.json
@@ -17,6 +18,9 @@ packs/<pack-id>/
   patches/ (optional)
   contracts/
 ```
+
+For official SRD-derived packs, `authenticity.lock.json` is used by automated tests to verify
+that critical data artifacts match an approved checksum baseline.
 
 ## Entity validation
 
