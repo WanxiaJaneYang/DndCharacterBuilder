@@ -196,4 +196,43 @@ describe("engine determinism", () => {
     expect(acSource?.setValue).toBe(15);
     expect(acSource?.source.packId).toBe("override");
   });
+
+  it("ignores malformed class progression effects instead of throwing", () => {
+    const fighter = context.resolvedData.entities.classes?.["fighter-1"];
+    if (!fighter) throw new Error("Missing fighter-1 fixture");
+
+    const brokenContext = {
+      ...context,
+      resolvedData: {
+        ...context.resolvedData,
+        entities: {
+          ...context.resolvedData.entities,
+          classes: {
+            ...context.resolvedData.entities.classes,
+            "fighter-1": {
+              ...fighter,
+              data: {
+                ...fighter.data,
+                progression: {
+                  levelGains: [
+                    {
+                      level: 1,
+                      effects: [{ kind: "set", targetPath: "stats.hp" }]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    let state = applyChoice(initialState, "name", "Malformed");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter-1");
+
+    expect(() => finalizeCharacter(state, brokenContext)).not.toThrow();
+  });
 });
