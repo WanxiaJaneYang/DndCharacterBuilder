@@ -1,6 +1,6 @@
 # Product Requirements Document (PRD)
 
-This document sets out the high‑level product requirements for the DnDCharacterBuilder project. It is based on our agreed PRD (v0.1) and updated for the new folder structure.
+This document sets out the high-level product requirements for the DnDCharacterBuilder project. It is based on our agreed PRD (v0.1) and updated for the new folder structure.
 
 ## Problem Statement
 
@@ -8,27 +8,27 @@ Creating a character in D&D can be intimidating. New players are overwhelmed by 
 
 ## Target Users
 
-1. **Primary – New Players:** Require clear guidance, simple explanations and validation to avoid mistakes.
-2. **Secondary – Returning Players:** Want a faster flow with the ability to tweak selections and skip guidance.
-3. **Tertiary – Table Admin/DM (future):** May enable or disable expansions and manage custom rules.
+1. **Primary - New Players:** Require clear guidance, simple explanations and validation to avoid mistakes.
+2. **Secondary - Returning Players:** Want a faster flow with the ability to tweak selections and skip guidance.
+3. **Tertiary - Table Admin/DM (future):** May enable or disable expansions and manage custom rules.
 
 ## Core Product Principles
 
-- **Data Driven:** Rules and UI flows are defined in JSON and can be extended without code changes.
-- **Edition‑Aware Flow:** The wizard steps depend on the selected edition and loaded rule packs.
-- **Validity by Construction:** Only valid choices are shown; the user cannot proceed until mandatory selections are completed.
+- **Data Driven:** Rules and UI flows are defined in JSON and can be extended without code changes.
+- **Edition-Aware Flow:** The wizard steps depend on the selected edition and loaded rule packs.
+- **Validity by Construction:** Only valid choices are shown; the user cannot proceed until mandatory selections are completed.
 - **Provenance and Determinism:** Derived stats must be reproducible and include a trace of their origins.
 
-## High‑Level Functional Requirements
+## High-Level Functional Requirements
 
 - Initial role-selection screen (DM vs Player) before wizard entry.
 - Version and source selection screen for Player flow.
-- Step‑by‑step wizard for Race, Class, Ability Scores, Feats, Skills, Equipment and Review.
+- Step-by-step wizard for Race, Class, Ability Scores, Feats, Skills, Equipment and Review.
 - Each step must render options using data packs and include short descriptions and optional details.
 - Validation and gating for each step.
 - Export of the character sheet with pack fingerprint and provenance.
 
-## Non‑Functional Requirements
+## Non-Functional Requirements
 
 - Deterministic engine and pure business logic.
 - Minimal network dependencies (works offline with local packs).
@@ -36,7 +36,7 @@ Creating a character in D&D can be intimidating. New players are overwhelmed by 
 
 ## Edition Variability
 
-Different editions may introduce new steps or remove existing ones. For example, D&D 5R adds a *background feat* step after the class selection. The flow must be configurable per edition and pack.
+Different editions may introduce new steps or remove existing ones. For example, D&D 5R adds a background-feat step after class selection. The flow must be configurable per edition and pack.
 
 ## MVP Scope Summary
 
@@ -44,9 +44,70 @@ See `/product/MVP_SCOPE.md` for the precise boundaries.
 
 ## Success Criteria
 
-- A first‑time user can complete the wizard and export a valid level‑1 character within 5 minutes.
+- A first-time user can complete the wizard and export a valid level-1 character within 5 minutes.
 - All screens are driven by JSON packs; no hardcoded lists remain.
 - All derived stats show provenance.
+
+## Final Character Sheet Parity Plan (SRD/PHB)
+
+The current sheet is functional but not yet complete against SRD 3.5 character-sheet expectations. Implementation should follow this priority order.
+
+### Phase 1: Core Playability (highest priority)
+
+Goal: make the exported/review sheet usable at the table for level-1 martial characters.
+
+- Add identity and progression fields:
+  - `level`, `xp`, `alignment`, `size`, `speed`.
+- Add full combat headline stats:
+  - `ac.total`, `ac.touch`, `ac.flatFooted`.
+  - `initiative.total`.
+  - `grapple.total`.
+  - `attacks.melee[]` and `attacks.ranged[]` entries (name, attack bonus, damage, crit, range).
+- Add save breakdowns:
+  - `fortitude`, `reflex`, `will` with `base`, `ability`, `misc`, `total`.
+- Add HP breakdown:
+  - `hp.total`, plus source breakdown (`hitDie`, `con`, `misc`).
+
+Phase 1 acceptance:
+- Review page shows these sections clearly.
+- Export JSON includes the same fields.
+- Engine tests validate deterministic totals and component breakdown math.
+
+### Phase 2: Sheet Completeness for Non-casters
+
+Goal: close major remaining gaps for common SRD 3.5 non-caster builds.
+
+- Add feat and trait visibility:
+  - explicit selected feat list with effect summary text.
+  - racial trait summary list (including passive traits like vision/senses).
+- Add skills detail completeness:
+  - per-skill `misc` modifier channel.
+  - armor-check penalty handling for affected skills.
+- Add equipment and carry/load summary:
+  - equipped items, carried weight, load category, speed impact.
+- Add movement detail:
+  - base speed vs adjusted speed (armor/load).
+
+Phase 2 acceptance:
+- Final sheet explains where each non-caster number comes from without external lookup.
+- Data pack can encode required modifiers without UI hardcoding.
+
+### Phase 3: Caster + Progression Expansion
+
+Goal: support broader class coverage and leveling complexity.
+
+- Add spellcasting block:
+  - caster level, spell ability, save DC basis.
+  - spells per day / known / prepared support (edition/pack driven).
+- Add multiclass progression surfaces:
+  - per-class levels, BAB/save aggregation provenance.
+  - XP-penalty rule output tied to favored class and class mix.
+- Add optional advanced sections:
+  - resistances/immunities, conditional modifiers, situational notes.
+
+Phase 3 acceptance:
+- At least one SRD caster path is fully representable in review/export.
+- Multiclass sheet output remains deterministic and provenance-backed.
 
 ## TODO
 
@@ -60,7 +121,7 @@ See `/product/MVP_SCOPE.md` for the precise boundaries.
 - [ ] Target users defined.
 - [ ] Core principles agreed.
 - [ ] Functional requirements listed.
-- [ ] Non‑functional requirements summarised.
+- [ ] Non-functional requirements summarised.
 - [ ] Edition variability described.
 - [ ] Success criteria established.
 - [ ] TODO tasks recorded.

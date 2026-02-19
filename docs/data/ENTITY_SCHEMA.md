@@ -42,3 +42,31 @@ For `entityType = "races"`, `data` is validated with a strict race schema:
 - Entity-level text metadata is required; image URL fields are optional and may be `null` when no asset exists.
 - Race entries can still express engine-ready mechanics in `effects`.
 - Rich metadata in `data` is intended for details modal + rules expansion.
+
+## Planned Extensions For Sheet Parity
+
+To support a more complete SRD-style final character sheet, the following entity `data` fields should be added in future phases.
+
+### Class `data` (planned additions)
+
+- `hitDie`: number (example: `10` for Fighter d10)
+- `baseAttackProgression`: enum (`full`, `threeQuarters`, `half`) or explicit table
+- `baseSaveProgression`: object keyed by `fort`, `ref`, `will` with progression enum
+- `classFeaturesByLevel`: list of `{ level, featureId }`
+- `spellcasting` (optional): caster ability, spells-per-day table, known/prepared model
+
+### Item `data` (planned additions)
+
+- `slot` (optional): worn slot (`armor`, `shield`, `weapon`, etc.)
+- `weight`: number
+- `cost`: number + currency unit
+- `armor` (optional): armor bonus, max dex, armor check penalty, arcane spell failure, speed impact
+- `weapon` (optional): attack type, damage, crit profile, range increment
+
+### Skill `data` (planned additions)
+
+- `armorCheckPenaltyApplies`: boolean
+- `trainedOnly`: boolean
+- `synergyRules` (optional): list of conditional misc modifiers
+
+These planned fields are intentionally data-driven so the engine can compute final-sheet values without hardcoded class or item logic.
