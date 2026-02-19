@@ -16,3 +16,7 @@ This section documents the JSON pack and schema contract used by the builder.
   - `racialTraits.extra-skill-points` increases level-1 skill budget.
   - `skillBonuses` apply to skill totals in review output.
   - `favoredClass` is surfaced as multiclass XP-penalty metadata for future leveling flow.
+- `EXPORT_SCHEMA.md` now documents a phased target model for closing SRD-style final character-sheet gaps:
+  - Phase 1 core combat/save/hp breakdowns
+  - Phase 2 non-caster sheet completeness
+  - Phase 3 caster and multiclass progression blocks

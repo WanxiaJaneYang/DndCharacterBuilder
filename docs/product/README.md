@@ -30,6 +30,7 @@ The product must support:
 ## Roadmap Pointers
 
 - See `/product/PRD.md` for detailed product requirements.
+- See `/product/PRD.md` section `Final Character Sheet Parity Plan (SRD/PHB)` for phased sheet-completeness work.
 - See `/product/MVP_SCOPE.md` for the exact MVP boundaries and success metrics.
 - See `/product/DECISIONS.md` for a record of product decisions.
 
