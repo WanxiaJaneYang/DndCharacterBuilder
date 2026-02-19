@@ -275,7 +275,7 @@ export function App() {
                     derivedRows.push({ label: t.reviewDexModifierLabel, value: sheet.abilities.dex?.mod ?? 0 });
                   }
                   if (statKey === 'attackBonus') {
-                    derivedRows.push({ label: 'BAB', value: Number(sheet.stats.bab ?? 0) });
+                    derivedRows.push({ label: t.reviewBabLabel, value: Number(sheet.stats.bab ?? 0) });
                     derivedRows.push({ label: t.reviewStrModifierLabel, value: sheet.abilities.str?.mod ?? 0 });
                   }
                   if (statKey === 'damageBonus') {
