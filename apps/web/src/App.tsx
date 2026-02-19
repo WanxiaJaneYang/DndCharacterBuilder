@@ -108,7 +108,7 @@ export function App() {
   const sheet = useMemo(() => finalizeCharacter(state, context), [state]);
   const skillEntities = useMemo(
     () => Object.values(context.resolvedData.entities.skills ?? {}).sort((a, b) => a.name.localeCompare(b.name)),
-    []
+    [context.resolvedData.entities.skills]
   );
   const selectedFeats = ((state.selections.feats as string[] | undefined) ?? []);
 

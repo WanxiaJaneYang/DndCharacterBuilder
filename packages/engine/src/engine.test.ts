@@ -98,7 +98,7 @@ describe("engine determinism", () => {
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "human");
     state = applyChoice(state, "class", "fighter-1");
-    state = applyChoice(state, "skills", { climb: 0.5 });
+    state = { ...state, selections: { ...state.selections, skills: { climb: 0.5 } } };
 
     const errors = validateState(state, context);
     expect(errors.some((error) => error.code === "SKILL_RANK_CLASS_INTEGER")).toBe(true);
@@ -125,6 +125,58 @@ describe("engine determinism", () => {
     const ranks = state.selections.skills as Record<string, number>;
     expect(ranks.climb).toBe(2);
     expect(ranks.listen).toBe(1.5);
+  });
+
+  it("returns UNKNOWN_SKILL when selected skill does not exist", () => {
+    let state = applyChoice(initialState, "name", "UnknownSkill");
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter-1");
+    state = { ...state, selections: { ...state.selections, skills: { "not-a-real-skill": 1 } } };
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "UNKNOWN_SKILL")).toBe(true);
+  });
+
+  it("returns SKILL_RANK_INVALID for negative and non-finite skill ranks", () => {
+    let state = applyChoice(initialState, "name", "InvalidSkillRanks");
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter-1");
+    state = { ...state, selections: { ...state.selections, skills: { climb: -1, jump: Number.POSITIVE_INFINITY } } };
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "SKILL_RANK_INVALID")).toBe(true);
+  });
+
+  it("returns SKILL_RANK_MAX when ranks exceed class/cross-class limits", () => {
+    let state = applyChoice(initialState, "name", "RankMax");
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter-1");
+    state = { ...state, selections: { ...state.selections, skills: { climb: 5, listen: 2.5 } } };
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "SKILL_RANK_MAX")).toBe(true);
+  });
+
+  it("returns SKILL_POINTS_EXCEEDED when allocated skill cost exceeds budget", () => {
+    let state = applyChoice(initialState, "name", "SkillBudget");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "dwarf");
+    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "skills", { climb: 4, diplomacy: 4 }, context);
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "SKILL_POINTS_EXCEEDED")).toBe(true);
+  });
+
+  it("returns STEP_LIMIT_EXCEEDED when selections exceed feat limit", () => {
+    let state = applyChoice(initialState, "name", "FeatLimit");
+    state = applyChoice(state, "abilities", { str: 16, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "dwarf");
+    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "feat", ["power-attack", "weapon-focus-longsword"]);
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "STEP_LIMIT_EXCEEDED")).toBe(true);
   });
 
   it("uses overriding pack id in provenance records", () => {

@@ -193,16 +193,21 @@ function getStepSelectionLimit(step: EntityTypeFlowStep, state: CharacterState, 
   return baseLimit;
 }
 
-function getSelectedSkillRanks(state: CharacterState): Record<string, number> {
+function getSelectedSkillRanks(state: CharacterState, context?: EngineContext): Record<string, number> {
   const raw = state.selections.skills;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const classSkills = context ? getClassSkills(state, context) : undefined;
   const normalized: Record<string, number> = {};
   for (const [skillId, value] of Object.entries(raw as Record<string, unknown>)) {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed < 0) continue;
     const canonicalSkillId = normalizeSkillId(skillId);
     if (!canonicalSkillId) continue;
-    normalized[canonicalSkillId] = Math.round(parsed * 2) / 2;
+    if (classSkills?.has(canonicalSkillId)) {
+      normalized[canonicalSkillId] = Math.round(parsed);
+    } else {
+      normalized[canonicalSkillId] = Math.round(parsed * 2) / 2;
+    }
   }
   return normalized;
 }
@@ -261,7 +266,7 @@ function buildDecisionSummary(state: CharacterState, context: EngineContext, abi
   const featStep = featStepCandidate && isEntityTypeFlowStep(featStepCandidate) ? featStepCandidate : undefined;
   const featSelectionLimit = featStep ? (getStepSelectionLimit(featStep, state, context) ?? 0) : 0;
   const classSkills = getClassSkills(state, context);
-  const selectedSkillRanks = getSelectedSkillRanks(state);
+  const selectedSkillRanks = getSelectedSkillRanks(state, context);
   const classSkillPointsPerLevel = getClassSkillPointsPerLevel(state, context);
   const intModifier = abilities.int?.mod ?? 0;
   const racialBonusAtLevel1 = getRaceSkillBonusAtLevel1(state, context);
@@ -304,7 +309,7 @@ function buildSkillBreakdown(
   abilities: Record<string, { score: number; mod: number }>,
   decisions: DecisionSummary
 ): Record<string, SkillBreakdown> {
-  const selectedRanks = getSelectedSkillRanks(state);
+  const selectedRanks = getSelectedSkillRanks(state, context);
   const racialBonuses = buildRacialSkillBonusMap(state, context);
   const skills = Object.values(context.resolvedData.entities.skills ?? {}).sort((a, b) => a.name.localeCompare(b.name));
   const output: Record<string, SkillBreakdown> = {};
@@ -410,25 +415,36 @@ export function validateState(state: CharacterState, context: EngineContext): Va
 
   const abilities = Object.fromEntries(Object.entries(state.abilities).map(([key, score]) => [key, { score, mod: abilityMod(score) }])) as Record<string, { score: number; mod: number }>;
   const decisions = buildDecisionSummary(state, context, abilities);
-  const selectedRanks = getSelectedSkillRanks(state);
+  const selectedRanks = getSelectedSkillRanks(state, context);
+  const rawSelectedSkills = state.selections.skills && typeof state.selections.skills === "object" && !Array.isArray(state.selections.skills)
+    ? (state.selections.skills as Record<string, unknown>)
+    : {};
   const knownSkills = new Set(Object.keys(context.resolvedData.entities.skills ?? {}).map((skillId) => normalizeSkillId(skillId)));
+
+  for (const [rawSkillId, rawRank] of Object.entries(rawSelectedSkills)) {
+    const skillId = normalizeSkillId(rawSkillId);
+    if (!skillId) continue;
+    const parsedRank = Number(rawRank);
+    if (!Number.isFinite(parsedRank) || parsedRank < 0) {
+      errors.push({ code: "SKILL_RANK_INVALID", message: `Invalid rank for ${skillId}.`, stepId: "skills" });
+      continue;
+    }
+    const isClassSkill = decisions.classSkills.includes(skillId);
+    if (isClassSkill) {
+      if (!Number.isInteger(parsedRank)) {
+        errors.push({ code: "SKILL_RANK_CLASS_INTEGER", message: `${skillId} class-skill ranks must be whole numbers.`, stepId: "skills" });
+      }
+    } else if (Math.round(parsedRank * 2) !== parsedRank * 2) {
+      errors.push({ code: "SKILL_RANK_STEP", message: `${skillId} ranks must use 0.5 increments.`, stepId: "skills" });
+    }
+  }
 
   for (const [skillId, rank] of Object.entries(selectedRanks)) {
     if (!knownSkills.has(skillId)) {
       errors.push({ code: "UNKNOWN_SKILL", message: `Unknown skill selected: ${skillId}.`, stepId: "skills" });
       continue;
     }
-    if (rank < 0 || !Number.isFinite(rank)) {
-      errors.push({ code: "SKILL_RANK_INVALID", message: `Invalid rank for ${skillId}.`, stepId: "skills" });
-      continue;
-    }
-    if (Math.round(rank * 2) !== rank * 2) {
-      errors.push({ code: "SKILL_RANK_STEP", message: `${skillId} ranks must use 0.5 increments.`, stepId: "skills" });
-    }
     const isClassSkill = decisions.classSkills.includes(skillId);
-    if (isClassSkill && !Number.isInteger(rank)) {
-      errors.push({ code: "SKILL_RANK_CLASS_INTEGER", message: `${skillId} class-skill ranks must be whole numbers.`, stepId: "skills" });
-    }
     const maxRanks = isClassSkill ? 4 : 2;
     if (rank > maxRanks) {
       errors.push({ code: "SKILL_RANK_MAX", message: `${skillId} exceeds max rank ${maxRanks}.`, stepId: "skills" });
