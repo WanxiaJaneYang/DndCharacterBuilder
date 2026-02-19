@@ -14,7 +14,7 @@ This living document tracks the engineering tasks required to implement the DnDC
 
 2. **Wizard UI & flow**
    - [ ] Build the Rules Setup page with version and source selection.
-   - [ ] Implement race, class, ability, feat, skill and equipment steps using card and allocator components.
+   - [x] Implement race, class, ability, feat, skill and equipment steps using card and allocator components.
    - [ ] Implement review & export step with provenance display.
    - [ ] Wire validation and gating for each step.
 
@@ -52,10 +52,18 @@ This living document tracks the engineering tasks required to implement the DnDC
 ## TODO
 
 - Complete export implementation and update engine to produce final character sheet.
-- Finalise skill allocation rules and implement the SkillAllocator component.
+- Expand class data and UI ergonomics for full SRD skill rules beyond the MVP subset.
 - Implement starting equipment mode selection and persist it in exports.
 - Write integration tests for wizard UI once components are stable.
 - Document code standards (linting, formatting) and add CI scripts.
+
+## Recent Progress
+
+- Added a dedicated `skills` step to the character-creation flow and connected it to the UI.
+- Updated engine decisions to consume race traits that change flow behavior:
+  - `bonus-feat` now increases the feat selection limit.
+  - `extra-skill-points` now increases level-1 skill budget.
+- Added cross-class skill cost/rank validation and surfaced `favoredClass` XP-penalty metadata for future multiclass leveling logic.
 
 ## Checklist
 

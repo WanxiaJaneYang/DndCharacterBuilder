@@ -48,6 +48,7 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText('Power Attack'));
     await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText('Chainmail'));
     await user.click(screen.getByLabelText('Heavy Wooden Shield'));
     await user.click(screen.getByRole('button', { name: nextPattern }));

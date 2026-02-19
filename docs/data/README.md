@@ -11,3 +11,8 @@ This section documents the JSON pack and schema contract used by the builder.
 
 - Race entities (`entityType: races`) use a structured `data` model for SRD 3.5 baseline traits (ability modifiers, vision, languages, favored class, racial traits, and optional bonus lists/spell-like abilities).
 - All entity types require text UI metadata (`summary`, `description`); image metadata (`portraitUrl`, `iconUrl`) is optional and may be `null`.
+- Engine flow now consumes race data that impacts creation logic:
+  - `racialTraits.bonus-feat` increases feat pick limit.
+  - `racialTraits.extra-skill-points` increases level-1 skill budget.
+  - `skillBonuses` apply to skill totals in review output.
+  - `favoredClass` is surfaced as multiclass XP-penalty metadata for future leveling flow.

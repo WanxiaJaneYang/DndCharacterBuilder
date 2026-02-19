@@ -8,6 +8,7 @@ const labels = {
   raceHeading: /Race|\u79cd\u65cf/i,
   classHeading: /Class|\u804c\u4e1a/i,
   featHeading: /Feat|\u4e13\u957f/i,
+  skillsHeading: /Skills|\u6280\u80fd/i,
   equipmentHeading: /Equipment|\u88c5\u5907/i,
   reviewHeading: /Review|\u603b\u89c8/i,
   english: /EN|English/i,
@@ -52,7 +53,9 @@ async function goToDetailPage(page: Page, locale: Locale) {
   await expect(page.getByRole('heading', { name: labels.featHeading })).toBeVisible();
   await page.getByLabel('Weapon Focus (Longsword)').click();
   await page.getByRole('button', { name: labels.next }).click();
-  await expect(page.getByText(labels.equipmentHeading, { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: labels.skillsHeading })).toBeVisible();
+  await page.getByRole('button', { name: labels.next }).click();
+  await expect(page.getByRole('heading', { name: labels.equipmentHeading })).toBeVisible();
   await page.getByRole('button', { name: labels.next }).click();
   await expect(page.getByRole('heading', { name: labels.reviewHeading })).toBeVisible();
 }

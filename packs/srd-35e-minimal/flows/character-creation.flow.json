@@ -47,6 +47,14 @@
       }
     },
     {
+      "id": "skills",
+      "kind": "skills",
+      "label": "Skills",
+      "source": {
+        "type": "manual"
+      }
+    },
+    {
       "id": "equipment",
       "kind": "equipment",
       "label": "Equipment",

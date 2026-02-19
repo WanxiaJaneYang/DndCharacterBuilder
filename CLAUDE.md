@@ -34,3 +34,7 @@
 2. Read the corresponding `docs/<area>/README.md` first to get an overview and find links to deeper documents.
 3. Each documentation subfolder contains a TODO list and a checklist. Use these to decide which files to read next and to track progress.
 4. Avoid hardcoding rule logic in UI or skipping the guidelines; follow the checklists to maintain determinism and traceability.
+
+## MR/PR guidance
+- Before any MR/PR work, read `.codex/mr-flow-and-approvals.md`.
+- Follow its MR flow, approval preferences, and GitHub command guidance for this repo.

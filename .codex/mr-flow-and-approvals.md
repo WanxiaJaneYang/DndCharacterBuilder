@@ -18,14 +18,27 @@
 
 ## Standard MR Flow
 1. Identify latest/open MR tied to current branch.
-2. Check CI status and review state.
+2. Check CI status and review state (including Copilot/reviewer status when used in this repo).
 3. Pull unresolved review threads/comments.
 4. Address unaddressed comments in code/docs/workflows.
 5. Resolve addressed threads.
-6. Re-request review (Copilot/reviewer) and re-check CI.
+6. Re-request review (Copilot/reviewer) using direct reviewer-request APIs and re-check CI.
 7. Iterate steps 3-6 until review threads are resolved and checks pass.
 8. Merge MR (prefer normal merge; use `--admin` only when required by policy/workflow).
 9. Verify merged state and report merge commit SHA.
+
+## Copilot Review Trigger Rules
+- Use direct reviewer requests, not comments:
+  - `gh pr edit <pr-number> --add-reviewer copilot`
+- Do **not** use comment pings like `@copilot ...` to re-request review.
+- After requesting Copilot review, poll PR checks/review state and only proceed once new comments (if any) are handled.
+
+## Post-push polling requirement
+- After every push to an MR branch:
+  1. Poll `gh pr checks <pr-number>` until checks are no longer pending.
+  2. Poll `gh pr view <pr-number>` for `reviewDecision` / requested reviewers (Copilot included when requested).
+  3. If CI fails, fix immediately and repeat polling.
+  4. If review is still required, report blocker clearly and continue once feedback arrives.
 
 ## Operational Rules For Future Sessions
 - Read this file at the start of MR-related tasks.

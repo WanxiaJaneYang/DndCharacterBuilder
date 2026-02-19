@@ -3,6 +3,14 @@
     "id": "fighter-1",
     "name": "Fighter (Level 1)",
     "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 2,
+      "classSkills": [
+        "climb",
+        "jump",
+        "ride"
+      ]
+    },
     "effects": [
       {
         "kind": "set",

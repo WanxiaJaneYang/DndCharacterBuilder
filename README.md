@@ -39,6 +39,9 @@ The `docs/` folder is organised by discipline. To work on a specific area, start
 
 Each documentation folder contains a todo list and a checklist to track progress. Use these to orient yourself and plan work.
 
+## MR/PR workflow note
+Before starting any merge-request or pull-request task, read `.codex/mr-flow-and-approvals.md` and follow its flow and approval preferences.
+
 ## Run locally
 ```bash
 npm install
