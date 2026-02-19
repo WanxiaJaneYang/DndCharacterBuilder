@@ -37,17 +37,16 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByRole('button', { name: playerNamePattern }));
     expect(screen.getByText(rulesSetupTitlePattern)).toBeTruthy();
     await user.click(screen.getByRole('button', { name: startWizardPattern }));
-    await user.type(screen.getByLabelText(en.nameLabel), 'Aric');
+    await user.click(screen.getByLabelText('Human'));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText('Fighter (Level 1)'));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     const strInput = screen.getByLabelText('STR');
     await user.clear(strInput);
     await user.type(strInput, '16');
-
     await user.click(screen.getByRole('button', { name: nextPattern }));
-    await user.click(screen.getByLabelText('Human'));
-    await user.click(screen.getByRole('button', { name: nextPattern }));
-    await user.click(screen.getByLabelText('Fighter (Level 1)'));
+    await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), 'Aric');
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText('Power Attack'));
     await user.click(screen.getByRole('button', { name: nextPattern }));
@@ -98,11 +97,13 @@ describe('role and language behavior', () => {
 
     await user.click(screen.getByRole('button', { name: playerNamePattern }));
     await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    expect(screen.getByLabelText('Human')).toBeTruthy();
+
     await user.click(screen.getByRole('button', { name: nextPattern }));
-    expect(screen.getByLabelText('STR')).toBeTruthy();
+    expect(screen.getByLabelText('Fighter (Level 1)')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
-    expect(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i'))).toBeTruthy();
+    expect(screen.getByLabelText('Human')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
     expect(screen.getByText(rulesSetupTitlePattern)).toBeTruthy();

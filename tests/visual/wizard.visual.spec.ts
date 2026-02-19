@@ -36,24 +36,24 @@ async function goToHomePage(page: Page, locale: Locale) {
   await enterPlayerFlow(page);
   await expect(page.getByRole('heading', { name: labels.rulesSetupHeading })).toBeVisible();
   await page.getByRole('button', { name: labels.startWizard }).click();
-  await expect(page.getByPlaceholder(labels.namePlaceholder)).toBeVisible();
+  await expect(page.getByRole('heading', { name: labels.raceHeading })).toBeVisible();
 }
 
 async function goToListPage(page: Page, locale: Locale) {
   await goToHomePage(page, locale);
-  await page.getByPlaceholder(labels.namePlaceholder).fill('Snapshot Hero');
+  await page.getByLabel('Human').click();
   await page.getByRole('button', { name: labels.next }).click();
-  await expect(page.getByRole('heading', { name: labels.abilityHeading })).toBeVisible();
-  await page.getByRole('button', { name: labels.next }).click();
-  await expect(page.getByRole('heading', { name: labels.raceHeading })).toBeVisible();
+  await expect(page.getByRole('heading', { name: labels.classHeading })).toBeVisible();
 }
 
 async function goToDetailPage(page: Page, locale: Locale) {
   await goToListPage(page, locale);
-  await page.getByLabel('Human').click();
-  await page.getByRole('button', { name: labels.next }).click();
-  await expect(page.getByRole('heading', { name: labels.classHeading })).toBeVisible();
   await page.getByLabel('Fighter (Level 1)').click();
+  await page.getByRole('button', { name: labels.next }).click();
+  await expect(page.getByRole('heading', { name: labels.abilityHeading })).toBeVisible();
+  await page.getByRole('button', { name: labels.next }).click();
+  await expect(page.getByPlaceholder(labels.namePlaceholder)).toBeVisible();
+  await page.getByPlaceholder(labels.namePlaceholder).fill('Snapshot Hero');
   await page.getByRole('button', { name: labels.next }).click();
   await expect(page.getByRole('heading', { name: labels.featHeading })).toBeVisible();
   await page.getByLabel('Weapon Focus (Longsword)').click();

@@ -1,22 +1,6 @@
 {
   "steps": [
     {
-      "id": "name",
-      "kind": "metadata",
-      "label": "Name",
-      "source": {
-        "type": "manual"
-      }
-    },
-    {
-      "id": "abilities",
-      "kind": "abilities",
-      "label": "Ability Scores",
-      "source": {
-        "type": "manual"
-      }
-    },
-    {
       "id": "race",
       "kind": "race",
       "label": "Race",
@@ -34,6 +18,22 @@
         "type": "entityType",
         "entityType": "classes",
         "limit": 1
+      }
+    },
+    {
+      "id": "abilities",
+      "kind": "abilities",
+      "label": "Ability Scores",
+      "source": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "name",
+      "kind": "metadata",
+      "label": "Name",
+      "source": {
+        "type": "manual"
       }
     },
     {
