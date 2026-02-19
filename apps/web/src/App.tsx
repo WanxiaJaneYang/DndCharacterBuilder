@@ -21,6 +21,12 @@ const editions: EditionOption[] = [
     optionalPackIds: [],
   },
 ];
+const fallbackEdition: EditionOption = {
+  id: '',
+  label: '',
+  basePackId: '',
+  optionalPackIds: [],
+};
 
 type Language = 'en' | 'zh';
 type Role = 'dm' | 'player' | null;
@@ -122,12 +128,12 @@ export function App() {
   const [showProv, setShowProv] = useState(false);
   const [role, setRole] = useState<Role>(null);
   const [language, setLanguage] = useState<Language>(detectDefaultLanguage);
-  const [selectedEditionId, setSelectedEditionId] = useState<string>(editions[0]!.id);
+  const [selectedEditionId, setSelectedEditionId] = useState<string>(editions[0]?.id ?? '');
   const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<string[]>([]);
   const [rulesReady, setRulesReady] = useState(false);
 
   const selectedEdition = useMemo(
-    () => editions.find((edition) => edition.id === selectedEditionId) ?? editions[0]!,
+    () => editions.find((edition) => edition.id === selectedEditionId) ?? editions[0] ?? fallbackEdition,
     [selectedEditionId]
   );
   const enabledPackIds = useMemo(
@@ -409,7 +415,7 @@ function RulesSetupGate({
   onOptionalPackToggle: (packId: string) => void;
   onStart: () => void;
 }) {
-  const selectedEdition = editions.find((edition) => edition.id === selectedEditionId) ?? editions[0]!;
+  const selectedEdition = editions.find((edition) => edition.id === selectedEditionId) ?? editions[0] ?? fallbackEdition;
 
   return (
     <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
@@ -428,7 +434,12 @@ function RulesSetupGate({
       <section>
         <h2>{text.sourcesLabel}</h2>
         <label>
-          <input type="checkbox" checked disabled />
+          <input
+            type="checkbox"
+            checked
+            disabled
+            aria-label={`${selectedEdition.basePackId} (${text.baseSourceLockedLabel})`}
+          />
           {selectedEdition.basePackId} ({text.baseSourceLockedLabel})
         </label>
         {selectedEdition.optionalPackIds.length === 0 && <p>-</p>}
