@@ -4,7 +4,7 @@
 **Scope:** Product + UX + UI handoff + data model (MVP = D&D 3.5 SRD)  
 **Audience:** Product, designers, engineers
 
-This document **complements** `docs/PRD.md`. PRD defines *what* to build; this spec defines *how it should feel*, *how UI is structured for Figma handoff*, and *what data schemas must exist* to keep the product data-driven across editions.
+This document **complements** `docs/product/PRD.md`. PRD defines *what* to build; this spec defines *how it should feel*, *how UI is structured for Figma handoff*, and *what data schemas must exist* to keep the product data-driven across editions.
 
 ---
 
@@ -124,6 +124,7 @@ Support multiple editions (e.g., 5r/2024) where steps differ (e.g., Background F
 - Show summary of choices + key derived stats.
 - **Provenance panel** for core numbers (AC, attack bonus, damage, saves, initiative, HP).
 - Export JSON includes pack fingerprint and provenance.
+- Implement progressively per `docs/product/PRD.md` parity phases (core playability first, then non-caster completeness, then caster/progression blocks).
 
 ---
 
@@ -135,9 +136,9 @@ Support multiple editions (e.g., 5r/2024) where steps differ (e.g., Background F
 ---
 
 ## 6) Deliverables checklist (docs + design + build)
-- [ ] `docs/UX_JOURNEY.md` (detailed journey + edge cases)
-- [ ] `docs/UI_SPEC.md` (component map + states + content rules)
-- [ ] `docs/FIGMA_HANDOFF.md` (token + component naming + dev handoff)
-- [ ] `docs/DATA_SCHEMA.md` (schemas + examples)
-- [ ] `docs/FLOW_SCHEMA.md` (flow step types + examples per edition)
-- [ ] `docs/WORK_PLAN.md` (agentic execution tracker + progress log format)
+- [ ] `docs/ux/JOURNEY_OVERVIEW.md` (detailed journey + edge cases)
+- [ ] `docs/ui/UI_SPEC.md` (component map + states + content rules)
+- [ ] `docs/figma/HANDOFF.md` (token + component naming + dev handoff)
+- [ ] `docs/data/ENTITY_SCHEMA.md` + `docs/data/EXPORT_SCHEMA.md` (schema and export examples)
+- [ ] `docs/data/FLOW_SCHEMA.md` (flow step types + examples per edition)
+- [ ] `docs/engineering/WORK_PLAN.md` (agentic execution tracker + progress log format)

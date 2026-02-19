@@ -6,6 +6,12 @@ This document specifies the **Review & Export** step, where the user examines th
 
 Present a comprehensive summary of the character, including selected race, class, ability scores (with modifiers), feats, skills, equipment and derived statistics (HP, AC, saves, attack bonuses, skill modifiers, etc.).  Allow the user to verify the information, view provenance, and then export the character sheet in JSON (and optionally HTML) format.
 
+This step should be implemented in phases aligned with `docs/product/PRD.md`:
+
+- **Phase 1 (Core Playability):** identity/progression basics, AC touch/flat-footed, saves breakdown, HP breakdown, initiative/grapple, attack lines.
+- **Phase 2 (Non-caster completeness):** feat/trait summaries, skill misc/ACP visibility, equipment/load and movement detail.
+- **Phase 3 (Caster + progression):** spellcasting blocks, multiclass progression surfaces, expanded defenses/resistances.
+
 ## User Intent
 
 - **New Player:** Needs reassurance that their character is valid.  Wants to see where each number comes from and may need guidance on what everything means.
@@ -56,7 +62,7 @@ The UI must be able to render these structures and provide interactive provenanc
 - Design the review layout for clarity and readability.
 - Implement provenance tooltips or panels that reference the engine's provenance data.
 - Ensure that editing previous steps correctly updates the review content.
-- Define the JSON export format in the data schema and implement the export logic.
+- Keep review sections aligned with the phased export model documented in `docs/data/EXPORT_SCHEMA.md`.
 - Consider implementing a basic HTML export template.
 
 ## Checklist
