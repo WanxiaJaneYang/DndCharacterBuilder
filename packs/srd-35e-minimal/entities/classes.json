@@ -26,10 +26,35 @@
           "fort": 2,
           "ref": 0,
           "will": 0,
-          "features": [],
-          "specialLabel": "Rage 1/day, fast movement"
+          "features": [
+            "rage-1-day",
+            "fast-movement",
+            "illiteracy"
+          ],
+          "specialLabel": "Rage 1/day, fast movement, illiteracy"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "rage-1-day"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "fast-movement"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "illiteracy"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -107,10 +132,45 @@
           "fort": 0,
           "ref": 2,
           "will": 2,
-          "features": [],
-          "specialLabel": "Bardic music, bardic knowledge"
+          "features": [
+            "bardic-music",
+            "bardic-knowledge",
+            "countersong",
+            "fascinate",
+            "inspire-courage-1"
+          ],
+          "specialLabel": "Bardic music, bardic knowledge, countersong, fascinate, inspire courage +1"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "bardic-music"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "bardic-knowledge"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "countersong"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "fascinate"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "inspire-courage-1"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -157,7 +217,7 @@
       }
     ],
     "summary": "Bard class option.",
-    "description": "Level 1 bard with d8 hit die, 3/4 base attack bonus, strong Reflex and Will saves, and social and perceptive skills.",
+    "description": "Level 1 bard with d6 hit die, 3/4 base attack bonus, strong Reflex and Will saves, and social and perceptive skills.",
     "portraitUrl": null,
     "iconUrl": null
   },
@@ -184,10 +244,40 @@
           "fort": 2,
           "ref": 0,
           "will": 2,
-          "features": [],
-          "specialLabel": "Turn or rebuke undead, domain powers"
+          "features": [
+            "turn-or-rebuke-undead",
+            "domains",
+            "aura",
+            "spontaneous-cure-inflict"
+          ],
+          "specialLabel": "Turn or rebuke undead, domains, aura, spontaneous cure/inflict casting"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "turn-or-rebuke-undead"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "domains"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "aura"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "spontaneous-cure-inflict"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -262,10 +352,35 @@
           "fort": 2,
           "ref": 0,
           "will": 2,
-          "features": [],
-          "specialLabel": "Nature sense, animal companion"
+          "features": [
+            "animal-companion",
+            "nature-sense",
+            "wild-empathy"
+          ],
+          "specialLabel": "Animal companion, nature sense, wild empathy"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "animal-companion"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "nature-sense"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "wild-empathy"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -486,10 +601,40 @@
           "fort": 2,
           "ref": 2,
           "will": 2,
-          "features": [],
-          "specialLabel": "Flurry of blows, unarmed strike"
+          "features": [
+            "bonus-monk-feat",
+            "flurry-of-blows",
+            "improved-unarmed-strike",
+            "ac-bonus-wisdom"
+          ],
+          "specialLabel": "Bonus monk feat, flurry of blows, improved unarmed strike, AC bonus (Wisdom)"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "bonus-monk-feat"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "flurry-of-blows"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "improved-unarmed-strike"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "ac-bonus-wisdom"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -564,10 +709,35 @@
           "fort": 2,
           "ref": 0,
           "will": 0,
-          "features": [],
-          "specialLabel": "Aura of good, detect evil"
+          "features": [
+            "aura-of-good",
+            "detect-evil",
+            "smite-evil-1-day"
+          ],
+          "specialLabel": "Aura of good, detect evil, smite evil 1/day"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "aura-of-good"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "detect-evil"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "smite-evil-1-day"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -645,10 +815,35 @@
           "fort": 2,
           "ref": 2,
           "will": 0,
-          "features": [],
-          "specialLabel": "Favored enemy, track"
+          "features": [
+            "favored-enemy",
+            "track",
+            "wild-empathy"
+          ],
+          "specialLabel": "Favored enemy, track, wild empathy"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "favored-enemy"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "track"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "wild-empathy"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -726,10 +921,30 @@
           "fort": 0,
           "ref": 2,
           "will": 0,
-          "features": [],
+          "features": [
+            "sneak-attack-1d6",
+            "trapfinding"
+          ],
           "specialLabel": "Sneak attack +1d6, trapfinding"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "sneak-attack-1d6"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "trapfinding"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -801,10 +1016,30 @@
           "fort": 0,
           "ref": 0,
           "will": 2,
-          "features": [],
-          "specialLabel": "Simple weapon proficiency, spontaneous arcane casting"
+          "features": [
+            "summon-familiar",
+            "spontaneous-arcane-spellcasting"
+          ],
+          "specialLabel": "Summon familiar, spontaneous arcane spellcasting"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "summon-familiar"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "spontaneous-arcane-spellcasting"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
@@ -876,10 +1111,35 @@
           "fort": 0,
           "ref": 0,
           "will": 2,
-          "features": [],
-          "specialLabel": "Familiar, prepared arcane casting"
+          "features": [
+            "summon-familiar",
+            "scribe-scroll",
+            "prepared-arcane-spellcasting"
+          ],
+          "specialLabel": "Summon familiar, Scribe Scroll, prepared arcane spellcasting"
         }
-      ]
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "grants": [
+              {
+                "kind": "grantFeature",
+                "featureId": "summon-familiar"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "scribe-scroll"
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "prepared-arcane-spellcasting"
+              }
+            ]
+          }
+        ]
+      }
     },
     "effects": [
       {
