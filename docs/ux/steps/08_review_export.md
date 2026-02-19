@@ -29,7 +29,7 @@ The review page should display sections summarising each aspect of the character
 - **Feats:** List of selected feats with brief reminders of their effects; clicking a feat reveals full text.
 - **Skills:** List of skills with ranks, modifiers, class/cross-class indicators and ability dependencies.
 - **Equipment:** Items selected, starting equipment mode (kit vs gold), total weight and cost (if applicable).
-- **Derived Stats:** HP, AC, initiative, BAB, saves (Fort/Ref/Will), speed, attack bonus, damage bonus; shown in a table with `Base | Adjustments | Final`.
+- **Derived Stats:** HP, AC, initiative, speed, BAB, saves (Fort/Ref/Will); shown in a table with `Base | Adjustments | Final`.
 - **Calculation Trace:** adjustments must be listed as readable rows (`+2 Elf`, `=10 Fighter`, etc.) so users can follow the formula without opening raw JSON.
 - **Pack Info:** Display the selected edition/version and the list of enabled rule packs with versions.  Show the pack fingerprint hash for reproducibility.
 - **Actions:**
