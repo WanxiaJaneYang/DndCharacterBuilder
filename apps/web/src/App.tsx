@@ -71,7 +71,17 @@ export function App() {
   };
 
   const setAbility = (key: string, value: number) => {
-    setState((prev) => applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: clampAbilityScore(value) }, context));
+    if (!Number.isFinite(value)) return;
+    setState((prev) => applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: value }, context));
+  };
+
+  const clampAbilityOnBlur = (key: string) => {
+    setState((prev) => {
+      const current = Number(prev.abilities[key]);
+      const clamped = clampAbilityScore(current);
+      if (current === clamped) return prev;
+      return applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: clamped }, context);
+    });
   };
 
   const exportJson = () => {
@@ -148,6 +158,7 @@ export function App() {
                 max={ABILITY_SCORE_MAX}
                 value={value}
                 onChange={(e) => setAbility(key, Number(e.target.value))}
+                onBlur={() => clampAbilityOnBlur(key)}
               />
               </label>
             ))}
