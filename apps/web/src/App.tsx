@@ -27,6 +27,7 @@ const fallbackEdition: EditionOption = {
   basePackId: '',
   optionalPackIds: [],
 };
+const defaultEditionId = editions.find((edition) => edition.id.trim().length > 0)?.id ?? '';
 
 type Language = 'en' | 'zh';
 type Role = 'dm' | 'player' | null;
@@ -128,7 +129,7 @@ export function App() {
   const [showProv, setShowProv] = useState(false);
   const [role, setRole] = useState<Role>(null);
   const [language, setLanguage] = useState<Language>(detectDefaultLanguage);
-  const [selectedEditionId, setSelectedEditionId] = useState<string>(editions[0]?.id ?? '');
+  const [selectedEditionId, setSelectedEditionId] = useState<string>(defaultEditionId);
   const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<string[]>([]);
   const [rulesReady, setRulesReady] = useState(false);
 
@@ -137,7 +138,9 @@ export function App() {
     [selectedEditionId]
   );
   const enabledPackIds = useMemo(
-    () => [selectedEdition.basePackId, ...selectedOptionalPackIds.filter((packId) => selectedEdition.optionalPackIds.includes(packId))],
+    () =>
+      [selectedEdition.basePackId, ...selectedOptionalPackIds.filter((packId) => selectedEdition.optionalPackIds.includes(packId))]
+        .filter((packId) => packId.trim().length > 0),
     [selectedEdition, selectedOptionalPackIds]
   );
   const resolvedData = useMemo(() => resolveLoadedPacks(embeddedPacks, enabledPackIds), [enabledPackIds]);
@@ -370,11 +373,13 @@ export function App() {
         onEditionChange={(editionId) => {
           setSelectedEditionId(editionId);
           setSelectedOptionalPackIds([]);
+          setState(initialState);
           setStepIndex(0);
         }}
         selectedOptionalPackIds={selectedOptionalPackIds}
         onOptionalPackToggle={(packId) => {
           setSelectedOptionalPackIds((current) => (current.includes(packId) ? current.filter((id) => id !== packId) : [...current, packId]));
+          setState(initialState);
           setStepIndex(0);
         }}
         onBack={() => {
@@ -457,13 +462,14 @@ function RulesSetupGate({
       </section>
       <section>
         <h2>{text.sourcesLabel}</h2>
-        <label>
-          <input
-            type="checkbox"
-            checked
-            disabled
-            aria-label={`${selectedEdition.basePackId} (${text.baseSourceLockedLabel})`}
-          />
+        <input
+          id="base-pack-checkbox"
+          type="checkbox"
+          checked
+          disabled
+          aria-label={`${selectedEdition.basePackId} (${text.baseSourceLockedLabel})`}
+        />
+        <label htmlFor="base-pack-checkbox">
           {selectedEdition.basePackId} ({text.baseSourceLockedLabel})
         </label>
         {selectedEdition.optionalPackIds.length === 0 && <p>-</p>}
