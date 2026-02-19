@@ -118,6 +118,29 @@ describe('role and language behavior', () => {
     });
   });
 
+  it('localizes ability score labels in zh', async () => {
+    await withNavigatorLanguage('zh-CN', async () => {
+      const user = userEvent.setup();
+      render(<App />);
+
+      await user.click(screen.getByRole('button', { name: new RegExp(zh.playerTitle) }));
+      await user.click(screen.getByRole('button', { name: zh.startWizard }));
+
+      await user.click(screen.getByLabelText('人类'));
+      await user.click(screen.getByRole('button', { name: zh.next }));
+
+      await user.click(screen.getByLabelText('战士（1级）'));
+      await user.click(screen.getByRole('button', { name: zh.next }));
+
+      expect(screen.getByLabelText('力量')).toBeTruthy();
+      expect(screen.getByLabelText('敏捷')).toBeTruthy();
+      expect(screen.getByLabelText('体质')).toBeTruthy();
+      expect(screen.getByLabelText('智力')).toBeTruthy();
+      expect(screen.getByLabelText('感知')).toBeTruthy();
+      expect(screen.getByLabelText('魅力')).toBeTruthy();
+    });
+  });
+
   it('supports back navigation from rules setup and from first wizard step', async () => {
     const user = userEvent.setup();
     render(<App />);
