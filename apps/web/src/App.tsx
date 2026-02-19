@@ -2,125 +2,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
 import { applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
-import uiTextJson from './uiText.json';
+import { EDITIONS, FALLBACK_EDITION, type EditionOption, defaultEditionId } from './editions';
+import { detectDefaultLanguage, uiText, type Language, type UIText } from './uiText';
 
 const embeddedPacks = [loadMinimalPack()];
-
-type EditionOption = {
-  id: string;
-  label: string;
-  basePackId: string;
-  optionalPackIds: string[];
-};
-
-const editions: EditionOption[] = [
-  {
-    id: 'dnd-3.5-srd',
-    label: 'D&D 3.5 SRD',
-    basePackId: 'srd-35e-minimal',
-    optionalPackIds: [],
-  },
-];
-const fallbackEdition: EditionOption = {
-  id: '',
-  label: '',
-  basePackId: '',
-  optionalPackIds: [],
-};
-const defaultEditionId = editions.find((edition) => edition.id.trim().length > 0)?.id ?? '';
-
-type Language = 'en' | 'zh';
 type Role = 'dm' | 'player' | null;
 
-export type UIText = {
-  appTitle: string;
-  appSubtitle: string;
-  stepCounter: string;
-  back: string;
-  next: string;
-  review: string;
-  exportJson: string;
-  toggleProvenance: string;
-  printableSheet: string;
-  nameLabel: string;
-  raceLabel: string;
-  classLabel: string;
-  metadataPlaceholder: string;
-  abilitiesSuffix: string;
-  roleAria: string;
-  roleQuestion: string;
-  roleIntro: string;
-  dmTitle: string;
-  dmSubtitle: string;
-  playerTitle: string;
-  playerSubtitle: string;
-  dmUnsupported: string;
-  rulesSetupTitle: string;
-  editionLabel: string;
-  sourcesLabel: string;
-  baseSourceLockedLabel: string;
-  startWizard: string;
-  languageLabel: string;
-  english: string;
-  chinese: string;
-};
+const STEP_ID_FEAT = 'feat';
+const STEP_ID_SKILLS = 'skills';
+const STEP_ID_ABILITIES = 'abilities';
+const DEFAULT_EXPORT_NAME = 'character';
+const ABILITY_SCORE_MIN = 3;
+const ABILITY_SCORE_MAX = 18;
 
-const uiTextKeys: Array<keyof UIText> = [
-  'appTitle',
-  'appSubtitle',
-  'stepCounter',
-  'back',
-  'next',
-  'review',
-  'exportJson',
-  'toggleProvenance',
-  'printableSheet',
-  'nameLabel',
-  'raceLabel',
-  'classLabel',
-  'metadataPlaceholder',
-  'abilitiesSuffix',
-  'roleAria',
-  'roleQuestion',
-  'roleIntro',
-  'dmTitle',
-  'dmSubtitle',
-  'playerTitle',
-  'playerSubtitle',
-  'dmUnsupported',
-  'rulesSetupTitle',
-  'editionLabel',
-  'sourcesLabel',
-  'baseSourceLockedLabel',
-  'startWizard',
-  'languageLabel',
-  'english',
-  'chinese',
-];
-
-function isUIText(value: unknown): value is UIText {
-  if (!value || typeof value !== 'object') return false;
-  return uiTextKeys.every((key) => typeof (value as Record<string, unknown>)[key] === 'string');
-}
-
-function parseUIText(input: unknown): Record<Language, UIText> {
-  if (!input || typeof input !== 'object') {
-    throw new Error('Invalid uiText.json format: expected object with en/zh keys.');
-  }
-  const record = input as Record<string, unknown>;
-  if (!isUIText(record.en) || !isUIText(record.zh)) {
-    throw new Error('Invalid uiText.json format: expected complete UIText payload for en and zh.');
-  }
-  return { en: record.en, zh: record.zh };
-}
-
-const uiText = parseUIText(uiTextJson);
-
-function detectDefaultLanguage(): Language {
-  if (typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('zh')) {
-    return 'zh';
-  }
-  return 'en';
+function clampAbilityScore(value: number): number {
+  if (!Number.isFinite(value)) return ABILITY_SCORE_MIN;
+  return Math.min(ABILITY_SCORE_MAX, Math.max(ABILITY_SCORE_MIN, value));
 }
 
 export function App() {
@@ -129,12 +26,12 @@ export function App() {
   const [showProv, setShowProv] = useState(false);
   const [role, setRole] = useState<Role>(null);
   const [language, setLanguage] = useState<Language>(detectDefaultLanguage);
-  const [selectedEditionId, setSelectedEditionId] = useState<string>(defaultEditionId);
+  const [selectedEditionId, setSelectedEditionId] = useState<string>(() => defaultEditionId(EDITIONS));
   const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<string[]>([]);
   const [rulesReady, setRulesReady] = useState(false);
 
   const selectedEdition = useMemo(
-    () => editions.find((edition) => edition.id === selectedEditionId) ?? editions[0] ?? fallbackEdition,
+    () => EDITIONS.find((edition) => edition.id === selectedEditionId) ?? EDITIONS[0] ?? FALLBACK_EDITION,
     [selectedEditionId]
   );
   const enabledPackIds = useMemo(
@@ -156,9 +53,9 @@ export function App() {
   }, [stepIndex, wizardSteps.length]);
 
   const t = uiText[language];
-  const choices = useMemo(() => listChoices(state, context), [state]);
+  const choices = useMemo(() => listChoices(state, context), [context, state]);
   const choiceMap = new Map(choices.map((c) => [c.stepId, c]));
-  const sheet = useMemo(() => finalizeCharacter(state, context), [state]);
+  const sheet = useMemo(() => finalizeCharacter(state, context), [context, state]);
   const skillEntities = useMemo(
     () => Object.values(context.resolvedData.entities.skills ?? {}).sort((a, b) => a.name.localeCompare(b.name)),
     [context.resolvedData.entities.skills]
@@ -166,7 +63,7 @@ export function App() {
   const selectedFeats = ((state.selections.feats as string[] | undefined) ?? []);
 
   const selectedStepValues = (stepId: string): string[] => {
-    if (stepId === 'feat') return selectedFeats;
+    if (stepId === STEP_ID_FEAT) return selectedFeats;
     const value = state.selections[stepId];
     if (Array.isArray(value)) return value.map(String);
     if (value === undefined || value === null || value === '') return [];
@@ -174,7 +71,17 @@ export function App() {
   };
 
   const setAbility = (key: string, value: number) => {
-    setState((prev) => applyChoice(prev, 'abilities', { ...prev.abilities, [key]: value }, context));
+    if (!Number.isFinite(value)) return;
+    setState((prev) => applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: value }, context));
+  };
+
+  const clampAbilityOnBlur = (key: string) => {
+    setState((prev) => {
+      const current = Number(prev.abilities[key]);
+      const clamped = clampAbilityScore(current);
+      if (current === clamped) return prev;
+      return applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: clamped }, context);
+    });
   };
 
   const exportJson = () => {
@@ -182,7 +89,7 @@ export function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${sheet.metadata.name || 'character'}.json`;
+    a.download = `${sheet.metadata.name || DEFAULT_EXPORT_NAME}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -456,7 +363,14 @@ export function App() {
           <div className="grid">
             {Object.entries(state.abilities).map(([key, value]) => (
               <label key={key}>{key.toUpperCase()}
-                <input type="number" min={3} max={18} value={value} onChange={(e) => setAbility(key, Number(e.target.value))} />
+              <input
+                type="number"
+                min={ABILITY_SCORE_MIN}
+                max={ABILITY_SCORE_MAX}
+                value={value}
+                onChange={(e) => setAbility(key, Number(e.target.value))}
+                onBlur={() => clampAbilityOnBlur(key)}
+              />
               </label>
             ))}
           </div>
@@ -465,7 +379,7 @@ export function App() {
     }
 
     if (currentStep.kind === 'skills') {
-      const selectedRanks = (state.selections.skills as Record<string, number> | undefined) ?? {};
+      const selectedRanks = (state.selections[STEP_ID_SKILLS] as Record<string, number> | undefined) ?? {};
 
       return (
         <section>
@@ -496,7 +410,7 @@ export function App() {
                       const parsed = Number(e.target.value);
                       const value = Number.isFinite(parsed) ? Math.min(maxRanks, Math.max(0, parsed)) : 0;
                       const nextRanks = { ...selectedRanks, [skill.id]: value };
-                      setState((s) => applyChoice(s, 'skills', nextRanks, context));
+                      setState((s) => applyChoice(s, STEP_ID_SKILLS, nextRanks, context));
                     }}
                   />
                 </label>
@@ -513,7 +427,7 @@ export function App() {
       const limit = stepChoice?.limit ?? currentStep.source.limit ?? 1;
 
       if (limit <= 1) {
-        const currentValue = currentStep.id === 'feat'
+        const currentValue = currentStep.id === STEP_ID_FEAT
           ? String(selectedFeats[0] ?? '')
           : String(state.selections[currentStep.id] ?? '');
 
@@ -523,7 +437,7 @@ export function App() {
             options={options}
             value={currentValue}
             onSelect={(id) => {
-              if (currentStep.id === 'feat') {
+              if (currentStep.id === STEP_ID_FEAT) {
                 setState((s) => applyChoice(s, currentStep.id, [id], context));
                 return;
               }
@@ -579,7 +493,7 @@ export function App() {
         language={language}
         onLanguageChange={setLanguage}
         text={t}
-        editions={editions}
+        editions={EDITIONS}
         selectedEditionId={selectedEditionId}
         onEditionChange={(editionId) => {
           setSelectedEditionId(editionId);
@@ -655,7 +569,7 @@ function RulesSetupGate({
   onBack: () => void;
   onStart: () => void;
 }) {
-  const selectedEdition = editions.find((edition) => edition.id === selectedEditionId) ?? editions[0] ?? fallbackEdition;
+  const selectedEdition = editions.find((edition) => edition.id === selectedEditionId) ?? editions[0] ?? FALLBACK_EDITION;
 
   return (
     <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
