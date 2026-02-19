@@ -71,7 +71,7 @@ Required fields used by the current engine:
 - `classSkills`: string[]
   - List of skill ids (from `entities/skills.json`) treated as class skills.
   - We map SRD class skill lists to existing skill ids; where a skill name doesn’t currently exist, we either:
-    - Re-use an obviously equivalent existing id (e.g. `gather-information`).
+    - Re-use an obviously equivalent existing id already present in the pack (e.g. `spot`, `listen`).
     - Defer adding new skills to a separate task if the gap is non-trivial.
 
 Structural / future-proof fields (minimal but extensible):

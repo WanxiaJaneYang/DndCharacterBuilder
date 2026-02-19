@@ -196,6 +196,50 @@ describe("class entity schema", () => {
       })
     ).toThrow(/invalid classes\.data/i);
   });
+
+  it("rejects negative level-1 BAB or saves", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-negative",
+        name: "Broken Class Negative",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          levelTable: [{ level: 1, bab: -1, fort: 2, ref: 0, will: 0 }]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
+
+  it("rejects level-1 row inconsistent with declared progressions", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-inconsistent",
+        name: "Broken Class Inconsistent",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          levelTable: [{ level: 1, bab: 0, fort: 2, ref: 0, will: 0 }]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
 });
 
 

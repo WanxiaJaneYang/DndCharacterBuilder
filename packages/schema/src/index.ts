@@ -178,10 +178,10 @@ const ClassSaveProgressSchema = z.enum(["good", "poor"]);
 
 const ClassLevelRowSchema = z.object({
   level: z.number().int().min(1),
-  bab: z.number().int(),
-  fort: z.number().int(),
-  ref: z.number().int(),
-  will: z.number().int(),
+  bab: z.number().int().min(0),
+  fort: z.number().int().min(0),
+  ref: z.number().int().min(0),
+  will: z.number().int().min(0),
   features: z.array(z.string()).optional(),
   specialLabel: z.string().min(1).optional()
 }).strict();
@@ -197,7 +197,40 @@ const ClassDataSchema = z.object({
     will: ClassSaveProgressSchema
   }).strict(),
   levelTable: z.array(ClassLevelRowSchema).min(1)
-}).strict();
+}).strict().superRefine((classData, ctx) => {
+  const firstLevel = classData.levelTable[0];
+  if (!firstLevel || firstLevel.level !== 1) return;
+
+  const expectedBabByProgression = {
+    full: 1,
+    threeQuarters: 0,
+    half: 0
+  } as const;
+  const expectedBab = expectedBabByProgression[classData.baseAttackProgression];
+  if (firstLevel.bab !== expectedBab) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Level 1 BAB (${firstLevel.bab}) does not match baseAttackProgression "${classData.baseAttackProgression}" (expected ${expectedBab}).`,
+      path: ["levelTable", 0, "bab"]
+    });
+  }
+
+  const expectedSaveForProgression = (progression: z.infer<typeof ClassSaveProgressSchema>): number =>
+    progression === "good" ? 2 : 0;
+
+  (["fort", "ref", "will"] as const).forEach((saveKey) => {
+    const progression = classData.baseSaveProgression[saveKey];
+    const expectedSave = expectedSaveForProgression(progression);
+    const actualSave = firstLevel[saveKey];
+    if (actualSave !== expectedSave) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Level 1 ${saveKey} save (${actualSave}) does not match ${saveKey} baseSaveProgression "${progression}" (expected ${expectedSave}).`,
+        path: ["levelTable", 0, saveKey]
+      });
+    }
+  });
+});
 
 export const EntitySchema = z.object({
   id: z.string(),

@@ -1,6 +1,6 @@
 # Core 3.5e Class Data Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **Contributor note:** Work through the tasks step-by-step and keep this plan updated as progress is made.
 
 **Goal:** Add level-1 entities for all core D&D 3.5 SRD base classes to `packs/srd-35e-minimal/entities/classes.json`, extend the class `data` model as per the design doc, and validate behaviour via existing and new contracts.
 
@@ -22,7 +22,7 @@
 
 **Step 2: Review skill IDs**
 - Open `packs/srd-35e-minimal/entities/skills.json`.
-- Note the canonical skill ids and names (e.g. `climb`, `listen`, `search`, `gather-information`, etc.).
+- Note the canonical skill ids and names (e.g. `climb`, `listen`, `spot`, `jump`, `diplomacy`, `ride`, etc.).
 - Map SRD class skill lists to these ids for each core class.
 - Document any SRD skills that are not yet present in `skills.json` as an explicit phase limitation (instead of adding ad-hoc fields in class entities).
 
