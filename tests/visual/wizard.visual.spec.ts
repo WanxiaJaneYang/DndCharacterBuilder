@@ -15,13 +15,19 @@ const labels = {
   startWizard: /Start Wizard|\u5f00\u59cb\u521b\u5efa/i,
   english: /EN|English/i,
   chinese: /\u4e2d\u6587|Chinese/i,
+  human: /Human|\u4eba\u7c7b/i,
+  fighter: /Fighter \(Level 1\)|\u6218\u58eb\uff081\u7ea7\uff09/i,
+  weaponFocusLongsword: /Weapon Focus \(Longsword\)|\u6b66\u5668\u4e13\u653b\uff08\u957f\u5251\uff09/i,
 };
 
 type Locale = 'en' | 'zh';
 
 async function chooseLanguage(page: Page, locale: Locale) {
   const radioName = locale === 'zh' ? labels.chinese : labels.english;
-  await page.getByRole('radio', { name: radioName }).click();
+  const radio = page.getByRole('radio', { name: radioName });
+  await radio.click();
+  await expect(radio).toBeChecked();
+  await expect(page.locator(`main[lang="${locale}"]`)).toBeVisible();
 }
 
 async function enterPlayerFlow(page: Page) {
@@ -41,19 +47,19 @@ async function goToHomePage(page: Page, locale: Locale) {
 
 async function goToListPage(page: Page, locale: Locale) {
   await goToHomePage(page, locale);
-  await page.getByLabel('Human').click();
+  await page.getByLabel(labels.human).click();
   await page.getByRole('button', { name: labels.next }).click();
   await expect(page.getByRole('heading', { name: labels.classHeading })).toBeVisible();
 }
 
 async function goToDetailPage(page: Page, locale: Locale) {
   await goToListPage(page, locale);
-  await page.getByLabel('Fighter (Level 1)').click();
+  await page.getByLabel(labels.fighter).click();
   await page.getByRole('button', { name: labels.next }).click();
   await expect(page.getByRole('heading', { name: labels.abilityHeading })).toBeVisible();
   await page.getByRole('button', { name: labels.next }).click();
   await expect(page.getByRole('heading', { name: labels.featHeading })).toBeVisible();
-  await page.getByLabel('Weapon Focus (Longsword)').click();
+  await page.getByLabel(labels.weaponFocusLongsword).click();
   await page.getByRole('button', { name: labels.next }).click();
   await expect(page.getByRole('heading', { name: labels.skillsHeading })).toBeVisible();
   await page.getByRole('button', { name: labels.next }).click();
