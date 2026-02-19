@@ -245,7 +245,6 @@
     "data": {
       "skillPointsPerLevel": 4,
       "classSkills": [
-        "climb",
         "listen",
         "spot"
       ],
