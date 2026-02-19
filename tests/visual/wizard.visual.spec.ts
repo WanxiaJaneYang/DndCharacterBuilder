@@ -72,7 +72,10 @@ async function goToDetailPage(page: Page, locale: Locale) {
 }
 
 async function waitForVisualStability(page: Page) {
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  // CI can keep background requests alive (analytics/dev sockets), so don't hard-fail on networkidle.
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => undefined);
+  await page.waitForTimeout(150);
 }
 
 // Small ratio threshold to tolerate platform anti-aliasing without hiding real regressions.
