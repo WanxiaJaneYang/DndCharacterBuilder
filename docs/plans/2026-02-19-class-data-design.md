@@ -213,6 +213,24 @@ These fixtures give us quick regression coverage that the new class data is wire
   - E.g. automatic proficiencies, conditional attack/save bonuses, rage usage, smite damage, etc.
 - Expand pack contracts to cover a wider range of class/race/feat combinations and verify more of the final sheet.
 
+### 4.3 Deferred Class Integrations (dynamic dependency model)
+
+Class-linked mechanics are tracked with a dynamic rule, not a closed list.
+
+Classification rule:
+- If a class mechanic requires a subsystem that is not yet implemented in engine/data/UI, mark it as `deferred-with-dependency`.
+- Dependencies are discovered incrementally as product scope evolves; this section is intentionally open-ended.
+
+Examples (non-exhaustive):
+- Proficiency-driven effects, alignment constraints, starter/loadout behavior, resource gating, feature unlock chains, or any mechanic requiring new state/model support.
+
+Standing update rule:
+- Whenever any subsystem changes that can affect class behavior, immediately revisit and update:
+  - `docs/data/ENTITY_SCHEMA.md` (class model contract),
+  - `packs/srd-35e-minimal/entities/classes.json` (actual class data),
+  - related engine logic and contracts/tests.
+- Treat this as an ongoing synchronization loop, not a one-time migration.
+
 ---
 
 ## 5. Acceptance Criteria
