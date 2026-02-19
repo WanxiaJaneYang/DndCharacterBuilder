@@ -14,10 +14,57 @@
       "fighter-1": {
         "name": "Fighter",
         "summary": "Fighter (class) option.",
-        "description": "Detailed reference entry for Fighter in the classes dataset.",
-        "data.classSkills.0": "climb",
-        "data.classSkills.1": "jump",
-        "data.classSkills.2": "ride"
+        "description": "Detailed reference entry for Fighter in the classes dataset."
+      },
+      "barbarian-1": {
+        "name": "Barbarian",
+        "summary": "Barbarian class option.",
+        "description": "Detailed reference entry for Barbarian in the classes dataset."
+      },
+      "bard-1": {
+        "name": "Bard",
+        "summary": "Bard class option.",
+        "description": "Detailed reference entry for Bard in the classes dataset."
+      },
+      "cleric-1": {
+        "name": "Cleric",
+        "summary": "Cleric class option.",
+        "description": "Detailed reference entry for Cleric in the classes dataset."
+      },
+      "druid-1": {
+        "name": "Druid",
+        "summary": "Druid class option.",
+        "description": "Detailed reference entry for Druid in the classes dataset."
+      },
+      "monk-1": {
+        "name": "Monk",
+        "summary": "Monk class option.",
+        "description": "Detailed reference entry for Monk in the classes dataset."
+      },
+      "paladin-1": {
+        "name": "Paladin",
+        "summary": "Paladin class option.",
+        "description": "Detailed reference entry for Paladin in the classes dataset."
+      },
+      "ranger-1": {
+        "name": "Ranger",
+        "summary": "Ranger class option.",
+        "description": "Detailed reference entry for Ranger in the classes dataset."
+      },
+      "rogue-1": {
+        "name": "Rogue",
+        "summary": "Rogue class option.",
+        "description": "Detailed reference entry for Rogue in the classes dataset."
+      },
+      "sorcerer-1": {
+        "name": "Sorcerer",
+        "summary": "Sorcerer class option.",
+        "description": "Detailed reference entry for Sorcerer in the classes dataset."
+      },
+      "wizard-1": {
+        "name": "Wizard",
+        "summary": "Wizard class option.",
+        "description": "Detailed reference entry for Wizard in the classes dataset."
       }
     },
     "feats": {

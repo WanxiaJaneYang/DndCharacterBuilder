@@ -265,6 +265,31 @@ function classIdBase(classId: string | undefined): string | undefined {
   return classId.replace(/-\d+$/, "");
 }
 
+function classIdLevel(classId: string | undefined): number {
+  if (!classId) return 0;
+  const match = classId.match(/-(\d+)$/);
+  if (!match?.[1]) return 1;
+  const parsed = Number(match[1]);
+  if (!Number.isFinite(parsed) || parsed < 1) return 1;
+  return Math.floor(parsed);
+}
+
+function getClassProgressionEffects(classEntity: ResolvedEntity | undefined, classId: string | undefined): Effect[] {
+  const progression = classEntity?.data?.progression as { levelGains?: unknown } | undefined;
+  if (!progression || !Array.isArray(progression.levelGains)) return [];
+  const selectedLevel = classIdLevel(classId);
+  const effects: Effect[] = [];
+
+  progression.levelGains
+    .filter((gain): gain is Record<string, unknown> => Boolean(gain) && typeof gain === "object")
+    .map((gain) => ({ level: Number(gain.level), effects: Array.isArray(gain.effects) ? (gain.effects as Effect[]) : [] }))
+    .filter((gain) => Number.isFinite(gain.level) && gain.level >= 1 && gain.level <= selectedLevel)
+    .sort((a, b) => a.level - b.level)
+    .forEach((gain) => effects.push(...gain.effects));
+
+  return effects;
+}
+
 function buildRacialSkillBonusMap(state: CharacterState, context: EngineContext): Record<string, number> {
   const race = getSelectedRace(state, context);
   const bonuses = (race?.data?.skillBonuses as Array<{ skill?: unknown; bonus?: unknown }> | undefined) ?? [];
@@ -536,6 +561,14 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     entity.effects.forEach((effect) => applyEffect(effect, sheet, provenance, source));
   }
 
+  function applyClassEntity(entity: ResolvedEntity | undefined, selectedClassId: string | undefined): void {
+    if (!entity) return;
+    const source = { packId: entity._source.packId, entityId: entity._source.entityId };
+    const progressionEffects = getClassProgressionEffects(entity, selectedClassId);
+    const effectsToApply = progressionEffects.length > 0 ? progressionEffects : (entity.effects ?? []);
+    effectsToApply.forEach((effect) => applyEffect(effect, sheet, provenance, source));
+  }
+
   const ruleEntities = Object.values(entityBuckets.rules ?? {}).sort((a, b) => a.id.localeCompare(b.id));
   for (const ruleEntity of ruleEntities) applyEntity(ruleEntity);
 
@@ -543,7 +576,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   applyEntity(raceId ? entityBuckets.races?.[raceId] : undefined);
 
   const classId = state.selections.class as string | undefined;
-  applyEntity(classId ? entityBuckets.classes?.[classId] : undefined);
+  applyClassEntity(classId ? entityBuckets.classes?.[classId] : undefined, classId);
 
   for (const featId of getSelectedFeatIds(state)) {
     applyEntity(entityBuckets.feats?.[featId]);

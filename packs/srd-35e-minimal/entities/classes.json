@@ -51,55 +51,71 @@
                 "kind": "grantFeature",
                 "featureId": "illiteracy"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 12
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 1
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 0
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 12
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "barbarian-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "barbarian class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 1
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 0
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Barbarian class option.",
     "description": "Level 1 barbarian with d12 hit die, full base attack bonus, strong Fortitude save, and martial wilderness skill focus.",
     "portraitUrl": null,
@@ -167,55 +183,71 @@
                 "kind": "grantFeature",
                 "featureId": "inspire-courage-1"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 6
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 2
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 6
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "bard-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "bard class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 2
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Bard class option.",
     "description": "Level 1 bard with d6 hit die, 3/4 base attack bonus, strong Reflex and Will saves, and social and perceptive skills.",
     "portraitUrl": null,
@@ -274,55 +306,71 @@
                 "kind": "grantFeature",
                 "featureId": "spontaneous-cure-inflict"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 8
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 2
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 8
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "cleric-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "cleric class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 2
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Cleric class option.",
     "description": "Level 1 cleric with d8 hit die, 3/4 base attack bonus, strong Fortitude and Will saves, and divine spellcasting and turning.",
     "portraitUrl": null,
@@ -377,55 +425,71 @@
                 "kind": "grantFeature",
                 "featureId": "wild-empathy"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 8
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 2
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 8
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "druid-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "druid class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 2
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Druid class option.",
     "description": "Level 1 druid with d8 hit die, 3/4 base attack bonus, strong Fortitude and Will saves, and nature-themed magic.",
     "portraitUrl": null,
@@ -441,52 +505,107 @@
         "climb",
         "jump",
         "ride"
-      ]
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 10
-            },
-            {
-              "abilityMod": "con"
-            }
+      ],
+      "hitDie": 10,
+      "baseAttackProgression": "full",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "poor",
+        "will": "poor"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 1,
+          "fort": 2,
+          "ref": 0,
+          "will": 0,
+          "features": [
+            "bonus-fighter-feat"
+          ],
+          "specialLabel": "Fighter bonus feat"
+        }
+      ],
+      "progression": {
+        "levelGains": [
+          {
+            "level": 1,
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 10
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 1
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 0
+                }
+              }
+            ],
+            "grants": [
+              {
+                "kind": "featureSlot",
+                "slotType": "feat",
+                "count": 1
+              },
+              {
+                "kind": "grantFeature",
+                "featureId": "bonus-fighter-feat",
+                "label": "Fighter bonus feat"
+              }
+            ]
+          }
+        ]
+      },
+      "deferredMechanics": [
+        {
+          "id": "fighter-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "fighter class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 1
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 0
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Fighter class option.",
     "description": "Level 1 fighter with d10 hit die, full base attack bonus, strong Fortitude save, and straightforward martial combat focus.",
     "portraitUrl": null,
@@ -548,55 +667,71 @@
                 "kind": "grantFeature",
                 "featureId": "ac-bonus-wisdom"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 8
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 2
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 8
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "monk-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "monk class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 2
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Monk class option.",
     "description": "Level 1 monk with d8 hit die, 3/4 base attack bonus, all three good saves, and unarmed combat focus.",
     "portraitUrl": null,
@@ -651,55 +786,71 @@
                 "kind": "grantFeature",
                 "featureId": "smite-evil-1-day"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 10
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 1
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 0
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 10
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "paladin-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "paladin class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 1
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 0
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Paladin class option.",
     "description": "Level 1 paladin with d10 hit die, full base attack bonus, strong Fortitude save, and divine champion flavour.",
     "portraitUrl": null,
@@ -757,57 +908,73 @@
                 "kind": "grantFeature",
                 "featureId": "wild-empathy"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 8
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 1
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 0
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 8
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "ranger-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "ranger class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 1
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 0
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Ranger class option.",
-    "description": "Level 1 ranger with d10 hit die, full base attack bonus, good Fortitude and Reflex saves, and wilderness scouting abilities.",
+    "description": "Level 1 ranger with d8 hit die, full base attack bonus, good Fortitude and Reflex saves, and wilderness scouting abilities.",
     "portraitUrl": null,
     "iconUrl": null
   },
@@ -858,55 +1025,71 @@
                 "kind": "grantFeature",
                 "featureId": "trapfinding"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 6
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 2
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 0
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 6
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "rogue-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "rogue class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 2
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 0
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Rogue class option.",
     "description": "Level 1 rogue with d6 hit die, 3/4 base attack bonus, strong Reflex save, and a focus on skills and precision attacks.",
     "portraitUrl": null,
@@ -953,55 +1136,71 @@
                 "kind": "grantFeature",
                 "featureId": "spontaneous-arcane-spellcasting"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 4
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 2
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 4
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "sorcerer-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "sorcerer class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 2
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Sorcerer class option.",
     "description": "Level 1 sorcerer with d4 hit die, 1/2 base attack bonus, strong Will save, and spontaneous arcane spellcasting.",
     "portraitUrl": null,
@@ -1053,55 +1252,71 @@
                 "kind": "grantFeature",
                 "featureId": "prepared-arcane-spellcasting"
               }
+            ],
+            "effects": [
+              {
+                "kind": "set",
+                "targetPath": "stats.hp",
+                "value": {
+                  "sum": [
+                    {
+                      "const": 4
+                    },
+                    {
+                      "abilityMod": "con"
+                    }
+                  ]
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.bab",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.fort",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.ref",
+                "value": {
+                  "const": 0
+                }
+              },
+              {
+                "kind": "set",
+                "targetPath": "stats.will",
+                "value": {
+                  "const": 2
+                }
+              }
             ]
           }
         ]
-      }
-    },
-    "effects": [
-      {
-        "kind": "set",
-        "targetPath": "stats.hp",
-        "value": {
-          "sum": [
-            {
-              "const": 4
-            },
-            {
-              "abilityMod": "con"
-            }
+      },
+      "deferredMechanics": [
+        {
+          "id": "wizard-rule-runtime-deferred",
+          "category": "runtime-rule",
+          "description": "wizard class-specific rules remain data-tracked but are not fully enforced by runtime validation yet.",
+          "dependsOn": [
+            "class-rule-engine",
+            "rules-reference-ui"
+          ],
+          "impactPaths": [
+            "selections.class",
+            "validation.class",
+            "stats"
           ]
         }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.bab",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.fort",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.ref",
-        "value": {
-          "const": 0
-        }
-      },
-      {
-        "kind": "set",
-        "targetPath": "stats.will",
-        "value": {
-          "const": 2
-        }
-      }
-    ],
+      ]
+    },
     "summary": "Wizard class option.",
     "description": "Level 1 wizard with d4 hit die, 1/2 base attack bonus, strong Will save, and prepared arcane spellcasting from a spellbook.",
     "portraitUrl": null,
