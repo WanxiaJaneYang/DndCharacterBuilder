@@ -52,9 +52,9 @@ To support a more complete SRD-style final character sheet, the following entity
 - `hitDie`: number (example: `10` for Fighter d10)
 - `baseAttackProgression`: enum (`full`, `threeQuarters`, `half`) or explicit table
 - `baseSaveProgression`: object keyed by `fort`, `ref`, `will` with progression enum
-- `progression.levelGains[*].effects`: preferred engine-facing source of level-derived stat changes
+- `progression.levelGains[*].effects`: intended future engine-facing source of level-derived stat changes
   (`stats.hp`, `stats.bab`, `stats.fort`, `stats.ref`, `stats.will`)
-- top-level entity `effects`: legacy fallback for classes that do not define `data.progression`
+- top-level entity `effects`: current implementation, used as fallback when `progression` is not defined
 - `classFeaturesByLevel`: list of `{ level, featureId }`
 - `spellcasting` (optional): caster ability, spells-per-day table, known/prepared model
 

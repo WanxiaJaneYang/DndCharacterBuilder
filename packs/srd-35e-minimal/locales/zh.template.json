@@ -24,14 +24,12 @@
       "power-attack": {
         "name": "Power Attack",
         "summary": "Power Attack (feat) option.",
-        "description": "Detailed reference entry for Power Attack in the feats dataset.",
-        "data.exclusiveGroup": "feat-slot-1"
+        "description": "Detailed reference entry for Power Attack in the feats dataset."
       },
       "weapon-focus-longsword": {
         "name": "Weapon Focus (Longsword)",
         "summary": "Weapon Focus (Longsword) (feat) option.",
-        "description": "Detailed reference entry for Weapon Focus (Longsword) in the feats dataset.",
-        "data.exclusiveGroup": "feat-slot-1"
+        "description": "Detailed reference entry for Weapon Focus (Longsword) in the feats dataset."
       }
     },
     "items": {
