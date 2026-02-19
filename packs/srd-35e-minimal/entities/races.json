@@ -449,6 +449,45 @@
             "selections",
             "review.spellLikeAbilities"
           ]
+        },
+        {
+          "id": "gnome-defensive-training-contextual-ac",
+          "category": "conditional-modifier",
+          "description": "Gnome defensive training (+4 dodge AC vs giants) is not yet applied by contextual combat rules.",
+          "dependsOn": [
+            "combat-context-engine",
+            "conditional-ac-modifier-system"
+          ],
+          "impactPaths": [
+            "combat.ac",
+            "validation.race.conditionalBonuses"
+          ]
+        },
+        {
+          "id": "gnome-attack-bonuses-vs-kobolds-goblinoids",
+          "category": "conditional-modifier",
+          "description": "Gnome +1 attack bonuses versus kobolds and goblinoids are not enforced by combat target typing.",
+          "dependsOn": [
+            "combat-target-typing",
+            "conditional-attack-modifier-system"
+          ],
+          "impactPaths": [
+            "combat.attackRoll",
+            "validation.race.conditionalBonuses"
+          ]
+        },
+        {
+          "id": "gnome-save-bonus-vs-illusions",
+          "category": "conditional-modifier",
+          "description": "Gnome +1 saving throw bonus versus illusions is not enforced by spell-school-aware save resolution.",
+          "dependsOn": [
+            "spell-school-tagging",
+            "conditional-save-modifier-system"
+          ],
+          "impactPaths": [
+            "combat.savingThrows",
+            "validation.race.conditionalBonuses"
+          ]
         }
       ]
     },
