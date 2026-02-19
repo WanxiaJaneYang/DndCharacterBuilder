@@ -41,103 +41,6 @@ h1, h2, h3 { font-family: inherit; color: #3a2717; }
 .actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
 label { display: block; margin-bottom: 0.5rem; }
 .sheet { border: 1px solid #cfb88f; padding: 0.75rem; background: #fff8e8; }
-.review-page {
-  display: grid;
-  gap: 1rem;
-}
-.review-page .sheet {
-  overflow-x: auto;
-}
-.review-hero {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding: 0.85rem;
-  border: 1px solid #d9bf90;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #fff8e5 0%, #f8ecd1 100%);
-}
-.review-character-name {
-  margin: 0;
-  font-size: 1.6rem;
-  font-weight: 700;
-}
-.review-character-meta {
-  margin: 0.2rem 0 0;
-  color: #5d4a34;
-}
-.review-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-.review-stat-cards {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-}
-.review-card {
-  margin: 0;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid #ccb082;
-  border-radius: 8px;
-  background: #fff6df;
-}
-.review-card h3 {
-  margin: 0 0 0.15rem;
-  font-size: 0.9rem;
-  color: #6a5539;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.review-card p {
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-.review-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
-}
-.review-table th,
-.review-table td {
-  text-align: left;
-  vertical-align: top;
-  padding: 0.5rem 0.45rem;
-  border-bottom: 1px dashed #d8bd8c;
-}
-.review-table th {
-  font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: #6b5638;
-}
-.review-cell-key {
-  font-weight: 700;
-}
-.calc-list {
-  margin: 0;
-  padding-left: 1rem;
-  display: grid;
-  gap: 0.25rem;
-}
-.calc-list code {
-  font-size: 0.82rem;
-  color: #3f2f1d;
-  background: #f2e4c6;
-  border: 1px solid #ddc69a;
-  border-radius: 5px;
-  padding: 0.1rem 0.25rem;
-}
-.review-muted {
-  color: #7e6a4a;
-}
-.review-decisions p {
-  margin: 0.35rem 0;
-}
 
 button,
 input { font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif; }
@@ -326,10 +229,6 @@ input { border: 1px solid #bca57d; border-radius: 6px; padding: 0.35rem 0.5rem; 
     text-align: center;
   }
   .role-message { bottom: 2.6vh; }
-  .review-table th,
-  .review-table td {
-    font-size: 0.92rem;
-  }
 }
 
 @media (orientation: landscape) {

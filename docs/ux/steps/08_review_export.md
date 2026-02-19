@@ -22,15 +22,11 @@ This step should be implemented in phases aligned with `docs/product/PRD.md`:
 The review page should display sections summarising each aspect of the character:
 
 - **Identity:** Character name, level, race, class, alignment (if chosen), background (if applicable).
-- **Abilities:** A breakdown table with `Ability | Base | Adjustments | Final | Modifier`.  
-  - `Base`: user-entered score.  
-  - `Adjustments`: each racial/class/rule/item modifier from provenance.  
-  - `Final` + `Modifier`: computed end result.
+- **Abilities:** A table showing each ability score and its modifier.  Hovering or tapping on a modifier reveals the calculation and racial/class bonuses (provenance).
 - **Feats:** List of selected feats with brief reminders of their effects; clicking a feat reveals full text.
 - **Skills:** List of skills with ranks, modifiers, class/cross-class indicators and ability dependencies.
 - **Equipment:** Items selected, starting equipment mode (kit vs gold), total weight and cost (if applicable).
-- **Derived Stats:** HP, AC, initiative, BAB, saves (Fort/Ref/Will), speed, attack bonus, damage bonus; shown in a table with `Base | Adjustments | Final`.
-- **Calculation Trace:** adjustments must be listed as readable rows (`+2 Elf`, `=10 Fighter`, etc.) so users can follow the formula without opening raw JSON.
+- **Derived Stats:** HP, AC (with breakdown by armor, shield, Dex, size, etc.), initiative, BAB, saves (Fort/Ref/Will), speed, etc.  Each stat should have a provenance breakdown when hovered.
 - **Pack Info:** Display the selected edition/version and the list of enabled rule packs with versions.  Show the pack fingerprint hash for reproducibility.
 - **Actions:**
   - **Edit** buttons for each section allow the user to go back and modify previous steps.  The wizard should support non-linear edits (e.g. go back from review to feats step, adjust selection and return to review).
