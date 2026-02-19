@@ -230,11 +230,9 @@ export function App() {
                     value={ranks}
                     onChange={(e) => {
                       const parsed = Number(e.target.value);
-                      const normalized = Number.isFinite(parsed)
-                        ? (classSkill ? Math.round(parsed) : Math.round(parsed * 2) / 2)
-                        : 0;
-                      const clamped = Math.min(maxRanks, Math.max(0, normalized));
-                      setState((s) => applyChoice(s, 'skills', { ...selectedRanks, [skill.id]: clamped }, context));
+                      const value = Number.isFinite(parsed) ? Math.min(maxRanks, Math.max(0, parsed)) : 0;
+                      const nextRanks = { ...selectedRanks, [skill.id]: value };
+                      setState((s) => applyChoice(s, 'skills', nextRanks, context));
                     }}
                   />
                 </label>

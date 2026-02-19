@@ -6,6 +6,10 @@ type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 const ABILITY_KEYS: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 const FIRST_LEVEL_SKILL_MULTIPLIER = 4;
 
+function normalizeSkillId(id: string): string {
+  return id.trim().toLowerCase();
+}
+
 export interface CharacterState {
   metadata: { name?: string };
   abilities: Record<string, number>;
@@ -196,7 +200,9 @@ function getSelectedSkillRanks(state: CharacterState): Record<string, number> {
   for (const [skillId, value] of Object.entries(raw as Record<string, unknown>)) {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed < 0) continue;
-    normalized[skillId] = Math.round(parsed * 2) / 2;
+    const canonicalSkillId = normalizeSkillId(skillId);
+    if (!canonicalSkillId) continue;
+    normalized[canonicalSkillId] = Math.round(parsed * 2) / 2;
   }
   return normalized;
 }
@@ -204,7 +210,7 @@ function getSelectedSkillRanks(state: CharacterState): Record<string, number> {
 function getClassSkills(state: CharacterState, context: EngineContext): Set<string> {
   const classEntity = getSelectedClass(state, context);
   const list = (classEntity?.data?.classSkills as unknown[] | undefined) ?? [];
-  return new Set(list.map((id) => String(id)));
+  return new Set(list.map((id) => normalizeSkillId(String(id))).filter(Boolean));
 }
 
 function getClassSkillPointsPerLevel(state: CharacterState, context: EngineContext): number {
@@ -242,7 +248,7 @@ function buildRacialSkillBonusMap(state: CharacterState, context: EngineContext)
   const race = getSelectedRace(state, context);
   const bonuses = (race?.data?.skillBonuses as Array<{ skill?: unknown; bonus?: unknown }> | undefined) ?? [];
   return bonuses.reduce<Record<string, number>>((acc, entry) => {
-    const skillId = String(entry.skill ?? "").toLowerCase();
+    const skillId = normalizeSkillId(String(entry.skill ?? ""));
     const bonus = Number(entry.bonus ?? 0);
     if (!skillId || !Number.isFinite(bonus)) return acc;
     acc[skillId] = (acc[skillId] ?? 0) + bonus;
@@ -311,7 +317,7 @@ function buildSkillBreakdown(
     const maxRanks = classSkill ? 4 : 2;
     const costPerRank = classSkill ? 1 : 2;
     const costSpent = ranks * costPerRank;
-    const racialBonus = racialBonuses[skillEntity.id.toLowerCase()] ?? 0;
+    const racialBonus = racialBonuses[normalizeSkillId(skillEntity.id)] ?? 0;
     const abilityModifier = abilities[ability]?.mod ?? 0;
 
     output[skillEntity.id] = {
@@ -359,9 +365,11 @@ export function applyChoice(state: CharacterState, choiceId: string, selection: 
     const classSkills = context ? getClassSkills(state, context) : new Set<string>();
     const normalized: Record<string, number> = {};
     for (const [skillId, rankValue] of Object.entries(raw)) {
+      const canonicalSkillId = normalizeSkillId(skillId);
+      if (!canonicalSkillId) continue;
       const rank = Number(rankValue);
       if (!Number.isFinite(rank) || rank < 0) continue;
-      normalized[skillId] = classSkills.has(skillId) ? Math.round(rank) : (Math.round(rank * 2) / 2);
+      normalized[canonicalSkillId] = classSkills.has(canonicalSkillId) ? Math.round(rank) : (Math.round(rank * 2) / 2);
     }
     return { ...state, selections: { ...state.selections, skills: normalized } };
   }
@@ -403,7 +411,7 @@ export function validateState(state: CharacterState, context: EngineContext): Va
   const abilities = Object.fromEntries(Object.entries(state.abilities).map(([key, score]) => [key, { score, mod: abilityMod(score) }])) as Record<string, { score: number; mod: number }>;
   const decisions = buildDecisionSummary(state, context, abilities);
   const selectedRanks = getSelectedSkillRanks(state);
-  const knownSkills = new Set(Object.keys(context.resolvedData.entities.skills ?? {}));
+  const knownSkills = new Set(Object.keys(context.resolvedData.entities.skills ?? {}).map((skillId) => normalizeSkillId(skillId)));
 
   for (const [skillId, rank] of Object.entries(selectedRanks)) {
     if (!knownSkills.has(skillId)) {
