@@ -43,8 +43,16 @@ export function App() {
   );
   const resolvedData = useMemo(() => resolveLoadedPacks(embeddedPacks, enabledPackIds), [enabledPackIds]);
   const context = useMemo(() => ({ enabledPackIds, resolvedData }), [enabledPackIds, resolvedData]);
+  const activeLocale = useMemo(() => context.resolvedData.locales[language], [context.resolvedData.locales, language]);
 
-  const wizardSteps = context.resolvedData.flow.steps;
+  const wizardSteps = useMemo(
+    () =>
+      context.resolvedData.flow.steps.map((step) => ({
+        ...step,
+        label: activeLocale?.flowStepLabels?.[step.id] ?? step.label
+      })),
+    [activeLocale?.flowStepLabels, context.resolvedData.flow.steps]
+  );
   const currentStep = wizardSteps[stepIndex];
 
   useEffect(() => {
@@ -54,23 +62,59 @@ export function App() {
   }, [stepIndex, wizardSteps.length]);
 
   const t = uiText[language];
+  const localizeEntityText = (entityType: string, entityId: string, path: string, fallback: string): string => {
+    const text = activeLocale?.entityText?.[entityType]?.[entityId]?.[path];
+    if (typeof text === 'string' && text.length > 0) return text;
+    if (path === 'name') {
+      const name = activeLocale?.entityNames?.[entityType]?.[entityId];
+      if (typeof name === 'string' && name.length > 0) return name;
+    }
+    return fallback;
+  };
   const choices = useMemo(() => listChoices(state, context), [context, state]);
-  const choiceMap = new Map(choices.map((c) => [c.stepId, c]));
+  const localizedChoices = useMemo(
+    () =>
+      choices.map((choice) => {
+        const flowStep = wizardSteps.find((step) => step.id === choice.stepId);
+        if (!flowStep || !('entityType' in flowStep.source)) {
+          return { ...choice, label: activeLocale?.flowStepLabels?.[choice.stepId] ?? choice.label };
+        }
+        const entityType = flowStep.source.entityType;
+        return {
+          ...choice,
+          label: activeLocale?.flowStepLabels?.[choice.stepId] ?? choice.label,
+          options: choice.options.map((option) => ({
+            ...option,
+            label: localizeEntityText(entityType, option.id, 'name', option.label)
+          }))
+        };
+      }),
+    [activeLocale?.flowStepLabels, choices, localizeEntityText, wizardSteps]
+  );
+  const choiceMap = new Map(localizedChoices.map((c) => [c.stepId, c]));
   const sheet = useMemo(() => finalizeCharacter(state, context), [context, state]);
-  const skillEntities = useMemo(
-    () => Object.values(context.resolvedData.entities.skills ?? {}).sort((a, b) => a.name.localeCompare(b.name)),
-    [context.resolvedData.entities.skills]
+  const skillEntities = useMemo(() => {
+    return Object.values(context.resolvedData.entities.skills ?? {})
+      .map((skill) => ({
+        ...skill,
+        displayName: localizeEntityText('skills', skill.id, 'name', skill.name)
+      }))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }, [context.resolvedData.entities.skills, localizeEntityText]
   );
   const selectedFeats = ((state.selections.feats as string[] | undefined) ?? []);
   const sourceNameByEntityId = useMemo(() => {
     const map = new Map<string, string>();
-    for (const bucket of Object.values(context.resolvedData.entities)) {
+    for (const [entityType, bucket] of Object.entries(context.resolvedData.entities)) {
       for (const entity of Object.values(bucket)) {
-        map.set(`${entity._source.packId}:${entity.id}`, entity.name);
+        const localized = activeLocale?.entityText?.[entityType]?.[entity.id]?.name
+          ?? activeLocale?.entityNames?.[entityType]?.[entity.id]
+          ?? entity.name;
+        map.set(`${entity._source.packId}:${entity.id}`, localized);
       }
     }
     return map;
-  }, [context.resolvedData.entities]);
+  }, [activeLocale?.entityNames, activeLocale?.entityText, context.resolvedData.entities]);
   const packVersionById = useMemo(() => {
     const map = new Map<string, string>();
     for (const manifest of context.resolvedData.manifests) {
@@ -154,16 +198,23 @@ export function App() {
         sourceNameByEntityId.get(`${packId}:${entityId}`) ?? entityId;
       const selectedRaceId = String(state.selections.race ?? '');
       const selectedClassId = String(state.selections.class ?? '');
-      const selectedRaceName = context.resolvedData.entities.races?.[selectedRaceId]?.name ?? (selectedRaceId || '-');
-      const selectedClassName = context.resolvedData.entities.classes?.[selectedClassId]?.name ?? (selectedClassId || '-');
+      const selectedRaceName = selectedRaceId
+        ? localizeEntityText('races', selectedRaceId, 'name', context.resolvedData.entities.races?.[selectedRaceId]?.name ?? selectedRaceId)
+        : '-';
+      const selectedClassName = selectedClassId
+        ? localizeEntityText('classes', selectedClassId, 'name', context.resolvedData.entities.classes?.[selectedClassId]?.name ?? selectedClassId)
+        : '-';
       const reviewSkills = Object.entries(sheet.skills)
         .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
-        .sort((a, b) => b[1].total - a[1].total || a[1].name.localeCompare(b[1].name));
+        .sort((a, b) => {
+          const left = localizeEntityText('skills', a[0], 'name', a[1].name);
+          const right = localizeEntityText('skills', b[0], 'name', b[1].name);
+          return b[1].total - a[1].total || left.localeCompare(right);
+        });
       const enabledPackDetails = enabledPackIds.map((packId) => ({
         packId,
         version: packVersionById.get(packId) ?? t.reviewUnknownVersion,
       }));
-
       return (
         <section className="review-page">
           <h2>{t.review}</h2>
@@ -318,7 +369,7 @@ export function App() {
               <tbody>
                 {reviewSkills.map(([skillId, skill]) => (
                   <tr key={skillId}>
-                    <td className="review-cell-key">{skill.name}</td>
+                    <td className="review-cell-key">{localizeEntityText('skills', skillId, 'name', skill.name)}</td>
                     <td>{skill.ranks}</td>
                     <td>{formatSigned(skill.abilityMod)} ({skill.ability.toUpperCase()})</td>
                     <td>{formatSigned(skill.racialBonus)}</td>
@@ -405,7 +456,7 @@ export function App() {
         <section>
           <h2>{currentStep.label}</h2>
           <p>
-            Budget: {sheet.decisions.skillPoints.total} | Spent: {sheet.decisions.skillPoints.spent} | Remaining: {sheet.decisions.skillPoints.remaining}
+            {t.skillsBudgetLabel}: {sheet.decisions.skillPoints.total} | {t.skillsSpentLabel}: {sheet.decisions.skillPoints.spent} | {t.skillsRemainingLabel}: {sheet.decisions.skillPoints.remaining}
           </p>
           <div className="grid">
             {skillEntities.map((skill) => {
@@ -419,7 +470,7 @@ export function App() {
 
               return (
                 <label key={skill.id}>
-                  {skill.name} ({classSkill ? 'Class' : 'Cross'} | cost {costPerRank}/rank | max {maxRanks} | racial {racialBonus >= 0 ? '+' : ''}{racialBonus})
+                  {skill.displayName} ({classSkill ? t.skillsClassLabel : t.skillsCrossLabel} | {t.skillsCostLabel} {costPerRank}{t.skillsPerRankUnit} | {t.skillsMaxLabel} {maxRanks} | {t.skillsRacialLabel} {racialBonus >= 0 ? '+' : ''}{racialBonus})
                   <input
                     type="number"
                     min={0}

@@ -1,10 +1,17 @@
 import { type Entity, type Flow, type Manifest } from "@dcb/schema";
 
+export interface PackLocale {
+  flowStepLabels?: Record<string, string>;
+  entityNames?: Record<string, Record<string, string>>;
+  entityText?: Record<string, Record<string, Record<string, string>>>;
+}
+
 export interface LoadedPack {
   manifest: Manifest;
   entities: Record<string, Entity[]>;
   flow: Flow;
   patches: Array<{ op: "mergeEntity"; entityType: string; id: string; value: Partial<Entity> }>;
+  locales?: Record<string, PackLocale>;
   packPath: string;
 }
 
@@ -21,6 +28,7 @@ export interface ResolvedPackSet {
   manifests: Manifest[];
   entities: Record<string, Record<string, ResolvedEntity>>;
   flow: Flow;
+  locales: Record<string, PackLocale>;
   fingerprint: string;
 }
 
@@ -218,6 +226,7 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
   const sorted = topoSortPacks(loaded, enabledPackIds);
 
   const entities: Record<string, Record<string, ResolvedEntity>> = {};
+  const locales: Record<string, PackLocale> = {};
   let flow: Flow | undefined;
 
   for (const pack of sorted) {
@@ -244,6 +253,44 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
         }
       }
     }
+
+    if (pack.locales) {
+      for (const [language, locale] of Object.entries(pack.locales)) {
+        const existing = locales[language] ?? {};
+        const mergedEntityNames: Record<string, Record<string, string>> = {
+          ...(existing.entityNames ?? {})
+        };
+        for (const [entityType, nameMap] of Object.entries(locale.entityNames ?? {})) {
+          mergedEntityNames[entityType] = {
+            ...(mergedEntityNames[entityType] ?? {}),
+            ...nameMap
+          };
+        }
+
+        const mergedEntityText: Record<string, Record<string, Record<string, string>>> = {
+          ...(existing.entityText ?? {})
+        };
+        for (const [entityType, entityMap] of Object.entries(locale.entityText ?? {})) {
+          mergedEntityText[entityType] ??= {};
+          for (const [entityId, textMap] of Object.entries(entityMap)) {
+            mergedEntityText[entityType][entityId] = {
+              ...(mergedEntityText[entityType][entityId] ?? {}),
+              ...textMap
+            };
+          }
+        }
+
+        locales[language] = {
+          flowStepLabels: {
+            ...(existing.flowStepLabels ?? {}),
+            ...(locale.flowStepLabels ?? {})
+          },
+          entityNames: mergedEntityNames,
+          entityText: mergedEntityText
+        };
+      }
+    }
+
     flow = pack.flow;
   }
 
@@ -262,6 +309,7 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
     manifests: sorted.map((p) => p.manifest),
     entities,
     flow,
+    locales,
     fingerprint
   };
 }

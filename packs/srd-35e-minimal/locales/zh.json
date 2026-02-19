@@ -1,0 +1,82 @@
+{
+  "flowStepLabels": {
+    "race": "种族",
+    "class": "职业",
+    "abilities": "属性值",
+    "feat": "专长",
+    "skills": "技能",
+    "equipment": "装备",
+    "name": "姓名",
+    "review": "总览"
+  },
+  "entityNames": {
+    "races": {
+      "human": "人类",
+      "dwarf": "矮人",
+      "elf": "精灵",
+      "gnome": "侏儒",
+      "half-elf": "半精灵",
+      "half-orc": "半兽人",
+      "halfling": "半身人"
+    },
+    "classes": {
+      "fighter-1": "战士（1级）"
+    },
+    "feats": {
+      "power-attack": "强力攻击",
+      "weapon-focus-longsword": "武器专攻（长剑）"
+    },
+    "items": {
+      "longsword": "长剑",
+      "chainmail": "链甲",
+      "heavy-wooden-shield": "重木盾"
+    },
+    "skills": {
+      "spot": "侦察",
+      "listen": "聆听",
+      "climb": "攀爬",
+      "jump": "跳跃",
+      "diplomacy": "交涉",
+      "ride": "骑术"
+    },
+    "rules": {
+      "base-ac": "基础AC",
+      "initiative": "先攻"
+    }
+  },
+  "entityText": {
+    "races": {
+      "human": { "name": "人类" },
+      "dwarf": { "name": "矮人" },
+      "elf": { "name": "精灵" },
+      "gnome": { "name": "侏儒" },
+      "half-elf": { "name": "半精灵" },
+      "half-orc": { "name": "半兽人" },
+      "halfling": { "name": "半身人" }
+    },
+    "classes": {
+      "fighter-1": { "name": "战士（1级）" }
+    },
+    "feats": {
+      "power-attack": { "name": "强力攻击" },
+      "weapon-focus-longsword": { "name": "武器专攻（长剑）" }
+    },
+    "items": {
+      "longsword": { "name": "长剑" },
+      "chainmail": { "name": "链甲" },
+      "heavy-wooden-shield": { "name": "重木盾" }
+    },
+    "skills": {
+      "spot": { "name": "侦察" },
+      "listen": { "name": "聆听" },
+      "climb": { "name": "攀爬" },
+      "jump": { "name": "跳跃" },
+      "diplomacy": { "name": "交涉" },
+      "ride": { "name": "骑术" }
+    },
+    "rules": {
+      "base-ac": { "name": "基础AC" },
+      "initiative": { "name": "先攻" }
+    }
+  }
+}

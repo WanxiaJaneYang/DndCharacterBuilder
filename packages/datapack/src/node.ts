@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { EntitySchema, FlowSchema, ManifestSchema, type Entity } from "@dcb/schema";
-import { resolveLoadedPacks, type LoadedPack, type ResolvedPackSet } from "./core";
+import { resolveLoadedPacks, type LoadedPack, type PackLocale, type ResolvedPackSet } from "./core";
 
 const ENTITY_FILES = ["races", "classes", "feats", "items", "skills", "rules"];
 
@@ -41,7 +41,15 @@ export function loadPack(packPath: string): LoadedPack {
   const patchFiles = fs.existsSync(patchesDir) ? fs.readdirSync(patchesDir).filter((f) => f.endsWith(".json")) : [];
   const patches = patchFiles.flatMap((file) => JSON.parse(fs.readFileSync(path.join(patchesDir, file), "utf8")));
 
-  return { manifest, entities, flow, patches, packPath };
+  const localesDir = path.join(packPath, "locales");
+  const localeFiles = fs.existsSync(localesDir) ? fs.readdirSync(localesDir).filter((f) => f.endsWith(".json")) : [];
+  const locales: Record<string, PackLocale> = {};
+  for (const file of localeFiles) {
+    const language = path.basename(file, ".json");
+    locales[language] = JSON.parse(fs.readFileSync(path.join(localesDir, file), "utf8")) as PackLocale;
+  }
+
+  return { manifest, entities, flow, patches, locales, packPath };
 }
 
 export function resolvePackSet(packsRoot: string, enabledPackIds: string[]): ResolvedPackSet {
