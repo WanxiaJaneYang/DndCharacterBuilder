@@ -1,5 +1,323 @@
 [
   {
+    "id": "barbarian-1",
+    "name": "Barbarian (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 4,
+      "classSkills": [
+        "climb",
+        "jump",
+        "listen",
+        "ride",
+        "spot"
+      ],
+      "hitDie": 12,
+      "baseAttackProgression": "full",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "poor",
+        "will": "poor"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 1,
+          "fort": 2,
+          "ref": 0,
+          "will": 0,
+          "features": [],
+          "specialLabel": "Rage 1/day, fast movement"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 12
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 1
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 0
+        }
+      }
+    ],
+    "summary": "Barbarian (Level 1) class option.",
+    "description": "Level 1 barbarian with d12 hit die, full base attack bonus, strong Fortitude save, and martial wilderness skill focus.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "bard-1",
+    "name": "Bard (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 6,
+      "classSkills": [
+        "climb",
+        "diplomacy",
+        "jump",
+        "listen",
+        "spot"
+      ],
+      "hitDie": 8,
+      "baseAttackProgression": "threeQuarters",
+      "baseSaveProgression": {
+        "fort": "poor",
+        "ref": "good",
+        "will": "good"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 0,
+          "fort": 0,
+          "ref": 2,
+          "will": 2,
+          "features": [],
+          "specialLabel": "Bardic music, bardic knowledge"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 8
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Bard (Level 1) class option.",
+    "description": "Level 1 bard with d8 hit die, 3/4 base attack bonus, strong Reflex and Will saves, and social and perceptive skills.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "cleric-1",
+    "name": "Cleric (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 2,
+      "classSkills": [
+        "diplomacy"
+      ],
+      "hitDie": 8,
+      "baseAttackProgression": "threeQuarters",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "poor",
+        "will": "good"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 0,
+          "fort": 2,
+          "ref": 0,
+          "will": 2,
+          "features": [],
+          "specialLabel": "Turn or rebuke undead, domain powers"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 8
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Cleric (Level 1) class option.",
+    "description": "Level 1 cleric with d8 hit die, 3/4 base attack bonus, strong Fortitude and Will saves, and divine spellcasting and turning.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "druid-1",
+    "name": "Druid (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 4,
+      "classSkills": [
+        "climb",
+        "listen",
+        "spot"
+      ],
+      "hitDie": 8,
+      "baseAttackProgression": "threeQuarters",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "poor",
+        "will": "good"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 0,
+          "fort": 2,
+          "ref": 0,
+          "will": 2,
+          "features": [],
+          "specialLabel": "Nature sense, animal companion"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 8
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Druid (Level 1) class option.",
+    "description": "Level 1 druid with d8 hit die, 3/4 base attack bonus, strong Fortitude and Will saves, and nature-themed magic.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
     "id": "fighter-1",
     "name": "Fighter (Level 1)",
     "entityType": "classes",
@@ -108,10 +426,505 @@
           ],
           "specialLabel": "Fighter bonus feat"
         }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 0
+        }
+      }
+    ],
+    "summary": "Fighter (Level 1) class option.",
+    "description": "Level 1 fighter with d10 hit die, full base attack bonus, strong Fortitude save, and straightforward martial combat focus.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "monk-1",
+    "name": "Monk (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 4,
+      "classSkills": [
+        "climb",
+        "jump",
+        "listen",
+        "spot"
+      ],
+      "hitDie": 8,
+      "baseAttackProgression": "threeQuarters",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "good",
+        "will": "good"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 0,
+          "fort": 2,
+          "ref": 2,
+          "will": 2,
+          "features": [],
+          "specialLabel": "Flurry of blows, unarmed strike"
+        }
       ]
     },
-    "summary": "Fighter (Level 1) (class) option.",
-    "description": "Detailed reference entry for Fighter (Level 1) in the classes dataset.",
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 8
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Monk (Level 1) class option.",
+    "description": "Level 1 monk with d8 hit die, 3/4 base attack bonus, all three good saves, and unarmed combat focus.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "paladin-1",
+    "name": "Paladin (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 2,
+      "classSkills": [
+        "diplomacy",
+        "ride"
+      ],
+      "hitDie": 10,
+      "baseAttackProgression": "full",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "poor",
+        "will": "poor"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 1,
+          "fort": 2,
+          "ref": 0,
+          "will": 0,
+          "features": [],
+          "specialLabel": "Aura of good, detect evil"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 10
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 1
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 0
+        }
+      }
+    ],
+    "summary": "Paladin (Level 1) class option.",
+    "description": "Level 1 paladin with d10 hit die, full base attack bonus, strong Fortitude save, and divine champion flavour.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "ranger-1",
+    "name": "Ranger (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 6,
+      "classSkills": [
+        "climb",
+        "jump",
+        "listen",
+        "ride",
+        "spot"
+      ],
+      "hitDie": 10,
+      "baseAttackProgression": "full",
+      "baseSaveProgression": {
+        "fort": "good",
+        "ref": "good",
+        "will": "poor"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 1,
+          "fort": 2,
+          "ref": 2,
+          "will": 0,
+          "features": [],
+          "specialLabel": "Favored enemy, track"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 10
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 1
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 0
+        }
+      }
+    ],
+    "summary": "Ranger (Level 1) class option.",
+    "description": "Level 1 ranger with d10 hit die, full base attack bonus, good Fortitude and Reflex saves, and wilderness scouting abilities.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "rogue-1",
+    "name": "Rogue (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 8,
+      "classSkills": [
+        "climb",
+        "diplomacy",
+        "jump",
+        "listen",
+        "spot"
+      ],
+      "hitDie": 6,
+      "baseAttackProgression": "threeQuarters",
+      "baseSaveProgression": {
+        "fort": "poor",
+        "ref": "good",
+        "will": "poor"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 0,
+          "fort": 0,
+          "ref": 2,
+          "will": 0,
+          "features": [],
+          "specialLabel": "Sneak attack +1d6, trapfinding"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 6
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 0
+        }
+      }
+    ],
+    "summary": "Rogue (Level 1) class option.",
+    "description": "Level 1 rogue with d6 hit die, 3/4 base attack bonus, strong Reflex save, and a focus on skills and precision attacks.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "sorcerer-1",
+    "name": "Sorcerer (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 2,
+      "classSkills": [
+        "diplomacy"
+      ],
+      "hitDie": 4,
+      "baseAttackProgression": "half",
+      "baseSaveProgression": {
+        "fort": "poor",
+        "ref": "poor",
+        "will": "good"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 0,
+          "fort": 0,
+          "ref": 0,
+          "will": 2,
+          "features": [],
+          "specialLabel": "Simple weapon proficiency, spontaneous arcane casting"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 4
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Sorcerer (Level 1) class option.",
+    "description": "Level 1 sorcerer with d4 hit die, 1/2 base attack bonus, strong Will save, and spontaneous arcane spellcasting.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "wizard-1",
+    "name": "Wizard (Level 1)",
+    "entityType": "classes",
+    "data": {
+      "skillPointsPerLevel": 2,
+      "classSkills": [
+        "diplomacy"
+      ],
+      "hitDie": 4,
+      "baseAttackProgression": "half",
+      "baseSaveProgression": {
+        "fort": "poor",
+        "ref": "poor",
+        "will": "good"
+      },
+      "levelTable": [
+        {
+          "level": 1,
+          "bab": 0,
+          "fort": 0,
+          "ref": 0,
+          "will": 2,
+          "features": [],
+          "specialLabel": "Familiar, prepared arcane casting"
+        }
+      ]
+    },
+    "effects": [
+      {
+        "kind": "set",
+        "targetPath": "stats.hp",
+        "value": {
+          "sum": [
+            {
+              "const": 4
+            },
+            {
+              "abilityMod": "con"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.bab",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.fort",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.ref",
+        "value": {
+          "const": 0
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.will",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Wizard (Level 1) class option.",
+    "description": "Level 1 wizard with d4 hit die, 1/2 base attack bonus, strong Will save, and prepared arcane spellcasting from a spellbook.",
     "portraitUrl": null,
     "iconUrl": null
   }
