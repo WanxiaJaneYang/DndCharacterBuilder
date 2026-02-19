@@ -24,7 +24,11 @@
     },
     {
       "path": "entities/classes.json",
-      "sha256": "60be8d861c50115b55edbe84d6f0f04e9e76bb12096d92160995d65a1aef072b"
+<<<<<<< HEAD
+      "sha256": "e9626282cf71f62aad78c79e1ae07bf9059bb771ece8168b4e17d12c125c941d"
+=======
+      "sha256": "e9626282cf71f62aad78c79e1ae07bf9059bb771ece8168b4e17d12c125c941d"
+>>>>>>> 62531ec (fix(data): resolve PR31 class data review findings)
     },
     {
       "path": "entities/feats.json",
