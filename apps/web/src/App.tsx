@@ -121,7 +121,7 @@ export function App() {
   };
 
   const setAbility = (key: string, value: number) => {
-    setState((prev) => applyChoice(prev, 'abilities', { ...prev.abilities, [key]: value }));
+    setState((prev) => applyChoice(prev, 'abilities', { ...prev.abilities, [key]: value }, context));
   };
 
   const exportJson = () => {
@@ -177,7 +177,7 @@ export function App() {
           <input
             id="character-name-input"
             value={state.metadata.name ?? ''}
-            onChange={(e) => setState((s) => applyChoice(s, currentStep.id, e.target.value))}
+            onChange={(e) => setState((s) => applyChoice(s, currentStep.id, e.target.value, context))}
             placeholder={t.metadataPlaceholder}
             aria-label={t.nameLabel}
           />
@@ -234,7 +234,7 @@ export function App() {
                         ? (classSkill ? Math.round(parsed) : Math.round(parsed * 2) / 2)
                         : 0;
                       const clamped = Math.min(maxRanks, Math.max(0, normalized));
-                      setState((s) => applyChoice(s, 'skills', { ...selectedRanks, [skill.id]: clamped }));
+                      setState((s) => applyChoice(s, 'skills', { ...selectedRanks, [skill.id]: clamped }, context));
                     }}
                   />
                 </label>
@@ -262,10 +262,10 @@ export function App() {
             value={currentValue}
             onSelect={(id) => {
               if (currentStep.id === 'feat') {
-                setState((s) => applyChoice(s, currentStep.id, [id]));
+                setState((s) => applyChoice(s, currentStep.id, [id], context));
                 return;
               }
-              setState((s) => applyChoice(s, currentStep.id, id));
+              setState((s) => applyChoice(s, currentStep.id, id, context));
             }}
           />
         );
@@ -285,9 +285,9 @@ export function App() {
                   disabled={!selected.includes(o.id) && selected.length >= limit}
                   onChange={(e) => {
                     const next = e.target.checked ? [...selected, o.id] : selected.filter((item) => item !== o.id);
-                    setState((s) => applyChoice(s, currentStep.id, next));
-                  }}
-                />
+                  setState((s) => applyChoice(s, currentStep.id, next, context));
+                }}
+              />
                 {o.label}
               </label>
             ))}

@@ -342,7 +342,7 @@ export function listChoices(state: CharacterState, context: EngineContext): Choi
     });
 }
 
-export function applyChoice(state: CharacterState, choiceId: string, selection: unknown): CharacterState {
+export function applyChoice(state: CharacterState, choiceId: string, selection: unknown, context?: EngineContext): CharacterState {
   if (choiceId === "name") {
     return { ...state, metadata: { ...state.metadata, name: String(selection) } };
   }
@@ -356,11 +356,12 @@ export function applyChoice(state: CharacterState, choiceId: string, selection: 
   }
   if (choiceId === "skills") {
     const raw = selection && typeof selection === "object" && !Array.isArray(selection) ? (selection as Record<string, unknown>) : {};
+    const classSkills = context ? getClassSkills(state, context) : new Set<string>();
     const normalized: Record<string, number> = {};
     for (const [skillId, rankValue] of Object.entries(raw)) {
       const rank = Number(rankValue);
       if (!Number.isFinite(rank) || rank < 0) continue;
-      normalized[skillId] = Math.round(rank * 2) / 2;
+      normalized[skillId] = classSkills.has(skillId) ? Math.round(rank) : (Math.round(rank * 2) / 2);
     }
     return { ...state, selections: { ...state.selections, skills: normalized } };
   }
@@ -523,6 +524,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   }
 
   const finalAbilities = sheet.abilities as Record<string, { score: number; mod: number }>;
+  for (const ability of Object.values(finalAbilities)) {
+    ability.mod = abilityMod(ability.score);
+  }
 
   sheet.stats.initiative = finalAbilities.dex?.mod ?? 0;
   sheet.stats.attackBonus = (sheet.stats.bab as number) + (finalAbilities.str?.mod ?? 0);

@@ -104,6 +104,29 @@ describe("engine determinism", () => {
     expect(errors.some((error) => error.code === "SKILL_RANK_CLASS_INTEGER")).toBe(true);
   });
 
+  it("recalculates ability modifiers after race effects", () => {
+    let state = applyChoice(initialState, "name", "Orc");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "half-orc");
+    state = applyChoice(state, "class", "fighter-1");
+
+    const sheet = finalizeCharacter(state, context);
+    expect(sheet.abilities.str!.score).toBe(12);
+    expect(sheet.abilities.str!.mod).toBe(1);
+    expect(sheet.stats.attackBonus).toBe(2);
+  });
+
+  it("normalizes class-skill ranks as integers when context is provided", () => {
+    let state = applyChoice(initialState, "name", "Norm");
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "skills", { climb: 1.5, listen: 1.5 }, context);
+
+    const ranks = state.selections.skills as Record<string, number>;
+    expect(ranks.climb).toBe(2);
+    expect(ranks.listen).toBe(1.5);
+  });
+
   it("uses overriding pack id in provenance records", () => {
     const base = makePack("base", 1);
     const override = makePack("override", 2, ["base"]);

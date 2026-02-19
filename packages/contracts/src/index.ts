@@ -43,7 +43,7 @@ export function runContracts(packsRoot: string): void {
       const context = { enabledPackIds: fixture.enabledPacks, resolvedData: resolved };
       let state: CharacterState = { ...initialState, ...(fixture.initialState as Partial<CharacterState>) };
       for (const action of fixture.actions) {
-        state = applyChoice(state, action.choiceId, action.selection);
+        state = applyChoice(state, action.choiceId, action.selection, context);
       }
 
       const choices = listChoices(state, context).flatMap((c) => c.options.map((o) => o.id));
