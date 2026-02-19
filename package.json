@@ -15,7 +15,8 @@
     "contracts": "npm --workspace @dcb/contracts run test",
     "test:visual": "playwright test",
     "test:visual:update": "playwright test --update-snapshots",
-    "playwright:install": "playwright install chromium"
+    "playwright:install": "playwright install chromium",
+    "locale:template": "node scripts/localization/generate-locale-template.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

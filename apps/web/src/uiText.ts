@@ -76,6 +76,15 @@ export type UIText = {
   reviewAbilityTableCaption: string;
   reviewCombatTableCaption: string;
   reviewSkillsTableCaption: string;
+  skillsBudgetLabel: string;
+  skillsSpentLabel: string;
+  skillsRemainingLabel: string;
+  skillsClassLabel: string;
+  skillsCrossLabel: string;
+  skillsCostLabel: string;
+  skillsMaxLabel: string;
+  skillsRacialLabel: string;
+  skillsPerRankUnit: string;
 };
 
 const uiTextKeys: Array<keyof UIText> = [
@@ -152,6 +161,15 @@ const uiTextKeys: Array<keyof UIText> = [
   'reviewAbilityTableCaption',
   'reviewCombatTableCaption',
   'reviewSkillsTableCaption',
+  'skillsBudgetLabel',
+  'skillsSpentLabel',
+  'skillsRemainingLabel',
+  'skillsClassLabel',
+  'skillsCrossLabel',
+  'skillsCostLabel',
+  'skillsMaxLabel',
+  'skillsRacialLabel',
+  'skillsPerRankUnit',
 ];
 
 function isUIText(value: unknown): value is UIText {
@@ -178,4 +196,3 @@ export function detectDefaultLanguage(): Language {
   }
   return 'en';
 }
-

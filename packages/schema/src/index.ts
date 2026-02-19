@@ -207,6 +207,12 @@ export const PackSchema = z.object({
   patches: z.array(z.any()).default([])
 });
 
+export const PackLocaleSchema = z.object({
+  flowStepLabels: z.record(z.string()).optional(),
+  entityNames: z.record(z.record(z.string())).optional(),
+  entityText: z.record(z.record(z.record(z.string()))).optional()
+});
+
 export const ContractFixtureSchema = z.object({
   enabledPacks: z.array(z.string()),
   initialState: z.record(z.any()),
@@ -246,5 +252,6 @@ export type Entity = z.infer<typeof EntitySchema>;
 export type Manifest = z.infer<typeof ManifestSchema>;
 export type Flow = z.infer<typeof FlowSchema>;
 export type Pack = z.infer<typeof PackSchema>;
+export type PackLocale = z.infer<typeof PackLocaleSchema>;
 export type ContractFixture = z.infer<typeof ContractFixtureSchema>;
 export type AuthenticityLock = z.infer<typeof AuthenticityLockSchema>;

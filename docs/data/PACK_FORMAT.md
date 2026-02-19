@@ -15,6 +15,8 @@ packs/<pack-id>/
     rules.json
   flows/
     character-creation.flow.json
+  locales/ (optional)
+    zh.json
   patches/ (optional)
   contracts/
 ```
@@ -53,3 +55,37 @@ Use `null` (or omit) when no real asset exists.
 - optional innate spell-like abilities (`innateSpellLikeAbilities`)
 
 This enables both engine-facing mechanics (via `effects`) and richer UI/rules content from pack data.
+
+## Locales (optional)
+
+Packs can provide UI-facing localization data under `locales/<language>.json`.
+
+Current supported locale payload keys:
+
+- `flowStepLabels`: map of `stepId -> localized label`
+- `entityNames`: nested map of `entityType -> entityId -> localized name`
+- `entityText`: nested map of `entityType -> entityId -> textPath -> localized text`
+
+At runtime, enabled packs are resolved in priority order and locale maps are merged with later packs overriding earlier values. This keeps step titles and entity labels data-driven and language-pack based instead of hardcoded in the frontend.
+
+`entityText` is the reusable long-term format because it supports rich content, not just names. Example paths:
+
+- `name`
+- `summary`
+- `description`
+- `data.racialTraits.0.name`
+- `data.racialTraits.0.description`
+
+## Locale generation workflow
+
+Use the template generator to extract all translatable strings for a pack:
+
+```bash
+npm run locale:template -- --pack packs/srd-35e-minimal --locale zh --out packs/srd-35e-minimal/locales/zh.template.json
+```
+
+To preserve existing translations while filling missing keys from source data:
+
+```bash
+npm run locale:template -- --pack packs/srd-35e-minimal --locale zh --merge packs/srd-35e-minimal/locales/zh.template.json --out packs/srd-35e-minimal/locales/zh.template.json
+```

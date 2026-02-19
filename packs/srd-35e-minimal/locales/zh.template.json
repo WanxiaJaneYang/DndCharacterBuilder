@@ -1,0 +1,312 @@
+{
+  "flowStepLabels": {
+    "race": "Race",
+    "class": "Class",
+    "abilities": "Ability Scores",
+    "feat": "Feat",
+    "skills": "Skills",
+    "equipment": "Equipment",
+    "name": "Name",
+    "review": "Review"
+  },
+  "entityText": {
+    "classes": {
+      "fighter-1": {
+        "name": "Fighter (Level 1)",
+        "summary": "Fighter (Level 1) (class) option.",
+        "description": "Detailed reference entry for Fighter (Level 1) in the classes dataset.",
+        "data.classSkills.0": "climb",
+        "data.classSkills.1": "jump",
+        "data.classSkills.2": "ride"
+      }
+    },
+    "feats": {
+      "power-attack": {
+        "name": "Power Attack",
+        "summary": "Power Attack (feat) option.",
+        "description": "Detailed reference entry for Power Attack in the feats dataset.",
+        "data.exclusiveGroup": "feat-slot-1"
+      },
+      "weapon-focus-longsword": {
+        "name": "Weapon Focus (Longsword)",
+        "summary": "Weapon Focus (Longsword) (feat) option.",
+        "description": "Detailed reference entry for Weapon Focus (Longsword) in the feats dataset.",
+        "data.exclusiveGroup": "feat-slot-1"
+      }
+    },
+    "items": {
+      "longsword": {
+        "name": "Longsword",
+        "summary": "Longsword (item) option.",
+        "description": "Detailed reference entry for Longsword in the items dataset."
+      },
+      "chainmail": {
+        "name": "Chainmail",
+        "summary": "Chainmail (item) option.",
+        "description": "Detailed reference entry for Chainmail in the items dataset."
+      },
+      "heavy-wooden-shield": {
+        "name": "Heavy Wooden Shield",
+        "summary": "Heavy Wooden Shield (item) option.",
+        "description": "Detailed reference entry for Heavy Wooden Shield in the items dataset."
+      }
+    },
+    "races": {
+      "human": {
+        "name": "Human",
+        "summary": "Human (race) option.",
+        "description": "Detailed reference entry for Human in the races dataset.",
+        "data.size": "medium",
+        "data.automaticLanguages.0": "Common",
+        "data.bonusLanguages.0": "Any (except secret languages)",
+        "data.favoredClass": "any",
+        "data.racialTraits.0.id": "bonus-feat",
+        "data.racialTraits.0.name": "Bonus Feat",
+        "data.racialTraits.0.description": "Humans select one extra feat at 1st level.",
+        "data.racialTraits.1.id": "extra-skill-points",
+        "data.racialTraits.1.name": "Extra Skill Points",
+        "data.racialTraits.1.description": "Humans gain 4 extra skill points at 1st level and 1 extra point at each additional level."
+      },
+      "dwarf": {
+        "name": "Dwarf",
+        "summary": "Dwarf (race) option.",
+        "description": "Detailed reference entry for Dwarf in the races dataset.",
+        "data.size": "medium",
+        "data.automaticLanguages.0": "Common",
+        "data.automaticLanguages.1": "Dwarven",
+        "data.bonusLanguages.0": "Giant",
+        "data.bonusLanguages.1": "Gnome",
+        "data.bonusLanguages.2": "Goblin",
+        "data.bonusLanguages.3": "Orc",
+        "data.bonusLanguages.4": "Terran",
+        "data.bonusLanguages.5": "Undercommon",
+        "data.favoredClass": "fighter",
+        "data.saveBonuses.0.target": "poison",
+        "data.saveBonuses.0.type": "racial",
+        "data.saveBonuses.1.target": "spellsAndSpellLikeEffects",
+        "data.saveBonuses.1.type": "racial",
+        "data.racialTraits.0.id": "stonecunning",
+        "data.racialTraits.0.name": "Stonecunning",
+        "data.racialTraits.0.description": "+2 bonus on Search checks to notice unusual stonework and automatic checks when within 10 feet.",
+        "data.racialTraits.1.id": "stability",
+        "data.racialTraits.1.name": "Stability",
+        "data.racialTraits.1.description": "+4 bonus on ability checks made to resist being bull rushed or tripped when standing on the ground.",
+        "data.racialTraits.2.id": "weapon-familiarity",
+        "data.racialTraits.2.name": "Weapon Familiarity",
+        "data.racialTraits.2.description": "Dwarven waraxe and dwarven urgrosh are treated as martial weapons.",
+        "data.skillBonuses.0.skill": "appraise",
+        "data.skillBonuses.0.type": "racial",
+        "data.skillBonuses.0.when": "related to stone or metal items",
+        "data.skillBonuses.1.skill": "craft",
+        "data.skillBonuses.1.type": "racial",
+        "data.skillBonuses.1.when": "related to stone or metal"
+      },
+      "elf": {
+        "name": "Elf",
+        "summary": "Elf (race) option.",
+        "description": "Detailed reference entry for Elf in the races dataset.",
+        "data.size": "medium",
+        "data.automaticLanguages.0": "Common",
+        "data.automaticLanguages.1": "Elven",
+        "data.bonusLanguages.0": "Draconic",
+        "data.bonusLanguages.1": "Gnoll",
+        "data.bonusLanguages.2": "Gnome",
+        "data.bonusLanguages.3": "Goblin",
+        "data.bonusLanguages.4": "Orc",
+        "data.bonusLanguages.5": "Sylvan",
+        "data.favoredClass": "wizard",
+        "data.saveBonuses.0.target": "enchantmentSpellsAndEffects",
+        "data.saveBonuses.0.type": "racial",
+        "data.racialTraits.0.id": "immune-sleep",
+        "data.racialTraits.0.name": "Immunity to Magic Sleep",
+        "data.racialTraits.0.description": "Elves are immune to magic sleep effects.",
+        "data.racialTraits.1.id": "secret-door-sense",
+        "data.racialTraits.1.name": "Keen Senses",
+        "data.racialTraits.1.description": "An elf passing within 5 feet of a secret or concealed door is entitled to a Search check as if actively looking.",
+        "data.racialTraits.2.id": "weapon-proficiency",
+        "data.racialTraits.2.name": "Weapon Proficiency",
+        "data.racialTraits.2.description": "Proficient with longsword, rapier, longbow, and shortbow (including composite variants).",
+        "data.skillBonuses.0.skill": "listen",
+        "data.skillBonuses.0.type": "racial",
+        "data.skillBonuses.1.skill": "search",
+        "data.skillBonuses.1.type": "racial",
+        "data.skillBonuses.2.skill": "spot",
+        "data.skillBonuses.2.type": "racial"
+      },
+      "gnome": {
+        "name": "Gnome",
+        "summary": "Gnome (race) option.",
+        "description": "Detailed reference entry for Gnome in the races dataset.",
+        "data.size": "small",
+        "data.automaticLanguages.0": "Common",
+        "data.automaticLanguages.1": "Gnome",
+        "data.bonusLanguages.0": "Draconic",
+        "data.bonusLanguages.1": "Dwarven",
+        "data.bonusLanguages.2": "Elven",
+        "data.bonusLanguages.3": "Giant",
+        "data.bonusLanguages.4": "Goblin",
+        "data.bonusLanguages.5": "Orc",
+        "data.favoredClass": "bard",
+        "data.racialTraits.0.id": "defensive-training",
+        "data.racialTraits.0.name": "Defensive Training",
+        "data.racialTraits.0.description": "+4 dodge bonus to AC against giants.",
+        "data.racialTraits.1.id": "weapon-familiarity",
+        "data.racialTraits.1.name": "Weapon Familiarity",
+        "data.racialTraits.1.description": "Gnome hooked hammer is treated as a martial weapon.",
+        "data.skillBonuses.0.skill": "listen",
+        "data.skillBonuses.0.type": "racial",
+        "data.skillBonuses.1.skill": "craft:alchemy",
+        "data.skillBonuses.1.type": "racial",
+        "data.attackBonuses.0.target": "kobolds",
+        "data.attackBonuses.0.type": "racial",
+        "data.attackBonuses.1.target": "goblinoids",
+        "data.attackBonuses.1.type": "racial",
+        "data.saveBonuses.0.target": "illusions",
+        "data.saveBonuses.0.type": "racial",
+        "data.innateSpellLikeAbilities.0.spell": "dancing lights",
+        "data.innateSpellLikeAbilities.0.frequency": "1/day",
+        "data.innateSpellLikeAbilities.0.casterLevel": "class-level",
+        "data.innateSpellLikeAbilities.1.spell": "ghost sound",
+        "data.innateSpellLikeAbilities.1.frequency": "1/day",
+        "data.innateSpellLikeAbilities.1.casterLevel": "class-level",
+        "data.innateSpellLikeAbilities.2.spell": "prestidigitation",
+        "data.innateSpellLikeAbilities.2.frequency": "1/day",
+        "data.innateSpellLikeAbilities.2.casterLevel": "class-level",
+        "data.innateSpellLikeAbilities.3.spell": "speak with animals",
+        "data.innateSpellLikeAbilities.3.frequency": "1/day",
+        "data.innateSpellLikeAbilities.3.casterLevel": "class-level",
+        "data.innateSpellLikeAbilities.3.scope": "burrowing mammals"
+      },
+      "half-elf": {
+        "name": "Half-Elf",
+        "summary": "Half-Elf (race) option.",
+        "description": "Detailed reference entry for Half-Elf in the races dataset.",
+        "data.size": "medium",
+        "data.automaticLanguages.0": "Common",
+        "data.automaticLanguages.1": "Elven",
+        "data.bonusLanguages.0": "Any (except secret languages)",
+        "data.favoredClass": "any",
+        "data.saveBonuses.0.target": "enchantmentSpellsAndEffects",
+        "data.saveBonuses.0.type": "racial",
+        "data.racialTraits.0.id": "elf-blood",
+        "data.racialTraits.0.name": "Elf Blood",
+        "data.racialTraits.0.description": "Half-elves count as both elves and humans for effects related to race.",
+        "data.racialTraits.1.id": "immunity-sleep",
+        "data.racialTraits.1.name": "Immunity to Sleep",
+        "data.racialTraits.1.description": "Immune to magical sleep effects.",
+        "data.skillBonuses.0.skill": "listen",
+        "data.skillBonuses.0.type": "racial",
+        "data.skillBonuses.1.skill": "search",
+        "data.skillBonuses.1.type": "racial",
+        "data.skillBonuses.2.skill": "spot",
+        "data.skillBonuses.2.type": "racial",
+        "data.skillBonuses.3.skill": "diplomacy",
+        "data.skillBonuses.3.type": "racial",
+        "data.skillBonuses.4.skill": "gather-information",
+        "data.skillBonuses.4.type": "racial"
+      },
+      "half-orc": {
+        "name": "Half-Orc",
+        "summary": "Half-Orc (race) option.",
+        "description": "Detailed reference entry for Half-Orc in the races dataset.",
+        "data.size": "medium",
+        "data.automaticLanguages.0": "Common",
+        "data.automaticLanguages.1": "Orc",
+        "data.bonusLanguages.0": "Draconic",
+        "data.bonusLanguages.1": "Giant",
+        "data.bonusLanguages.2": "Gnoll",
+        "data.bonusLanguages.3": "Goblin",
+        "data.bonusLanguages.4": "Abyssal",
+        "data.favoredClass": "barbarian",
+        "data.racialTraits.0.id": "orc-blood",
+        "data.racialTraits.0.name": "Orc Blood",
+        "data.racialTraits.0.description": "Half-orcs count as both orcs and humans for effects related to race."
+      },
+      "halfling": {
+        "name": "Halfling",
+        "summary": "Halfling (race) option.",
+        "description": "Detailed reference entry for Halfling in the races dataset.",
+        "data.size": "small",
+        "data.automaticLanguages.0": "Common",
+        "data.automaticLanguages.1": "Halfling",
+        "data.bonusLanguages.0": "Dwarven",
+        "data.bonusLanguages.1": "Elven",
+        "data.bonusLanguages.2": "Gnome",
+        "data.bonusLanguages.3": "Goblin",
+        "data.bonusLanguages.4": "Orc",
+        "data.favoredClass": "rogue",
+        "data.racialTraits.0.id": "fearless",
+        "data.racialTraits.0.name": "Fearless",
+        "data.racialTraits.0.description": "+2 racial bonus on all saving throws against fear.",
+        "data.racialTraits.1.id": "halfling-throwing",
+        "data.racialTraits.1.name": "Thrown Weapon Bonus",
+        "data.racialTraits.1.description": "+1 racial bonus on attack rolls with thrown weapons and slings.",
+        "data.racialTraits.2.id": "surefooted",
+        "data.racialTraits.2.name": "Surefooted",
+        "data.racialTraits.2.description": "+2 racial bonus on Climb, Jump, and Move Silently checks.",
+        "data.skillBonuses.0.skill": "climb",
+        "data.skillBonuses.0.type": "racial",
+        "data.skillBonuses.1.skill": "jump",
+        "data.skillBonuses.1.type": "racial",
+        "data.skillBonuses.2.skill": "listen",
+        "data.skillBonuses.2.type": "racial",
+        "data.skillBonuses.3.skill": "move-silently",
+        "data.skillBonuses.3.type": "racial",
+        "data.saveBonuses.0.target": "fear",
+        "data.saveBonuses.0.type": "racial",
+        "data.attackBonuses.0.target": "thrown-weapons-and-slings",
+        "data.attackBonuses.0.type": "racial"
+      }
+    },
+    "rules": {
+      "base-ac": {
+        "name": "Base AC",
+        "summary": "Base AC (rule) option.",
+        "description": "Detailed reference entry for Base AC in the rules dataset."
+      },
+      "initiative": {
+        "name": "Initiative",
+        "summary": "Initiative (rule) option.",
+        "description": "Detailed reference entry for Initiative in the rules dataset."
+      }
+    },
+    "skills": {
+      "spot": {
+        "name": "Spot",
+        "summary": "Spot (skill) option.",
+        "description": "Detailed reference entry for Spot in the skills dataset.",
+        "data.ability": "wis"
+      },
+      "listen": {
+        "name": "Listen",
+        "summary": "Listen (skill) option.",
+        "description": "Detailed reference entry for Listen in the skills dataset.",
+        "data.ability": "wis"
+      },
+      "climb": {
+        "name": "Climb",
+        "summary": "Climb (skill) option.",
+        "description": "Detailed reference entry for Climb in the skills dataset.",
+        "data.ability": "str"
+      },
+      "jump": {
+        "name": "Jump",
+        "summary": "Jump (skill) option.",
+        "description": "Detailed reference entry for Jump in the skills dataset.",
+        "data.ability": "str"
+      },
+      "diplomacy": {
+        "name": "Diplomacy",
+        "summary": "Diplomacy (skill) option.",
+        "description": "Detailed reference entry for Diplomacy in the skills dataset.",
+        "data.ability": "cha"
+      },
+      "ride": {
+        "name": "Ride",
+        "summary": "Ride (skill) option.",
+        "description": "Detailed reference entry for Ride in the skills dataset.",
+        "data.ability": "dex"
+      }
+    }
+  }
+}

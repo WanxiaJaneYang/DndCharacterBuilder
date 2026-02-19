@@ -9,6 +9,8 @@ import itemsJson from '../../../packs/srd-35e-minimal/entities/items.json';
 import skillsJson from '../../../packs/srd-35e-minimal/entities/skills.json';
 import rulesJson from '../../../packs/srd-35e-minimal/entities/rules.json';
 import flowJson from '../../../packs/srd-35e-minimal/flows/character-creation.flow.json';
+import zhLocaleJson from '../../../packs/srd-35e-minimal/locales/zh.json';
+import type { PackLocale } from '@dcb/datapack';
 
 export function loadMinimalPack(): LoadedPack {
   return {
@@ -23,6 +25,9 @@ export function loadMinimalPack(): LoadedPack {
     },
     flow: flowJson as Flow,
     patches: [],
+    locales: {
+      zh: zhLocaleJson as PackLocale,
+    },
     packPath: 'packs/srd-35e-minimal'
   };
 }
