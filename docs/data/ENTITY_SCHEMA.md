@@ -55,6 +55,13 @@ For `entityType = "classes"`, `data` is validated with a strict class schema:
   - `fort`: `good | poor`
   - `ref`: `good | poor`
   - `will`: `good | poor`
+- `deferredMechanics` (optional): list of not-yet-implemented class-linked rules that should be revisited when dependencies land:
+  - `id`: stable identifier for the deferred rule/mechanic
+  - `category`: grouping tag (e.g. `alignment`, `proficiency`, `starter-pack`, `spellcasting`)
+  - `description`: clear rule statement and current limitation
+  - `dependsOn`: one or more dependency ids/names (subsystems or features that must be implemented first)
+  - `sourceRefs` (optional): source links/ids for authenticity traceability
+  - `impactPaths` (optional): expected model/engine areas impacted when implemented
 - `levelTable` (optional, descriptive metadata): list of
   - `{ level, bab, fort, ref, will, features?, specialLabel? }`
 - `progression` (optional, engine-facing dynamic model):
@@ -68,6 +75,7 @@ At least one of `levelTable` or `progression.levelGains` must be present.
 Engine note:
 - `progression.levelGains[*].effects` is the adaptive source of truth for dynamic sheet changes by level.
 - `levelTable` remains useful as display/reference metadata.
+- `deferredMechanics` is the backlog bridge: use it to quickly identify and complete class updates when dependent systems are added.
 
 ## Planned Extensions For Sheet Parity
 

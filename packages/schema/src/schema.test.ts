@@ -274,6 +274,45 @@ describe("class entity schema", () => {
     expect(parsed.id).toBe("rogue-1");
   });
 
+  it("accepts deferred mechanics metadata for not-yet-implemented class rules", () => {
+    const parsed = EntitySchema.parse({
+      id: "barbarian-1",
+      name: "Barbarian (Level 1)",
+      entityType: "classes",
+      summary: "Barbarian summary",
+      description: "Barbarian detail",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        skillPointsPerLevel: 4,
+        classSkills: ["climb", "jump"],
+        hitDie: 12,
+        baseAttackProgression: "full",
+        baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+        progression: {
+          levelGains: [
+            {
+              level: 1,
+              effects: [{ kind: "set", targetPath: "stats.bab", value: { const: 1 } }]
+            }
+          ]
+        },
+        deferredMechanics: [
+          {
+            id: "alignment-restriction-non-lawful",
+            category: "alignment",
+            description: "Barbarians cannot be lawful until alignment system is implemented.",
+            dependsOn: ["alignment-selection-flow", "alignment-validation-engine"],
+            impactPaths: ["metadata.alignment", "validation.class.alignment"],
+            sourceRefs: ["https://www.d20srd.org/srd/classes/barbarian.htm"]
+          }
+        ]
+      }
+    });
+
+    expect(parsed.id).toBe("barbarian-1");
+  });
+
   it("rejects missing or misplaced level-1 row in levelTable", () => {
     expect(() =>
       EntitySchema.parse({
@@ -364,6 +403,43 @@ describe("class entity schema", () => {
               }
             ]
           }
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
+
+  it("rejects malformed deferred mechanics metadata", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-class-deferred-mechanics",
+        name: "Broken Class Deferred Mechanics",
+        entityType: "classes",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          progression: {
+            levelGains: [
+              {
+                level: 1,
+                effects: [{ kind: "set", targetPath: "stats.bab", value: { const: 1 } }]
+              }
+            ]
+          },
+          deferredMechanics: [
+            {
+              id: "alignment-restriction-non-lawful",
+              category: "alignment",
+              description: "Barbarians cannot be lawful.",
+              dependsOn: []
+            }
+          ]
         }
       })
     ).toThrow(/invalid classes\.data/i);

@@ -17,6 +17,22 @@
         "ref": "poor",
         "will": "poor"
       },
+      "deferredMechanics": [
+        {
+          "id": "fighter-proficiency-modeling",
+          "category": "proficiency",
+          "description": "Fighter weapon and armor proficiency rules are not yet enforced mechanically in engine/equipment validation.",
+          "dependsOn": [
+            "equipment-proficiency-model",
+            "equipment-validation-engine"
+          ],
+          "impactPaths": [
+            "selections.equipment",
+            "validation.class.proficiency",
+            "stats.attackBonus"
+          ]
+        }
+      ],
       "progression": {
         "levelGains": [
           {

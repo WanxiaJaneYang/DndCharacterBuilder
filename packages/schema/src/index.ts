@@ -186,6 +186,15 @@ const ClassLevelRowSchema = z.object({
   specialLabel: z.string().min(1).optional()
 }).strict();
 
+const DeferredClassMechanicSchema = z.object({
+  id: z.string().min(1),
+  category: z.string().min(1),
+  description: z.string().min(1),
+  dependsOn: z.array(z.string().min(1)).min(1),
+  sourceRefs: z.array(z.string().min(1)).optional(),
+  impactPaths: z.array(z.string().min(1)).optional()
+}).strict();
+
 const ClassProgressionGrantSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("featureSlot"),
@@ -271,6 +280,7 @@ const ClassDataSchema = z.object({
     ref: ClassSaveProgressSchema,
     will: ClassSaveProgressSchema
   }).strict(),
+  deferredMechanics: z.array(DeferredClassMechanicSchema).optional(),
   levelTable: z.array(ClassLevelRowSchema).min(1).optional(),
   progression: ClassProgressionSchema.optional()
 }).strict().superRefine((classData, ctx) => {
