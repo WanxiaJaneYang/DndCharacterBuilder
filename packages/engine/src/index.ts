@@ -276,23 +276,65 @@ function classIdLevel(classId: string | undefined): number {
   return Math.floor(parsed);
 }
 
-function getClassProgressionEffects(classEntity: ResolvedEntity | undefined, classId: string | undefined): Effect[] {
+type ClassProgressionGrant = {
+  kind: string;
+  slotType?: string;
+  count?: number;
+};
+
+type ClassLevelGain = {
+  level: number;
+  effects: Effect[];
+  grants: ClassProgressionGrant[];
+};
+
+function parseClassProgressionGains(classEntity: ResolvedEntity | undefined): ClassLevelGain[] {
   const progression = classEntity?.data?.progression as { levelGains?: unknown } | undefined;
   if (!progression || !Array.isArray(progression.levelGains)) return [];
+
+  return progression.levelGains
+    .map((rawGain): ClassLevelGain | null => {
+      if (!rawGain || typeof rawGain !== "object") return null;
+      const record = rawGain as Record<string, unknown>;
+      const level = Number(record.level);
+      if (!Number.isFinite(level) || level < 1) return null;
+      const effects = (Array.isArray(record.effects) ? record.effects : [])
+        .map((effect) => EffectSchema.safeParse(effect))
+        .filter((result): result is { success: true; data: Effect } => result.success)
+        .map((result) => result.data);
+      const grants = Array.isArray(record.grants) ? (record.grants as ClassProgressionGrant[]) : [];
+      return { level: Math.floor(level), effects, grants };
+    })
+    .filter((gain): gain is ClassLevelGain => Boolean(gain))
+    .sort((a, b) => a.level - b.level);
+}
+
+function getApplicableClassGains(state: CharacterState, context: EngineContext): ClassLevelGain[] {
+  const selectedClass = getSelectedClass(state, context);
+  if (!selectedClass) return [];
+  const selectedLevel = classIdLevel(String(state.selections.class ?? ""));
+  return parseClassProgressionGains(selectedClass).filter((gain) => gain.level <= selectedLevel);
+}
+
+function getClassProgressionFeatSlotBonus(state: CharacterState, context: EngineContext): number {
+  return getApplicableClassGains(state, context).reduce((total, gain) => {
+    const gainBonus = gain.grants.reduce((count, grant) => {
+      if (grant.kind !== "featureSlot") return count;
+      if (String(grant.slotType ?? "").trim().toLowerCase() !== FEAT_SLOT_TYPE) return count;
+      const slotCount = Number(grant.count ?? 0);
+      if (!Number.isFinite(slotCount) || slotCount < 1) return count;
+      return count + Math.floor(slotCount);
+    }, 0);
+    return total + gainBonus;
+  }, 0);
+}
+
+function getClassProgressionEffects(classEntity: ResolvedEntity | undefined, classId: string | undefined): Effect[] {
   const selectedLevel = classIdLevel(classId);
   const effects: Effect[] = [];
 
-  progression.levelGains
-    .filter((gain): gain is Record<string, unknown> => Boolean(gain) && typeof gain === "object")
-    .map((gain) => ({
-      level: Number(gain.level),
-      effects: (Array.isArray(gain.effects) ? gain.effects : [])
-        .map((effect) => EffectSchema.safeParse(effect))
-        .filter((result): result is { success: true; data: Effect } => result.success)
-        .map((result) => result.data)
-    }))
+  parseClassProgressionGains(classEntity)
     .filter((gain) => Number.isFinite(gain.level) && gain.level >= 1 && gain.level <= selectedLevel)
-    .sort((a, b) => a.level - b.level)
     .forEach((gain) => effects.push(...gain.effects));
 
   return effects;
