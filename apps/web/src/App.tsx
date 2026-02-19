@@ -162,6 +162,23 @@ export function App() {
       const selectedClassName = selectedClassEntity
         ? localizeEntityName(language, selectedClassEntity.id, selectedClassEntity.name)
         : (selectedClassId || '-');
+      const selectedFeatNames = selectedFeats
+        .map((featId) => {
+          const featEntity = context.resolvedData.entities.feats?.[featId];
+          return featEntity
+            ? localizeEntityName(language, featEntity.id, featEntity.name)
+            : featId;
+        })
+        .filter((value) => value.trim().length > 0);
+      const selectedEquipmentIds = (state.selections.equipment as string[] | undefined) ?? [];
+      const selectedEquipmentNames = selectedEquipmentIds
+        .map((itemId) => {
+          const itemEntity = context.resolvedData.entities.items?.[itemId];
+          return itemEntity
+            ? localizeEntityName(language, itemEntity.id, itemEntity.name)
+            : itemId;
+        })
+        .filter((value) => value.trim().length > 0);
       const reviewSkills = Object.entries(sheet.skills)
         .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
         .sort((a, b) => b[1].total - a[1].total || a[1].name.localeCompare(b[1].name));
@@ -334,6 +351,32 @@ export function App() {
                 ))}
               </tbody>
             </table>
+          </article>
+
+          <article className="sheet">
+            <h3>{t.reviewFeatsHeading}</h3>
+            {selectedFeatNames.length === 0 ? (
+              <p className="review-muted">-</p>
+            ) : (
+              <ul>
+                {selectedFeatNames.map((featName) => (
+                  <li key={featName}>{featName}</li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className="sheet">
+            <h3>{t.reviewEquipmentHeading}</h3>
+            {selectedEquipmentNames.length === 0 ? (
+              <p className="review-muted">-</p>
+            ) : (
+              <ul>
+                {selectedEquipmentNames.map((itemName) => (
+                  <li key={itemName}>{itemName}</li>
+                ))}
+              </ul>
+            )}
           </article>
 
           <article className="sheet review-decisions">

@@ -37,6 +37,8 @@ export type UIText = {
   reviewAbilityBreakdown: string;
   reviewCombatBreakdown: string;
   reviewSkillsBreakdown: string;
+  reviewFeatsHeading: string;
+  reviewEquipmentHeading: string;
   reviewRulesDecisions: string;
   reviewRawProvenance: string;
   reviewPackInfo: string;
@@ -112,6 +114,8 @@ const uiTextKeys: Array<keyof UIText> = [
   'reviewAbilityBreakdown',
   'reviewCombatBreakdown',
   'reviewSkillsBreakdown',
+  'reviewFeatsHeading',
+  'reviewEquipmentHeading',
   'reviewRulesDecisions',
   'reviewRawProvenance',
   'reviewPackInfo',

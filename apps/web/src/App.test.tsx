@@ -148,11 +148,15 @@ describe('role and language behavior', () => {
       expect(screen.getAllByRole('heading', { name: zh.reviewAbilityBreakdown }).length).toBeGreaterThan(0);
       expect(screen.getAllByRole('heading', { name: zh.reviewCombatBreakdown }).length).toBeGreaterThan(0);
       expect(screen.getAllByRole('heading', { name: zh.reviewPackInfo }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('heading', { name: zh.reviewFeatsHeading }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('heading', { name: zh.reviewEquipmentHeading }).length).toBeGreaterThan(0);
       expect(screen.getAllByRole('columnheader', { name: zh.reviewBaseColumn }).length).toBeGreaterThan(0);
       expect(screen.getAllByRole('columnheader', { name: zh.reviewAdjustmentsColumn }).length).toBeGreaterThan(0);
       expect(screen.getAllByText(zh.reviewFingerprintLabel, { exact: false }).length).toBeGreaterThan(0);
       expect(screen.getByText('人类', { selector: 'strong' })).toBeTruthy();
       expect(screen.getByText('战士（1级）', { selector: 'strong' })).toBeTruthy();
+      expect(screen.getByText(/强力攻击|武器专攻（长剑）/)).toBeTruthy();
+      expect(screen.getAllByText('锁子甲').length).toBeGreaterThan(0);
     });
   });
 });

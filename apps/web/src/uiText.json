@@ -71,7 +71,9 @@
     "reviewSpeedLabel": "Speed",
     "reviewFortLabel": "Fortitude",
     "reviewRefLabel": "Reflex",
-    "reviewWillLabel": "Will"
+    "reviewWillLabel": "Will",
+    "reviewFeatsHeading": "Feats",
+    "reviewEquipmentHeading": "Equipment"
   },
   "zh": {
     "appTitle": "D&D 3.5 新手角色创建器（MVP）",
@@ -145,6 +147,8 @@
     "reviewSpeedLabel": "速度",
     "reviewFortLabel": "强韧",
     "reviewRefLabel": "反射",
-    "reviewWillLabel": "意志"
+    "reviewWillLabel": "意志",
+    "reviewFeatsHeading": "专长",
+    "reviewEquipmentHeading": "装备"
   }
 }
