@@ -65,22 +65,18 @@ export function App() {
     const map = new Map<string, string>();
     for (const bucket of Object.values(context.resolvedData.entities)) {
       for (const entity of Object.values(bucket)) {
-        map.set(entity.id, entity.name);
+        map.set(`${entity._source.packId}:${entity.id}`, entity.name);
       }
     }
     return map;
   }, [context.resolvedData.entities]);
   const packVersionById = useMemo(() => {
     const map = new Map<string, string>();
-    for (const bucket of Object.values(context.resolvedData.entities)) {
-      for (const entity of Object.values(bucket)) {
-        if (!map.has(entity._source.packId)) {
-          map.set(entity._source.packId, entity._source.version ?? t.reviewUnknownVersion);
-        }
-      }
+    for (const manifest of context.resolvedData.manifests) {
+      map.set(manifest.id, manifest.version || t.reviewUnknownVersion);
     }
     return map;
-  }, [context.resolvedData.entities, t.reviewUnknownVersion]);
+  }, [context.resolvedData.manifests, t.reviewUnknownVersion]);
   const provenanceByTargetPath = useMemo(() => {
     const map = new Map<string, typeof sheet.provenance>();
     for (const record of sheet.provenance) {
@@ -131,7 +127,7 @@ export function App() {
 
     if (currentStep.kind === 'review') {
       const abilityOrder = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
-      const statOrder = ['hp', 'ac', 'initiative', 'speed', 'bab', 'fort', 'ref', 'will', 'attackBonus', 'damageBonus'] as const;
+      const statOrder = ['hp', 'ac', 'initiative', 'speed', 'bab', 'fort', 'ref', 'will'] as const;
       const statLabels: Record<(typeof statOrder)[number], string> = {
         hp: 'HP',
         ac: 'AC',
@@ -141,8 +137,6 @@ export function App() {
         fort: 'FORT',
         ref: 'REF',
         will: 'WILL',
-        attackBonus: 'ATK',
-        damageBonus: 'DMG',
       };
       const statBaseDefaults: Record<(typeof statOrder)[number], number> = {
         hp: 0,
@@ -153,11 +147,10 @@ export function App() {
         fort: 0,
         ref: 0,
         will: 0,
-        attackBonus: 0,
-        damageBonus: 0,
       };
       const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
-      const formatSourceLabel = (entityId: string) => sourceNameByEntityId.get(entityId) ?? entityId;
+      const formatSourceLabel = (packId: string, entityId: string) =>
+        sourceNameByEntityId.get(`${packId}:${entityId}`) ?? entityId;
       const selectedRaceId = String(state.selections.race ?? '');
       const selectedClassId = String(state.selections.class ?? '');
       const selectedRaceName = context.resolvedData.entities.races?.[selectedRaceId]?.name ?? (selectedRaceId || '-');
@@ -239,7 +232,7 @@ export function App() {
                               <li key={`${targetPath}-${index}`}>
                                 <code>{record.delta !== undefined ? formatSigned(record.delta) : `= ${record.setValue ?? 0}`}</code>
                                 {' '}
-                                {formatSourceLabel(record.source.entityId)}
+                                {formatSourceLabel(record.source.packId, record.source.entityId)}
                               </li>
                             ))}
                           </ul>
@@ -270,24 +263,13 @@ export function App() {
                 {statOrder.map((statKey) => {
                   const targetPath = `stats.${statKey}`;
                   const records = provenanceByTargetPath.get(targetPath) ?? [];
-                  const derivedRows: Array<{ label: string; value: number }> = [];
-                  if (statKey === 'initiative') {
-                    derivedRows.push({ label: t.reviewDexModifierLabel, value: sheet.abilities.dex?.mod ?? 0 });
-                  }
-                  if (statKey === 'attackBonus') {
-                    derivedRows.push({ label: t.reviewBabLabel, value: Number(sheet.stats.bab ?? 0) });
-                    derivedRows.push({ label: t.reviewStrModifierLabel, value: sheet.abilities.str?.mod ?? 0 });
-                  }
-                  if (statKey === 'damageBonus') {
-                    derivedRows.push({ label: t.reviewStrModifierLabel, value: sheet.abilities.str?.mod ?? 0 });
-                  }
 
                   return (
                     <tr key={statKey}>
                       <td className="review-cell-key">{statLabels[statKey]}</td>
                       <td>{statBaseDefaults[statKey]}</td>
                       <td>
-                        {records.length === 0 && derivedRows.length === 0 ? (
+                        {records.length === 0 ? (
                           <span className="review-muted">-</span>
                         ) : (
                           <ul className="calc-list">
@@ -295,12 +277,7 @@ export function App() {
                               <li key={`${targetPath}-${index}`}>
                                 <code>{record.delta !== undefined ? formatSigned(record.delta) : `= ${record.setValue ?? 0}`}</code>
                                 {' '}
-                                {formatSourceLabel(record.source.entityId)}
-                              </li>
-                            ))}
-                            {derivedRows.map((row) => (
-                              <li key={`${targetPath}-${row.label}`}>
-                                <code>{formatSigned(row.value)}</code> {row.label}
+                                {formatSourceLabel(record.source.packId, record.source.entityId)}
                               </li>
                             ))}
                           </ul>
