@@ -78,6 +78,9 @@ describe("pack contracts", () => {
     const wizard = byId("wizard-1");
     expect(wizard?.data?.classSkills ?? []).not.toContain("diplomacy");
 
+    const druid = byId("druid-1");
+    expect(druid?.data?.classSkills ?? []).not.toContain("climb");
+
     const fighter = byId("fighter-1");
     expect(fighter?.data?.levelTable?.[0]?.features ?? []).toContain("bonus-fighter-feat");
     expect(fighter?.data?.levelTable?.[0]?.specialLabel).toBe("Fighter bonus feat");
