@@ -12,9 +12,9 @@
   "entityText": {
     "classes": {
       "fighter-1": {
-        "name": "Fighter (Level 1)",
-        "summary": "Fighter (Level 1) (class) option.",
-        "description": "Detailed reference entry for Fighter (Level 1) in the classes dataset.",
+        "name": "Fighter",
+        "summary": "Fighter (class) option.",
+        "description": "Detailed reference entry for Fighter in the classes dataset.",
         "data.classSkills.0": "climb",
         "data.classSkills.1": "jump",
         "data.classSkills.2": "ride"

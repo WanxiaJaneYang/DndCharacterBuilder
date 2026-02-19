@@ -146,7 +146,7 @@ describe("class entity schema", () => {
   it("accepts structured class data", () => {
     const parsed = EntitySchema.parse({
       id: "fighter-1",
-      name: "Fighter (Level 1)",
+      name: "Fighter",
       entityType: "classes",
       summary: "Fighter summary",
       description: "Fighter detail",
@@ -244,7 +244,7 @@ describe("class entity schema", () => {
   it("accepts progression-only class data without levelTable", () => {
     const parsed = EntitySchema.parse({
       id: "rogue-1",
-      name: "Rogue (Level 1)",
+      name: "Rogue",
       entityType: "classes",
       summary: "Rogue summary",
       description: "Rogue detail",

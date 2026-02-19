@@ -1,7 +1,7 @@
 [
   {
     "id": "barbarian-1",
-    "name": "Barbarian (Level 1)",
+    "name": "Barbarian",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 4,
@@ -75,14 +75,14 @@
         }
       }
     ],
-    "summary": "Barbarian (Level 1) class option.",
+    "summary": "Barbarian class option.",
     "description": "Level 1 barbarian with d12 hit die, full base attack bonus, strong Fortitude save, and martial wilderness skill focus.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "bard-1",
-    "name": "Bard (Level 1)",
+    "name": "Bard",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 6,
@@ -156,14 +156,14 @@
         }
       }
     ],
-    "summary": "Bard (Level 1) class option.",
+    "summary": "Bard class option.",
     "description": "Level 1 bard with d8 hit die, 3/4 base attack bonus, strong Reflex and Will saves, and social and perceptive skills.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "cleric-1",
-    "name": "Cleric (Level 1)",
+    "name": "Cleric",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 2,
@@ -233,14 +233,14 @@
         }
       }
     ],
-    "summary": "Cleric (Level 1) class option.",
+    "summary": "Cleric class option.",
     "description": "Level 1 cleric with d8 hit die, 3/4 base attack bonus, strong Fortitude and Will saves, and divine spellcasting and turning.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "druid-1",
-    "name": "Druid (Level 1)",
+    "name": "Druid",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 4,
@@ -311,14 +311,14 @@
         }
       }
     ],
-    "summary": "Druid (Level 1) class option.",
+    "summary": "Druid class option.",
     "description": "Level 1 druid with d8 hit die, 3/4 base attack bonus, strong Fortitude and Will saves, and nature-themed magic.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "fighter-1",
-    "name": "Fighter (Level 1)",
+    "name": "Fighter",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 2,
@@ -455,14 +455,14 @@
         }
       }
     ],
-    "summary": "Fighter (Level 1) class option.",
+    "summary": "Fighter class option.",
     "description": "Level 1 fighter with d10 hit die, full base attack bonus, strong Fortitude save, and straightforward martial combat focus.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "monk-1",
-    "name": "Monk (Level 1)",
+    "name": "Monk",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 4,
@@ -535,14 +535,14 @@
         }
       }
     ],
-    "summary": "Monk (Level 1) class option.",
+    "summary": "Monk class option.",
     "description": "Level 1 monk with d8 hit die, 3/4 base attack bonus, all three good saves, and unarmed combat focus.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "paladin-1",
-    "name": "Paladin (Level 1)",
+    "name": "Paladin",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 2,
@@ -613,14 +613,14 @@
         }
       }
     ],
-    "summary": "Paladin (Level 1) class option.",
+    "summary": "Paladin class option.",
     "description": "Level 1 paladin with d10 hit die, full base attack bonus, strong Fortitude save, and divine champion flavour.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "ranger-1",
-    "name": "Ranger (Level 1)",
+    "name": "Ranger",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 6,
@@ -694,14 +694,14 @@
         }
       }
     ],
-    "summary": "Ranger (Level 1) class option.",
+    "summary": "Ranger class option.",
     "description": "Level 1 ranger with d10 hit die, full base attack bonus, good Fortitude and Reflex saves, and wilderness scouting abilities.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "rogue-1",
-    "name": "Rogue (Level 1)",
+    "name": "Rogue",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 8,
@@ -775,14 +775,14 @@
         }
       }
     ],
-    "summary": "Rogue (Level 1) class option.",
+    "summary": "Rogue class option.",
     "description": "Level 1 rogue with d6 hit die, 3/4 base attack bonus, strong Reflex save, and a focus on skills and precision attacks.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "sorcerer-1",
-    "name": "Sorcerer (Level 1)",
+    "name": "Sorcerer",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 2,
@@ -850,14 +850,14 @@
         }
       }
     ],
-    "summary": "Sorcerer (Level 1) class option.",
+    "summary": "Sorcerer class option.",
     "description": "Level 1 sorcerer with d4 hit die, 1/2 base attack bonus, strong Will save, and spontaneous arcane spellcasting.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
     "id": "wizard-1",
-    "name": "Wizard (Level 1)",
+    "name": "Wizard",
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 2,
@@ -925,7 +925,7 @@
         }
       }
     ],
-    "summary": "Wizard (Level 1) class option.",
+    "summary": "Wizard class option.",
     "description": "Level 1 wizard with d4 hit die, 1/2 base attack bonus, strong Will save, and prepared arcane spellcasting from a spellbook.",
     "portraitUrl": null,
     "iconUrl": null
