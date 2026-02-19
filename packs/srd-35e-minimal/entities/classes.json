@@ -93,7 +93,7 @@
         "listen",
         "spot"
       ],
-      "hitDie": 8,
+      "hitDie": 6,
       "baseAttackProgression": "threeQuarters",
       "baseSaveProgression": {
         "fort": "poor",
@@ -119,7 +119,7 @@
         "value": {
           "sum": [
             {
-              "const": 8
+              "const": 6
             },
             {
               "abilityMod": "con"
@@ -632,7 +632,7 @@
         "ride",
         "spot"
       ],
-      "hitDie": 10,
+      "hitDie": 8,
       "baseAttackProgression": "full",
       "baseSaveProgression": {
         "fort": "good",
@@ -658,7 +658,7 @@
         "value": {
           "sum": [
             {
-              "const": 10
+              "const": 8
             },
             {
               "abilityMod": "con"
@@ -787,9 +787,7 @@
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 2,
-      "classSkills": [
-        "diplomacy"
-      ],
+      "classSkills": [],
       "hitDie": 4,
       "baseAttackProgression": "half",
       "baseSaveProgression": {
@@ -864,9 +862,7 @@
     "entityType": "classes",
     "data": {
       "skillPointsPerLevel": 2,
-      "classSkills": [
-        "diplomacy"
-      ],
+      "classSkills": [],
       "hitDie": 4,
       "baseAttackProgression": "half",
       "baseSaveProgression": {
