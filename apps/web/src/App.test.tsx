@@ -151,6 +151,8 @@ describe('role and language behavior', () => {
       expect(screen.getAllByRole('columnheader', { name: zh.reviewBaseColumn }).length).toBeGreaterThan(0);
       expect(screen.getAllByRole('columnheader', { name: zh.reviewAdjustmentsColumn }).length).toBeGreaterThan(0);
       expect(screen.getAllByText(zh.reviewFingerprintLabel, { exact: false }).length).toBeGreaterThan(0);
+      expect(screen.getByText('人类', { selector: 'strong' })).toBeTruthy();
+      expect(screen.getByText('战士（1级）', { selector: 'strong' })).toBeTruthy();
     });
   });
 });

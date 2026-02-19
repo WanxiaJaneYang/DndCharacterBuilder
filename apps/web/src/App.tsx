@@ -4,6 +4,7 @@ import { loadMinimalPack } from './loadMinimalPack';
 import { applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
 import { EDITIONS, FALLBACK_EDITION, type EditionOption, defaultEditionId } from './editions';
 import { detectDefaultLanguage, uiText, type Language, type UIText } from './uiText';
+import { localizeEntityName } from './entityLocalization';
 
 const embeddedPacks = [loadMinimalPack()];
 type Role = 'dm' | 'player' | null;
@@ -65,11 +66,11 @@ export function App() {
     const map = new Map<string, string>();
     for (const bucket of Object.values(context.resolvedData.entities)) {
       for (const entity of Object.values(bucket)) {
-        map.set(`${entity._source.packId}:${entity.id}`, entity.name);
+        map.set(`${entity._source.packId}:${entity.id}`, localizeEntityName(language, entity.id, entity.name));
       }
     }
     return map;
-  }, [context.resolvedData.entities]);
+  }, [context.resolvedData.entities, language]);
   const packVersionById = useMemo(() => {
     const map = new Map<string, string>();
     for (const manifest of context.resolvedData.manifests) {
@@ -153,8 +154,14 @@ export function App() {
         sourceNameByEntityId.get(`${packId}:${entityId}`) ?? entityId;
       const selectedRaceId = String(state.selections.race ?? '');
       const selectedClassId = String(state.selections.class ?? '');
-      const selectedRaceName = context.resolvedData.entities.races?.[selectedRaceId]?.name ?? (selectedRaceId || '-');
-      const selectedClassName = context.resolvedData.entities.classes?.[selectedClassId]?.name ?? (selectedClassId || '-');
+      const selectedRaceEntity = context.resolvedData.entities.races?.[selectedRaceId];
+      const selectedClassEntity = context.resolvedData.entities.classes?.[selectedClassId];
+      const selectedRaceName = selectedRaceEntity
+        ? localizeEntityName(language, selectedRaceEntity.id, selectedRaceEntity.name)
+        : (selectedRaceId || '-');
+      const selectedClassName = selectedClassEntity
+        ? localizeEntityName(language, selectedClassEntity.id, selectedClassEntity.name)
+        : (selectedClassId || '-');
       const reviewSkills = Object.entries(sheet.skills)
         .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
         .sort((a, b) => b[1].total - a[1].total || a[1].name.localeCompare(b[1].name));
@@ -317,7 +324,7 @@ export function App() {
               <tbody>
                 {reviewSkills.map(([skillId, skill]) => (
                   <tr key={skillId}>
-                    <td className="review-cell-key">{skill.name}</td>
+                    <td className="review-cell-key">{localizeEntityName(language, skillId, skill.name)}</td>
                     <td>{skill.ranks}</td>
                     <td>{formatSigned(skill.abilityMod)} ({skill.ability.toUpperCase()})</td>
                     <td>{formatSigned(skill.racialBonus)}</td>
@@ -331,7 +338,11 @@ export function App() {
 
           <article className="sheet review-decisions">
             <h3>{t.reviewRulesDecisions}</h3>
-            <p>{t.reviewFavoredClassLabel}: {sheet.decisions.favoredClass ?? '-'}</p>
+            <p>
+              {t.reviewFavoredClassLabel}: {sheet.decisions.favoredClass
+                ? localizeEntityName(language, sheet.decisions.favoredClass, sheet.decisions.favoredClass)
+                : '-'}
+            </p>
             <p>{t.reviewMulticlassXpIgnoredLabel}: {sheet.decisions.ignoresMulticlassXpPenalty ? t.reviewYes : t.reviewNo}</p>
             <p>{t.reviewFeatSlotsLabel}: {sheet.decisions.featSelectionLimit}</p>
           </article>
