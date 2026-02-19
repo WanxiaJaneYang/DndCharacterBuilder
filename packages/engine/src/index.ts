@@ -613,10 +613,25 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
 
   function applyClassEntity(entity: ResolvedEntity | undefined, selectedClassId: string | undefined): void {
     if (!entity) return;
-    const source = { packId: entity._source.packId, entityId: entity._source.entityId };
-    const progressionEffects = getClassProgressionEffects(entity, selectedClassId);
-    const effectsToApply = progressionEffects.length > 0 ? progressionEffects : (entity.effects ?? []);
-    effectsToApply.forEach((effect) => applyEffect(effect, sheet, provenance, source));
+    const selectedLevel = classIdLevel(selectedClassId);
+    const applicableGains = parseClassProgressionGains(entity).filter((gain) => gain.level >= 1 && gain.level <= selectedLevel);
+    let appliedProgression = false;
+
+    for (const gain of applicableGains) {
+      if (gain.effects.length === 0) continue;
+      const source = {
+        packId: entity._source.packId,
+        entityId: entity._source.entityId,
+        choiceStepId: `class-level-${gain.level}`
+      };
+      gain.effects.forEach((effect) => applyEffect(effect, sheet, provenance, source));
+      appliedProgression = true;
+    }
+
+    if (!appliedProgression) {
+      const fallbackSource = { packId: entity._source.packId, entityId: entity._source.entityId };
+      (entity.effects ?? []).forEach((effect) => applyEffect(effect, sheet, provenance, fallbackSource));
+    }
   }
 
   const ruleEntities = Object.values(entityBuckets.rules ?? {}).sort((a, b) => a.id.localeCompare(b.id));
