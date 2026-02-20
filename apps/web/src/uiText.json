@@ -118,7 +118,8 @@
       "int": "INT",
       "wis": "WIS",
       "cha": "CHA"
-    }
+    },
+    "reviewAttackItemColumn": "Item"
   },
   "zh": {
     "appTitle": "D&D 3.5 新手角色创建器（MVP）",
@@ -239,6 +240,7 @@
       "int": "智力",
       "wis": "感知",
       "cha": "魅力"
-    }
+    },
+    "reviewAttackItemColumn": "项目"
   }
 }

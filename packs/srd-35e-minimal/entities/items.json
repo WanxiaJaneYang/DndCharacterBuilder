@@ -3,6 +3,13 @@
     "id": "longsword",
     "name": "Longsword",
     "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "19-20/x2",
+      "weight": 4
+    },
     "effects": [],
     "summary": "Longsword (item) option.",
     "description": "Detailed reference entry for Longsword in the items dataset.",
@@ -13,6 +20,11 @@
     "id": "chainmail",
     "name": "Chainmail",
     "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 40,
+      "armorCheckPenalty": -5
+    },
     "effects": [
       {
         "kind": "add",
@@ -38,6 +50,11 @@
     "id": "heavy-wooden-shield",
     "name": "Heavy Wooden Shield",
     "entityType": "items",
+    "data": {
+      "category": "shield",
+      "weight": 10,
+      "armorCheckPenalty": -2
+    },
     "effects": [
       {
         "kind": "add",

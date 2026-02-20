@@ -324,7 +324,7 @@ export function App() {
               <thead>
                 <tr>
                   <th>{t.reviewAttackTypeColumn}</th>
-                  <th>{t.reviewSkillColumn}</th>
+                  <th>{t.reviewAttackItemColumn}</th>
                   <th>{t.reviewAttackBonusColumn}</th>
                   <th>{t.reviewDamageColumn}</th>
                   <th>{t.reviewCritColumn}</th>

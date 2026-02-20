@@ -83,6 +83,7 @@ export type UIText = {
   reviewSaveHpBreakdown: string;
   reviewAttackLines: string;
   reviewAttackTypeColumn: string;
+  reviewAttackItemColumn: string;
   reviewAttackBonusColumn: string;
   reviewDamageColumn: string;
   reviewCritColumn: string;
@@ -199,6 +200,7 @@ const uiTextStringKeys: Array<Exclude<keyof UIText, 'abilityLabels'>> = [
   'reviewSaveHpBreakdown',
   'reviewAttackLines',
   'reviewAttackTypeColumn',
+  'reviewAttackItemColumn',
   'reviewAttackBonusColumn',
   'reviewDamageColumn',
   'reviewCritColumn',

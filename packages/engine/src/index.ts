@@ -887,48 +887,51 @@ function inferAcBreakdown(
   };
 }
 
-function isLikelyRangedWeapon(itemId: string): boolean {
-  const id = itemId.toLowerCase();
-  return id.includes("bow")
-    || id.includes("crossbow")
-    || id.includes("sling")
-    || id.includes("javelin")
-    || id.includes("dart")
-    || id.includes("thrown")
-    || id.includes("ranged");
-}
-
-function isLikelyArmorOrShield(itemId: string): boolean {
-  const id = itemId.toLowerCase();
-  return id.includes("armor")
-    || id.includes("mail")
-    || id.includes("shield")
-    || id.includes("plate")
-    || id.includes("leather")
-    || id.includes("hide")
-    || id.includes("chain");
-}
-
-function estimateItemWeight(itemId: string): number {
-  switch (itemId.trim().toLowerCase()) {
-    case "chainmail": return 40;
-    case "heavy-wooden-shield": return 10;
-    case "longsword": return 4;
-    default: return 0;
+function getEntityDataRecord(entity: ResolvedEntity | undefined): Record<string, unknown> {
+  const rawData = entity?.data;
+  if (!rawData || typeof rawData !== "object" || Array.isArray(rawData)) {
+    return {};
   }
+  return rawData as Record<string, unknown>;
 }
 
-function estimateItemAcp(itemId: string): number {
-  switch (itemId.trim().toLowerCase()) {
-    case "chainmail": return -5;
-    case "heavy-wooden-shield": return -2;
-    default: return 0;
-  }
+function getEntityDataNumber(entity: ResolvedEntity | undefined, key: string, fallback = 0): number {
+  const value = getEntityDataRecord(entity)[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-function affectedByAcp(skillId: string): boolean {
-  const id = skillId.trim().toLowerCase();
-  return id === "climb" || id === "jump" || id === "ride";
+function getEntityDataString(entity: ResolvedEntity | undefined, key: string): string {
+  const value = getEntityDataRecord(entity)[key];
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function isArmorOrShieldItem(item: ResolvedEntity): boolean {
+  const category = getEntityDataString(item, "category").toLowerCase();
+  if (category === "armor" || category === "shield") return true;
+  return (item.effects ?? []).some((effect) =>
+    effect.targetPath === "stats.ac" || effect.targetPath === "stats.speed"
+  );
+}
+
+function isRangedWeaponItem(item: ResolvedEntity): boolean {
+  const category = getEntityDataString(item, "category").toLowerCase();
+  const weaponType = getEntityDataString(item, "weaponType").toLowerCase();
+  if (category !== "weapon") return false;
+  if (weaponType === "ranged") return true;
+  return getEntityDataString(item, "range").length > 0;
+}
+
+function getItemWeight(item: ResolvedEntity): number {
+  return getEntityDataNumber(item, "weight", 0);
+}
+
+function getItemArmorCheckPenalty(item: ResolvedEntity): number {
+  return getEntityDataNumber(item, "armorCheckPenalty", 0);
+}
+
+function skillIsAffectedByArmorCheckPenalty(skillEntity: ResolvedEntity | undefined): boolean {
+  const value = getEntityDataRecord(skillEntity).armorCheckPenaltyApplies;
+  return value === true;
 }
 
 export function finalizeCharacter(state: CharacterState, context: EngineContext): CharacterSheet {
@@ -997,9 +1000,6 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   const initiativeMisc = Number(sheet.stats.initiative ?? 0);
   sheet.stats.initiative = initiativeMisc + (finalAbilities.dex?.mod ?? 0);
   sheet.stats.ac = Number(sheet.stats.ac ?? 0) + decisions.sizeModifiers.ac;
-  sheet.stats.fort = Number(sheet.stats.fort ?? 0) + (finalAbilities.con?.mod ?? 0);
-  sheet.stats.ref = Number(sheet.stats.ref ?? 0) + (finalAbilities.dex?.mod ?? 0);
-  sheet.stats.will = Number(sheet.stats.will ?? 0) + (finalAbilities.wis?.mod ?? 0);
   sheet.stats.attackBonus = (sheet.stats.bab as number) + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack;
   sheet.stats.damageBonus = finalAbilities.str?.mod ?? 0;
   const selectedRace = raceId ? entityBuckets.races?.[raceId] : undefined;
@@ -1031,32 +1031,31 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     misc: 0
   };
   sheet.stats.grapple = grapple.total;
-  const attackItems = ((state.selections.equipment as string[] | undefined) ?? [])
+  const selectedEquipmentEntities = ((state.selections.equipment as string[] | undefined) ?? [])
     .map((itemId) => entityBuckets.items?.[itemId])
-    .filter((entity): entity is ResolvedEntity => Boolean(entity))
-    .filter((entity) => !isLikelyArmorOrShield(entity.id));
+    .filter((entity): entity is ResolvedEntity => Boolean(entity));
+  const attackItems = selectedEquipmentEntities.filter((entity) => !isArmorOrShieldItem(entity));
   const meleeAttacks: AttackLine[] = [];
   const rangedAttacks: AttackLine[] = [];
   for (const item of attackItems) {
-    const id = item.id.toLowerCase();
     const baseLine = {
       itemId: item.id,
       name: item.name
     };
-    if (isLikelyRangedWeapon(id)) {
+    if (isRangedWeaponItem(item)) {
       rangedAttacks.push({
         ...baseLine,
         attackBonus: bab + (finalAbilities.dex?.mod ?? 0) + decisions.sizeModifiers.attack,
-        damage: "1d8",
-        crit: "x2",
-        range: "varies"
+        damage: getEntityDataString(item, "damage") || "1d8",
+        crit: getEntityDataString(item, "crit") || "x2",
+        range: getEntityDataString(item, "range") || "varies"
       });
     } else {
       meleeAttacks.push({
         ...baseLine,
         attackBonus: bab + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack,
-        damage: `1d8${(finalAbilities.str?.mod ?? 0) >= 0 ? "+" : ""}${finalAbilities.str?.mod ?? 0}`,
-        crit: id.includes("longsword") ? "19-20/x2" : "x2"
+        damage: getEntityDataString(item, "damage") || `1d8${(finalAbilities.str?.mod ?? 0) >= 0 ? "+" : ""}${finalAbilities.str?.mod ?? 0}`,
+        crit: getEntityDataString(item, "crit") || "x2"
       });
     }
   }
@@ -1069,22 +1068,25 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
       crit: "x2"
     });
   }
+  const fortBase = Number(sheet.stats.fort ?? 0);
+  const refBase = Number(sheet.stats.ref ?? 0);
+  const willBase = Number(sheet.stats.will ?? 0);
   const saveBreakdown = {
     fort: {
-      total: Number(sheet.stats.fort ?? 0),
-      base: Number(sheet.stats.fort ?? 0) - (finalAbilities.con?.mod ?? 0),
+      total: fortBase + (finalAbilities.con?.mod ?? 0),
+      base: fortBase,
       ability: finalAbilities.con?.mod ?? 0,
       misc: 0
     },
     ref: {
-      total: Number(sheet.stats.ref ?? 0),
-      base: Number(sheet.stats.ref ?? 0) - (finalAbilities.dex?.mod ?? 0),
+      total: refBase + (finalAbilities.dex?.mod ?? 0),
+      base: refBase,
       ability: finalAbilities.dex?.mod ?? 0,
       misc: 0
     },
     will: {
-      total: Number(sheet.stats.will ?? 0),
-      base: Number(sheet.stats.will ?? 0) - (finalAbilities.wis?.mod ?? 0),
+      total: willBase + (finalAbilities.wis?.mod ?? 0),
+      base: willBase,
       ability: finalAbilities.wis?.mod ?? 0,
       misc: 0
     }
@@ -1142,7 +1144,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     }))
     .filter((trait) => trait.name.length > 0 || trait.summary.length > 0);
   const selectedEquipment = ((state.selections.equipment as string[] | undefined) ?? []).map((itemId) => String(itemId));
-  const totalWeight = selectedEquipment.reduce((sum, itemId) => sum + estimateItemWeight(itemId), 0);
+  const totalWeight = selectedEquipmentEntities.reduce((sum, item) => sum + getItemWeight(item), 0);
   const strScore = Number(finalAbilities.str?.score ?? 10);
   const lightLoadLimit = strScore * 10;
   const mediumLoadLimit = strScore * 20;
@@ -1151,12 +1153,13 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     : totalWeight <= mediumLoadLimit
       ? "medium"
       : "heavy";
-  const acpPenalty = selectedEquipment.reduce((sum, itemId) => sum + estimateItemAcp(itemId), 0);
+  const acpPenalty = selectedEquipmentEntities.reduce((sum, item) => sum + getItemArmorCheckPenalty(item), 0);
   const phase2Skills = Object.entries(skills)
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([skillId, skill]) => {
       const misc = 0;
-      const acp = affectedByAcp(skillId) ? acpPenalty : 0;
+      const skillEntity = entityBuckets.skills?.[skillId];
+      const acp = skillIsAffectedByArmorCheckPenalty(skillEntity) ? acpPenalty : 0;
       return {
         id: skillId,
         name: skill.name,
