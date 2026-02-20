@@ -190,6 +190,14 @@ const SpellDcBonusSchema = z.object({
   type: z.string().optional(),
   when: z.string().optional()
 }).strict();
+const DeferredMechanicBaseSchema = z.object({
+  id: z.string().min(1),
+  category: z.string().min(1),
+  description: z.string().min(1),
+  dependsOn: z.array(z.string().min(1)).min(1),
+  sourceRefs: z.array(z.string().min(1)).optional(),
+  impactPaths: z.array(z.string().min(1)).optional()
+}).strict();
 
 const RaceDataSchema = z.object({
   size: z.enum(["small", "medium", "large"]),
@@ -211,7 +219,8 @@ const RaceDataSchema = z.object({
   innateSpellLikeAbilities: z.array(InnateSpellLikeAbilitySchema).optional(),
   ancestryTags: z.array(RaceAncestryTagSchema).optional(),
   sizeModifiers: RaceSizeModifierSchema.optional(),
-  movementOverrides: RaceMovementOverrideSchema.optional()
+  movementOverrides: RaceMovementOverrideSchema.optional(),
+  deferredMechanics: z.array(DeferredMechanicBaseSchema).optional()
 }).strict();
 
 const ClassSaveProgressSchema = z.enum(["good", "poor"]);
@@ -228,14 +237,7 @@ const ClassLevelRowSchema = z.object({
   spellSlots: z.record(z.union([z.string().min(1), z.null()])).optional()
 }).strict();
 
-const DeferredClassMechanicSchema = z.object({
-  id: z.string().min(1),
-  category: z.string().min(1),
-  description: z.string().min(1),
-  dependsOn: z.array(z.string().min(1)).min(1),
-  sourceRefs: z.array(z.string().min(1)).optional(),
-  impactPaths: z.array(z.string().min(1)).optional()
-}).strict();
+const DeferredClassMechanicSchema = DeferredMechanicBaseSchema;
 
 const ClassProgressionGrantSchema = z.discriminatedUnion("kind", [
   z.object({

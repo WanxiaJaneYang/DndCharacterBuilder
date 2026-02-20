@@ -1,8 +1,8 @@
 {
   "packId": "srd-35e-minimal",
   "officialRuleset": true,
-  "generatedAt": "2026-02-20T02:25:00.000Z",
-  "generatedBy": "class-data-authenticity refresh (normalized JSON hashes)",
+  "generatedAt": "2026-02-20T05:20:14.843Z",
+  "generatedBy": "rebase conflict resolution refresh",
   "sourceAuthorities": [
     {
       "title": "D&D 3.5 System Reference Document",
@@ -20,7 +20,7 @@
     },
     {
       "path": "entities/races.json",
-      "sha256": "43ed458a946b666234d7b720a7c62750f4cbaa9e0e300afb32b8907b83b3cd6f"
+      "sha256": "8acf1c318e3b8c2c22560fcf1db22a6c0f5e6361dc719dc25ee160167001ec5a"
     },
     {
       "path": "entities/classes.json",

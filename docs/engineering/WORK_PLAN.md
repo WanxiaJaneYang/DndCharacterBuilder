@@ -64,6 +64,7 @@ This living document tracks the engineering tasks required to implement the DnDC
   - `bonus-feat` now increases the feat selection limit.
   - `extra-skill-points` now increases level-1 skill budget.
 - Added cross-class skill cost/rank validation and surfaced `favoredClass` XP-penalty metadata for future multiclass leveling logic.
+- Added race-level `deferredMechanics` tracking in schema and `races.json` so PHB-linked but not-yet-implemented race rules are indexed for fast follow-up when dependent systems land.
 
 ## Checklist
 

@@ -36,12 +36,20 @@ For `entityType = "races"`, `data` is validated with a strict race schema:
 - `saveBonuses` (optional): list of `{ target, bonus, type?, when? }`
 - `attackBonuses` (optional): list of `{ target, bonus, type?, when? }`
 - `innateSpellLikeAbilities` (optional): list of `{ spell, frequency, casterLevel?, scope? }`
+- `deferredMechanics` (optional): list of race-linked rules tracked for later implementation:
+  - `id`: stable deferred-rule identifier
+  - `category`: grouping tag (for example `proficiency`, `spell-like`, `race-typing`, `situational-bonus`)
+  - `description`: what is not implemented yet
+  - `dependsOn`: required subsystem(s) before implementing this rule
+  - `sourceRefs` (optional): authenticity/source references
+  - `impactPaths` (optional): expected model/engine areas to update
 
 ## Notes
 
 - Entity-level text metadata is required; image URL fields are optional and may be `null` when no asset exists.
 - Race entries can still express engine-ready mechanics in `effects`.
 - Rich metadata in `data` is intended for details modal + rules expansion.
+- `deferredMechanics` is a lookup index for unfinished race mechanics so follow-up implementation can be done quickly and traceably.
 
 ## Class `data` model
 

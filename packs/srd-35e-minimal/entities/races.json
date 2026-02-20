@@ -125,6 +125,36 @@
           "description": "Dwarven waraxe and dwarven urgrosh are treated as martial weapons."
         }
       ],
+      "deferredMechanics": [
+        {
+          "id": "dwarf-weapon-familiarity-proficiency",
+          "category": "proficiency",
+          "description": "Dwarven weapon familiarity is documented but not enforced by current equipment/proficiency mechanics.",
+          "dependsOn": [
+            "equipment-proficiency-model",
+            "equipment-validation-engine"
+          ],
+          "impactPaths": [
+            "selections.equipment",
+            "validation.race.proficiency"
+          ]
+        },
+        {
+          "id": "dwarf-conditional-bonuses",
+          "category": "situational-bonus",
+          "description": "Dwarf situational save/check modifiers (for example poison or spell-like effects) are not dynamically evaluated yet.",
+          "dependsOn": [
+            "situational-modifier-engine",
+            "typed-condition-evaluator"
+          ],
+          "impactPaths": [
+            "stats.fort",
+            "stats.ref",
+            "stats.will",
+            "validation.checks"
+          ]
+        }
+      ],
       "skillBonuses": [
         {
           "skill": "appraise",
@@ -237,7 +267,37 @@
           "type": "racial"
         }
       ],
-      "innateSpellLikeAbilities": []
+      "innateSpellLikeAbilities": [],
+      "deferredMechanics": [
+        {
+          "id": "elf-weapon-proficiency-package",
+          "category": "proficiency",
+          "description": "Elf weapon proficiency package is recorded but not enforced by equipment/attack validation yet.",
+          "dependsOn": [
+            "equipment-proficiency-model",
+            "attack-roll-proficiency-validation"
+          ],
+          "impactPaths": [
+            "selections.equipment",
+            "stats.attackBonus",
+            "validation.race.proficiency"
+          ]
+        },
+        {
+          "id": "elf-conditional-perception-and-save-effects",
+          "category": "situational-bonus",
+          "description": "Elf conditional effects such as secret-door sensing and enchantment-specific saves are not fully automated yet.",
+          "dependsOn": [
+            "situational-modifier-engine",
+            "contextual-check-trigger-system"
+          ],
+          "impactPaths": [
+            "skills.search",
+            "stats.will",
+            "validation.checks"
+          ]
+        }
+      ]
     },
     "summary": "Elf (race) option.",
     "description": "Detailed reference entry for Elf in the races dataset.",
@@ -360,6 +420,74 @@
           "casterLevel": "class-level",
           "scope": "burrowing mammals"
         }
+      ],
+      "deferredMechanics": [
+        {
+          "id": "gnome-weapon-familiarity-proficiency",
+          "category": "proficiency",
+          "description": "Gnome weapon familiarity is not enforced by current equipment/proficiency mechanics.",
+          "dependsOn": [
+            "equipment-proficiency-model",
+            "equipment-validation-engine"
+          ],
+          "impactPaths": [
+            "selections.equipment",
+            "validation.race.proficiency"
+          ]
+        },
+        {
+          "id": "gnome-spell-like-abilities-runtime",
+          "category": "spell-like",
+          "description": "Gnome spell-like abilities are present in data but not executed by a spell/ability runtime.",
+          "dependsOn": [
+            "spell-like-ability-runtime",
+            "uses-per-day-tracking"
+          ],
+          "impactPaths": [
+            "abilities",
+            "selections",
+            "review.spellLikeAbilities"
+          ]
+        },
+        {
+          "id": "gnome-defensive-training-contextual-ac",
+          "category": "conditional-modifier",
+          "description": "Gnome defensive training (+4 dodge AC vs giants) is not yet applied by contextual combat rules.",
+          "dependsOn": [
+            "combat-context-engine",
+            "conditional-ac-modifier-system"
+          ],
+          "impactPaths": [
+            "combat.ac",
+            "validation.race.conditionalBonuses"
+          ]
+        },
+        {
+          "id": "gnome-attack-bonuses-vs-kobolds-goblinoids",
+          "category": "conditional-modifier",
+          "description": "Gnome +1 attack bonuses versus kobolds and goblinoids are not enforced by combat target typing.",
+          "dependsOn": [
+            "combat-target-typing",
+            "conditional-attack-modifier-system"
+          ],
+          "impactPaths": [
+            "combat.attackRoll",
+            "validation.race.conditionalBonuses"
+          ]
+        },
+        {
+          "id": "gnome-save-bonus-vs-illusions",
+          "category": "conditional-modifier",
+          "description": "Gnome +1 saving throw bonus versus illusions is not enforced by spell-school-aware save resolution.",
+          "dependsOn": [
+            "spell-school-tagging",
+            "conditional-save-modifier-system"
+          ],
+          "impactPaths": [
+            "combat.savingThrows",
+            "validation.race.conditionalBonuses"
+          ]
+        }
       ]
     },
     "summary": "Gnome (race) option.",
@@ -441,6 +569,22 @@
           "bonus": 2,
           "type": "racial"
         }
+      ],
+      "deferredMechanics": [
+        {
+          "id": "half-elf-race-typing",
+          "category": "race-typing",
+          "description": "Half-elf dual race typing (counts as elf and human) is not represented in type-aware rule resolution yet.",
+          "dependsOn": [
+            "race-tagging-system",
+            "type-aware-constraint-evaluator"
+          ],
+          "impactPaths": [
+            "constraints",
+            "effects",
+            "validation.raceTyping"
+          ]
+        }
       ]
     },
     "summary": "Half-Elf (race) option.",
@@ -511,6 +655,22 @@
           "id": "orc-blood",
           "name": "Orc Blood",
           "description": "Half-orcs count as both orcs and humans for effects related to race."
+        }
+      ],
+      "deferredMechanics": [
+        {
+          "id": "half-orc-race-typing",
+          "category": "race-typing",
+          "description": "Half-orc dual race typing (counts as orc and human) is not represented in type-aware rule resolution yet.",
+          "dependsOn": [
+            "race-tagging-system",
+            "type-aware-constraint-evaluator"
+          ],
+          "impactPaths": [
+            "constraints",
+            "effects",
+            "validation.raceTyping"
+          ]
         }
       ]
     },
@@ -620,6 +780,23 @@
           "target": "thrown-weapons-and-slings",
           "bonus": 1,
           "type": "racial"
+        }
+      ],
+      "deferredMechanics": [
+        {
+          "id": "halfling-situational-combat-bonuses",
+          "category": "situational-bonus",
+          "description": "Halfling situational save/attack bonuses are captured in data but not fully applied through typed combat/save contexts.",
+          "dependsOn": [
+            "situational-modifier-engine",
+            "typed-combat-context-model"
+          ],
+          "impactPaths": [
+            "stats.attackBonus",
+            "stats.fort",
+            "stats.ref",
+            "stats.will"
+          ]
         }
       ]
     },

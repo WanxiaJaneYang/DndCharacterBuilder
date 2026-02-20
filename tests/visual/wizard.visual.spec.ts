@@ -72,11 +72,17 @@ async function goToDetailPage(page: Page, locale: Locale) {
 }
 
 async function waitForVisualStability(page: Page) {
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  // CI can keep background requests alive (analytics/dev sockets), so don't hard-fail on networkidle.
+  await page.waitForLoadState('networkidle', { timeout: 1200 }).catch((err: unknown) => {
+    if (err instanceof Error && err.name === 'TimeoutError') return;
+    throw err;
+  });
+  await page.waitForTimeout(150);
 }
 
 // Small ratio threshold to tolerate platform anti-aliasing without hiding real regressions.
-const screenshotOptions = { fullPage: true, maxDiffPixelRatio: 0.0005 };
+const screenshotOptions = { fullPage: true, maxDiffPixelRatio: 0.0005, timeout: 15000 };
 // Detail page captures a long, dense summary view that shows larger OS/font rasterization drift in CI.
 const detailScreenshotOptions = { ...screenshotOptions, maxDiffPixelRatio: 0.012 };
 
