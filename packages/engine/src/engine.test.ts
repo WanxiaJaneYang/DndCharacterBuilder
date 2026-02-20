@@ -54,6 +54,18 @@ describe("engine determinism", () => {
     expect(choices.find((c) => c.stepId === "race")?.options[0]?.id).toBe("human");
   });
 
+  it("stores abilities selection payload with generation mode metadata", () => {
+    const state = applyChoice(initialState, "abilities", {
+      mode: "pointBuy",
+      pointCap: 32,
+      scores: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 }
+    });
+
+    expect(state.abilities).toEqual({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 });
+    expect((state.selections.abilitiesMeta as { mode?: string; pointCap?: number } | undefined)?.mode).toBe("pointBuy");
+    expect((state.selections.abilitiesMeta as { mode?: string; pointCap?: number } | undefined)?.pointCap).toBe(32);
+  });
+
   it("applies race-driven feat limit for humans", () => {
     const humanState = applyChoice(initialState, "race", "human");
     const humanFeatLimit = listChoices(humanState, context).find((c) => c.stepId === "feat")?.limit;
@@ -318,6 +330,56 @@ describe("engine determinism", () => {
 
     const errors = validateState(state, context);
     expect(errors.some((error) => error.code === "STEP_LIMIT_EXCEEDED")).toBe(true);
+  });
+
+  it("rejects point-buy allocations above configured cap", () => {
+    let state = applyChoice(initialState, "name", "PointBuy");
+    state = applyChoice(state, "abilities", {
+      mode: "pointBuy",
+      pointCap: 20,
+      scores: { str: 18, dex: 18, con: 18, int: 8, wis: 8, cha: 8 }
+    });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "ABILITY_POINTBUY_EXCEEDED")).toBe(true);
+  });
+
+  it("rejects phb standardArray when scores are not one-use", () => {
+    let state = applyChoice(initialState, "name", "PhbArray");
+    state = applyChoice(state, "abilities", {
+      mode: "phb",
+      scores: { str: 15, dex: 15, con: 13, int: 12, wis: 10, cha: 8 }
+    });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "ABILITY_PHB_ARRAY_INVALID")).toBe(true);
+  });
+
+  it("rejects rollSets state with no selected set", () => {
+    let state = applyChoice(initialState, "name", "RollSets");
+    state = applyChoice(state, "abilities", {
+      mode: "rollSets",
+      scores: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 },
+      rollSets: {
+        generatedSets: [
+          [15, 14, 13, 12, 10, 8],
+          [14, 14, 13, 12, 10, 8],
+          [13, 13, 13, 12, 10, 8],
+          [16, 14, 12, 11, 10, 9],
+          [15, 15, 12, 11, 10, 8]
+        ],
+        selectedSetIndex: -1
+      }
+    });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "ABILITY_ROLLSETS_SELECTION_REQUIRED")).toBe(true);
   });
 
   it("uses overriding pack id in provenance records", () => {
