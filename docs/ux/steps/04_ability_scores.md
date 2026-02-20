@@ -4,12 +4,13 @@ This document defines the **Ability Scores** step.  Characters in D&D have six a
 
 ## Goal
 
-Provide a clear and beginner-friendly method for assigning ability scores.  Two approaches are supported:
+Provide a clear and beginner-friendly method for assigning ability scores.  Methods are data-driven from flow config and can vary by edition.
 
-1. **Point Buy** (32 points) - recommended for newcomers because it guides them to create balanced characters.
-2. **Manual Entry** - veterans can assign scores manually (within allowed ranges) if desired.
+MVP supports:
 
-The method is defined in the flow JSON.  If unspecified, default to manual entry for MVP and refine later.
+1. **Point Buy** (edition-configured defaults, including cap and score-cost table).
+2. **PHB Method** (edition-configured; e.g. standard array/manual-range variants).
+3. **Roll Sets** (generate configured sets and pick one).
 
 ## User Intent
 
@@ -40,41 +41,43 @@ Depending on the selected method:
 - Display the resulting ability modifier next to each ability as the user updates values.
 - Provide a short explanation of what each ability represents (e.g. Strength affects melee attacks and damage).
 
-### Manual Entry
+### PHB and Roll Sets
 
-- Present six numeric inputs labelled with each ability.
-- Enforce valid range (3-18) for each ability in 3.5 SRD.
-- Provide the same explanation and live modifier calculation.
-- Validate that the user enters a value for each ability before proceeding.
+- PHB mode behavior is read from flow config (e.g. standard array or manual range).
+- Roll Sets mode uses configured generation settings and requires selecting a generated set.
+- Both modes must produce final base scores for all six abilities before continuing.
 
 Regardless of method:
 
 - A "Reset" option returns values to the default (e.g. all 8s for point buy).
 - Derived modifiers update in real time.
+- Existing race/class/rule modifiers are shown on the Ability step (base, adjustments, final, modifier) so players can see effective outcomes immediately.
 - Once complete, store the scores in engine state so racial bonuses and class effects can be applied.
 
 ## Data Requirements
 
-The flow JSON must specify:
+The flow JSON must specify `abilitiesConfig`, including:
 
-- `method`: `"pointBuy"` or `"manual"` (or other in future).
-- `points`: number of points for point buy (default 32).
-- `min_score` and `max_score`: valid range for manual entry (default 3-18).
+- enabled `modes` and `defaultMode`
+- `pointBuy` config (cost table, cap defaults/range, score bounds)
+- `phb` config
+- `rollSets` config
 
-The engine must define cost tables and validation rules.  Racial ability adjustments should apply after scores are selected and before derived stats are finalised.
+The engine validates abilities against this config.  Racial ability adjustments apply after base scores are selected.
 
 ## Validation & Gating
 
 - Ensure that all six abilities have values.
 - For point buy, total cost <= available points; if cost > points, block progression and show error.
-- For manual entry, each score must fall within the defined range.
+- For PHB mode, scores must satisfy configured PHB rules.
+- For roll sets, one generated set must be selected.
 - Show error messages near invalid fields and disable Next until resolved.
 
 ## Acceptance Criteria
 
 - The ability assignment method is configured via flow JSON, not hardcoded.
 - Point buy enforces the correct cost table and point total.
-- Manual entry enforces valid ranges.
+- PHB and roll-set validations are enforced from flow config.
 - Ability modifiers update live in the UI.
 - Racial adjustments apply after ability scores are stored (engine must handle this).
 
@@ -88,8 +91,8 @@ The engine must define cost tables and validation rules.  Racial ability adjustm
 
 ## Checklist
 
-- [ ] Ability method read from flow JSON.
-- [ ] Point buy interface implemented with proper cost table.
-- [ ] Manual entry validated and stored.
-- [ ] Racial adjustments applied after abilities.
-- [ ] Tests cover validation and cost calculation.
+- [x] Ability mode read from flow JSON.
+- [x] Point buy interface implemented with configured cost table and cap.
+- [x] Existing modifiers shown in Ability step summary.
+- [x] Engine validates point buy / PHB / roll-set requirements.
+- [x] Tests cover config parsing, engine validation, and web rendering.
