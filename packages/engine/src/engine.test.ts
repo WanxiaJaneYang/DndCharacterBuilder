@@ -120,6 +120,31 @@ describe("engine determinism", () => {
     expect(sheet.stats.attackBonus).toBe(2);
   });
 
+  it("applies small-size combat modifiers to AC and attack bonus", () => {
+    let state = applyChoice(initialState, "name", "Small");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "halfling");
+    state = applyChoice(state, "class", "fighter-1");
+
+    const sheet = finalizeCharacter(state, context);
+    expect(sheet.stats.ac).toBe(11);
+    expect(sheet.stats.attackBonus).toBe(1);
+  });
+
+  it("exposes structured race bonus datasets in decision summary", () => {
+    let state = applyChoice(initialState, "name", "Gnomish");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "gnome");
+    state = applyChoice(state, "class", "fighter-1");
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(sheet.decisions.racialSaveBonuses.length).toBeGreaterThan(0);
+    expect(sheet.decisions.racialAttackBonuses.length).toBeGreaterThan(0);
+    expect(sheet.decisions.racialInnateSpellLikeAbilities.length).toBeGreaterThan(0);
+    expect(sheet.decisions.racialSaveBonuses.some((bonus) => bonus.target === "illusions")).toBe(true);
+  });
+
   it("normalizes class-skill ranks as integers when context is provided", () => {
     let state = applyChoice(initialState, "name", "Norm");
     state = applyChoice(state, "race", "human");
