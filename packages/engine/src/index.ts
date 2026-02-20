@@ -837,6 +837,56 @@ function getGrappleSizeModifier(size: string | undefined): number {
   }
 }
 
+const SRD_MEDIUM_LOAD_TABLE: Array<{ light: number; medium: number; heavy: number } | null> = [
+  null,
+  { light: 3, medium: 6, heavy: 10 },
+  { light: 6, medium: 13, heavy: 20 },
+  { light: 10, medium: 20, heavy: 30 },
+  { light: 13, medium: 26, heavy: 40 },
+  { light: 16, medium: 33, heavy: 50 },
+  { light: 20, medium: 40, heavy: 60 },
+  { light: 23, medium: 46, heavy: 70 },
+  { light: 26, medium: 53, heavy: 80 },
+  { light: 30, medium: 60, heavy: 90 },
+  { light: 33, medium: 66, heavy: 100 },
+  { light: 38, medium: 76, heavy: 115 },
+  { light: 43, medium: 86, heavy: 130 },
+  { light: 50, medium: 100, heavy: 150 },
+  { light: 58, medium: 116, heavy: 175 },
+  { light: 66, medium: 133, heavy: 200 },
+  { light: 76, medium: 153, heavy: 230 },
+  { light: 86, medium: 173, heavy: 260 },
+  { light: 100, medium: 200, heavy: 300 },
+  { light: 116, medium: 233, heavy: 350 },
+  { light: 133, medium: 266, heavy: 400 },
+  { light: 153, medium: 306, heavy: 460 },
+  { light: 173, medium: 346, heavy: 520 },
+  { light: 200, medium: 400, heavy: 600 },
+  { light: 233, medium: 466, heavy: 700 },
+  { light: 266, medium: 533, heavy: 800 },
+  { light: 306, medium: 613, heavy: 920 },
+  { light: 346, medium: 693, heavy: 1040 },
+  { light: 400, medium: 800, heavy: 1200 },
+  { light: 466, medium: 933, heavy: 1400 }
+];
+
+function getSrdMediumLoadLimits(strScore: number): { light: number; medium: number; heavy: number } {
+  const normalizedScore = Number.isFinite(strScore) ? Math.max(1, Math.floor(strScore)) : 10;
+  if (normalizedScore < SRD_MEDIUM_LOAD_TABLE.length) {
+    return SRD_MEDIUM_LOAD_TABLE[normalizedScore] ?? { light: 0, medium: 0, heavy: 0 };
+  }
+  const baseEntry = SRD_MEDIUM_LOAD_TABLE[20]!;
+  const incrementsOfTen = Math.floor((normalizedScore - 20) / 10);
+  const remainderScore = normalizedScore - (incrementsOfTen * 10);
+  const remainderEntry = SRD_MEDIUM_LOAD_TABLE[remainderScore] ?? baseEntry;
+  const multiplier = 4 ** incrementsOfTen;
+  return {
+    light: remainderEntry.light * multiplier,
+    medium: remainderEntry.medium * multiplier,
+    heavy: remainderEntry.heavy * multiplier
+  };
+}
+
 function inferAcBreakdown(
   provenance: ProvenanceRecord[],
   selectedEquipmentIds: Set<string>,
@@ -1008,8 +1058,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   const selectedClassLevel = classIdLevel(String(classId ?? ""));
   const selectedClassHitDie = Number(selectedClass?.data?.hitDie ?? 0);
   const hpTotal = Number(sheet.stats.hp ?? 0);
-  const hpCon = finalAbilities.con?.mod ?? 0;
+  const hpConPerLevel = finalAbilities.con?.mod ?? 0;
   const effectiveLevel = Number.isFinite(selectedClassLevel) && selectedClassLevel > 0 ? selectedClassLevel : 1;
+  const hpCon = hpConPerLevel * effectiveLevel;
   const inferredHitDieHp = Number.isFinite(selectedClassHitDie) && selectedClassHitDie > 0
     ? Math.floor(selectedClassHitDie * effectiveLevel)
     : 0;
@@ -1153,8 +1204,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   const totalWeight = selectedEquipmentEntities.reduce((sum, item) => sum + getItemWeight(item), 0);
   const strScore = Number(finalAbilities.str?.score ?? 10);
   const carryingMultiplier = Number(decisions.sizeModifiers.carryingCapacityMultiplier ?? 1);
-  const lightLoadLimit = strScore * 10 * carryingMultiplier;
-  const mediumLoadLimit = strScore * 20 * carryingMultiplier;
+  const srdLimits = getSrdMediumLoadLimits(strScore);
+  const lightLoadLimit = srdLimits.light * carryingMultiplier;
+  const mediumLoadLimit = srdLimits.medium * carryingMultiplier;
   const loadCategory: "light" | "medium" | "heavy" = totalWeight <= lightLoadLimit
     ? "light"
     : totalWeight <= mediumLoadLimit

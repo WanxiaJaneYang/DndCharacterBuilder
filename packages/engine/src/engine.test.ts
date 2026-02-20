@@ -339,7 +339,7 @@ describe("engine determinism", () => {
 
     const sheet = finalizeCharacter(state, localContext);
     expect(sheet.phase2.equipment.totalWeight).toBe(90);
-    expect(sheet.phase2.equipment.loadCategory).toBe("medium");
+    expect(sheet.phase2.equipment.loadCategory).toBe("heavy");
   });
 
   it("scales inferred HP hit-die breakdown by parsed class level suffix", () => {
@@ -408,8 +408,8 @@ describe("engine determinism", () => {
     const sheet = finalizeCharacter(state, localContext);
     expect(sheet.phase1.identity.level).toBe(3);
     expect(sheet.phase1.combat.hp.total).toBe(25);
-    expect(sheet.phase1.combat.hp.breakdown.con).toBe(2);
-    expect(sheet.phase1.combat.hp.breakdown.hitDie).toBe(23);
+    expect(sheet.phase1.combat.hp.breakdown.con).toBe(6);
+    expect(sheet.phase1.combat.hp.breakdown.hitDie).toBe(19);
     expect(sheet.phase1.combat.hp.breakdown.misc).toBe(0);
   });
 
