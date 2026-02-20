@@ -31,6 +31,17 @@ Each ability row displays:
 - Final derived modifier
 - Expand/collapse control for source breakdown
 
+### Score Stepper Ergonomics (Point Buy / Range Inputs)
+
+- Use prominent `-` and `+` steppers beside each score input with a minimum 40x40 hit target (mobile-first).
+- Single tap/click adjusts by 1 step; press-and-hold repeats after a short delay for fast tuning.
+- Support keyboard controls on focused score input:
+  - `ArrowUp` / `ArrowDown`: plus/minus 1
+  - `Shift` + arrow: accelerated stepping (when valid for the mode)
+- Disable stepper buttons when min/max or point-cap constraints would be violated.
+- Keep spent/remaining points visible while stepping so users can adjust without scanning elsewhere.
+- Provide subtle feedback for blocked actions (disabled state + brief reason text near row).
+
 ### Source Breakdown (expandable per ability)
 
 - Group by dynamic `sourceType` values from active effects (for example: race, class, feat, template, rules module, extension content).
@@ -74,6 +85,7 @@ No UI hardcoded defaults for mode rules or modifier source categories.
 - Desktop/tablet: six-row table layout with expandable detail rows.
 - Mobile: stacked row cards (still one card per ability) with details in an accordion panel.
 - Keep key numbers (Base, Existing, Final, Modifier) visible without opening details.
+- Keep `-` and `+` controls pinned next to the editable score on all breakpoints.
 
 ## Acceptance Criteria
 

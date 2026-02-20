@@ -40,6 +40,16 @@ Suggested effect shape:
 - For each row show: Base, Existing, Final, Derived Modifier.
 - Existing is computed from active `abilityEffects` for that ability.
 
+### Score Controls (Usability Requirements)
+
+- For editable score fields, render adjacent `-` and `+` steppers with large hit areas (minimum 40x40).
+- Click/tap changes by one step; press-and-hold performs repeat stepping for quick adjustments.
+- Keyboard parity:
+  - `ArrowUp` / `ArrowDown` adjust by one step.
+  - Optional accelerated stepping (for example `Shift` + arrow) when consistent with active mode constraints.
+- Buttons must be disabled when constraints would be violated (min/max score, point cap, mode rules).
+- Expose immediate feedback for blocked increments/decrements (disabled affordance + short inline reason).
+
 ### Dynamic Source Groups
 
 - Group row details by `sourceType` (or configured grouping key).
@@ -65,6 +75,7 @@ Suggested effect shape:
 - Desktop/tablet: table-like rows with expandable detail sections.
 - Mobile: card rows with accordion detail panel per ability.
 - Keep headline numbers readable without requiring detail expansion.
+- Keep score steppers directly adjacent to the score value at every breakpoint.
 
 ## Checklist
 
