@@ -19,4 +19,5 @@ Add engine support for race mechanics that are already encoded in race JSON but 
 - [x] GREEN: implement engine parsing/support and make tests pass
 - [x] Validate engine tests
 - [x] Validate workspace typecheck
-- [ ] Open MR for step 2
+- [x] Open MR for step 2
+
