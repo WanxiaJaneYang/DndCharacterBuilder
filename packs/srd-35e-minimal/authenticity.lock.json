@@ -16,7 +16,7 @@
     },
     {
       "path": "flows/character-creation.flow.json",
-      "sha256": "ef7f629c274a7040af3115dfc96cb2d0f59f142250762d71713530e1a7a40a38"
+      "sha256": "cb05a125508a81c19b914b394d30e646e55b22722dae591d98f6b8c8fe5dd0c6"
     },
     {
       "path": "entities/races.json",

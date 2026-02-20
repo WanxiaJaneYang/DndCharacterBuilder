@@ -166,7 +166,9 @@ export function App() {
     const abilityStep = wizardSteps.find((step) => step.id === STEP_ID_ABILITIES) as ({ abilitiesConfig?: AbilityStepConfig } | undefined);
     return abilityStep?.abilitiesConfig;
   }, [wizardSteps]);
-  const abilityModes = abilityStepConfig?.modes?.length ? abilityStepConfig.modes : ['pointBuy', 'phb', 'rollSets'];
+  const abilityModes: AbilityMode[] = abilityStepConfig?.modes?.length
+    ? abilityStepConfig.modes
+    : (['pointBuy', 'phb', 'rollSets'] as AbilityMode[]);
   const abilityMeta = (state.selections.abilitiesMeta as {
     mode?: AbilityMode;
     pointCap?: number;
