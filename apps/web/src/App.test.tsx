@@ -14,7 +14,7 @@ const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
 const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
 const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
 const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
-const fighterLabelPattern = /Fighter(?: \(Level 1\))?|战士(?:（1级）)?/i;
+const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?)$/i;
 
 afterEach(() => {
   cleanup();
@@ -58,7 +58,7 @@ describe('wizard e2e-ish happy path', () => {
 
     expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'AC' })).toBeTruthy();
-    expect(screen.getByText(/Fighter|战士/i, { selector: 'strong' })).toBeTruthy();
+    expect(screen.getByText(fighterLabelPattern, { selector: 'strong' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.reviewAbilityBreakdown })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.reviewCombatBreakdown })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.reviewPackInfo })).toBeTruthy();

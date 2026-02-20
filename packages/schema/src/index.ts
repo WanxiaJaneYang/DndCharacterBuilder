@@ -185,7 +185,7 @@ const ClassLevelRowSchema = z.object({
   features: z.array(z.string()).optional(),
   specialLabel: z.string().min(1).optional(),
   babDisplay: z.string().min(1).optional(),
-  spellSlots: z.record(z.string().nullable()).optional()
+  spellSlots: z.record(z.union([z.string().min(1), z.null()])).optional()
 }).strict();
 
 const DeferredClassMechanicSchema = z.object({
@@ -299,7 +299,7 @@ const ClassDataSchema = z.object({
     notes: z.array(z.string().min(1)).optional(),
     spellsPerDayByLevel: z.array(z.object({
       level: z.number().int().min(1),
-      slots: z.record(z.string().nullable())
+      slots: z.record(z.union([z.string().min(1), z.null()]))
     }).strict()).optional()
   }).strict().optional(),
   deferredMechanics: z.array(DeferredClassMechanicSchema).optional(),
