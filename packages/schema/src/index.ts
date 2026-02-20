@@ -69,11 +69,54 @@ const ChoiceStepSourceSchema = z.discriminatedUnion("type", [
   }).strict()
 ]);
 
+const AbilityGenerationModeSchema = z.enum(["pointBuy", "phb", "rollSets"]);
+
+const PointBuyConfigSchema = z.object({
+  costTable: z.record(z.string().regex(/^\d+$/), z.number().int()),
+  defaultPointCap: z.number().int().min(1),
+  minPointCap: z.number().int().min(1),
+  maxPointCap: z.number().int().min(1),
+  pointCapStep: z.number().int().min(1),
+  minScore: z.number().int().min(1),
+  maxScore: z.number().int().min(1)
+}).strict();
+
+const PhbConfigSchema = z.object({
+  methodType: z.enum(["standardArray", "manualRange"]),
+  standardArray: z.array(z.number().int()).length(6).optional(),
+  manualRange: z.object({
+    minScore: z.number().int().min(1),
+    maxScore: z.number().int().min(1)
+  }).strict().optional()
+}).strict();
+
+const RollSetsConfigSchema = z.object({
+  setsCount: z.number().int().min(1),
+  rollFormula: z.enum(["4d6_drop_lowest"]),
+  scoresPerSet: z.number().int().min(1),
+  assignmentPolicy: z.enum(["assign_after_pick"])
+}).strict();
+
+const AbilitiesConfigSchema = z.object({
+  modes: z.array(AbilityGenerationModeSchema).min(1),
+  defaultMode: AbilityGenerationModeSchema,
+  pointBuy: PointBuyConfigSchema.optional(),
+  phb: PhbConfigSchema.optional(),
+  rollSets: RollSetsConfigSchema.optional()
+}).strict();
+
+const AbilityPresentationSchema = z.object({
+  showExistingModifiers: z.boolean(),
+  modifierSources: z.array(z.enum(["race", "class", "rules", "feats"])).optional()
+}).strict();
+
 const ChoiceStepSchema = z.object({
   id: ChoiceStepIdSchema,
   kind: ChoiceStepKindSchema,
   label: z.string(),
-  source: ChoiceStepSourceSchema
+  source: ChoiceStepSourceSchema,
+  abilitiesConfig: AbilitiesConfigSchema.optional(),
+  abilityPresentation: AbilityPresentationSchema.optional()
 }).superRefine((step, ctx) => {
   const expectedKinds: Record<z.infer<typeof ChoiceStepIdSchema>, z.infer<typeof ChoiceStepKindSchema>> = {
     name: "metadata",
@@ -114,6 +157,91 @@ const ChoiceStepSchema = z.object({
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `Invalid source for ${step.kind}. Expected ${expectedSourceType} source, got ${step.source.type}.`
+    });
+  }
+
+  if (step.kind !== "abilities") {
+    if (step.abilitiesConfig) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "abilitiesConfig is only allowed on abilities steps."
+      });
+    }
+    if (step.abilityPresentation) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "abilityPresentation is only allowed on abilities steps."
+      });
+    }
+    return;
+  }
+
+  const cfg = step.abilitiesConfig;
+  if (!cfg) return;
+
+  if (!cfg.modes.includes(cfg.defaultMode)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "defaultMode must be one of modes",
+      path: ["abilitiesConfig", "defaultMode"]
+    });
+  }
+
+  if (cfg.modes.includes("pointBuy")) {
+    if (!cfg.pointBuy) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "pointBuy config is required when pointBuy mode is enabled",
+        path: ["abilitiesConfig", "pointBuy"]
+      });
+    } else {
+      if (cfg.pointBuy.minScore > cfg.pointBuy.maxScore) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "pointBuy minScore cannot be greater than maxScore",
+          path: ["abilitiesConfig", "pointBuy", "minScore"]
+        });
+      }
+      for (let score = cfg.pointBuy.minScore; score <= cfg.pointBuy.maxScore; score += 1) {
+        if (!(String(score) in cfg.pointBuy.costTable)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "pointBuy.costTable must include all scores in configured range",
+            path: ["abilitiesConfig", "pointBuy", "costTable", String(score)]
+          });
+          break;
+        }
+      }
+    }
+  }
+
+  if (cfg.modes.includes("phb")) {
+    if (!cfg.phb) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "phb config is required when phb mode is enabled",
+        path: ["abilitiesConfig", "phb"]
+      });
+    } else if (cfg.phb.methodType === "standardArray" && !cfg.phb.standardArray) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "phb.standardArray is required for standardArray method",
+        path: ["abilitiesConfig", "phb", "standardArray"]
+      });
+    } else if (cfg.phb.methodType === "manualRange" && !cfg.phb.manualRange) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "phb.manualRange is required for manualRange method",
+        path: ["abilitiesConfig", "phb", "manualRange"]
+      });
+    }
+  }
+
+  if (cfg.modes.includes("rollSets") && !cfg.rollSets) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "rollSets config is required when rollSets mode is enabled",
+      path: ["abilitiesConfig", "rollSets"]
     });
   }
 });
