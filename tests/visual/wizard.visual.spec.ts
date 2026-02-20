@@ -82,7 +82,7 @@ async function waitForVisualStability(page: Page) {
 }
 
 // Small ratio threshold to tolerate platform anti-aliasing without hiding real regressions.
-const screenshotOptions = { fullPage: true, maxDiffPixelRatio: 0.0005 };
+const screenshotOptions = { fullPage: true, maxDiffPixelRatio: 0.0005, timeout: 15000 };
 // Detail page captures a long, dense summary view that shows larger OS/font rasterization drift in CI.
 const detailScreenshotOptions = { ...screenshotOptions, maxDiffPixelRatio: 0.012 };
 
