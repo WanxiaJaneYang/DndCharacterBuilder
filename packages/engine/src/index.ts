@@ -456,7 +456,7 @@ function getRaceSizeModifiers(state: CharacterState, context: EngineContext): De
 
   const size = String(race?.data?.size ?? "").toLowerCase();
   if (size === "small") return { ac: 1, attack: 1, hide: 4, carryingCapacityMultiplier: 0.75 };
-  if (size === "large") return { ac: -1, attack: -1, hide: -4, carryingCapacityMultiplier: 1 };
+  if (size === "large") return { ac: -1, attack: -1, hide: -4, carryingCapacityMultiplier: 2 };
   return { ac: 0, attack: 0, hide: 0, carryingCapacityMultiplier: 1 };
 }
 
@@ -494,6 +494,7 @@ function buildDecisionSummary(state: CharacterState, context: EngineContext, abi
   const ignoresMulticlassXpPenalty = favoredClass === null || favoredClass === "any" || favoredClass === selectedClassBase;
   const sizeModifiers = getRaceSizeModifiers(state, context);
   const movementOverrides = getRaceMovementOverrides(state, context);
+  // Step 2 intentionally reads race-v2 fields via narrow casts while schema/data rollout lands in separate PRs.
   const ancestryTags = parseRaceAncestryTags((race?.data as { ancestryTags?: unknown } | undefined)?.ancestryTags);
   const racialSaveBonuses = parseRacialModifiers(race?.data?.saveBonuses);
   const racialAttackBonuses = parseRacialModifiers(race?.data?.attackBonuses);
