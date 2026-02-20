@@ -267,8 +267,7 @@
           "type": "racial"
         }
       ],
-      "innateSpellLikeAbilities": []
-      ,
+      "innateSpellLikeAbilities": [],
       "deferredMechanics": [
         {
           "id": "elf-weapon-proficiency-package",

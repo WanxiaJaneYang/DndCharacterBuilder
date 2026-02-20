@@ -74,7 +74,10 @@ async function goToDetailPage(page: Page, locale: Locale) {
 async function waitForVisualStability(page: Page) {
   await page.waitForLoadState('domcontentloaded');
   // CI can keep background requests alive (analytics/dev sockets), so don't hard-fail on networkidle.
-  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => undefined);
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch((err: unknown) => {
+    if (err instanceof Error && err.name === 'TimeoutError') return;
+    throw err;
+  });
   await page.waitForTimeout(150);
 }
 
