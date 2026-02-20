@@ -11,13 +11,60 @@
   },
   "entityText": {
     "classes": {
-      "fighter-1": {
-        "name": "Fighter (Level 1)",
-        "summary": "Fighter (Level 1) (class) option.",
-        "description": "Detailed reference entry for Fighter (Level 1) in the classes dataset.",
-        "data.classSkills.0": "climb",
-        "data.classSkills.1": "jump",
-        "data.classSkills.2": "ride"
+      "barbarian": {
+        "name": "Barbarian",
+        "summary": "Barbarian class option.",
+        "description": "SRD 3.5 Barbarian class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "bard": {
+        "name": "Bard",
+        "summary": "Bard class option.",
+        "description": "SRD 3.5 Bard class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "cleric": {
+        "name": "Cleric",
+        "summary": "Cleric class option.",
+        "description": "SRD 3.5 Cleric class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "druid": {
+        "name": "Druid",
+        "summary": "Druid class option.",
+        "description": "SRD 3.5 Druid class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "fighter": {
+        "name": "Fighter",
+        "summary": "Fighter class option.",
+        "description": "SRD 3.5 Fighter class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "monk": {
+        "name": "Monk",
+        "summary": "Monk class option.",
+        "description": "SRD 3.5 Monk class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "paladin": {
+        "name": "Paladin",
+        "summary": "Paladin class option.",
+        "description": "SRD 3.5 Paladin class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "ranger": {
+        "name": "Ranger",
+        "summary": "Ranger class option.",
+        "description": "SRD 3.5 Ranger class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "rogue": {
+        "name": "Rogue",
+        "summary": "Rogue class option.",
+        "description": "SRD 3.5 Rogue class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "sorcerer": {
+        "name": "Sorcerer",
+        "summary": "Sorcerer class option.",
+        "description": "SRD 3.5 Sorcerer class data with full 1-20 progression and PHB-aligned class rules metadata."
+      },
+      "wizard": {
+        "name": "Wizard",
+        "summary": "Wizard class option.",
+        "description": "SRD 3.5 Wizard class data with full 1-20 progression and PHB-aligned class rules metadata."
       }
     },
     "feats": {

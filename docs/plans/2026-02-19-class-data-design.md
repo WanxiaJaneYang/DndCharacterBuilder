@@ -39,8 +39,8 @@ Class entities stay within the existing `EntitySchema` shape and extend the plan
 For each class we define:
 
 - `id`: stable kebab-case identifier.
-  - Pattern: `<class-id>-1`, e.g. `barbarian-1`, `bard-1`, `cleric-1`, ..., `wizard-1`.
-- `name`: human-readable label, e.g. `"Barbarian (Level 1)"`.
+  - Pattern: `<class-id>`, e.g. `barbarian`, `bard`, `cleric`, ..., `wizard`.
+- `name`: human-readable label, e.g. `"Barbarian"`.
 - `entityType`: `"classes"`.
 - `summary`: short SRD/OGL-safe summary suitable for list cards.
 - `description`: slightly longer paraphrased description focused on what level-1 of this class provides.
@@ -172,11 +172,11 @@ We extend pack contracts under `packs/srd-35e-minimal/contracts/`:
 
 - Retain existing `happy-path.json`:
   - Human Fighter 1, asserting:
-    - Correct availability of `human`, `fighter-1`, `power-attack`, `chainmail`.
+    - Correct availability of `human`, `fighter`, `power-attack`, `chainmail`.
     - Correct AC and BAB subset in the final sheet.
 - Add at least one additional contract fixture for another class (e.g. Human Rogue 1 or Human Cleric 1):
   - Actions:
-    - Choose abilities, race (`human`), class (`rogue-1` or `cleric-1`), a simple feat, and starting gear.
+    - Choose abilities, race (`human`), class (`rogue` or `cleric`), a simple feat, and starting gear.
   - Expectations:
     - `availableChoicesContains` includes the new class id.
     - `validationErrorCodes` is empty.

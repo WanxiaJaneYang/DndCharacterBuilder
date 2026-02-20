@@ -28,7 +28,7 @@ The sections below define the phased target model needed for SRD-style parity.
   },
   "identity": {
     "raceId": "human",
-    "classId": "fighter-1",
+    "classId": "fighter",
     "size": "medium",
     "speed": {
       "base": 30,

@@ -20,7 +20,7 @@
 
 **Step 1: Review current Fighter class entity**
 - Open `packs/srd-35e-minimal/entities/classes.json`.
-- Confirm current structure for `fighter-1` (fields, effects, and any existing `data` fields).
+- Confirm current structure for `fighter` (fields, effects, and any existing `data` fields).
 
 **Step 2: Review skill IDs**
 - Open `packs/srd-35e-minimal/entities/skills.json`.
@@ -35,7 +35,7 @@
 **Files:**
 - Modify: `packs/srd-35e-minimal/entities/classes.json`
 
-**Step 1: Add structural class data to `fighter-1`**
+**Step 1: Add structural class data to `fighter`**
 - Add a `data.hitDie` field with value `10`.
 - Add `data.baseAttackProgression: "full"`.
 - Add `data.baseSaveProgression` with `{ fort: "good", ref: "poor", will: "poor" }`.
@@ -68,8 +68,8 @@
 **Step 1: Draft class entries**
 - For each of: Barbarian, Bard, Cleric, Druid, Monk, Paladin, Ranger, Rogue, Sorcerer, Wizard:
   - Add a new entity object with:
-    - `id`: `<class-id>-1` (e.g. `barbarian-1`).
-    - `name`: `<Class Name> (Level 1)`.
+    - `id`: `<class-id>` (e.g. `barbarian`).
+    - `name`: `<Class Name>`.
     - `entityType`: `"classes"`.
     - `summary`: SRD/OGL-safe one-line summary.
     - `description`: short paraphrased description focused on level-1.
@@ -117,7 +117,7 @@
     - Choose a simple name.
     - Provide a reasonable ability array.
     - `race`: `human` (or another existing race).
-    - `class`: the new class id (e.g. `"rogue-1"`).
+    - `class`: the new class id (e.g. `"rogue"`).
     - `feat`: pick an existing feat that makes sense but is already in `feats.json`.
     - `equipment`: choose a few existing items.
   - `expected`:
@@ -163,7 +163,7 @@
 **Status (current):**
 - Design doc for core 3.5e class data is written: `docs/plans/2026-02-19-class-data-design.md`.
 - Implementation plan (this file) is drafted.
-- `fighter-1` in `packs/srd-35e-minimal/entities/classes.json` has been extended with:
+- `fighter` in `packs/srd-35e-minimal/entities/classes.json` has been extended with:
   - `hitDie`, `baseAttackProgression`, `baseSaveProgression`.
   - A level-1 `levelTable` entry that matches existing effects.
 

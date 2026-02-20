@@ -183,7 +183,9 @@ const ClassLevelRowSchema = z.object({
   ref: z.number().int().min(0),
   will: z.number().int().min(0),
   features: z.array(z.string()).optional(),
-  specialLabel: z.string().min(1).optional()
+  specialLabel: z.string().min(1).optional(),
+  babDisplay: z.string().min(1).optional(),
+  spellSlots: z.record(z.union([z.string().min(1), z.null()])).optional()
 }).strict();
 
 const DeferredClassMechanicSchema = z.object({
@@ -271,6 +273,7 @@ const ClassProgressionSchema = z.object({
 });
 
 const ClassDataSchema = z.object({
+  sourceRefs: z.array(z.string().min(1)).optional(),
   skillPointsPerLevel: z.number().int().min(0),
   classSkills: z.array(z.string()),
   hitDie: z.number().int().positive(),
@@ -280,6 +283,25 @@ const ClassDataSchema = z.object({
     ref: ClassSaveProgressSchema,
     will: ClassSaveProgressSchema
   }).strict(),
+  alignmentConstraint: z.object({
+    text: z.string().min(1),
+    allowedAlignments: z.array(z.string().min(1)).optional()
+  }).strict().optional(),
+  proficiencies: z.object({
+    text: z.string().min(1)
+  }).strict().optional(),
+  exClassRules: z.array(z.string().min(1)).optional(),
+  spellcasting: z.object({
+    tradition: z.enum(["arcane", "divine"]),
+    castingModel: z.enum(["prepared", "spontaneous"]),
+    ability: AbilityIdSchema,
+    startsAtLevel: z.number().int().min(1),
+    notes: z.array(z.string().min(1)).optional(),
+    spellsPerDayByLevel: z.array(z.object({
+      level: z.number().int().min(1),
+      slots: z.record(z.union([z.string().min(1), z.null()]))
+    }).strict()).optional()
+  }).strict().optional(),
   deferredMechanics: z.array(DeferredClassMechanicSchema).optional(),
   levelTable: z.array(ClassLevelRowSchema).min(1).optional(),
   progression: ClassProgressionSchema.optional()
