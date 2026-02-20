@@ -382,6 +382,29 @@ describe("engine determinism", () => {
     expect(errors.some((error) => error.code === "ABILITY_ROLLSETS_SELECTION_REQUIRED")).toBe(true);
   });
 
+  it("rejects rollSets scores that do not come from selected set", () => {
+    let state = applyChoice(initialState, "name", "RollSetsMismatch");
+    state = applyChoice(state, "abilities", {
+      mode: "rollSets",
+      scores: { str: 18, dex: 18, con: 18, int: 18, wis: 18, cha: 18 },
+      rollSets: {
+        generatedSets: [
+          [15, 14, 13, 12, 10, 8],
+          [14, 14, 13, 12, 10, 8],
+          [13, 13, 13, 12, 10, 8],
+          [16, 14, 12, 11, 10, 9],
+          [15, 15, 12, 11, 10, 8]
+        ],
+        selectedSetIndex: 0
+      }
+    });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "ABILITY_ROLLSETS_SET_MISMATCH")).toBe(true);
+  });
+
   it("returns explicit config error when selected ability mode config is missing", () => {
     const steps = context.resolvedData.flow.steps.map((step) => {
       if (step.id !== "abilities") return step;

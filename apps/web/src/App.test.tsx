@@ -1,4 +1,4 @@
-﻿import { afterEach, describe, expect, it } from 'vitest';
+﻿import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
@@ -196,6 +196,28 @@ describe('role and language behavior', () => {
     expect(Number((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value)).toBe(before);
   });
 
+
+  it('supports roll-sets mode by generating 5 sets and applying the selected set', async () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    await user.click(screen.getByRole('radio', { name: /Roll Sets|掷骰组/i }));
+    expect(screen.getAllByRole('radio', { name: /^(?:Set|第)\s*\d+/i }).length).toBe(5);
+
+    await user.click(screen.getByRole('radio', { name: /^(?:Set|第)\s*1/i }));
+    expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value).toBe('3');
+    expect((screen.getByRole('spinbutton', { name: /DEX|敏捷/i }) as HTMLInputElement).value).toBe('3');
+
+    randomSpy.mockRestore();
+  });
   it('shows modifier source attribution groups and hides non-impacting source types', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -271,6 +293,7 @@ describe('role and language behavior', () => {
     });
   });
 });
+
 
 
 

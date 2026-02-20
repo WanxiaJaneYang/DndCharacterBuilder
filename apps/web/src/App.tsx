@@ -29,7 +29,14 @@ type AbilityStepConfig = {
   };
   phb?: {
     methodType?: 'standardArray' | 'manualRange';
+    standardArray?: number[];
     manualRange?: { minScore?: number; maxScore?: number };
+  };
+  rollSets?: {
+    setsCount?: number;
+    rollFormula?: string;
+    scoresPerSet?: number;
+    assignmentPolicy?: 'assign_after_pick';
   };
 };
 
@@ -39,6 +46,24 @@ type AbilityPresentationConfig = {
   hideZeroEffectGroups?: boolean;
   sourceTypeLabels?: Record<string, string>;
 };
+
+const DEFAULT_ABILITY_MIN = 3;
+const DEFAULT_ABILITY_MAX = 18;
+
+function rollScoreByFormula(formula: string): number {
+  if (formula !== '4d6_drop_lowest') return 10;
+  const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1).sort((a, b) => a - b);
+  return rolls.slice(1).reduce((sum, value) => sum + value, 0);
+}
+
+function generateRollSets(config: AbilityStepConfig['rollSets']): number[][] {
+  const setsCount = Math.max(1, Number(config?.setsCount ?? 1));
+  const scoresPerSet = Math.max(1, Number(config?.scoresPerSet ?? ABILITY_ORDER.length));
+  const formula = String(config?.rollFormula ?? '4d6_drop_lowest');
+  return Array.from({ length: setsCount }, () =>
+    Array.from({ length: scoresPerSet }, () => rollScoreByFormula(formula))
+  );
+}
 
 function clampAbilityScore(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return min;
@@ -198,16 +223,38 @@ export function App() {
     rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
   } | undefined) ?? {};
   const selectedAbilityMode: AbilityMode | undefined = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0];
+  const rollSetsConfig = abilityStepConfig?.rollSets;
+  const generatedRollSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
+  const selectedRollSetIndexRaw = Number(abilityMeta.rollSets?.selectedSetIndex);
+  const selectedRollSetIndex = Number.isInteger(selectedRollSetIndexRaw) ? selectedRollSetIndexRaw : -1;
+  const selectedRollSet = selectedRollSetIndex >= 0 && selectedRollSetIndex < generatedRollSets.length
+    ? generatedRollSets[selectedRollSetIndex]
+    : undefined;
+  const rollScoresPool = selectedRollSet && selectedRollSet.length > 0
+    ? selectedRollSet
+    : generatedRollSets.flat();
+  const currentScores = ABILITY_ORDER.map((ability) => Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN));
+  const phbStandardArray = abilityStepConfig?.phb?.methodType === 'standardArray'
+    ? (abilityStepConfig.phb.standardArray ?? [])
+    : [];
   const abilityMinScore = selectedAbilityMode === 'pointBuy'
-    ? Number(abilityStepConfig?.pointBuy?.minScore ?? 0)
+    ? Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN)
     : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
-      ? Number(abilityStepConfig.phb.manualRange?.minScore ?? 0)
-      : Math.min(...ABILITY_ORDER.map((ability) => Number(state.abilities[ability] ?? 0)));
+      ? Number(abilityStepConfig.phb.manualRange?.minScore ?? DEFAULT_ABILITY_MIN)
+      : selectedAbilityMode === 'phb' && phbStandardArray.length
+        ? Math.min(...phbStandardArray)
+        : selectedAbilityMode === 'rollSets' && rollScoresPool.length
+          ? Math.min(...rollScoresPool)
+          : Math.min(...currentScores, DEFAULT_ABILITY_MIN);
   const abilityMaxScore = selectedAbilityMode === 'pointBuy'
-    ? Number(abilityStepConfig?.pointBuy?.maxScore ?? 0)
+    ? Number(abilityStepConfig?.pointBuy?.maxScore ?? DEFAULT_ABILITY_MAX)
     : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
-      ? Number(abilityStepConfig.phb.manualRange?.maxScore ?? 0)
-      : Math.max(...ABILITY_ORDER.map((ability) => Number(state.abilities[ability] ?? 0)));
+      ? Number(abilityStepConfig.phb.manualRange?.maxScore ?? DEFAULT_ABILITY_MAX)
+      : selectedAbilityMode === 'phb' && phbStandardArray.length
+        ? Math.max(...phbStandardArray)
+        : selectedAbilityMode === 'rollSets' && rollScoresPool.length
+          ? Math.max(...rollScoresPool)
+          : Math.max(...currentScores, DEFAULT_ABILITY_MAX);
   const pointBuyCostTable = abilityStepConfig?.pointBuy?.costTable ?? {};
   const pointCapMin = abilityStepConfig?.pointBuy?.minPointCap ?? 0;
   const pointCapMax = abilityStepConfig?.pointBuy?.maxPointCap ?? 0;
@@ -238,6 +285,20 @@ export function App() {
   const setAbility = (key: string, value: number) => {
     if (!Number.isFinite(value)) return;
     applyAbilitySelection({ ...state.abilities, [key]: value });
+  };
+
+  const applySelectedRollSet = (set: number[], index: number) => {
+    const nextScores = Object.fromEntries(ABILITY_ORDER.map((ability, abilityIndex) => [
+      ability,
+      Number(set[abilityIndex] ?? state.abilities[ability] ?? DEFAULT_ABILITY_MIN)
+    ]));
+    applyAbilitySelection(nextScores, { rollSets: { generatedSets: generatedRollSets, selectedSetIndex: index } });
+  };
+
+  const regenerateRollSetOptions = () => {
+    if (!rollSetsConfig) return;
+    const generatedSets = generateRollSets(rollSetsConfig);
+    applyAbilitySelection({ ...state.abilities }, { rollSets: { generatedSets, selectedSetIndex: -1 } });
   };
 
   const stepAbility = (key: string, delta: number) => {
@@ -542,7 +603,18 @@ export function App() {
                   type="radio"
                   name="ability-generation-mode"
                   checked={selectedAbilityMode === mode}
-                  onChange={() => applyAbilitySelection({ ...state.abilities }, { mode })}
+                  onChange={() => {
+                    if (mode === 'rollSets') {
+                      const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
+                      const generatedSets = currentSets.length > 0 ? currentSets : generateRollSets(rollSetsConfig);
+                      applyAbilitySelection(
+                        { ...state.abilities },
+                        { mode, rollSets: { generatedSets, selectedSetIndex: selectedRollSetIndex } }
+                      );
+                      return;
+                    }
+                    applyAbilitySelection({ ...state.abilities }, { mode });
+                  }}
                 />
                 {mode === 'pointBuy' ? t.abilityModePointBuy : mode === 'phb' ? t.abilityModePhb : t.abilityModeRollSets}
               </label>
@@ -568,6 +640,31 @@ export function App() {
               </label>
               <p>{t.pointBuyRemainingLabel}: {pointBuyRemaining}</p>
             </div>
+          )}
+          {selectedAbilityMode === 'rollSets' && rollSetsConfig && (
+            <section className="sheet">
+              <div className="rollsets-header">
+                <h3>{language === 'zh' ? '掷骰组选取' : 'Roll-Set Selection'}</h3>
+                <button type="button" onClick={regenerateRollSetOptions}>
+                  {language === 'zh' ? '重新掷骰' : 'Reroll Sets'}
+                </button>
+              </div>
+              <p>{language === 'zh' ? '掷出多个属性组，选择一组并按你的意愿分配。' : 'Roll multiple sets, pick one, then assign scores as you wish.'}</p>
+              <fieldset role="radiogroup" aria-label={language === 'zh' ? '掷骰组列表' : 'Roll-Set Options'}>
+                {generatedRollSets.map((set, index) => (
+                  <label key={`roll-set-${index}`} className="rollset-option">
+                    <input
+                      type="radio"
+                      name="roll-set-choice"
+                      checked={selectedRollSetIndex === index}
+                      onChange={() => applySelectedRollSet(set, index)}
+                    />
+                    <span>{language === 'zh' ? `第 ${index + 1} 组` : `Set ${index + 1}`}</span>
+                    <code>{set.join(', ')}</code>
+                  </label>
+                ))}
+              </fieldset>
+            </section>
           )}
           <div className="grid">
             {ABILITY_ORDER.map((key) => {

@@ -53,6 +53,26 @@ h1, h2, h3 { font-family: inherit; color: #3a2717; }
   font-size: 1.1rem;
   line-height: 1;
 }
+.rollsets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.rollset-option {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+.rollset-option code {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid #ddc69a;
+  background: #f2e4c6;
+  border-radius: 6px;
+}
 .actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
 label { display: block; margin-bottom: 0.5rem; }
 .sheet { border: 1px solid #cfb88f; padding: 0.75rem; background: #fff8e8; }

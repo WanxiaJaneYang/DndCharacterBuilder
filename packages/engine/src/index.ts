@@ -798,6 +798,28 @@ export function validateState(state: CharacterState, context: EngineContext): Va
           message: "Roll-sets mode requires selecting one generated set before continuing.",
           stepId: ABILITY_STEP_ID
         });
+      } else {
+        const selectedSet = generatedSets[selectedSetIndex];
+        const validSet = Array.isArray(selectedSet) && selectedSet.every((value) => Number.isFinite(Number(value)));
+        if (!validSet) {
+          errors.push({
+            code: "ABILITY_ROLLSETS_SELECTION_REQUIRED",
+            message: "Roll-sets mode requires selecting one generated set before continuing.",
+            stepId: ABILITY_STEP_ID
+          });
+        } else {
+          const expected = [...selectedSet.map((value) => Number(value))].sort((a, b) => a - b);
+          const actual = ABILITY_KEYS.map((ability) => Number(state.abilities[ability])).sort((a, b) => a - b);
+          const sameLength = expected.length === actual.length;
+          const sameValues = sameLength && expected.every((value, index) => value === actual[index]);
+          if (!sameValues) {
+            errors.push({
+              code: "ABILITY_ROLLSETS_SET_MISMATCH",
+              message: "Assigned ability scores must come from the selected roll-set.",
+              stepId: ABILITY_STEP_ID
+            });
+          }
+        }
       }
     }
   }
