@@ -16,7 +16,20 @@ Future editions may modify this journey:
 
 - 5R (2024) may add a background feat step after class selection.
 - 3.5 currently includes manual skills allocation and no background step.
-- Ability assignment method and equipment mode may differ by flow/packs.
+- Ability assignment mode and constraints are edition-bound via `abilitiesConfig`.
+
+## Ability Step Journey (MVP)
+
+At the Ability Scores step, the user:
+
+1. Chooses generation mode (`Point Buy`, `PHB`, `Roll Sets`) from configured options.
+   - Mode list, default selection, labels, and constraints come from `abilitiesConfig` in pack data (no UI hardcoded defaults).
+2. Completes mode-specific assignment:
+   - Point Buy: set scores and point cap, keep total cost within cap.
+   - PHB: follow configured PHB rule (for example standard array).
+   - Roll Sets: generate configured sets and pick one.
+3. Reviews live table showing base score, existing modifiers, final score, and final modifier for each ability.
+4. Continues only when validation passes for selected mode.
 
 ## UX Goals
 

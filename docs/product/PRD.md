@@ -28,6 +28,19 @@ Creating a character in D&D can be intimidating. New players are overwhelmed by 
 - Validation and gating for each step.
 - Export of the character sheet with pack fingerprint and provenance.
 
+### Ability Score Product Requirement (2026-02)
+
+- Ability generation must be fully data-driven by flow config (`abilitiesConfig`), with no edition behavior hardcoded in UI logic.
+- MVP supports three generation modes:
+  1. Point Buy
+  2. PHB Method
+  3. Roll Sets (generate configured sets and pick one)
+- Rules are edition-bound in architecture: different editions can define different defaults/tables/method parameters in pack data; MVP implementation remains 3.5-only.
+- Default ruleset selection and all mode parameters (enabled modes, default mode, point-buy table/caps, PHB method config, roll-set formula/count) must come from pack-owned flow data, with no code-side fallback constants.
+- Ability step must surface existing modifiers (from currently applied race/class/rules/feats) so users can see effective outcomes during assignment.
+- Point-buy cap must be user-adjustable within configured bounds in MVP.
+- Full custom point-buy table authoring/saving is explicitly non-MVP.
+
 ## Localization & Data Services (MCP)
 
 To support large, extensible datasets and user-provided packs, the product relies on external MCP-based services to automate data generation:
