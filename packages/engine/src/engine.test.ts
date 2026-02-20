@@ -47,6 +47,14 @@ describe("engine determinism", () => {
     expect(one).toEqual(two);
     expect(one.stats.ac).toBe(18);
     expect(one.stats.attackBonus).toBe(4);
+    expect(one.phase1.identity.level).toBe(1);
+    expect(one.phase1.combat.ac.touch).toBe(12);
+    expect(one.phase1.combat.ac.flatFooted).toBe(17);
+    expect(one.phase1.combat.attacks.melee.length).toBeGreaterThan(0);
+    expect(one.phase2.feats.length).toBe(1);
+    expect(one.phase2.feats[0]?.id).toBe("power-attack");
+    expect(one.phase2.equipment.totalWeight).toBe(54);
+    expect(one.phase2.movement.adjusted).toBe(20);
   });
 
   it("lists choices", () => {

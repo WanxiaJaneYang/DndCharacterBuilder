@@ -28,6 +28,40 @@ The following pages correspond to flow steps defined in the pack.  Each page is 
 8. **Equipment** – select starting kit or items (`ux/steps/07_equipment.md`).
 9. **Review & Export** – show final character summary and export options (`ux/steps/08_review_export.md`).
 
+### Review & Export (Phase 1 UI Contract)
+
+For the current parity sprint, the Review page must prioritize table-useful combat information before secondary metadata:
+
+1. Identity strip: name, race, class, level, xp, size/speed context.
+2. Combat headline cards: AC total/touch/flat-footed, HP total, initiative total, grapple total.
+3. Breakdown table block: Fort/Ref/Will and HP with `base | ability | misc | total`.
+4. Attack lines block: melee/ranged rows for equipped attack items with deterministic placeholders when source item profiles are incomplete.
+5. Existing sections retained: abilities breakdown, skills breakdown, rules decisions, pack info, provenance panel.
+
+Interaction requirements:
+- Keep export JSON and provenance toggle visible near the top of the review page.
+- Keep review readable on mobile by allowing horizontal scroll only inside data tables, not whole-page overflow.
+- Calculation rows should stay human-readable first; raw provenance remains optional/expandable.
+
+### Review & Export (Phase 2 UI Contract)
+
+Phase 2 extends the review page with non-caster completeness panels:
+
+1. Feats panel:
+- List selected feats with short effect-summary text.
+
+2. Traits panel:
+- List racial/passive traits and sensory/resistance notes when present.
+
+3. Skills detail extension:
+- Show `misc` and ACP-impact channels explicitly for each visible skill row (including `0` values).
+
+4. Equipment/load panel:
+- Show selected equipment list, total carried weight, load category, and short movement-impact note.
+
+5. Movement detail panel:
+- Show base vs adjusted speed in one compact block tied to equipment/load context.
+
 ## Component Requirements
 
 ### StepChecklist

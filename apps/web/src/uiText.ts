@@ -51,6 +51,8 @@ export type UIText = {
   reviewSkillColumn: string;
   reviewRanksColumn: string;
   reviewRacialColumn: string;
+  reviewMiscColumn: string;
+  reviewAcpColumn: string;
   reviewTotalColumn: string;
   reviewPointCostColumn: string;
   reviewPerRankUnit: string;
@@ -69,6 +71,33 @@ export type UIText = {
   reviewFortLabel: string;
   reviewRefLabel: string;
   reviewWillLabel: string;
+  reviewIdentityProgression: string;
+  reviewLevelLabel: string;
+  reviewXpLabel: string;
+  reviewSizeLabel: string;
+  reviewSpeedBaseLabel: string;
+  reviewSpeedAdjustedLabel: string;
+  reviewAcTouchLabel: string;
+  reviewAcFlatFootedLabel: string;
+  reviewGrappleLabel: string;
+  reviewSaveHpBreakdown: string;
+  reviewAttackLines: string;
+  reviewAttackTypeColumn: string;
+  reviewAttackBonusColumn: string;
+  reviewDamageColumn: string;
+  reviewCritColumn: string;
+  reviewRangeColumn: string;
+  reviewAttackMeleeLabel: string;
+  reviewAttackRangedLabel: string;
+  reviewFeatSummary: string;
+  reviewTraitSummary: string;
+  reviewEquipmentLoad: string;
+  reviewSelectedItemsLabel: string;
+  reviewTotalWeightLabel: string;
+  reviewLoadCategoryLabel: string;
+  reviewSpeedImpactLabel: string;
+  reviewMovementDetail: string;
+  reviewMovementNotesLabel: string;
   reviewDexModifierLabel: string;
   reviewStrModifierLabel: string;
   reviewSelectedEditionLabel: string;
@@ -138,6 +167,8 @@ const uiTextStringKeys: Array<Exclude<keyof UIText, 'abilityLabels'>> = [
   'reviewSkillColumn',
   'reviewRanksColumn',
   'reviewRacialColumn',
+  'reviewMiscColumn',
+  'reviewAcpColumn',
   'reviewTotalColumn',
   'reviewPointCostColumn',
   'reviewPerRankUnit',
@@ -156,6 +187,33 @@ const uiTextStringKeys: Array<Exclude<keyof UIText, 'abilityLabels'>> = [
   'reviewFortLabel',
   'reviewRefLabel',
   'reviewWillLabel',
+  'reviewIdentityProgression',
+  'reviewLevelLabel',
+  'reviewXpLabel',
+  'reviewSizeLabel',
+  'reviewSpeedBaseLabel',
+  'reviewSpeedAdjustedLabel',
+  'reviewAcTouchLabel',
+  'reviewAcFlatFootedLabel',
+  'reviewGrappleLabel',
+  'reviewSaveHpBreakdown',
+  'reviewAttackLines',
+  'reviewAttackTypeColumn',
+  'reviewAttackBonusColumn',
+  'reviewDamageColumn',
+  'reviewCritColumn',
+  'reviewRangeColumn',
+  'reviewAttackMeleeLabel',
+  'reviewAttackRangedLabel',
+  'reviewFeatSummary',
+  'reviewTraitSummary',
+  'reviewEquipmentLoad',
+  'reviewSelectedItemsLabel',
+  'reviewTotalWeightLabel',
+  'reviewLoadCategoryLabel',
+  'reviewSpeedImpactLabel',
+  'reviewMovementDetail',
+  'reviewMovementNotesLabel',
   'reviewDexModifierLabel',
   'reviewStrModifierLabel',
   'reviewSelectedEditionLabel',
