@@ -167,10 +167,25 @@ const RaceSizeModifierSchema = z.object({
 
 const RaceMovementOverrideSchema = z.object({
   ignoreArmorSpeedReduction: z.boolean().optional()
-}).strict();
+}).strict().refine(
+  (obj) => Object.keys(obj).length > 0,
+  { message: "RaceMovementOverride must have at least one property." }
+);
+
+const SpellSchoolSchema = z.enum([
+  "abjuration",
+  "conjuration",
+  "divination",
+  "enchantment",
+  "evocation",
+  "illusion",
+  "necromancy",
+  "transmutation",
+  "universal"
+]);
 
 const SpellDcBonusSchema = z.object({
-  school: z.string(),
+  school: SpellSchoolSchema,
   bonus: z.number(),
   type: z.string().optional(),
   when: z.string().optional()

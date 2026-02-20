@@ -168,7 +168,9 @@ describe("race entity schema", () => {
         },
         movementOverrides: {
           ignoreArmorSpeedReduction: false
-        }
+        },
+        acBonuses: [{ target: "giants", bonus: 4, type: "racial", when: "dodge bonus" }],
+        spellDcBonuses: [{ school: "illusion", bonus: 1, type: "racial" }]
       }
     });
 
@@ -195,6 +197,56 @@ describe("race entity schema", () => {
           favoredClass: "any",
           racialTraits: [],
           ancestryTags: ["dragonborn"]
+        }
+      })
+    ).toThrow(/invalid races\.data/i);
+  });
+
+  it("rejects empty race movement override object", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "invalid-movement-override",
+        name: "Invalid Movement Override",
+        entityType: "races",
+        summary: "Invalid",
+        description: "Invalid",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          size: "medium",
+          baseSpeed: 30,
+          abilityModifiers: {},
+          vision: { lowLight: false, darkvisionFeet: 0 },
+          automaticLanguages: ["Common"],
+          bonusLanguages: ["Any"],
+          favoredClass: "any",
+          racialTraits: [],
+          movementOverrides: {}
+        }
+      })
+    ).toThrow(/invalid races\.data/i);
+  });
+
+  it("rejects race v2 spell DC bonuses with unknown school values", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "invalid-spell-dc-school",
+        name: "Invalid Spell DC School",
+        entityType: "races",
+        summary: "Invalid",
+        description: "Invalid",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          size: "medium",
+          baseSpeed: 30,
+          abilityModifiers: {},
+          vision: { lowLight: false, darkvisionFeet: 0 },
+          automaticLanguages: ["Common"],
+          bonusLanguages: ["Any"],
+          favoredClass: "any",
+          racialTraits: [],
+          spellDcBonuses: [{ school: "illusions", bonus: 1 }]
         }
       })
     ).toThrow(/invalid races\.data/i);
