@@ -168,6 +168,13 @@
           "type": "racial",
           "when": "related to stone or metal"
         }
+      ],
+      "attackBonuses": [
+        {
+          "target": "orcs-and-half-orcs",
+          "bonus": 1,
+          "type": "racial"
+        }
       ]
     },
     "summary": "Dwarf (race) option.",
@@ -394,7 +401,7 @@
       "saveBonuses": [
         {
           "target": "illusions",
-          "bonus": 1,
+          "bonus": 2,
           "type": "racial"
         }
       ],
@@ -655,6 +662,11 @@
           "id": "orc-blood",
           "name": "Orc Blood",
           "description": "Half-orcs count as both orcs and humans for effects related to race."
+        },
+        {
+          "id": "minimum-intelligence",
+          "name": "Minimum Intelligence",
+          "description": "A half-orc's Intelligence score is always at least 3, even after racial adjustments."
         }
       ],
       "deferredMechanics": [
@@ -769,6 +781,11 @@
         }
       ],
       "saveBonuses": [
+        {
+          "target": "all",
+          "bonus": 1,
+          "type": "racial"
+        },
         {
           "target": "fear",
           "bonus": 2,
