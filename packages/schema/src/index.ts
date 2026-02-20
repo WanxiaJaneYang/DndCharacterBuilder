@@ -190,7 +190,6 @@ const SpellDcBonusSchema = z.object({
   type: z.string().optional(),
   when: z.string().optional()
 }).strict();
-
 const DeferredMechanicBaseSchema = z.object({
   id: z.string().min(1),
   category: z.string().min(1),
