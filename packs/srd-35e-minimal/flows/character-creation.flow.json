@@ -26,6 +26,45 @@
       "label": "Ability Scores",
       "source": {
         "type": "manual"
+      },
+      "abilitiesConfig": {
+        "modes": ["pointBuy", "phb", "rollSets"],
+        "defaultMode": "pointBuy",
+        "pointBuy": {
+          "costTable": {
+            "8": 0,
+            "9": 1,
+            "10": 2,
+            "11": 3,
+            "12": 4,
+            "13": 5,
+            "14": 6,
+            "15": 8,
+            "16": 10,
+            "17": 13,
+            "18": 16
+          },
+          "defaultPointCap": 32,
+          "minPointCap": 20,
+          "maxPointCap": 40,
+          "pointCapStep": 1,
+          "minScore": 8,
+          "maxScore": 18
+        },
+        "phb": {
+          "methodType": "standardArray",
+          "standardArray": [15, 14, 13, 12, 10, 8]
+        },
+        "rollSets": {
+          "setsCount": 5,
+          "rollFormula": "4d6_drop_lowest",
+          "scoresPerSet": 6,
+          "assignmentPolicy": "assign_after_pick"
+        }
+      },
+      "abilityPresentation": {
+        "showExistingModifiers": true,
+        "modifierSources": ["race", "class", "rules", "feats"]
       }
     },
     {

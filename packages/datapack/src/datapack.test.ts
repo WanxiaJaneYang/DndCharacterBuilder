@@ -32,6 +32,15 @@ describe("resolvePackSet", () => {
     expect(resolved.fingerprint).toMatch(/^[a-f0-9]{64}$/);
   });
 
+  it("loads abilities config from flow", () => {
+    const root = path.resolve(process.cwd(), "../../packs");
+    const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
+    const abilityStep = resolved.flow.steps.find((step) => step.id === "abilities");
+
+    expect(abilityStep?.abilitiesConfig?.defaultMode).toBe("pointBuy");
+    expect(abilityStep?.abilitiesConfig?.modes).toEqual(["pointBuy", "phb", "rollSets"]);
+  });
+
   it("ensures all entities expose required UI metadata", () => {
     const root = path.resolve(process.cwd(), "../../packs");
     const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
