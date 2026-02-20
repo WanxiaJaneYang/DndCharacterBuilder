@@ -12,12 +12,62 @@ const STEP_ID_FEAT = 'feat';
 const STEP_ID_SKILLS = 'skills';
 const STEP_ID_ABILITIES = 'abilities';
 const DEFAULT_EXPORT_NAME = 'character';
-const ABILITY_SCORE_MIN = 3;
-const ABILITY_SCORE_MAX = 18;
+const ABILITY_ORDER = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
+type AbilityMode = 'pointBuy' | 'phb' | 'rollSets';
 
-function clampAbilityScore(value: number): number {
-  if (!Number.isFinite(value)) return ABILITY_SCORE_MIN;
-  const clamped = Math.min(ABILITY_SCORE_MAX, Math.max(ABILITY_SCORE_MIN, value));
+type AbilityStepConfig = {
+  modes?: AbilityMode[];
+  defaultMode?: AbilityMode;
+  pointBuy?: {
+    costTable?: Record<string, number>;
+    defaultPointCap?: number;
+    minPointCap?: number;
+    maxPointCap?: number;
+    pointCapStep?: number;
+    minScore?: number;
+    maxScore?: number;
+  };
+  phb?: {
+    methodType?: 'standardArray' | 'manualRange';
+    standardArray?: number[];
+    manualRange?: { minScore?: number; maxScore?: number };
+  };
+  rollSets?: {
+    setsCount?: number;
+    rollFormula?: string;
+    scoresPerSet?: number;
+    assignmentPolicy?: 'assign_after_pick';
+  };
+};
+
+type AbilityPresentationConfig = {
+  showExistingModifiers?: boolean;
+  groupBy?: 'sourceType';
+  hideZeroEffectGroups?: boolean;
+  sourceTypeLabels?: Record<string, string>;
+};
+
+const DEFAULT_ABILITY_MIN = 3;
+const DEFAULT_ABILITY_MAX = 18;
+
+function rollScoreByFormula(formula: string): number {
+  if (formula !== '4d6_drop_lowest') return 10;
+  const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1).sort((a, b) => a - b);
+  return rolls.slice(1).reduce((sum, value) => sum + value, 0);
+}
+
+function generateRollSets(config: AbilityStepConfig['rollSets']): number[][] {
+  const setsCount = Math.max(1, Number(config?.setsCount ?? 1));
+  const scoresPerSet = Math.max(1, Number(config?.scoresPerSet ?? ABILITY_ORDER.length));
+  const formula = String(config?.rollFormula ?? '4d6_drop_lowest');
+  return Array.from({ length: setsCount }, () =>
+    Array.from({ length: scoresPerSet }, () => rollScoreByFormula(formula))
+  );
+}
+
+function clampAbilityScore(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  const clamped = Math.min(max, Math.max(min, value));
   return Math.round(clamped);
 }
 
@@ -137,6 +187,18 @@ export function App() {
     }
     return map;
   }, [sheet.provenance]);
+  const sourceMetaByEntityKey = useMemo(() => {
+    const map = new Map<string, { sourceType: string; sourceLabel: string }>();
+    for (const [entityType, bucket] of Object.entries(context.resolvedData.entities)) {
+      for (const entity of Object.values(bucket)) {
+        const sourceLabel = activeLocale?.entityText?.[entityType]?.[entity.id]?.name
+          ?? activeLocale?.entityNames?.[entityType]?.[entity.id]
+          ?? entity.name;
+        map.set(`${entity._source.packId}:${entity.id}`, { sourceType: entityType, sourceLabel });
+      }
+    }
+    return map;
+  }, [activeLocale?.entityNames, activeLocale?.entityText, context.resolvedData.entities]);
 
   const selectedStepValues = (stepId: string): string[] => {
     if (stepId === STEP_ID_FEAT) return selectedFeats;
@@ -146,18 +208,111 @@ export function App() {
     return [String(value)];
   };
 
+  const abilityStepConfig = useMemo(() => {
+    const abilityStep = wizardSteps.find((step) => step.id === STEP_ID_ABILITIES) as ({ abilitiesConfig?: AbilityStepConfig } | undefined);
+    return abilityStep?.abilitiesConfig;
+  }, [wizardSteps]);
+  const abilityPresentation = useMemo(() => {
+    const abilityStep = wizardSteps.find((step) => step.id === STEP_ID_ABILITIES) as ({ abilityPresentation?: AbilityPresentationConfig } | undefined);
+    return abilityStep?.abilityPresentation;
+  }, [wizardSteps]);
+  const abilityModes: AbilityMode[] = abilityStepConfig?.modes?.length ? abilityStepConfig.modes : [];
+  const abilityMeta = (state.selections.abilitiesMeta as {
+    mode?: AbilityMode;
+    pointCap?: number;
+    rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
+  } | undefined) ?? {};
+  const selectedAbilityMode: AbilityMode | undefined = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0];
+  const rollSetsConfig = abilityStepConfig?.rollSets;
+  const generatedRollSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
+  const selectedRollSetIndexRaw = Number(abilityMeta.rollSets?.selectedSetIndex);
+  const selectedRollSetIndex = Number.isInteger(selectedRollSetIndexRaw) ? selectedRollSetIndexRaw : -1;
+  const selectedRollSet = selectedRollSetIndex >= 0 && selectedRollSetIndex < generatedRollSets.length
+    ? generatedRollSets[selectedRollSetIndex]
+    : undefined;
+  const rollScoresPool = selectedRollSet && selectedRollSet.length > 0
+    ? selectedRollSet
+    : generatedRollSets.flat();
+  const currentScores = ABILITY_ORDER.map((ability) => Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN));
+  const phbStandardArray = abilityStepConfig?.phb?.methodType === 'standardArray'
+    ? (abilityStepConfig.phb.standardArray ?? [])
+    : [];
+  const abilityMinScore = selectedAbilityMode === 'pointBuy'
+    ? Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN)
+    : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
+      ? Number(abilityStepConfig.phb.manualRange?.minScore ?? DEFAULT_ABILITY_MIN)
+      : selectedAbilityMode === 'phb' && phbStandardArray.length
+        ? Math.min(...phbStandardArray)
+        : selectedAbilityMode === 'rollSets' && rollScoresPool.length
+          ? Math.min(...rollScoresPool)
+          : Math.min(...currentScores, DEFAULT_ABILITY_MIN);
+  const abilityMaxScore = selectedAbilityMode === 'pointBuy'
+    ? Number(abilityStepConfig?.pointBuy?.maxScore ?? DEFAULT_ABILITY_MAX)
+    : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
+      ? Number(abilityStepConfig.phb.manualRange?.maxScore ?? DEFAULT_ABILITY_MAX)
+      : selectedAbilityMode === 'phb' && phbStandardArray.length
+        ? Math.max(...phbStandardArray)
+        : selectedAbilityMode === 'rollSets' && rollScoresPool.length
+          ? Math.max(...rollScoresPool)
+          : Math.max(...currentScores, DEFAULT_ABILITY_MAX);
+  const pointBuyCostTable = abilityStepConfig?.pointBuy?.costTable ?? {};
+  const pointCapMin = abilityStepConfig?.pointBuy?.minPointCap ?? 0;
+  const pointCapMax = abilityStepConfig?.pointBuy?.maxPointCap ?? 0;
+  const pointCapStep = abilityStepConfig?.pointBuy?.pointCapStep ?? 1;
+  const pointCapDefault = abilityStepConfig?.pointBuy?.defaultPointCap ?? 0;
+  const selectedPointCap = Number.isFinite(Number(abilityMeta.pointCap)) ? Number(abilityMeta.pointCap) : pointCapDefault;
+  const pointBuySpent = ABILITY_ORDER.reduce((sum, ability) => sum + Number(pointBuyCostTable[String(state.abilities[ability])] ?? 0), 0);
+  const pointBuyRemaining = selectedPointCap - pointBuySpent;
+
+  const applyAbilitySelection = (
+    nextScores: Record<string, number>,
+    metaPatch?: Partial<{ mode: AbilityMode; pointCap: number; rollSets: { generatedSets?: number[][]; selectedSetIndex?: number } }>
+  ) => {
+    setState((prev) => {
+      const prevMeta = (prev.selections.abilitiesMeta as Record<string, unknown> | undefined) ?? {};
+      const nextMode = metaPatch?.mode ?? selectedAbilityMode ?? abilityModes[0];
+      if (!nextMode) return applyChoice(prev, STEP_ID_ABILITIES, nextScores, context);
+      const nextMeta = { ...prevMeta, ...metaPatch, mode: nextMode };
+      return applyChoice(
+        prev,
+        STEP_ID_ABILITIES,
+        { mode: nextMeta.mode, pointCap: nextMeta.pointCap, rollSets: nextMeta.rollSets, scores: nextScores },
+        context
+      );
+    });
+  };
+
   const setAbility = (key: string, value: number) => {
     if (!Number.isFinite(value)) return;
-    setState((prev) => applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: value }, context));
+    applyAbilitySelection({ ...state.abilities, [key]: value });
+  };
+
+  const applySelectedRollSet = (set: number[], index: number) => {
+    const nextScores = Object.fromEntries(ABILITY_ORDER.map((ability, abilityIndex) => [
+      ability,
+      Number(set[abilityIndex] ?? state.abilities[ability] ?? DEFAULT_ABILITY_MIN)
+    ]));
+    applyAbilitySelection(nextScores, { rollSets: { generatedSets: generatedRollSets, selectedSetIndex: index } });
+  };
+
+  const regenerateRollSetOptions = () => {
+    if (!rollSetsConfig) return;
+    const generatedSets = generateRollSets(rollSetsConfig);
+    applyAbilitySelection({ ...state.abilities }, { rollSets: { generatedSets, selectedSetIndex: -1 } });
+  };
+
+  const stepAbility = (key: string, delta: number) => {
+    const current = Number(state.abilities[key] ?? 0);
+    const next = clampAbilityScore(current + delta, abilityMinScore, abilityMaxScore);
+    if (next === current) return;
+    applyAbilitySelection({ ...state.abilities, [key]: next });
   };
 
   const clampAbilityOnBlur = (key: string) => {
-    setState((prev) => {
-      const current = Number(prev.abilities[key]);
-      const clamped = clampAbilityScore(current);
-      if (current === clamped) return prev;
-      return applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: clamped }, context);
-    });
+    const current = Number(state.abilities[key]);
+    const clamped = clampAbilityScore(current, abilityMinScore, abilityMaxScore);
+    if (current === clamped) return;
+    applyAbilitySelection({ ...state.abilities, [key]: clamped });
   };
 
   const exportJson = () => {
@@ -431,28 +586,198 @@ export function App() {
     }
 
     if (currentStep.kind === 'abilities') {
+      const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
+      const showModifierTable = abilityPresentation?.showExistingModifiers ?? true;
+      const sourceTypeLabels = abilityPresentation?.sourceTypeLabels ?? {};
+      const hideZeroGroups = abilityPresentation?.hideZeroEffectGroups ?? true;
+      const groupLabel = (sourceType: string) => sourceTypeLabels[sourceType] ?? sourceType;
+
       return (
         <section>
-          <h2>{currentStep.label} {t.abilitiesSuffix}</h2>
+          <h2>{currentStep.label}</h2>
+          <fieldset role="radiogroup" aria-label={t.abilityGenerationLabel}>
+            <legend>{t.abilityGenerationLabel}</legend>
+            {abilityModes.map((mode) => (
+              <label key={mode}>
+                <input
+                  type="radio"
+                  name="ability-generation-mode"
+                  checked={selectedAbilityMode === mode}
+                  onChange={() => {
+                    if (mode === 'rollSets') {
+                      const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
+                      const generatedSets = currentSets.length > 0 ? currentSets : generateRollSets(rollSetsConfig);
+                      applyAbilitySelection(
+                        { ...state.abilities },
+                        { mode, rollSets: { generatedSets, selectedSetIndex: selectedRollSetIndex } }
+                      );
+                      return;
+                    }
+                    applyAbilitySelection({ ...state.abilities }, { mode });
+                  }}
+                />
+                {mode === 'pointBuy' ? t.abilityModePointBuy : mode === 'phb' ? t.abilityModePhb : t.abilityModeRollSets}
+              </label>
+            ))}
+          </fieldset>
+          {selectedAbilityMode === 'pointBuy' && abilityStepConfig?.pointBuy && (
+            <div>
+              <label>
+                {t.pointCapLabel}
+                <input
+                  type="number"
+                  min={pointCapMin}
+                  max={pointCapMax}
+                  step={pointCapStep}
+                  value={selectedPointCap}
+                  onChange={(event) => {
+                    const parsed = Number(event.target.value);
+                    if (!Number.isFinite(parsed)) return;
+                    const clamped = Math.min(pointCapMax, Math.max(pointCapMin, parsed));
+                    applyAbilitySelection({ ...state.abilities }, { pointCap: clamped });
+                  }}
+                />
+              </label>
+              <p>{t.pointBuyRemainingLabel}: {pointBuyRemaining}</p>
+            </div>
+          )}
+          {selectedAbilityMode === 'rollSets' && rollSetsConfig && (
+            <section className="sheet">
+              <div className="rollsets-header">
+                <h3>{language === 'zh' ? '掷骰组选取' : 'Roll-Set Selection'}</h3>
+                <button type="button" onClick={regenerateRollSetOptions}>
+                  {language === 'zh' ? '重新掷骰' : 'Reroll Sets'}
+                </button>
+              </div>
+              <p>{language === 'zh' ? '掷出多个属性组，选择一组并按你的意愿分配。' : 'Roll multiple sets, pick one, then assign scores as you wish.'}</p>
+              <fieldset role="radiogroup" aria-label={language === 'zh' ? '掷骰组列表' : 'Roll-Set Options'}>
+                {generatedRollSets.map((set, index) => (
+                  <label key={`roll-set-${index}`} className="rollset-option">
+                    <input
+                      type="radio"
+                      name="roll-set-choice"
+                      checked={selectedRollSetIndex === index}
+                      onChange={() => applySelectedRollSet(set, index)}
+                    />
+                    <span>{language === 'zh' ? `第 ${index + 1} 组` : `Set ${index + 1}`}</span>
+                    <code>{set.join(', ')}</code>
+                  </label>
+                ))}
+              </fieldset>
+            </section>
+          )}
           <div className="grid">
-            {Object.entries(state.abilities).map(([key, value]) => {
+            {ABILITY_ORDER.map((key) => {
+              const value = Number(state.abilities[key] ?? 0);
               const label = localizeAbilityLabel(key);
+              const canDecrease = value > abilityMinScore;
+              const canIncrease = value < abilityMaxScore;
               return (
-                <label key={key}>
-                  {label}
-                  <input
-                    type="number"
-                    min={ABILITY_SCORE_MIN}
-                    max={ABILITY_SCORE_MAX}
-                    step={1}
-                    value={value}
-                    onChange={(e) => setAbility(key, Number(e.target.value))}
-                    onBlur={() => clampAbilityOnBlur(key)}
-                  />
-                </label>
+                <div key={key} className="ability-input-row">
+                  <label htmlFor={`ability-input-${key}`}>{label}</label>
+                  <div className="ability-stepper">
+                    <button
+                      type="button"
+                      className="ability-step-btn"
+                      aria-label={language === 'zh' ? `降低 ${label}` : `Decrease ${label}`}
+                      disabled={!canDecrease}
+                      onClick={() => stepAbility(key, -1)}
+                    >
+                      -
+                    </button>
+                    <input
+                      id={`ability-input-${key}`}
+                      type="number"
+                      min={abilityMinScore}
+                      max={abilityMaxScore}
+                      step={1}
+                      value={value}
+                      onChange={(e) => setAbility(key, Number(e.target.value))}
+                      onBlur={() => clampAbilityOnBlur(key)}
+                    />
+                    <button
+                      type="button"
+                      className="ability-step-btn"
+                      aria-label={language === 'zh' ? `提高 ${label}` : `Increase ${label}`}
+                      disabled={!canIncrease}
+                      onClick={() => stepAbility(key, 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
               );
             })}
           </div>
+          {showModifierTable && <article className="sheet">
+            <h3>{t.abilityExistingModifiersLabel}</h3>
+            <table className="review-table">
+              <thead>
+                <tr>
+                  <th>{t.reviewAbilityColumn}</th>
+                  <th>{t.reviewBaseColumn}</th>
+                  <th>{t.abilityExistingModifiersLabel}</th>
+                  <th>{t.reviewFinalColumn}</th>
+                  <th>{t.reviewModifierColumn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ABILITY_ORDER.map((ability) => {
+                  const targetPath = `abilities.${ability}.score`;
+                  const records = provenanceByTargetPath.get(targetPath) ?? [];
+                  const baseScore = Number(state.abilities[ability] ?? 10);
+                  const adjustment = records.reduce((sum, record) => sum + Number(record.delta ?? 0), 0);
+                  const grouped = new Map<string, Array<{ sourceLabel: string; delta: number }>>();
+                  for (const record of records) {
+                    const delta = Number(record.delta ?? 0);
+                    if (!Number.isFinite(delta)) continue;
+                    const meta = sourceMetaByEntityKey.get(`${record.source.packId}:${record.source.entityId}`);
+                    const sourceType = meta?.sourceType ?? 'unknown';
+                    const sourceLabel = meta?.sourceLabel ?? record.source.entityId;
+                    const list = grouped.get(sourceType) ?? [];
+                    list.push({ sourceLabel, delta });
+                    grouped.set(sourceType, list);
+                  }
+                  const groupsToRender = Array.from(grouped.entries())
+                    .map(([sourceType, items]) => ({
+                      sourceType,
+                      items,
+                      total: items.reduce((sum, item) => sum + item.delta, 0)
+                    }))
+                    .filter((group) => !hideZeroGroups || group.total !== 0);
+                  const finalScore = Number(sheet.abilities[ability]?.score ?? baseScore);
+                  const finalMod = Number(sheet.abilities[ability]?.mod ?? 0);
+                  return (
+                    <tr key={ability}>
+                      <td>{localizeAbilityLabel(ability)}</td>
+                      <td>{baseScore}</td>
+                      <td>
+                        <div>{formatSigned(adjustment)}</div>
+                        {groupsToRender.length > 0 && (
+                          <ul className="calc-list">
+                            {groupsToRender.map((group) => (
+                              <li key={`${ability}-${group.sourceType}`}>
+                                <strong>{groupLabel(group.sourceType)}</strong>: {formatSigned(group.total)}
+                                <ul className="calc-list">
+                                  {group.items.map((item, index) => (
+                                    <li key={`${ability}-${group.sourceType}-${index}`}>
+                                      <code>{formatSigned(item.delta)}</code> {item.sourceLabel}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </td>
+                      <td>{finalScore}</td>
+                      <td>{formatSigned(finalMod)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </article>}
         </section>
       );
     }

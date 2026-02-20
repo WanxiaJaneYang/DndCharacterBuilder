@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
@@ -14,7 +14,7 @@ const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
 const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
 const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
 const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
-const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?)$/i;
+const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|\u6218\u58EB(?:\uFF081\u7EA7\uFF09)?)$/i;
 
 afterEach(() => {
   cleanup();
@@ -142,6 +142,98 @@ describe('role and language behavior', () => {
     });
   });
 
+  it('renders ability mode selector and point-buy cap controls from flow config', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    expect(screen.getByRole('radiogroup', { name: /Ability Generation|生成方式/i })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: /Point Buy|点购/i })).toBeTruthy();
+    expect(screen.getByRole('spinbutton', { name: /Point Cap|点数上限/i })).toBeTruthy();
+    expect(screen.getByText(/Points Remaining|剩余点数/i)).toBeTruthy();
+  });
+
+  it('shows existing ability modifiers on the ability step', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Elf|精灵)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    expect(screen.getAllByText(/Existing Modifiers|现有调整/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/\+2/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/-2/).length).toBeGreaterThan(0);
+  });
+
+  it('supports plus and minus score steppers for ability inputs', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    const strInput = screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement;
+    const before = Number(strInput.value);
+
+    await user.click(screen.getByRole('button', { name: /Increase STR|提高 力量/i }));
+    expect(Number((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value)).toBe(before + 1);
+
+    await user.click(screen.getByRole('button', { name: /Decrease STR|降低 力量/i }));
+    expect(Number((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value)).toBe(before);
+  });
+
+
+  it('supports roll-sets mode by generating 5 sets and applying the selected set', async () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    await user.click(screen.getByRole('radio', { name: /Roll Sets|掷骰组/i }));
+    expect(screen.getAllByRole('radio', { name: /^(?:Set|第)\s*\d+/i }).length).toBe(5);
+
+    await user.click(screen.getByRole('radio', { name: /^(?:Set|第)\s*1/i }));
+    expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value).toBe('3');
+    expect((screen.getByRole('spinbutton', { name: /DEX|敏捷/i }) as HTMLInputElement).value).toBe('3');
+
+    randomSpy.mockRestore();
+  });
+  it('shows modifier source attribution groups and hides non-impacting source types', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Elf|精灵)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    expect(screen.getAllByText(/Elf|精灵/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Race/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Fighter|战士/i)).toBeNull();
+  });
+
   it('supports back navigation from rules setup and from first wizard step', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -181,9 +273,9 @@ describe('role and language behavior', () => {
       await user.click(featChoices[0]!);
       await user.click(screen.getByRole('button', { name: nextPattern }));
       await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.click(screen.getByLabelText(/Chainmail|链甲/));
+      await user.click(screen.getByLabelText(/Chainmail|\u94FE\u7532/));
       await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), '赵云');
+      await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), '\u8D75\u4E91');
       await user.click(screen.getByRole('button', { name: nextPattern }));
 
       expect(screen.getAllByRole('heading', { name: zh.reviewAbilityBreakdown }).length).toBeGreaterThan(0);
