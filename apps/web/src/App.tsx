@@ -12,12 +12,28 @@ const STEP_ID_FEAT = 'feat';
 const STEP_ID_SKILLS = 'skills';
 const STEP_ID_ABILITIES = 'abilities';
 const DEFAULT_EXPORT_NAME = 'character';
-const ABILITY_SCORE_MIN = 3;
-const ABILITY_SCORE_MAX = 18;
+const DEFAULT_ABILITY_SCORE_MIN = 3;
+const DEFAULT_ABILITY_SCORE_MAX = 18;
+const ABILITY_ORDER = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
+type AbilityMode = 'pointBuy' | 'phb' | 'rollSets';
 
-function clampAbilityScore(value: number): number {
-  if (!Number.isFinite(value)) return ABILITY_SCORE_MIN;
-  const clamped = Math.min(ABILITY_SCORE_MAX, Math.max(ABILITY_SCORE_MIN, value));
+type AbilityStepConfig = {
+  modes?: AbilityMode[];
+  defaultMode?: AbilityMode;
+  pointBuy?: {
+    costTable?: Record<string, number>;
+    defaultPointCap?: number;
+    minPointCap?: number;
+    maxPointCap?: number;
+    pointCapStep?: number;
+    minScore?: number;
+    maxScore?: number;
+  };
+};
+
+function clampAbilityScore(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  const clamped = Math.min(max, Math.max(min, value));
   return Math.round(clamped);
 }
 
@@ -146,18 +162,54 @@ export function App() {
     return [String(value)];
   };
 
+  const abilityStepConfig = useMemo(() => {
+    const abilityStep = wizardSteps.find((step) => step.id === STEP_ID_ABILITIES) as ({ abilitiesConfig?: AbilityStepConfig } | undefined);
+    return abilityStep?.abilitiesConfig;
+  }, [wizardSteps]);
+  const abilityModes = abilityStepConfig?.modes?.length ? abilityStepConfig.modes : ['pointBuy', 'phb', 'rollSets'];
+  const abilityMeta = (state.selections.abilitiesMeta as {
+    mode?: AbilityMode;
+    pointCap?: number;
+    rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
+  } | undefined) ?? {};
+  const selectedAbilityMode: AbilityMode = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0] ?? 'pointBuy';
+  const abilityMinScore = abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_SCORE_MIN;
+  const abilityMaxScore = abilityStepConfig?.pointBuy?.maxScore ?? DEFAULT_ABILITY_SCORE_MAX;
+  const pointBuyCostTable = abilityStepConfig?.pointBuy?.costTable ?? {};
+  const pointCapMin = abilityStepConfig?.pointBuy?.minPointCap ?? 1;
+  const pointCapMax = abilityStepConfig?.pointBuy?.maxPointCap ?? 999;
+  const pointCapStep = abilityStepConfig?.pointBuy?.pointCapStep ?? 1;
+  const pointCapDefault = abilityStepConfig?.pointBuy?.defaultPointCap ?? 32;
+  const selectedPointCap = Number.isFinite(Number(abilityMeta.pointCap)) ? Number(abilityMeta.pointCap) : pointCapDefault;
+  const pointBuySpent = ABILITY_ORDER.reduce((sum, ability) => sum + Number(pointBuyCostTable[String(state.abilities[ability])] ?? 0), 0);
+  const pointBuyRemaining = selectedPointCap - pointBuySpent;
+
+  const applyAbilitySelection = (
+    nextScores: Record<string, number>,
+    metaPatch?: Partial<{ mode: AbilityMode; pointCap: number; rollSets: { generatedSets?: number[][]; selectedSetIndex?: number } }>
+  ) => {
+    setState((prev) => {
+      const prevMeta = (prev.selections.abilitiesMeta as Record<string, unknown> | undefined) ?? {};
+      const nextMeta = { ...prevMeta, ...metaPatch, mode: (metaPatch?.mode ?? selectedAbilityMode) };
+      return applyChoice(
+        prev,
+        STEP_ID_ABILITIES,
+        { mode: nextMeta.mode, pointCap: nextMeta.pointCap, rollSets: nextMeta.rollSets, scores: nextScores },
+        context
+      );
+    });
+  };
+
   const setAbility = (key: string, value: number) => {
     if (!Number.isFinite(value)) return;
-    setState((prev) => applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: value }, context));
+    applyAbilitySelection({ ...state.abilities, [key]: value });
   };
 
   const clampAbilityOnBlur = (key: string) => {
-    setState((prev) => {
-      const current = Number(prev.abilities[key]);
-      const clamped = clampAbilityScore(current);
-      if (current === clamped) return prev;
-      return applyChoice(prev, STEP_ID_ABILITIES, { ...prev.abilities, [key]: clamped }, context);
-    });
+    const current = Number(state.abilities[key]);
+    const clamped = clampAbilityScore(current, abilityMinScore, abilityMaxScore);
+    if (current === clamped) return;
+    applyAbilitySelection({ ...state.abilities, [key]: clamped });
   };
 
   const exportJson = () => {
@@ -431,9 +483,45 @@ export function App() {
     }
 
     if (currentStep.kind === 'abilities') {
+      const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
       return (
         <section>
           <h2>{currentStep.label} {t.abilitiesSuffix}</h2>
+          <fieldset role="radiogroup" aria-label={t.abilityGenerationLabel}>
+            <legend>{t.abilityGenerationLabel}</legend>
+            {abilityModes.map((mode) => (
+              <label key={mode}>
+                <input
+                  type="radio"
+                  name="ability-generation-mode"
+                  checked={selectedAbilityMode === mode}
+                  onChange={() => applyAbilitySelection({ ...state.abilities }, { mode })}
+                />
+                {mode === 'pointBuy' ? t.abilityModePointBuy : mode === 'phb' ? t.abilityModePhb : t.abilityModeRollSets}
+              </label>
+            ))}
+          </fieldset>
+          {selectedAbilityMode === 'pointBuy' && (
+            <div>
+              <label>
+                {t.pointCapLabel}
+                <input
+                  type="number"
+                  min={pointCapMin}
+                  max={pointCapMax}
+                  step={pointCapStep}
+                  value={selectedPointCap}
+                  onChange={(event) => {
+                    const parsed = Number(event.target.value);
+                    if (!Number.isFinite(parsed)) return;
+                    const clamped = Math.min(pointCapMax, Math.max(pointCapMin, parsed));
+                    applyAbilitySelection({ ...state.abilities }, { pointCap: clamped });
+                  }}
+                />
+              </label>
+              <p>{t.pointBuyRemainingLabel}: {pointBuyRemaining}</p>
+            </div>
+          )}
           <div className="grid">
             {Object.entries(state.abilities).map(([key, value]) => {
               const label = localizeAbilityLabel(key);
@@ -442,8 +530,8 @@ export function App() {
                   {label}
                   <input
                     type="number"
-                    min={ABILITY_SCORE_MIN}
-                    max={ABILITY_SCORE_MAX}
+                    min={abilityMinScore}
+                    max={abilityMaxScore}
                     step={1}
                     value={value}
                     onChange={(e) => setAbility(key, Number(e.target.value))}
@@ -453,6 +541,39 @@ export function App() {
               );
             })}
           </div>
+          <article className="sheet">
+            <h3>{t.abilityExistingModifiersLabel}</h3>
+            <table className="review-table">
+              <thead>
+                <tr>
+                  <th>{t.reviewAbilityColumn}</th>
+                  <th>{t.reviewBaseColumn}</th>
+                  <th>{t.abilityExistingModifiersLabel}</th>
+                  <th>{t.reviewFinalColumn}</th>
+                  <th>{t.reviewModifierColumn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ABILITY_ORDER.map((ability) => {
+                  const targetPath = `abilities.${ability}.score`;
+                  const records = provenanceByTargetPath.get(targetPath) ?? [];
+                  const baseScore = Number(state.abilities[ability] ?? 10);
+                  const adjustment = records.reduce((sum, record) => sum + Number(record.delta ?? 0), 0);
+                  const finalScore = Number(sheet.abilities[ability]?.score ?? baseScore);
+                  const finalMod = Number(sheet.abilities[ability]?.mod ?? 0);
+                  return (
+                    <tr key={ability}>
+                      <td>{localizeAbilityLabel(ability)}</td>
+                      <td>{baseScore}</td>
+                      <td>{formatSigned(adjustment)}</td>
+                      <td>{finalScore}</td>
+                      <td>{formatSigned(finalMod)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </article>
         </section>
       );
     }

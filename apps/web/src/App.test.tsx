@@ -142,6 +142,39 @@ describe('role and language behavior', () => {
     });
   });
 
+  it('renders ability mode selector and point-buy cap controls from flow config', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    expect(screen.getByRole('radiogroup', { name: /Ability Generation|生成方式/i })).toBeTruthy();
+    expect(screen.getByRole('radio', { name: /Point Buy|点购/i })).toBeTruthy();
+    expect(screen.getByRole('spinbutton', { name: /Point Cap|点数上限/i })).toBeTruthy();
+    expect(screen.getByText(/Points Remaining|剩余点数/i)).toBeTruthy();
+  });
+
+  it('shows existing ability modifiers on the ability step', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Elf|精灵)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    expect(screen.getAllByText(/Existing Modifiers|现有调整/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/\+2/)).toBeTruthy();
+    expect(screen.getByText(/-2/)).toBeTruthy();
+  });
+
   it('supports back navigation from rules setup and from first wizard step', async () => {
     const user = userEvent.setup();
     render(<App />);

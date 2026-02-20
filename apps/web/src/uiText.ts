@@ -19,6 +19,13 @@ export type UIText = {
   classLabel: string;
   metadataPlaceholder: string;
   abilitiesSuffix: string;
+  abilityGenerationLabel: string;
+  abilityModePointBuy: string;
+  abilityModePhb: string;
+  abilityModeRollSets: string;
+  pointCapLabel: string;
+  pointBuyRemainingLabel: string;
+  abilityExistingModifiersLabel: string;
   roleAria: string;
   roleQuestion: string;
   roleIntro: string;
@@ -106,6 +113,13 @@ const uiTextStringKeys: Array<Exclude<keyof UIText, 'abilityLabels'>> = [
   'classLabel',
   'metadataPlaceholder',
   'abilitiesSuffix',
+  'abilityGenerationLabel',
+  'abilityModePointBuy',
+  'abilityModePhb',
+  'abilityModeRollSets',
+  'pointCapLabel',
+  'pointBuyRemainingLabel',
+  'abilityExistingModifiersLabel',
   'roleAria',
   'roleQuestion',
   'roleIntro',
