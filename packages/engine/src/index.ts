@@ -997,8 +997,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   }
 
   const decisions = buildDecisionSummary(state, context, finalAbilities);
-  const initiativeMisc = Number(sheet.stats.initiative ?? 0);
-  sheet.stats.initiative = initiativeMisc + (finalAbilities.dex?.mod ?? 0);
+  const initiativeTotal = Number(sheet.stats.initiative ?? 0);
+  const initiativeDex = finalAbilities.dex?.mod ?? 0;
+  const initiativeMisc = initiativeTotal - initiativeDex;
   sheet.stats.ac = Number(sheet.stats.ac ?? 0) + decisions.sizeModifiers.ac;
   sheet.stats.attackBonus = (sheet.stats.bab as number) + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack;
   sheet.stats.damageBonus = finalAbilities.str?.mod ?? 0;
@@ -1106,8 +1107,8 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     combat: {
       ac: acBreakdown,
       initiative: {
-        total: Number(sheet.stats.initiative ?? 0),
-        dex: finalAbilities.dex?.mod ?? 0,
+        total: initiativeTotal,
+        dex: initiativeDex,
         misc: initiativeMisc
       },
       grapple,
@@ -1146,8 +1147,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   const selectedEquipment = ((state.selections.equipment as string[] | undefined) ?? []).map((itemId) => String(itemId));
   const totalWeight = selectedEquipmentEntities.reduce((sum, item) => sum + getItemWeight(item), 0);
   const strScore = Number(finalAbilities.str?.score ?? 10);
-  const lightLoadLimit = strScore * 10;
-  const mediumLoadLimit = strScore * 20;
+  const carryingMultiplier = Number(decisions.sizeModifiers.carryingCapacityMultiplier ?? 1);
+  const lightLoadLimit = strScore * 10 * carryingMultiplier;
+  const mediumLoadLimit = strScore * 20 * carryingMultiplier;
   const loadCategory: "light" | "medium" | "heavy" = totalWeight <= lightLoadLimit
     ? "light"
     : totalWeight <= mediumLoadLimit
