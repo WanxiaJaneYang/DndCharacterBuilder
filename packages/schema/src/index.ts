@@ -107,7 +107,9 @@ const AbilitiesConfigSchema = z.object({
 
 const AbilityPresentationSchema = z.object({
   showExistingModifiers: z.boolean(),
-  modifierSources: z.array(z.enum(["race", "class", "rules", "feats"])).optional()
+  groupBy: z.enum(["sourceType"]).optional(),
+  hideZeroEffectGroups: z.boolean().optional(),
+  sourceTypeLabels: z.record(z.string().min(1), z.string().min(1)).optional()
 }).strict();
 
 const ChoiceStepSchema = z.object({

@@ -12,8 +12,6 @@ const STEP_ID_FEAT = 'feat';
 const STEP_ID_SKILLS = 'skills';
 const STEP_ID_ABILITIES = 'abilities';
 const DEFAULT_EXPORT_NAME = 'character';
-const DEFAULT_ABILITY_SCORE_MIN = 3;
-const DEFAULT_ABILITY_SCORE_MAX = 18;
 const ABILITY_ORDER = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
 type AbilityMode = 'pointBuy' | 'phb' | 'rollSets';
 
@@ -29,6 +27,17 @@ type AbilityStepConfig = {
     minScore?: number;
     maxScore?: number;
   };
+  phb?: {
+    methodType?: 'standardArray' | 'manualRange';
+    manualRange?: { minScore?: number; maxScore?: number };
+  };
+};
+
+type AbilityPresentationConfig = {
+  showExistingModifiers?: boolean;
+  groupBy?: 'sourceType';
+  hideZeroEffectGroups?: boolean;
+  sourceTypeLabels?: Record<string, string>;
 };
 
 function clampAbilityScore(value: number, min: number, max: number): number {
@@ -153,6 +162,18 @@ export function App() {
     }
     return map;
   }, [sheet.provenance]);
+  const sourceMetaByEntityKey = useMemo(() => {
+    const map = new Map<string, { sourceType: string; sourceLabel: string }>();
+    for (const [entityType, bucket] of Object.entries(context.resolvedData.entities)) {
+      for (const entity of Object.values(bucket)) {
+        const sourceLabel = activeLocale?.entityText?.[entityType]?.[entity.id]?.name
+          ?? activeLocale?.entityNames?.[entityType]?.[entity.id]
+          ?? entity.name;
+        map.set(`${entity._source.packId}:${entity.id}`, { sourceType: entityType, sourceLabel });
+      }
+    }
+    return map;
+  }, [activeLocale?.entityNames, activeLocale?.entityText, context.resolvedData.entities]);
 
   const selectedStepValues = (stepId: string): string[] => {
     if (stepId === STEP_ID_FEAT) return selectedFeats;
@@ -166,22 +187,32 @@ export function App() {
     const abilityStep = wizardSteps.find((step) => step.id === STEP_ID_ABILITIES) as ({ abilitiesConfig?: AbilityStepConfig } | undefined);
     return abilityStep?.abilitiesConfig;
   }, [wizardSteps]);
-  const abilityModes: AbilityMode[] = abilityStepConfig?.modes?.length
-    ? abilityStepConfig.modes
-    : (['pointBuy', 'phb', 'rollSets'] as AbilityMode[]);
+  const abilityPresentation = useMemo(() => {
+    const abilityStep = wizardSteps.find((step) => step.id === STEP_ID_ABILITIES) as ({ abilityPresentation?: AbilityPresentationConfig } | undefined);
+    return abilityStep?.abilityPresentation;
+  }, [wizardSteps]);
+  const abilityModes: AbilityMode[] = abilityStepConfig?.modes?.length ? abilityStepConfig.modes : [];
   const abilityMeta = (state.selections.abilitiesMeta as {
     mode?: AbilityMode;
     pointCap?: number;
     rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
   } | undefined) ?? {};
-  const selectedAbilityMode: AbilityMode = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0] ?? 'pointBuy';
-  const abilityMinScore = abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_SCORE_MIN;
-  const abilityMaxScore = abilityStepConfig?.pointBuy?.maxScore ?? DEFAULT_ABILITY_SCORE_MAX;
+  const selectedAbilityMode: AbilityMode | undefined = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0];
+  const abilityMinScore = selectedAbilityMode === 'pointBuy'
+    ? Number(abilityStepConfig?.pointBuy?.minScore ?? 0)
+    : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
+      ? Number(abilityStepConfig.phb.manualRange?.minScore ?? 0)
+      : Math.min(...ABILITY_ORDER.map((ability) => Number(state.abilities[ability] ?? 0)));
+  const abilityMaxScore = selectedAbilityMode === 'pointBuy'
+    ? Number(abilityStepConfig?.pointBuy?.maxScore ?? 0)
+    : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
+      ? Number(abilityStepConfig.phb.manualRange?.maxScore ?? 0)
+      : Math.max(...ABILITY_ORDER.map((ability) => Number(state.abilities[ability] ?? 0)));
   const pointBuyCostTable = abilityStepConfig?.pointBuy?.costTable ?? {};
-  const pointCapMin = abilityStepConfig?.pointBuy?.minPointCap ?? 1;
-  const pointCapMax = abilityStepConfig?.pointBuy?.maxPointCap ?? 999;
+  const pointCapMin = abilityStepConfig?.pointBuy?.minPointCap ?? 0;
+  const pointCapMax = abilityStepConfig?.pointBuy?.maxPointCap ?? 0;
   const pointCapStep = abilityStepConfig?.pointBuy?.pointCapStep ?? 1;
-  const pointCapDefault = abilityStepConfig?.pointBuy?.defaultPointCap ?? 32;
+  const pointCapDefault = abilityStepConfig?.pointBuy?.defaultPointCap ?? 0;
   const selectedPointCap = Number.isFinite(Number(abilityMeta.pointCap)) ? Number(abilityMeta.pointCap) : pointCapDefault;
   const pointBuySpent = ABILITY_ORDER.reduce((sum, ability) => sum + Number(pointBuyCostTable[String(state.abilities[ability])] ?? 0), 0);
   const pointBuyRemaining = selectedPointCap - pointBuySpent;
@@ -192,7 +223,9 @@ export function App() {
   ) => {
     setState((prev) => {
       const prevMeta = (prev.selections.abilitiesMeta as Record<string, unknown> | undefined) ?? {};
-      const nextMeta = { ...prevMeta, ...metaPatch, mode: (metaPatch?.mode ?? selectedAbilityMode) };
+      const nextMode = metaPatch?.mode ?? selectedAbilityMode ?? abilityModes[0];
+      if (!nextMode) return prev;
+      const nextMeta = { ...prevMeta, ...metaPatch, mode: nextMode };
       return applyChoice(
         prev,
         STEP_ID_ABILITIES,
@@ -205,6 +238,13 @@ export function App() {
   const setAbility = (key: string, value: number) => {
     if (!Number.isFinite(value)) return;
     applyAbilitySelection({ ...state.abilities, [key]: value });
+  };
+
+  const stepAbility = (key: string, delta: number) => {
+    const current = Number(state.abilities[key] ?? 0);
+    const next = clampAbilityScore(current + delta, abilityMinScore, abilityMaxScore);
+    if (next === current) return;
+    applyAbilitySelection({ ...state.abilities, [key]: next });
   };
 
   const clampAbilityOnBlur = (key: string) => {
@@ -486,6 +526,11 @@ export function App() {
 
     if (currentStep.kind === 'abilities') {
       const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
+      const showModifierTable = abilityPresentation?.showExistingModifiers ?? true;
+      const sourceTypeLabels = abilityPresentation?.sourceTypeLabels ?? {};
+      const hideZeroGroups = abilityPresentation?.hideZeroEffectGroups ?? true;
+      const groupLabel = (sourceType: string) => sourceTypeLabels[sourceType] ?? sourceType;
+
       return (
         <section>
           <h2>{currentStep.label} {t.abilitiesSuffix}</h2>
@@ -503,7 +548,7 @@ export function App() {
               </label>
             ))}
           </fieldset>
-          {selectedAbilityMode === 'pointBuy' && (
+          {selectedAbilityMode === 'pointBuy' && abilityStepConfig?.pointBuy && (
             <div>
               <label>
                 {t.pointCapLabel}
@@ -525,25 +570,49 @@ export function App() {
             </div>
           )}
           <div className="grid">
-            {Object.entries(state.abilities).map(([key, value]) => {
+            {ABILITY_ORDER.map((key) => {
+              const value = Number(state.abilities[key] ?? 0);
               const label = localizeAbilityLabel(key);
+              const canDecrease = value > abilityMinScore;
+              const canIncrease = value < abilityMaxScore;
               return (
-                <label key={key}>
-                  {label}
-                  <input
-                    type="number"
-                    min={abilityMinScore}
-                    max={abilityMaxScore}
-                    step={1}
-                    value={value}
-                    onChange={(e) => setAbility(key, Number(e.target.value))}
-                    onBlur={() => clampAbilityOnBlur(key)}
-                  />
-                </label>
+                <div key={key} className="ability-input-row">
+                  <label htmlFor={`ability-input-${key}`}>{label}</label>
+                  <div className="ability-stepper">
+                    <button
+                      type="button"
+                      className="ability-step-btn"
+                      aria-label={language === 'zh' ? `降低 ${label}` : `Decrease ${label}`}
+                      disabled={!canDecrease}
+                      onClick={() => stepAbility(key, -1)}
+                    >
+                      -
+                    </button>
+                    <input
+                      id={`ability-input-${key}`}
+                      type="number"
+                      min={abilityMinScore}
+                      max={abilityMaxScore}
+                      step={1}
+                      value={value}
+                      onChange={(e) => setAbility(key, Number(e.target.value))}
+                      onBlur={() => clampAbilityOnBlur(key)}
+                    />
+                    <button
+                      type="button"
+                      className="ability-step-btn"
+                      aria-label={language === 'zh' ? `提高 ${label}` : `Increase ${label}`}
+                      disabled={!canIncrease}
+                      onClick={() => stepAbility(key, 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
               );
             })}
           </div>
-          <article className="sheet">
+          {showModifierTable && <article className="sheet">
             <h3>{t.abilityExistingModifiersLabel}</h3>
             <table className="review-table">
               <thead>
@@ -561,13 +630,49 @@ export function App() {
                   const records = provenanceByTargetPath.get(targetPath) ?? [];
                   const baseScore = Number(state.abilities[ability] ?? 10);
                   const adjustment = records.reduce((sum, record) => sum + Number(record.delta ?? 0), 0);
+                  const grouped = new Map<string, Array<{ sourceLabel: string; delta: number }>>();
+                  for (const record of records) {
+                    const delta = Number(record.delta ?? 0);
+                    if (!Number.isFinite(delta)) continue;
+                    const meta = sourceMetaByEntityKey.get(`${record.source.packId}:${record.source.entityId}`);
+                    const sourceType = meta?.sourceType ?? 'unknown';
+                    const sourceLabel = meta?.sourceLabel ?? record.source.entityId;
+                    const list = grouped.get(sourceType) ?? [];
+                    list.push({ sourceLabel, delta });
+                    grouped.set(sourceType, list);
+                  }
+                  const groupsToRender = Array.from(grouped.entries())
+                    .map(([sourceType, items]) => ({
+                      sourceType,
+                      items,
+                      total: items.reduce((sum, item) => sum + item.delta, 0)
+                    }))
+                    .filter((group) => !hideZeroGroups || group.total !== 0);
                   const finalScore = Number(sheet.abilities[ability]?.score ?? baseScore);
                   const finalMod = Number(sheet.abilities[ability]?.mod ?? 0);
                   return (
                     <tr key={ability}>
                       <td>{localizeAbilityLabel(ability)}</td>
                       <td>{baseScore}</td>
-                      <td>{formatSigned(adjustment)}</td>
+                      <td>
+                        <div>{formatSigned(adjustment)}</div>
+                        {groupsToRender.length > 0 && (
+                          <ul className="calc-list">
+                            {groupsToRender.map((group) => (
+                              <li key={`${ability}-${group.sourceType}`}>
+                                <strong>{groupLabel(group.sourceType)}</strong>: {formatSigned(group.total)}
+                                <ul className="calc-list">
+                                  {group.items.map((item, index) => (
+                                    <li key={`${ability}-${group.sourceType}-${index}`}>
+                                      <code>{formatSigned(item.delta)}</code> {item.sourceLabel}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </td>
                       <td>{finalScore}</td>
                       <td>{formatSigned(finalMod)}</td>
                     </tr>
@@ -575,7 +680,7 @@ export function App() {
                 })}
               </tbody>
             </table>
-          </article>
+          </article>}
         </section>
       );
     }

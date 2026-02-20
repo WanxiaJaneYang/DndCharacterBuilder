@@ -718,6 +718,13 @@ export function validateState(state: CharacterState, context: EngineContext): Va
       });
     } else if (abilityMode === "pointBuy") {
       const pointBuyCfg = abilityConfig.pointBuy;
+      if (!pointBuyCfg) {
+        errors.push({
+          code: "ABILITY_MODE_CONFIG_MISSING",
+          message: "Point-buy mode is enabled but pointBuy config is missing.",
+          stepId: ABILITY_STEP_ID
+        });
+      } else {
       const costTable = pointBuyCfg?.costTable ?? {};
       const meta = state.selections.abilitiesMeta as { pointCap?: unknown } | undefined;
       const pointCapRaw = Number(meta?.pointCap ?? pointBuyCfg?.defaultPointCap ?? 0);
@@ -746,8 +753,16 @@ export function validateState(state: CharacterState, context: EngineContext): Va
           stepId: ABILITY_STEP_ID
         });
       }
+      }
     } else if (abilityMode === "phb") {
       const phbCfg = abilityConfig.phb;
+      if (!phbCfg) {
+        errors.push({
+          code: "ABILITY_MODE_CONFIG_MISSING",
+          message: "PHB mode is enabled but phb config is missing.",
+          stepId: ABILITY_STEP_ID
+        });
+      }
       if (phbCfg?.methodType === "standardArray" && Array.isArray(phbCfg.standardArray)) {
         const expected = [...phbCfg.standardArray].sort((a, b) => a - b);
         const actual = ABILITY_KEYS.map((ability) => Number(state.abilities[ability])).sort((a, b) => a - b);
@@ -763,6 +778,13 @@ export function validateState(state: CharacterState, context: EngineContext): Va
       }
     } else if (abilityMode === "rollSets") {
       const rollCfg = abilityConfig.rollSets;
+      if (!rollCfg) {
+        errors.push({
+          code: "ABILITY_MODE_CONFIG_MISSING",
+          message: "Roll-sets mode is enabled but rollSets config is missing.",
+          stepId: ABILITY_STEP_ID
+        });
+      }
       const meta = state.selections.abilitiesMeta as {
         rollSets?: { generatedSets?: unknown; selectedSetIndex?: unknown };
       } | undefined;

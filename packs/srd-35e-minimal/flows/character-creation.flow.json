@@ -64,7 +64,14 @@
       },
       "abilityPresentation": {
         "showExistingModifiers": true,
-        "modifierSources": ["race", "class", "rules", "feats"]
+        "groupBy": "sourceType",
+        "hideZeroEffectGroups": true,
+        "sourceTypeLabels": {
+          "races": "Race",
+          "classes": "Class",
+          "rules": "Rules",
+          "feats": "Feats"
+        }
       }
     },
     {
