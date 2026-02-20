@@ -156,6 +156,26 @@ const InnateSpellLikeAbilitySchema = z.object({
   scope: z.string().optional()
 }).strict();
 
+const RaceAncestryTagSchema = z.enum(["human", "elf", "orc", "dwarf", "gnome", "halfling"]);
+
+const RaceSizeModifierSchema = z.object({
+  ac: z.number(),
+  attack: z.number(),
+  hide: z.number(),
+  carryingCapacityMultiplier: z.number().positive()
+}).strict();
+
+const RaceMovementOverrideSchema = z.object({
+  ignoreArmorSpeedReduction: z.boolean().optional()
+}).strict();
+
+const SpellDcBonusSchema = z.object({
+  school: z.string(),
+  bonus: z.number(),
+  type: z.string().optional(),
+  when: z.string().optional()
+}).strict();
+
 const RaceDataSchema = z.object({
   size: z.enum(["small", "medium", "large"]),
   baseSpeed: z.number().int().positive(),
@@ -171,7 +191,12 @@ const RaceDataSchema = z.object({
   skillBonuses: z.array(SkillBonusSchema).optional(),
   saveBonuses: z.array(RacialModifierSchema).optional(),
   attackBonuses: z.array(RacialModifierSchema).optional(),
-  innateSpellLikeAbilities: z.array(InnateSpellLikeAbilitySchema).optional()
+  acBonuses: z.array(RacialModifierSchema).optional(),
+  spellDcBonuses: z.array(SpellDcBonusSchema).optional(),
+  innateSpellLikeAbilities: z.array(InnateSpellLikeAbilitySchema).optional(),
+  ancestryTags: z.array(RaceAncestryTagSchema).optional(),
+  sizeModifiers: RaceSizeModifierSchema.optional(),
+  movementOverrides: RaceMovementOverrideSchema.optional()
 }).strict();
 
 const ClassSaveProgressSchema = z.enum(["good", "poor"]);
