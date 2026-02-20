@@ -35,7 +35,7 @@ Creating a character in D&D can be intimidating. New players are overwhelmed by 
   1. Point Buy
   2. PHB Method
   3. Roll Sets (generate configured sets and pick one)
-- Rules are edition-bound: 3e and 5e can define different defaults/tables/method parameters in pack data.
+- Rules are edition-bound in architecture: different editions can define different defaults/tables/method parameters in pack data; MVP implementation remains 3.5-only.
 - Ability step must surface existing modifiers (from currently applied race/class/rules/feats) so users can see effective outcomes during assignment.
 - Point-buy cap must be user-adjustable within configured bounds in MVP.
 - Full custom point-buy table authoring/saving is explicitly non-MVP.

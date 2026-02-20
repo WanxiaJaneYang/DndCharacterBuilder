@@ -32,7 +32,7 @@ Non-MVP:
 - No hardcoded edition rules in app logic.
 - Edition packs define generation behavior and defaults.
 - MVP must expose all 3 generation modes.
-- 3e and 5e may have different point-buy tables and PHB defaults.
+- Architecture supports edition-specific defaults (for example, 3e and 5e can differ), while MVP implementation targets 3.5 only.
 - Point-buy cap is customizable in MVP within configured bounds.
 - Full custom table authoring is deferred to later version.
 
@@ -139,7 +139,7 @@ Risk: Rolling method reproducibility.
 - User can customize point cap within configured range.
 - Existing modifiers are visible in ability-step table.
 - Engine validates ability selection using config rules.
-- 3e and 5e can define different defaults without code branching.
+- Ability generation rules are loaded from config without hardcoded edition branching, and are validated for the active 3.5 pack in MVP.
 - No hardcoded rule constants for edition behavior in frontend.
 
 ## 11) Out of Scope

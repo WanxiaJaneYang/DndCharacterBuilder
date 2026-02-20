@@ -43,7 +43,7 @@ This document defines the minimal viable product boundaries for the DnDCharacter
 
 ## TODO
 
-- Define 3e and 5e default `abilitiesConfig` payloads in pack data.
+- Define default `abilitiesConfig` payload for 3.5 in pack data (MVP); define additional edition payloads (for example 5e) in post-MVP phases.
 - Clarify which races and classes are included in the minimal pack.
 - Define starting equipment modes and initial kits.
 - Add success metrics for load performance and accessibility.
