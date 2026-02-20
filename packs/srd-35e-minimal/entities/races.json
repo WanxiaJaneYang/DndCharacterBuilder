@@ -490,7 +490,7 @@
         {
           "id": "gnome-save-bonus-vs-illusions",
           "category": "conditional-modifier",
-          "description": "Gnome +1 saving throw bonus versus illusions is not enforced by spell-school-aware save resolution.",
+          "description": "Gnome +2 saving throw bonus versus illusions is not enforced by spell-school-aware save resolution.",
           "dependsOn": [
             "spell-school-tagging",
             "conditional-save-modifier-system"
