@@ -140,6 +140,117 @@ describe("race entity schema", () => {
       })
     ).toThrow(/invalid races\.data/i);
   });
+
+  it("accepts race v2 structured fields for ancestry, size modifiers, movement overrides, AC bonuses, and spell DC bonuses", () => {
+    const parsed = EntitySchema.parse({
+      id: "half-elf",
+      name: "Half-Elf",
+      entityType: "races",
+      summary: "Half-elf summary",
+      description: "Half-elf detail",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        size: "medium",
+        baseSpeed: 30,
+        abilityModifiers: {},
+        vision: { lowLight: true, darkvisionFeet: 0 },
+        automaticLanguages: ["Common", "Elven"],
+        bonusLanguages: ["Any (except secret languages)"],
+        favoredClass: "any",
+        racialTraits: [{ id: "elven-blood", name: "Elven Blood", description: "Counts as elf for race effects." }],
+        ancestryTags: ["human", "elf"],
+        sizeModifiers: {
+          ac: 0,
+          attack: 0,
+          hide: 0,
+          carryingCapacityMultiplier: 1
+        },
+        movementOverrides: {
+          ignoreArmorSpeedReduction: false
+        },
+        acBonuses: [{ target: "giants", bonus: 4, type: "racial", when: "dodge bonus" }],
+        spellDcBonuses: [{ school: "illusion", bonus: 1, type: "racial" }]
+      }
+    });
+
+    expect(parsed.id).toBe("half-elf");
+  });
+
+  it("rejects race v2 fields with invalid ancestry tags", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "invalid-race",
+        name: "Invalid Race",
+        entityType: "races",
+        summary: "Invalid",
+        description: "Invalid",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          size: "medium",
+          baseSpeed: 30,
+          abilityModifiers: {},
+          vision: { lowLight: false, darkvisionFeet: 0 },
+          automaticLanguages: ["Common"],
+          bonusLanguages: ["Any"],
+          favoredClass: "any",
+          racialTraits: [],
+          ancestryTags: ["dragonborn"]
+        }
+      })
+    ).toThrow(/invalid races\.data/i);
+  });
+
+  it("rejects empty race movement override object", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "invalid-movement-override",
+        name: "Invalid Movement Override",
+        entityType: "races",
+        summary: "Invalid",
+        description: "Invalid",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          size: "medium",
+          baseSpeed: 30,
+          abilityModifiers: {},
+          vision: { lowLight: false, darkvisionFeet: 0 },
+          automaticLanguages: ["Common"],
+          bonusLanguages: ["Any"],
+          favoredClass: "any",
+          racialTraits: [],
+          movementOverrides: {}
+        }
+      })
+    ).toThrow(/invalid races\.data/i);
+  });
+
+  it("rejects race v2 spell DC bonuses with unknown school values", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "invalid-spell-dc-school",
+        name: "Invalid Spell DC School",
+        entityType: "races",
+        summary: "Invalid",
+        description: "Invalid",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          size: "medium",
+          baseSpeed: 30,
+          abilityModifiers: {},
+          vision: { lowLight: false, darkvisionFeet: 0 },
+          automaticLanguages: ["Common"],
+          bonusLanguages: ["Any"],
+          favoredClass: "any",
+          racialTraits: [],
+          spellDcBonuses: [{ school: "illusions", bonus: 1 }]
+        }
+      })
+    ).toThrow(/invalid races\.data/i);
+  });
 });
 
 describe("class entity schema", () => {
