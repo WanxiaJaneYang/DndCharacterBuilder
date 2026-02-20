@@ -33,6 +33,7 @@ Non-MVP:
 - Edition packs define generation behavior and defaults.
 - MVP must expose all 3 generation modes.
 - Architecture supports edition-specific defaults (for example, 3e and 5e can differ), while MVP implementation targets 3.5 only.
+- No hardcoded fallback defaults for ability generation parameters; missing/invalid config is a data validation error, not a silent fallback.
 - Point-buy cap is customizable in MVP within configured bounds.
 - Full custom table authoring is deferred to later version.
 
@@ -100,6 +101,7 @@ Mode behavior:
 - UI performs immediate guardrails and user feedback.
 - Engine is source of truth for final ability-step validation.
 - Ability validation is driven by flow config, not constants.
+- If required ability-generation config is missing or invalid, engine surfaces explicit config errors and blocks progression.
 - `Next` is gated by ability validation success.
 
 ## 7) Existing Modifiers Visibility
@@ -141,6 +143,7 @@ Risk: Rolling method reproducibility.
 - Engine validates ability selection using config rules.
 - Ability generation rules are loaded from config without hardcoded edition branching, and are validated for the active 3.5 pack in MVP.
 - No hardcoded rule constants for edition behavior in frontend.
+- No hardcoded fallback defaults for ability mode parameters in frontend or engine.
 
 ## 11) Out of Scope
 

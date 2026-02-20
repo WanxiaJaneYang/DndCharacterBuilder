@@ -19,6 +19,7 @@ This document defines the minimal viable product boundaries for the DnDCharacter
    - Point Buy (with configurable point-cap bounds)
    - PHB method
    - Roll Sets (generate 5 sets, pick one)
+   - All defaults/limits/formulas are loaded from pack data (`abilitiesConfig`) with no hardcoded fallback values in UI/engine.
 5. **Feat selection** – limited to feats provided in the minimal pack.
 6. **Skill selection** – simplified 3.5 skill allocation: obey budget and max ranks.
 7. **Equipment selection** – choose items from minimal pack; starting equipment mode recorded.

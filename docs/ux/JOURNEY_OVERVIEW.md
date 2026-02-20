@@ -23,6 +23,7 @@ Future editions may modify this journey:
 At the Ability Scores step, the user:
 
 1. Chooses generation mode (`Point Buy`, `PHB`, `Roll Sets`) from configured options.
+   - Mode list, default selection, labels, and constraints come from `abilitiesConfig` in pack data (no UI hardcoded defaults).
 2. Completes mode-specific assignment:
    - Point Buy: set scores and point cap, keep total cost within cap.
    - PHB: follow configured PHB rule (for example standard array).
