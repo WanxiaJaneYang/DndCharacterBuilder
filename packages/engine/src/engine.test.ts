@@ -66,7 +66,7 @@ describe("engine determinism", () => {
 
     expect(humanFeatLimit).toBe(2);
     expect(dwarfFeatLimit).toBe(1);
-    expect(dwarfFighterFeatLimit).toBe(1);
+    expect(dwarfFighterFeatLimit).toBe(2);
   });
 
   it("computes skill budget and racial skill bonuses from race/class data", () => {

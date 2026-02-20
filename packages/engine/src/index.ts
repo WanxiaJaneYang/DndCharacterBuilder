@@ -279,6 +279,7 @@ function classIdLevel(classId: string | undefined): number {
 type ClassProgressionGrant = {
   kind: string;
   slotType?: string;
+  featureId?: string;
   count?: number;
 };
 
@@ -316,11 +317,16 @@ function getApplicableClassGains(state: CharacterState, context: EngineContext):
 function getClassProgressionFeatSlotBonus(state: CharacterState, context: EngineContext): number {
   return getApplicableClassGains(state, context).reduce((total, gain) => {
     const gainBonus = gain.grants.reduce((count, grant) => {
-      if (grant.kind !== "featureSlot") return count;
-      if (String(grant.slotType ?? "").trim().toLowerCase() !== FEAT_SLOT_TYPE) return count;
-      const slotCount = Number(grant.count ?? 0);
-      if (!Number.isFinite(slotCount) || slotCount < 1) return count;
-      return count + Math.floor(slotCount);
+      if (grant.kind === "featureSlot") {
+        if (String(grant.slotType ?? "").trim().toLowerCase() !== FEAT_SLOT_TYPE) return count;
+        const slotCount = Number(grant.count ?? 0);
+        if (!Number.isFinite(slotCount) || slotCount < 1) return count;
+        return count + Math.floor(slotCount);
+      }
+      if (grant.kind === "grantFeature" && String(grant.featureId ?? "").trim().toLowerCase() === "bonus-feat") {
+        return count + 1;
+      }
+      return count;
     }, 0);
     return total + gainBonus;
   }, 0);
