@@ -145,8 +145,8 @@ describe("race entity schema", () => {
 describe("class entity schema", () => {
   it("accepts structured class data", () => {
     const parsed = EntitySchema.parse({
-      id: "fighter-1",
-      name: "Fighter (Level 1)",
+      id: "fighter",
+      name: "Fighter",
       entityType: "classes",
       summary: "Fighter summary",
       description: "Fighter detail",
@@ -172,7 +172,7 @@ describe("class entity schema", () => {
       }
     });
 
-    expect(parsed.id).toBe("fighter-1");
+    expect(parsed.id).toBe("fighter");
   });
 
   it("rejects classes with malformed class data", () => {
@@ -243,8 +243,8 @@ describe("class entity schema", () => {
 
   it("accepts progression-only class data without levelTable", () => {
     const parsed = EntitySchema.parse({
-      id: "rogue-1",
-      name: "Rogue (Level 1)",
+      id: "rogue",
+      name: "Rogue",
       entityType: "classes",
       summary: "Rogue summary",
       description: "Rogue detail",
@@ -271,13 +271,13 @@ describe("class entity schema", () => {
       }
     });
 
-    expect(parsed.id).toBe("rogue-1");
+    expect(parsed.id).toBe("rogue");
   });
 
   it("accepts deferred mechanics metadata for not-yet-implemented class rules", () => {
     const parsed = EntitySchema.parse({
-      id: "barbarian-1",
-      name: "Barbarian (Level 1)",
+      id: "barbarian",
+      name: "Barbarian",
       entityType: "classes",
       summary: "Barbarian summary",
       description: "Barbarian detail",
@@ -310,7 +310,7 @@ describe("class entity schema", () => {
       }
     });
 
-    expect(parsed.id).toBe("barbarian-1");
+    expect(parsed.id).toBe("barbarian");
   });
 
   it("rejects missing or misplaced level-1 row in levelTable", () => {
