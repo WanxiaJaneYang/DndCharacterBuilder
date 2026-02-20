@@ -41,6 +41,15 @@
   3. If CI fails, fix immediately and repeat polling.
   4. If review is still required, report blocker clearly and continue once feedback arrives.
 
+## Closed-Unmerged Branch Guardrail
+- Before declaring an MR cycle complete, run a closed/unmerged audit:
+  1. list closed PRs with `mergedAt == null`
+  2. compare each head to `main` for `ahead` and `unique_patch_commits`
+  3. verify whether any such head is represented by an open PR
+- If unmerged unique patches are not in an open PR, triage them one-by-one:
+  - mark as superseded with rationale, or
+  - open a new recovery MR from `main` with selective cherry-picks.
+
 ## Operational Rules For Future Sessions
 - Read this file at the start of MR-related tasks.
 - Assume user wants end-to-end completion (fix -> resolve -> review -> merge) unless user says otherwise.
