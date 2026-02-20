@@ -124,7 +124,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "Small");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "halfling");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
 
     const sheet = finalizeCharacter(state, context);
     expect(sheet.stats.ac).toBe(11);
@@ -155,7 +155,7 @@ describe("engine determinism", () => {
             racialTraits: []
           }
         }],
-        classes: [{ id: "fighter-1", name: "Fighter", entityType: "classes", summary: "Fighter", description: "Fighter class", portraitUrl: null, iconUrl: null, effects: [] }],
+        classes: [{ id: "fighter", name: "Fighter", entityType: "classes", summary: "Fighter", description: "Fighter class", portraitUrl: null, iconUrl: null, effects: [] }],
         feats: [],
         items: [],
         skills: [],
@@ -178,7 +178,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "Large");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "ogrekin");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
 
     const sheet = finalizeCharacter(state, localContext);
     expect(sheet.stats.ac).toBe(9);
@@ -211,7 +211,7 @@ describe("engine determinism", () => {
             sizeModifiers: { ac: 2, attack: 2, hide: 8, carryingCapacityMultiplier: 0.5 }
           }
         }],
-        classes: [{ id: "fighter-1", name: "Fighter", entityType: "classes", summary: "Fighter", description: "Fighter class", portraitUrl: null, iconUrl: null, effects: [] }],
+        classes: [{ id: "fighter", name: "Fighter", entityType: "classes", summary: "Fighter", description: "Fighter class", portraitUrl: null, iconUrl: null, effects: [] }],
         feats: [],
         items: [],
         skills: [],
@@ -234,7 +234,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "Override");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "tinyling");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
 
     const sheet = finalizeCharacter(state, localContext);
     expect(sheet.stats.ac).toBe(12);
@@ -247,7 +247,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "Gnomish");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "gnome");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
 
     const sheet = finalizeCharacter(state, context);
 
