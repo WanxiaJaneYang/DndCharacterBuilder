@@ -329,17 +329,6 @@ function getClassProgressionFeatSlotBonus(state: CharacterState, context: Engine
   }, 0);
 }
 
-function getClassProgressionEffects(classEntity: ResolvedEntity | undefined, classId: string | undefined): Effect[] {
-  const selectedLevel = classIdLevel(classId);
-  const effects: Effect[] = [];
-
-  parseClassProgressionGains(classEntity)
-    .filter((gain) => Number.isFinite(gain.level) && gain.level >= 1 && gain.level <= selectedLevel)
-    .forEach((gain) => effects.push(...gain.effects));
-
-  return effects;
-}
-
 function buildRacialSkillBonusMap(state: CharacterState, context: EngineContext): Record<string, number> {
   const race = getSelectedRace(state, context);
   const bonuses = (race?.data?.skillBonuses as Array<{ skill?: unknown; bonus?: unknown }> | undefined) ?? [];
