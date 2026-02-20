@@ -271,7 +271,7 @@ export function App() {
     setState((prev) => {
       const prevMeta = (prev.selections.abilitiesMeta as Record<string, unknown> | undefined) ?? {};
       const nextMode = metaPatch?.mode ?? selectedAbilityMode ?? abilityModes[0];
-      if (!nextMode) return prev;
+      if (!nextMode) return applyChoice(prev, STEP_ID_ABILITIES, nextScores, context);
       const nextMeta = { ...prevMeta, ...metaPatch, mode: nextMode };
       return applyChoice(
         prev,
@@ -594,7 +594,7 @@ export function App() {
 
       return (
         <section>
-          <h2>{currentStep.label} {t.abilitiesSuffix}</h2>
+          <h2>{currentStep.label}</h2>
           <fieldset role="radiogroup" aria-label={t.abilityGenerationLabel}>
             <legend>{t.abilityGenerationLabel}</legend>
             {abilityModes.map((mode) => (

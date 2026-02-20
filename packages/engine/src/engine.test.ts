@@ -346,6 +346,20 @@ describe("engine determinism", () => {
     expect(errors.some((error) => error.code === "ABILITY_POINTBUY_EXCEEDED")).toBe(true);
   });
 
+  it("sanitizes point-buy cap to configured bounds before validating", () => {
+    let state = applyChoice(initialState, "name", "PointBuyCapClamp");
+    state = applyChoice(state, "abilities", {
+      mode: "pointBuy",
+      pointCap: 999,
+      scores: { str: 18, dex: 18, con: 18, int: 8, wis: 8, cha: 8 }
+    });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "ABILITY_POINTBUY_EXCEEDED")).toBe(true);
+  });
+
   it("rejects phb standardArray when scores are not one-use", () => {
     let state = applyChoice(initialState, "name", "PhbArray");
     state = applyChoice(state, "abilities", {

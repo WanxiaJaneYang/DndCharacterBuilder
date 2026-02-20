@@ -1,4 +1,4 @@
-﻿import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
@@ -14,7 +14,7 @@ const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
 const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
 const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
 const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
-const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:锛?绾э級)?)$/i;
+const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|\u6218\u58EB(?:\uFF081\u7EA7\uFF09)?)$/i;
 
 afterEach(() => {
   cleanup();
@@ -273,9 +273,9 @@ describe('role and language behavior', () => {
       await user.click(featChoices[0]!);
       await user.click(screen.getByRole('button', { name: nextPattern }));
       await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.click(screen.getByLabelText(/Chainmail|链甲/));
+      await user.click(screen.getByLabelText(/Chainmail|\u94FE\u7532/));
       await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), '璧典簯');
+      await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), '\u8D75\u4E91');
       await user.click(screen.getByRole('button', { name: nextPattern }));
 
       expect(screen.getAllByRole('heading', { name: zh.reviewAbilityBreakdown }).length).toBeGreaterThan(0);
@@ -293,8 +293,3 @@ describe('role and language behavior', () => {
     });
   });
 });
-
-
-
-
-
