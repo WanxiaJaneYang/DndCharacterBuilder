@@ -20,17 +20,17 @@
       "halfling": "半身人"
     },
     "classes": {
-      "barbarian": "Barbarian",
-      "bard": "Bard",
-      "cleric": "Cleric",
-      "druid": "Druid",
-      "fighter": "Fighter",
-      "monk": "Monk",
-      "paladin": "Paladin",
-      "ranger": "Ranger",
-      "rogue": "Rogue",
-      "sorcerer": "Sorcerer",
-      "wizard": "Wizard"
+      "barbarian": "野蛮人",
+      "bard": "吟游诗人",
+      "cleric": "牧师",
+      "druid": "德鲁伊",
+      "fighter": "战士",
+      "monk": "武僧",
+      "paladin": "圣骑士",
+      "ranger": "游侠",
+      "rogue": "游荡者",
+      "sorcerer": "术士",
+      "wizard": "法师"
     },
     "feats": {
       "power-attack": "强力攻击",
@@ -80,37 +80,37 @@
     },
     "classes": {
       "barbarian": {
-        "name": "Barbarian"
+        "name": "野蛮人"
       },
       "bard": {
-        "name": "Bard"
+        "name": "吟游诗人"
       },
       "cleric": {
-        "name": "Cleric"
+        "name": "牧师"
       },
       "druid": {
-        "name": "Druid"
+        "name": "德鲁伊"
       },
       "fighter": {
-        "name": "Fighter"
+        "name": "战士"
       },
       "monk": {
-        "name": "Monk"
+        "name": "武僧"
       },
       "paladin": {
-        "name": "Paladin"
+        "name": "圣骑士"
       },
       "ranger": {
-        "name": "Ranger"
+        "name": "游侠"
       },
       "rogue": {
-        "name": "Rogue"
+        "name": "游荡者"
       },
       "sorcerer": {
-        "name": "Sorcerer"
+        "name": "术士"
       },
       "wizard": {
-        "name": "Wizard"
+        "name": "法师"
       }
     },
     "feats": {
