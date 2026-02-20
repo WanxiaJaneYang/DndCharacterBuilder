@@ -890,6 +890,7 @@ function getSrdMediumLoadLimits(strScore: number): { light: number; medium: numb
 function inferAcBreakdown(
   provenance: ProvenanceRecord[],
   selectedEquipmentIds: Set<string>,
+  selectedEquipmentById: Map<string, ResolvedEntity>,
   dexModifier: number,
   sizeModifier: number,
   acTotal: number
@@ -907,7 +908,10 @@ function inferAcBreakdown(
     }
     if (record.delta === undefined || !Number.isFinite(record.delta)) continue;
     const delta = Number(record.delta);
-    if (sourceId.includes("shield")) {
+    const sourceItem = selectedEquipmentById.get(sourceId);
+    const sourceCategory = getEntityDataString(sourceItem, "category").toLowerCase();
+    const isShield = sourceCategory === "shield" || (sourceCategory.length === 0 && sourceId.includes("shield") && selectedEquipmentIds.has(sourceId));
+    if (isShield) {
       shield += delta;
       continue;
     }
@@ -982,6 +986,11 @@ function getItemArmorCheckPenalty(item: ResolvedEntity): number {
 function skillIsAffectedByArmorCheckPenalty(skillEntity: ResolvedEntity | undefined): boolean {
   const value = getEntityDataRecord(skillEntity).armorCheckPenaltyApplies;
   return value === true;
+}
+
+function formatDamageWithModifier(baseDamage: string, modifier: number): string {
+  if (!Number.isFinite(modifier) || modifier === 0) return baseDamage;
+  return `${baseDamage}${modifier > 0 ? "+" : ""}${modifier}`;
 }
 
 export function finalizeCharacter(state: CharacterState, context: EngineContext): CharacterSheet {
@@ -1067,13 +1076,20 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   const maxHitDieHp = Math.max(hpTotal - hpCon, 0);
   const hpHitDie = inferredHitDieHp > 0 ? Math.min(inferredHitDieHp, maxHitDieHp) : maxHitDieHp;
   const hpMisc = hpTotal - hpHitDie - hpCon;
+  const selectedEquipmentEntities = ((state.selections.equipment as string[] | undefined) ?? [])
+    .map((itemId) => entityBuckets.items?.[itemId])
+    .filter((entity): entity is ResolvedEntity => Boolean(entity));
   const selectedEquipmentIds = new Set(
     (((state.selections.equipment as string[] | undefined) ?? []).map((itemId) => String(itemId).trim().toLowerCase()))
+  );
+  const selectedEquipmentById = new Map(
+    selectedEquipmentEntities.map((item) => [item.id.trim().toLowerCase(), item] as const)
   );
   const acTotal = Number(sheet.stats.ac ?? 0);
   const acBreakdown = inferAcBreakdown(
     provenance,
     selectedEquipmentIds,
+    selectedEquipmentById,
     finalAbilities.dex?.mod ?? 0,
     decisions.sizeModifiers.ac,
     acTotal
@@ -1088,9 +1104,6 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     misc: 0
   };
   sheet.stats.grapple = grapple.total;
-  const selectedEquipmentEntities = ((state.selections.equipment as string[] | undefined) ?? [])
-    .map((itemId) => entityBuckets.items?.[itemId])
-    .filter((entity): entity is ResolvedEntity => Boolean(entity));
   const attackItems = selectedEquipmentEntities.filter((entity) => !isArmorOrShieldItem(entity));
   const meleeAttacks: AttackLine[] = [];
   const rangedAttacks: AttackLine[] = [];
@@ -1111,7 +1124,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
       meleeAttacks.push({
         ...baseLine,
         attackBonus: bab + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack,
-        damage: getEntityDataString(item, "damage") || `1d8${(finalAbilities.str?.mod ?? 0) >= 0 ? "+" : ""}${finalAbilities.str?.mod ?? 0}`,
+        damage: getEntityDataString(item, "damage") || formatDamageWithModifier("1d8", finalAbilities.str?.mod ?? 0),
         crit: getEntityDataString(item, "crit") || "x2"
       });
     }
@@ -1121,7 +1134,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
       itemId: "unarmed-strike",
       name: "Unarmed Strike",
       attackBonus: bab + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack,
-      damage: `1d3${(finalAbilities.str?.mod ?? 0) >= 0 ? "+" : ""}${finalAbilities.str?.mod ?? 0}`,
+      damage: formatDamageWithModifier("1d3", finalAbilities.str?.mod ?? 0),
       crit: "x2"
     });
   }
