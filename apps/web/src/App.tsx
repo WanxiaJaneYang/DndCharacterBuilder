@@ -527,7 +527,12 @@ export function App() {
 
           <article className="sheet review-decisions">
             <h3>{t.reviewEquipmentLoad}</h3>
-            <p>{t.reviewSelectedItemsLabel}: {phase2.equipment.selectedItems.join(', ') || '-'}</p>
+            <p>
+              {t.reviewSelectedItemsLabel}:{' '}
+              {phase2.equipment.selectedItems
+                .map((itemId) => localizeEntityText('items', itemId, 'name', itemId))
+                .join(', ') || '-'}
+            </p>
             <p>{t.reviewTotalWeightLabel}: {phase2.equipment.totalWeight}</p>
             <p>{t.reviewLoadCategoryLabel}: {phase2.equipment.loadCategory}</p>
             <p>{t.reviewSpeedImpactLabel}: {phase2.equipment.speedImpact}</p>

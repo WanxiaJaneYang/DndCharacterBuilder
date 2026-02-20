@@ -869,7 +869,7 @@ function inferAcBreakdown(
   }
   const natural = 0;
   const deflection = 0;
-  const touch = base + dexModifier + sizeModifier + deflection + misc;
+  const touch = acTotal - armor - shield - natural;
   const flatFooted = acTotal - Math.max(dexModifier, 0);
   return {
     total: acTotal,
@@ -1009,7 +1009,12 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   const selectedClassHitDie = Number(selectedClass?.data?.hitDie ?? 0);
   const hpTotal = Number(sheet.stats.hp ?? 0);
   const hpCon = finalAbilities.con?.mod ?? 0;
-  const hpHitDie = Number.isFinite(selectedClassHitDie) && selectedClassHitDie > 0 ? Math.floor(selectedClassHitDie) : Math.max(hpTotal - hpCon, 0);
+  const effectiveLevel = Number.isFinite(selectedClassLevel) && selectedClassLevel > 0 ? selectedClassLevel : 1;
+  const inferredHitDieHp = Number.isFinite(selectedClassHitDie) && selectedClassHitDie > 0
+    ? Math.floor(selectedClassHitDie * effectiveLevel)
+    : 0;
+  const maxHitDieHp = Math.max(hpTotal - hpCon, 0);
+  const hpHitDie = inferredHitDieHp > 0 ? Math.min(inferredHitDieHp, maxHitDieHp) : maxHitDieHp;
   const hpMisc = hpTotal - hpHitDie - hpCon;
   const selectedEquipmentIds = new Set(
     (((state.selections.equipment as string[] | undefined) ?? []).map((itemId) => String(itemId).trim().toLowerCase()))
