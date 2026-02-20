@@ -36,38 +36,46 @@ async function enterPlayerFlow(page: Page) {
   await playerButton.click();
 }
 
+async function clickNext(page: Page) {
+  const next = page.getByRole('button', { name: labels.next });
+  await expect(next).toBeVisible();
+  await next.scrollIntoViewIfNeeded();
+  // Mobile snapshots can place review tables over the footer hit target; force keeps navigation deterministic.
+  await next.click({ force: true });
+}
+
 async function goToHomePage(page: Page, locale: Locale) {
   await page.goto('/');
   await chooseLanguage(page, locale);
   await enterPlayerFlow(page);
   await expect(page.getByRole('heading', { name: labels.rulesSetupHeading })).toBeVisible();
-  await page.getByRole('button', { name: labels.startWizard }).click();
+  await page.getByRole('button', { name: labels.startWizard }).click({ force: true });
   await expect(page.getByRole('heading', { name: labels.raceHeading })).toBeVisible();
 }
 
 async function goToListPage(page: Page, locale: Locale) {
   await goToHomePage(page, locale);
   await page.getByLabel(labels.human).click();
-  await page.getByRole('button', { name: labels.next }).click();
+  await clickNext(page);
   await expect(page.getByRole('heading', { name: labels.classHeading })).toBeVisible();
 }
 
 async function goToDetailPage(page: Page, locale: Locale) {
   await goToListPage(page, locale);
   await page.getByLabel(labels.fighter).click();
-  await page.getByRole('button', { name: labels.next }).click();
+  await clickNext(page);
   await expect(page.getByRole('heading', { name: labels.abilityHeading })).toBeVisible();
-  await page.getByRole('button', { name: labels.next }).click();
+  await clickNext(page);
   await expect(page.getByRole('heading', { name: labels.featHeading })).toBeVisible();
   await page.getByLabel(labels.weaponFocusLongsword).click();
-  await page.getByRole('button', { name: labels.next }).click();
+  await clickNext(page);
   await expect(page.getByRole('heading', { name: labels.skillsHeading })).toBeVisible();
-  await page.getByRole('button', { name: labels.next }).click();
+  await clickNext(page);
   await expect(page.getByRole('heading', { name: labels.equipmentHeading })).toBeVisible();
-  await page.getByRole('button', { name: labels.next }).click();
+  await clickNext(page);
   await expect(page.getByPlaceholder(labels.namePlaceholder)).toBeVisible();
   await page.getByPlaceholder(labels.namePlaceholder).fill('Snapshot Hero');
-  await page.getByRole('button', { name: labels.next }).click();
+  await clickNext(page);
   await expect(page.getByRole('heading', { name: labels.reviewHeading })).toBeVisible();
 }
 

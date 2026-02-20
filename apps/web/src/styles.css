@@ -38,6 +38,41 @@ h1, h2, h3 { font-family: inherit; color: #3a2717; }
 .subtitle { color: #5c4a36; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
 .grid.two { grid-template-columns: repeat(2, 1fr); }
+.ability-input-row { display: grid; gap: 0.35rem; }
+.ability-stepper {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  gap: 0.35rem;
+  align-items: center;
+}
+.ability-step-btn {
+  width: 42px;
+  height: 42px;
+  margin-right: 0;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.rollsets-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.rollset-option {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+.rollset-option code {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border: 1px solid #ddc69a;
+  background: #f2e4c6;
+  border-radius: 6px;
+}
 .actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
 label { display: block; margin-bottom: 0.5rem; }
 .sheet { border: 1px solid #cfb88f; padding: 0.75rem; background: #fff8e8; }
@@ -319,6 +354,15 @@ input { border: 1px solid #bca57d; border-radius: 6px; padding: 0.35rem 0.5rem; 
   z-index: 3;
   width: min(92vw, 760px);
   font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .ability-stepper {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+  }
 }
 
 @media (orientation: portrait) {

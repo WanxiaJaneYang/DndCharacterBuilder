@@ -55,6 +55,185 @@ describe("flow schema", () => {
     expect(parsed.steps[0]?.id).toBe("skills");
   });
 
+  it("accepts abilities step with data-driven generation config", () => {
+    const parsed = FlowSchema.parse({
+      steps: [
+        {
+          id: "abilities",
+          kind: "abilities",
+          label: "Ability Scores",
+          source: { type: "manual" },
+          abilitiesConfig: {
+            modes: ["pointBuy", "phb", "rollSets"],
+            defaultMode: "pointBuy",
+            pointBuy: {
+              costTable: {
+                "8": 0,
+                "9": 1,
+                "10": 2,
+                "11": 3,
+                "12": 4,
+                "13": 5,
+                "14": 6,
+                "15": 8,
+                "16": 10,
+                "17": 13,
+                "18": 16
+              },
+              defaultPointCap: 32,
+              minPointCap: 20,
+              maxPointCap: 40,
+              pointCapStep: 1,
+              minScore: 8,
+              maxScore: 18
+            },
+            phb: {
+              methodType: "standardArray",
+              standardArray: [15, 14, 13, 12, 10, 8]
+            },
+            rollSets: {
+              setsCount: 5,
+              rollFormula: "4d6_drop_lowest",
+              scoresPerSet: 6,
+              assignmentPolicy: "assign_after_pick"
+            }
+          },
+          abilityPresentation: {
+            showExistingModifiers: true,
+            groupBy: "sourceType",
+            hideZeroEffectGroups: true,
+            sourceTypeLabels: {
+              races: "Race",
+              classes: "Class",
+              origins: "Origin"
+            }
+          }
+        }
+      ]
+    });
+
+    expect(parsed.steps[0]?.id).toBe("abilities");
+  });
+
+  it("rejects abilities config where defaultMode is not in modes", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["pointBuy", "phb"],
+              defaultMode: "rollSets"
+            }
+          }
+        ]
+      })
+    ).toThrow(/defaultMode must be one of modes/i);
+  });
+
+  it("rejects point-buy config when cost table is missing a score in range", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["pointBuy"],
+              defaultMode: "pointBuy",
+              pointBuy: {
+                costTable: {
+                  "8": 0,
+                  "9": 1
+                },
+                defaultPointCap: 32,
+                minPointCap: 20,
+                maxPointCap: 40,
+                pointCapStep: 1,
+                minScore: 8,
+                maxScore: 10
+              }
+            }
+          }
+        ]
+      })
+    ).toThrow(/pointBuy.costTable must include all scores in configured range/i);
+  });
+
+  it("rejects rollSets config with setsCount lower than 1", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["rollSets"],
+              defaultMode: "rollSets",
+              rollSets: {
+                setsCount: 0,
+                rollFormula: "4d6_drop_lowest",
+                scoresPerSet: 6,
+                assignmentPolicy: "assign_after_pick"
+              }
+            }
+          }
+        ]
+      })
+    ).toThrow();
+  });
+
+  it("rejects legacy fixed modifierSources in abilityPresentation", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["pointBuy"],
+              defaultMode: "pointBuy",
+              pointBuy: {
+                costTable: {
+                  "8": 0,
+                  "9": 1,
+                  "10": 2,
+                  "11": 3,
+                  "12": 4,
+                  "13": 5,
+                  "14": 6,
+                  "15": 8,
+                  "16": 10,
+                  "17": 13,
+                  "18": 16
+                },
+                defaultPointCap: 32,
+                minPointCap: 20,
+                maxPointCap: 40,
+                pointCapStep: 1,
+                minScore: 8,
+                maxScore: 18
+              }
+            },
+            abilityPresentation: {
+              showExistingModifiers: true,
+              modifierSources: ["race"]
+            }
+          }
+        ]
+      })
+    ).toThrow();
+  });
+
 
 
   it("rejects manual source for entity-selection kinds", () => {

@@ -1,53 +1,86 @@
 # AbilityAllocator Component
 
-The `AbilityAllocator` component is responsible for collecting ability scores (Strength, Dexterity, Constitution, Intelligence, Wisdom, Charisma) from the user.  It should support different allocation methods depending on the flow configuration.
+The Ability step allocator collects ability scores for STR/DEX/CON/INT/WIS/CHA. Behavior is fully driven by flow and presentation data and must remain edition-agnostic.
 
 ## Purpose
 
-- Provide an intuitive interface for players to assign scores to abilities.
-- Enforce the chosen allocation rules (point buy, manual entry, or other methods in future editions).
-- Display derived ability modifiers immediately.
+- Provide a clear interface for assigning base scores via configured generation modes.
+- Enforce selected mode rules (point buy, PHB, roll sets) from pack config.
+- Show final outcomes clearly: base score, existing modifiers, final score, final modifier.
+- Show provenance of existing modifiers without hardcoding source categories.
 
-## Props
+## Inputs
 
-- `method: 'manual' | 'pointBuy' | string:` Determines the allocation method.  The string may include additional parameters (e.g. `pointBuy:32`).
-- `initialScores?: Record<string, number>:` Optional starting values for each ability.
-- `onChange: (scores: Record<string, number>) => void:` Callback triggered whenever the user updates an ability score.  The scores object maps ability names (e.g. `str`, `dex`) to numeric values.
-- `pointBudget?: number:` For point buy, the total points available.
+- `abilitiesConfig`: Pack-owned generation config (`modes`, `defaultMode`, mode-specific parameters).
+- `abilityPresentation`: Pack-owned presentation config for modifier visibility and grouping.
+- `initialScores?: Record<AbilityKey, number>`: Optional initial base scores.
+- `abilityEffects?: Record<AbilityKey, AbilityEffect[]>`: Active pre-ability effects resolved by engine.
+- `abilityMeta?`: Mode-specific state (for example point cap, PHB assignment state, roll-sets selection).
+- `onChange`: Callback for score/mode state updates.
 
-## Behaviour
+Suggested effect shape:
+- `AbilityEffect`:
+  - `ability: AbilityKey`
+  - `value: number`
+  - `sourceType: string`
+  - `sourceId: string`
+  - `sourceLabel: string`
 
-### Manual Method
+## Behavior
 
-For manual allocation (common in D&D 3.5), the component should:
+### Mode Workspace
 
-- Present six numeric inputs (one per ability) with min/max values (usually 3–18).
-- Validate that values are within the allowed range.
-- Display the ability modifier next to each input.
+- Render enabled modes from `abilitiesConfig.modes` only.
+- Use `abilitiesConfig.defaultMode` as initial mode.
+- Do not apply code-side fallback mode defaults when config is missing.
 
-### Point Buy Method
+### Ability Summary Rows
 
-For point buy (optional in 3.5 or other editions):
+- Render one row per ability in fixed ability order.
+- For each row show: Base, Existing, Final, Derived Modifier.
+- Existing is computed from active `abilityEffects` for that ability.
 
-- Start with all abilities at an initial value (commonly 8).
-- Provide controls (e.g. plus/minus buttons or sliders) to increase/decrease each ability.
-- Show the remaining point budget.  Each increment costs a number of points based on the current score (e.g. using D&D point buy tables).  See flow configuration for the budget and cost rules.
-- Disable controls when the budget is exhausted.
+### Score Controls (Usability Requirements)
 
-### Common Behaviour
+- For editable score fields, render adjacent `-` and `+` steppers with large hit areas (minimum 40x40).
+- Click/tap changes by one step; press-and-hold performs repeat stepping for quick adjustments.
+- Keyboard parity:
+  - `ArrowUp` / `ArrowDown` adjust by one step.
+  - Optional accelerated stepping (for example `Shift` + arrow) when consistent with active mode constraints.
+- Buttons must be disabled when constraints would be violated (min/max score, point cap, mode rules).
+- Expose immediate feedback for blocked increments/decrements (disabled affordance + short inline reason).
 
-- Each time a score changes, call `onChange` with the updated scores.
-- Calculate and display the ability modifier using the standard formula `(score - 10) // 2`.
+### Dynamic Source Groups
 
-## TODO
+- Group row details by `sourceType` (or configured grouping key).
+- Render only groups whose net value for that ability is non-zero.
+- Show each line item with source label and signed modifier.
+- Hide groups with no impact to reduce noise.
+- If no effects apply to an ability, show `No current modifiers` in collapsed detail state.
 
-- [ ] Implement point buy cost table for D&D 3.5 and configure via rule data.
-- [ ] Add tooltips explaining what each ability does for beginners.
-- [ ] Handle invalid states gracefully (e.g. negative budgets, missing config).
+### Ruleset and Extension Awareness
+
+- `abilityEffects` must already be filtered to the active ruleset and selected extensions.
+- UI does not assume which step/entity produced the effect.
+- UI remains generic across race/class/feat/template/module/custom sources.
+
+## Validation Boundaries
+
+- UI: immediate constraints, empty-state warnings, and mode-specific input guardrails.
+- Engine: authoritative mode validation and config integrity checks.
+- If required config is missing/invalid, surface explicit configuration errors and block progression.
+
+## Responsive Guidelines
+
+- Desktop/tablet: table-like rows with expandable detail sections.
+- Mobile: card rows with accordion detail panel per ability.
+- Keep headline numbers readable without requiring detail expansion.
+- Keep score steppers directly adjacent to the score value at every breakpoint.
 
 ## Checklist
 
-- [ ] Supports at least manual entry method for MVP.
-- [ ] Point buy method is implemented or stubbed with clear TODO.
-- [ ] Validation prevents illegal scores.
-- [ ] Ability modifiers are calculated and displayed.
+- [x] Supports point buy / PHB / roll-set modes from `abilitiesConfig`.
+- [x] No hardcoded source-type list in modifier rendering.
+- [x] Renders only non-zero impacting source groups.
+- [x] Keeps one-row-per-ability summary and expandable provenance details.
+- [x] Handles ruleset/extension-driven effect changes without UI code branching.
