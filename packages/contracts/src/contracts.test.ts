@@ -60,6 +60,7 @@ describe("pack contracts", () => {
 
     const dwarf = byId.get("dwarf");
     expect(dwarf?.data?.attackBonuses?.some((bonus) => bonus.target === "orcs-and-half-orcs" && bonus.bonus === 1)).toBe(true);
+    expect(dwarf?.data?.attackBonuses?.some((bonus) => bonus.target === "goblinoids" && bonus.bonus === 1)).toBe(true);
 
     const gnome = byId.get("gnome");
     expect(gnome?.data?.saveBonuses?.some((bonus) => bonus.target === "illusions" && bonus.bonus === 2)).toBe(true);

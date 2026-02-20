@@ -4,7 +4,7 @@
 Encode additional PHB race mechanics in `packs/srd-35e-minimal/entities/races.json` without waiting on schema-v2-only fields.
 
 ## Changes
-- Dwarf: added racial attack bonus vs orcs/half-orcs.
+- Dwarf: added racial attack bonus vs orcs/half-orcs and goblinoids.
 - Gnome: corrected illusion save bonus from `+1` to `+2`.
 - Halfling: added missing general `+1` save bonus (kept existing `+2 vs fear`).
 - Half-orc: added explicit minimum-Intelligence race trait marker.
@@ -16,4 +16,4 @@ Encode additional PHB race mechanics in `packs/srd-35e-minimal/entities/races.js
 - [x] Apply race data updates
 - [x] Add regression contract test coverage
 - [x] Validate contracts + typecheck
-- [ ] Open MR for step 3
+- [x] Open MR for step 3
