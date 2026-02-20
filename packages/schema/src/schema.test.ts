@@ -251,6 +251,71 @@ describe("race entity schema", () => {
       })
     ).toThrow(/invalid races\.data/i);
   });
+
+  it("accepts deferred mechanics metadata for not-yet-implemented race rules", () => {
+    const parsed = EntitySchema.parse({
+      id: "dwarf",
+      name: "Dwarf",
+      entityType: "races",
+      summary: "Dwarf summary",
+      description: "Dwarf detail",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        size: "medium",
+        baseSpeed: 20,
+        abilityModifiers: { con: 2, cha: -2 },
+        vision: { lowLight: false, darkvisionFeet: 60 },
+        automaticLanguages: ["Common", "Dwarven"],
+        bonusLanguages: ["Giant"],
+        favoredClass: "fighter",
+        racialTraits: [{ id: "stonecunning", name: "Stonecunning", description: "Stonework sense." }],
+        deferredMechanics: [
+          {
+            id: "dwarf-weapon-familiarity-proficiency",
+            category: "proficiency",
+            description: "Dwarven weapon familiarity requires equipment proficiency mechanics.",
+            dependsOn: ["equipment-proficiency-model", "equipment-validation-engine"],
+            impactPaths: ["selections.equipment", "validation.race.proficiency"]
+          }
+        ]
+      }
+    });
+
+    expect(parsed.id).toBe("dwarf");
+  });
+
+  it("rejects malformed race deferred mechanics metadata", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-race-deferred",
+        name: "Broken Race Deferred",
+        entityType: "races",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          size: "medium",
+          baseSpeed: 30,
+          abilityModifiers: {},
+          vision: { lowLight: false, darkvisionFeet: 0 },
+          automaticLanguages: ["Common"],
+          bonusLanguages: ["Any"],
+          favoredClass: "any",
+          racialTraits: [{ id: "bonus-feat", name: "Bonus Feat", description: "Extra feat." }],
+          deferredMechanics: [
+            {
+              id: "broken-deferred-mechanic",
+              category: "alignment",
+              description: "Broken deferred metadata.",
+              dependsOn: []
+            }
+          ]
+        }
+      })
+    ).toThrow(/invalid races\.data/i);
+  });
 });
 
 describe("class entity schema", () => {
