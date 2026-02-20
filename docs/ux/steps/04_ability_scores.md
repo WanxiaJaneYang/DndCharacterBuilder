@@ -1,98 +1,84 @@
 # UX Step 04 - Ability Scores
 
-This document defines the **Ability Scores** step.  Characters in D&D have six ability scores: Strength, Dexterity, Constitution, Intelligence, Wisdom and Charisma.  The value of each ability score determines a modifier that affects skills, attacks and saves.
+This document defines the Ability Scores step for a data-driven, edition-bound flow.
 
 ## Goal
 
-Provide a clear and beginner-friendly method for assigning ability scores.  Methods are data-driven from flow config and can vary by edition.
+Keep ability assignment clear for new players while preserving full ruleset flexibility.
 
-MVP supports:
+- Support exactly three generation modes from data config:
+  1. Point Buy
+  2. PHB Method
+  3. Roll Sets
+- Show existing ability modifiers without tying UI logic to fixed source types (not race/class-only).
+- Prevent confusion by showing concise totals first and detailed provenance on demand.
 
-1. **Point Buy** (edition-configured defaults, including cap and score-cost table).
-2. **PHB Method** (edition-configured; e.g. standard array/manual-range variants).
-3. **Roll Sets** (generate configured sets and pick one).
+## UX Model
 
-## User Intent
+### Structure
 
-- **New Player:** Needs a structured method that prevents illegal scores and explains the consequences of high or low values.
-- **Returning Player:** May prefer to assign numbers directly and follow house rules.
+- Top: mode selector, driven by `abilitiesConfig.modes`.
+- Main area: mode-specific controls (Point Buy, PHB, Roll Sets).
+- Summary area: six ability rows (STR/DEX/CON/INT/WIS/CHA), one row per ability.
 
-## Layout & Interaction
+### Ability Row (always visible)
 
-Depending on the selected method:
+Each ability row displays:
+- Ability label
+- Base score (from current generation mode)
+- Existing modifier total (sum of active prior effects for that ability)
+- Final score
+- Final derived modifier
+- Expand/collapse control for source breakdown
 
-### Point Buy (32)
+### Source Breakdown (expandable per ability)
 
-- Display six ability score fields with dropdowns or number inputs.
-- Show available points remaining as the user adjusts values.
-- Each score has a cost; higher values cost more.  For 3.5 SRD, the cost table is typically:
-  - 8 -> 0 points
-  - 9 -> 1 point
-  - 10 -> 2 points
-  - 11 -> 3 points
-  - 12 -> 4 points
-  - 13 -> 5 points
-  - 14 -> 6 points
-  - 15 -> 8 points
-  - 16 -> 10 points
-  - 17 -> 13 points
-  - 18 -> 16 points
-- Enforce the total point limit and the minimum/maximum per score (8-18 before racial adjustments for 3.5).
-- Display the resulting ability modifier next to each ability as the user updates values.
-- Provide a short explanation of what each ability represents (e.g. Strength affects melee attacks and damage).
+- Group by dynamic `sourceType` values from active effects (for example: race, class, feat, template, rules module, extension content).
+- Render only groups with non-zero net effect for that ability.
+- Within each rendered group, show line items with source label and signed value.
+- If no active effects impact the ability, show `No current modifiers` and no empty groups.
 
-### PHB and Roll Sets
+This keeps the default view simple while preserving explainability.
 
-- PHB mode behavior is read from flow config (e.g. standard array or manual range).
-- Roll Sets mode uses configured generation settings and requires selecting a generated set.
-- Both modes must produce final base scores for all six abilities before continuing.
+## Data Contract (UI Design Level)
 
-Regardless of method:
+Ability generation behavior is pack-owned:
+- `abilitiesConfig.modes`
+- `abilitiesConfig.defaultMode`
+- `abilitiesConfig.pointBuy`
+- `abilitiesConfig.phb`
+- `abilitiesConfig.rollSets`
 
-- A "Reset" option returns values to the default (e.g. all 8s for point buy).
-- Derived modifiers update in real time.
-- Existing race/class/rule modifiers are shown on the Ability step (base, adjustments, final, modifier) so players can see effective outcomes immediately.
-- Once complete, store the scores in engine state so racial bonuses and class effects can be applied.
+Modifier display behavior is also data-driven:
+- `abilityPresentation.showExistingModifiers`
+- `abilityPresentation.groupBy` (MVP: `sourceType`)
+- `abilityPresentation.hideZeroEffectGroups` (MVP: `true`)
+- `abilityPresentation.sourceTypeLabels` (optional localized label mapping)
 
-## Data Requirements
+No UI hardcoded defaults for mode rules or modifier source categories.
 
-The flow JSON must specify `abilitiesConfig`, including:
+## Ruleset/Extension Filtering
 
-- enabled `modes` and `defaultMode`
-- `pointBuy` config (cost table, cap defaults/range, score bounds)
-- `phb` config
-- `rollSets` config
+- Modifier rows must reflect only effects that are active in the current resolved ruleset plus selected content set.
+- If a user enables or disables extensions, the displayed source groups update accordingly.
+- Non-selected, disabled, or non-applicable sources are not rendered.
 
-The engine validates abilities against this config.  Racial ability adjustments apply after base scores are selected.
+## Validation and Gating
 
-## Validation & Gating
+- Next is enabled only when engine validation for the selected mode passes.
+- UI provides immediate guardrails and error messages, but engine remains source of truth.
+- Missing required mode config is surfaced as a configuration error (no silent fallback mode/values).
 
-- Ensure that all six abilities have values.
-- For point buy, total cost <= available points; if cost > points, block progression and show error.
-- For PHB mode, scores must satisfy configured PHB rules.
-- For roll sets, one generated set must be selected.
-- Show error messages near invalid fields and disable Next until resolved.
+## Responsive Behavior
+
+- Desktop/tablet: six-row table layout with expandable detail rows.
+- Mobile: stacked row cards (still one card per ability) with details in an accordion panel.
+- Keep key numbers (Base, Existing, Final, Modifier) visible without opening details.
 
 ## Acceptance Criteria
 
-- The ability assignment method is configured via flow JSON, not hardcoded.
-- Point buy enforces the correct cost table and point total.
-- PHB and roll-set validations are enforced from flow config.
-- Ability modifiers update live in the UI.
-- Racial adjustments apply after ability scores are stored (engine must handle this).
-
-## TODO
-
-- Implement point buy interface with live point tracking.
-- Define cost table in the engine or configuration.
-- Decide default method for 3.5 SRD (manual vs point buy) and document it in the flow.
-- Add tooltips explaining each ability's impact.
-- Write unit tests for validation logic.
-
-## Checklist
-
-- [x] Ability mode read from flow JSON.
-- [x] Point buy interface implemented with configured cost table and cap.
-- [x] Existing modifiers shown in Ability step summary.
-- [x] Engine validates point buy / PHB / roll-set requirements.
-- [x] Tests cover config parsing, engine validation, and web rendering.
+- Ability step renders 3 generation modes from config only.
+- Ability summary always shows one row per ability with Base/Existing/Final/Modifier.
+- Breakdown groups are dynamic by source type and render only non-zero impacting groups.
+- Modifier display updates when ruleset/extension selection changes.
+- No hardcoded source-type assumptions (for example, race/class-only logic) in UI behavior.
