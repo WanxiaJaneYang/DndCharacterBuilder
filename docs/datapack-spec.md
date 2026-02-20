@@ -29,7 +29,7 @@ packs/<pack-id>/
 - `compatibleEngineRange` (optional)
 
 ## Entity ID conventions
-- Use lowercase kebab-case IDs (`fighter-1`, `power-attack`).
+- Use lowercase kebab-case IDs (`fighter`, `power-attack`).
 - IDs must be stable across versions for reliable overrides.
 
 ## Merge/override rules

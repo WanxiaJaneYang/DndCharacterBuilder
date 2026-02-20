@@ -1,8 +1,8 @@
 {
   "packId": "srd-35e-minimal",
   "officialRuleset": true,
-  "generatedAt": "2026-02-19T10:16:00.000Z",
-  "generatedBy": "research/srd-authenticity-auto-validation baseline",
+  "generatedAt": "2026-02-20T02:25:00.000Z",
+  "generatedBy": "class-data-authenticity refresh (normalized JSON hashes)",
   "sourceAuthorities": [
     {
       "title": "D&D 3.5 System Reference Document",
@@ -24,7 +24,7 @@
     },
     {
       "path": "entities/classes.json",
-      "sha256": "60be8d861c50115b55edbe84d6f0f04e9e76bb12096d92160995d65a1aef072b"
+      "sha256": "69594f9b345b2f067e670acec19dcc68d89d323809afeee0093cbd093648bd78"
     },
     {
       "path": "entities/feats.json",

@@ -55,6 +55,20 @@ For `entityType = "classes"`, `data` is validated with a strict class schema:
   - `fort`: `good | poor`
   - `ref`: `good | poor`
   - `will`: `good | poor`
+- `sourceRefs` (optional): class source anchors used for authenticity traceability
+- `alignmentConstraint` (optional):
+  - `text`: source-aligned alignment requirement text
+  - `allowedAlignments` (optional): explicit normalized alignment list
+- `proficiencies` (optional):
+  - `text`: source-aligned weapon/armor proficiency text
+- `exClassRules` (optional): string[] of source-aligned ex-class consequences/restrictions
+- `spellcasting` (optional):
+  - `tradition`: `arcane | divine`
+  - `castingModel`: `prepared | spontaneous`
+  - `ability`: `str | dex | con | int | wis | cha`
+  - `startsAtLevel`: integer >= 1
+  - `notes` (optional): string[]
+  - `spellsPerDayByLevel` (optional): list of `{ level, slots }`
 - `deferredMechanics` (optional): list of not-yet-implemented class-linked rules that should be revisited when dependencies land:
   - `id`: stable identifier for the deferred rule/mechanic
   - `category`: grouping tag (e.g. `alignment`, `proficiency`, `starter-pack`, `spellcasting`)
@@ -63,7 +77,7 @@ For `entityType = "classes"`, `data` is validated with a strict class schema:
   - `sourceRefs` (optional): source links/ids for authenticity traceability
   - `impactPaths` (optional): expected model/engine areas impacted when implemented
 - `levelTable` (optional, descriptive metadata): list of
-  - `{ level, bab, fort, ref, will, features?, specialLabel? }`
+  - `{ level, bab, fort, ref, will, features?, specialLabel?, babDisplay?, spellSlots? }`
 - `progression` (optional, engine-facing dynamic model):
   - `levelGains`: ordered list of level entries (`level` unique/ascending, must include level 1)
   - each level gain must include at least one of:

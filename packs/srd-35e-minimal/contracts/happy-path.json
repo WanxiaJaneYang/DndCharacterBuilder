@@ -1,20 +1,63 @@
 {
-  "enabledPacks": ["srd-35e-minimal"],
+  "enabledPacks": [
+    "srd-35e-minimal"
+  ],
   "initialState": {},
   "actions": [
-    { "choiceId": "race", "selection": "human" },
-    { "choiceId": "class", "selection": "fighter-1" },
-    { "choiceId": "abilities", "selection": { "str": 16, "dex": 12, "con": 14, "int": 10, "wis": 10, "cha": 8 } },
-    { "choiceId": "feat", "selection": ["power-attack"] },
-    { "choiceId": "equipment", "selection": ["longsword", "chainmail", "heavy-wooden-shield"] },
-    { "choiceId": "name", "selection": "Aric" }
+    {
+      "choiceId": "race",
+      "selection": "human"
+    },
+    {
+      "choiceId": "class",
+      "selection": "fighter"
+    },
+    {
+      "choiceId": "abilities",
+      "selection": {
+        "str": 16,
+        "dex": 12,
+        "con": 14,
+        "int": 10,
+        "wis": 10,
+        "cha": 8
+      }
+    },
+    {
+      "choiceId": "feat",
+      "selection": [
+        "power-attack"
+      ]
+    },
+    {
+      "choiceId": "equipment",
+      "selection": [
+        "longsword",
+        "chainmail",
+        "heavy-wooden-shield"
+      ]
+    },
+    {
+      "choiceId": "name",
+      "selection": "Aric"
+    }
   ],
   "expected": {
-    "availableChoicesContains": ["human", "fighter-1", "power-attack", "chainmail"],
+    "availableChoicesContains": [
+      "human",
+      "fighter",
+      "power-attack",
+      "chainmail"
+    ],
     "validationErrorCodes": [],
     "finalSheetSubset": {
-      "metadata": { "name": "Aric" },
-      "stats": { "ac": 18, "bab": 1 }
+      "metadata": {
+        "name": "Aric"
+      },
+      "stats": {
+        "ac": 18,
+        "bab": 1
+      }
     }
   }
 }

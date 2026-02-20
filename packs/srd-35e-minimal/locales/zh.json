@@ -20,7 +20,17 @@
       "halfling": "半身人"
     },
     "classes": {
-      "fighter-1": "战士（1级）"
+      "barbarian": "Barbarian",
+      "bard": "Bard",
+      "cleric": "Cleric",
+      "druid": "Druid",
+      "fighter": "Fighter",
+      "monk": "Monk",
+      "paladin": "Paladin",
+      "ranger": "Ranger",
+      "rogue": "Rogue",
+      "sorcerer": "Sorcerer",
+      "wizard": "Wizard"
     },
     "feats": {
       "power-attack": "强力攻击",
@@ -46,37 +56,109 @@
   },
   "entityText": {
     "races": {
-      "human": { "name": "人类" },
-      "dwarf": { "name": "矮人" },
-      "elf": { "name": "精灵" },
-      "gnome": { "name": "侏儒" },
-      "half-elf": { "name": "半精灵" },
-      "half-orc": { "name": "半兽人" },
-      "halfling": { "name": "半身人" }
+      "human": {
+        "name": "人类"
+      },
+      "dwarf": {
+        "name": "矮人"
+      },
+      "elf": {
+        "name": "精灵"
+      },
+      "gnome": {
+        "name": "侏儒"
+      },
+      "half-elf": {
+        "name": "半精灵"
+      },
+      "half-orc": {
+        "name": "半兽人"
+      },
+      "halfling": {
+        "name": "半身人"
+      }
     },
     "classes": {
-      "fighter-1": { "name": "战士（1级）" }
+      "barbarian": {
+        "name": "Barbarian"
+      },
+      "bard": {
+        "name": "Bard"
+      },
+      "cleric": {
+        "name": "Cleric"
+      },
+      "druid": {
+        "name": "Druid"
+      },
+      "fighter": {
+        "name": "Fighter"
+      },
+      "monk": {
+        "name": "Monk"
+      },
+      "paladin": {
+        "name": "Paladin"
+      },
+      "ranger": {
+        "name": "Ranger"
+      },
+      "rogue": {
+        "name": "Rogue"
+      },
+      "sorcerer": {
+        "name": "Sorcerer"
+      },
+      "wizard": {
+        "name": "Wizard"
+      }
     },
     "feats": {
-      "power-attack": { "name": "强力攻击" },
-      "weapon-focus-longsword": { "name": "武器专攻（长剑）" }
+      "power-attack": {
+        "name": "强力攻击"
+      },
+      "weapon-focus-longsword": {
+        "name": "武器专攻（长剑）"
+      }
     },
     "items": {
-      "longsword": { "name": "长剑" },
-      "chainmail": { "name": "链甲" },
-      "heavy-wooden-shield": { "name": "重木盾" }
+      "longsword": {
+        "name": "长剑"
+      },
+      "chainmail": {
+        "name": "链甲"
+      },
+      "heavy-wooden-shield": {
+        "name": "重木盾"
+      }
     },
     "skills": {
-      "spot": { "name": "侦察" },
-      "listen": { "name": "聆听" },
-      "climb": { "name": "攀爬" },
-      "jump": { "name": "跳跃" },
-      "diplomacy": { "name": "交涉" },
-      "ride": { "name": "骑术" }
+      "spot": {
+        "name": "侦察"
+      },
+      "listen": {
+        "name": "聆听"
+      },
+      "climb": {
+        "name": "攀爬"
+      },
+      "jump": {
+        "name": "跳跃"
+      },
+      "diplomacy": {
+        "name": "交涉"
+      },
+      "ride": {
+        "name": "骑术"
+      }
     },
     "rules": {
-      "base-ac": { "name": "基础AC" },
-      "initiative": { "name": "先攻" }
+      "base-ac": {
+        "name": "基础AC"
+      },
+      "initiative": {
+        "name": "先攻"
+      }
     }
   }
 }

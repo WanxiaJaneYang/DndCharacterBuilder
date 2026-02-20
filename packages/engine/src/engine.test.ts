@@ -13,7 +13,7 @@ function makePack(id: string, priority: number, dependencies: string[] = []): Lo
     manifest: { id, name: id, version: "1.0.0", priority, dependencies },
     entities: {
       races: [{ id: "human", name: "Human", entityType: "races", summary: "Human", description: "Human race", portraitUrl: "assets/races/human-portrait.png", iconUrl: "assets/icons/races/human.png", effects: [], data: { size: "medium", baseSpeed: 30, abilityModifiers: {}, vision: { lowLight: false, darkvisionFeet: 0 }, automaticLanguages: ["Common"], bonusLanguages: ["Any"], favoredClass: "any", racialTraits: [] } }],
-      classes: [{ id: "fighter-1", name: "Fighter", entityType: "classes", summary: "Fighter", description: "Fighter class", portraitUrl: "assets/classes/fighter-portrait.png", iconUrl: "assets/icons/classes/fighter.png", effects: [] }],
+      classes: [{ id: "fighter", name: "Fighter", entityType: "classes", summary: "Fighter", description: "Fighter class", portraitUrl: "assets/classes/fighter-portrait.png", iconUrl: "assets/icons/classes/fighter.png", effects: [] }],
       feats: [],
       items: [],
       skills: [],
@@ -37,7 +37,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "Aric");
     state = applyChoice(state, "abilities", { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 });
     state = applyChoice(state, "race", "human");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = applyChoice(state, "feat", ["power-attack"]);
     state = applyChoice(state, "equipment", ["longsword", "chainmail", "heavy-wooden-shield"]);
 
@@ -61,19 +61,19 @@ describe("engine determinism", () => {
     const dwarfState = applyChoice(initialState, "race", "dwarf");
     const dwarfFeatLimit = listChoices(dwarfState, context).find((c) => c.stepId === "feat")?.limit;
 
-    const dwarfFighterState = applyChoice(dwarfState, "class", "fighter-1");
+    const dwarfFighterState = applyChoice(dwarfState, "class", "fighter");
     const dwarfFighterFeatLimit = listChoices(dwarfFighterState, context).find((c) => c.stepId === "feat")?.limit;
 
     expect(humanFeatLimit).toBe(2);
     expect(dwarfFeatLimit).toBe(1);
-    expect(dwarfFighterFeatLimit).toBe(2);
+    expect(dwarfFighterFeatLimit).toBe(1);
   });
 
   it("computes skill budget and racial skill bonuses from race/class data", () => {
     let state = applyChoice(initialState, "name", "Lia");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "half-elf");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = applyChoice(state, "skills", { climb: 4, diplomacy: 2 });
 
     const sheet = finalizeCharacter(state, context);
@@ -91,7 +91,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "LowInt");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 3, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "dwarf");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
 
     const sheet = finalizeCharacter(state, context);
     expect(sheet.decisions.skillPoints.total).toBe(4);
@@ -101,7 +101,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "Ranks");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "human");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = { ...state, selections: { ...state.selections, skills: { climb: 0.5 } } };
 
     const errors = validateState(state, context);
@@ -112,7 +112,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "Orc");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "half-orc");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
 
     const sheet = finalizeCharacter(state, context);
     expect(sheet.abilities.str!.score).toBe(12);
@@ -123,7 +123,7 @@ describe("engine determinism", () => {
   it("normalizes class-skill ranks as integers when context is provided", () => {
     let state = applyChoice(initialState, "name", "Norm");
     state = applyChoice(state, "race", "human");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = applyChoice(state, "skills", { climb: 1.5, listen: 1.5 }, context);
 
     const ranks = state.selections.skills as Record<string, number>;
@@ -134,7 +134,7 @@ describe("engine determinism", () => {
   it("returns UNKNOWN_SKILL when selected skill does not exist", () => {
     let state = applyChoice(initialState, "name", "UnknownSkill");
     state = applyChoice(state, "race", "human");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = { ...state, selections: { ...state.selections, skills: { "not-a-real-skill": 1 } } };
 
     const errors = validateState(state, context);
@@ -144,7 +144,7 @@ describe("engine determinism", () => {
   it("returns SKILL_RANK_INVALID for negative and non-finite skill ranks", () => {
     let state = applyChoice(initialState, "name", "InvalidSkillRanks");
     state = applyChoice(state, "race", "human");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = { ...state, selections: { ...state.selections, skills: { climb: -1, jump: Number.POSITIVE_INFINITY } } };
 
     const errors = validateState(state, context);
@@ -154,7 +154,7 @@ describe("engine determinism", () => {
   it("returns SKILL_RANK_MAX when ranks exceed class/cross-class limits", () => {
     let state = applyChoice(initialState, "name", "RankMax");
     state = applyChoice(state, "race", "human");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = { ...state, selections: { ...state.selections, skills: { climb: 5, listen: 2.5 } } };
 
     const errors = validateState(state, context);
@@ -165,7 +165,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "SkillBudget");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "dwarf");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = applyChoice(state, "skills", { climb: 4, diplomacy: 4 }, context);
 
     const errors = validateState(state, context);
@@ -176,7 +176,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "FeatLimit");
     state = applyChoice(state, "abilities", { str: 16, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "dwarf");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
     state = applyChoice(state, "feat", ["power-attack", "weapon-focus-longsword", "unknown-feat"]);
 
     const errors = validateState(state, context);
@@ -192,7 +192,7 @@ describe("engine determinism", () => {
     let state = applyChoice(initialState, "name", "Ref");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "human");
-    state = applyChoice(state, "class", "fighter-1");
+    state = applyChoice(state, "class", "fighter");
 
     const sheet = finalizeCharacter(state, { enabledPackIds: ["override"], resolvedData: resolvedOverride });
     const acSource = sheet.provenance.find((entry) => entry.targetPath === "stats.ac");
