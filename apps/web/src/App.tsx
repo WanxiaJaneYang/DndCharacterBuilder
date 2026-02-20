@@ -329,6 +329,8 @@ export function App() {
     if (!currentStep) return null;
 
     if (currentStep.kind === 'review') {
+      const phase1 = sheet.phase1;
+      const phase2 = sheet.phase2;
       const abilityOrder = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
       const statOrder = ['hp', 'ac', 'initiative', 'speed', 'bab', 'fort', 'ref', 'will'] as const;
       const statLabels: Record<(typeof statOrder)[number], string> = {
@@ -369,6 +371,7 @@ export function App() {
           const right = localizeEntityText('skills', b[0], 'name', b[1].name);
           return b[1].total - a[1].total || left.localeCompare(right);
         });
+      const phase2SkillMap = new Map(phase2.skills.map((skill) => [skill.id, skill]));
       const enabledPackDetails = enabledPackIds.map((packId) => ({
         packId,
         version: packVersionById.get(packId) ?? t.reviewUnknownVersion,
@@ -389,24 +392,154 @@ export function App() {
             </div>
           </header>
 
+          <article className="sheet review-decisions">
+            <h3>{t.reviewIdentityProgression}</h3>
+            <p>{t.reviewLevelLabel}: {phase1.identity.level}</p>
+            <p>{t.reviewXpLabel}: {phase1.identity.xp}</p>
+            <p>{t.reviewSizeLabel}: {phase1.identity.size}</p>
+            <p>{t.reviewSpeedBaseLabel}: {phase1.identity.speed.base}</p>
+            <p>{t.reviewSpeedAdjustedLabel}: {phase1.identity.speed.adjusted}</p>
+          </article>
+
           <div className="review-stat-cards">
             <article className="review-card">
               <h3>{t.reviewAcLabel}</h3>
-              <p>{String(sheet.stats.ac)}</p>
+              <p>{String(phase1.combat.ac.total)}</p>
+            </article>
+            <article className="review-card">
+              <h3>{t.reviewAcTouchLabel}</h3>
+              <p>{String(phase1.combat.ac.touch)}</p>
+            </article>
+            <article className="review-card">
+              <h3>{t.reviewAcFlatFootedLabel}</h3>
+              <p>{String(phase1.combat.ac.flatFooted)}</p>
             </article>
             <article className="review-card">
               <h3>{t.reviewHpLabel}</h3>
-              <p>{String(sheet.stats.hp)}</p>
-            </article>
-            <article className="review-card">
-              <h3>{t.reviewBabLabel}</h3>
-              <p>{String(sheet.stats.bab)}</p>
+              <p>{String(phase1.combat.hp.total)}</p>
             </article>
             <article className="review-card">
               <h3>{t.reviewInitiativeLabel}</h3>
-              <p>{String(sheet.stats.initiative)}</p>
+              <p>{String(phase1.combat.initiative.total)}</p>
+            </article>
+            <article className="review-card">
+              <h3>{t.reviewGrappleLabel}</h3>
+              <p>{String(phase1.combat.grapple.total)}</p>
             </article>
           </div>
+
+          <article className="sheet">
+            <h3>{t.reviewSaveHpBreakdown}</h3>
+            <table className="review-table">
+              <thead>
+                <tr>
+                  <th>{t.reviewStatColumn}</th>
+                  <th>{t.reviewBaseColumn}</th>
+                  <th>{t.reviewAbilityColumn}</th>
+                  <th>{t.reviewAdjustmentsColumn}</th>
+                  <th>{t.reviewFinalColumn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="review-cell-key">{t.reviewFortLabel}</td>
+                  <td>{phase1.combat.saves.fort.base}</td>
+                  <td>{phase1.combat.saves.fort.ability}</td>
+                  <td>{phase1.combat.saves.fort.misc}</td>
+                  <td>{phase1.combat.saves.fort.total}</td>
+                </tr>
+                <tr>
+                  <td className="review-cell-key">{t.reviewRefLabel}</td>
+                  <td>{phase1.combat.saves.ref.base}</td>
+                  <td>{phase1.combat.saves.ref.ability}</td>
+                  <td>{phase1.combat.saves.ref.misc}</td>
+                  <td>{phase1.combat.saves.ref.total}</td>
+                </tr>
+                <tr>
+                  <td className="review-cell-key">{t.reviewWillLabel}</td>
+                  <td>{phase1.combat.saves.will.base}</td>
+                  <td>{phase1.combat.saves.will.ability}</td>
+                  <td>{phase1.combat.saves.will.misc}</td>
+                  <td>{phase1.combat.saves.will.total}</td>
+                </tr>
+                <tr>
+                  <td className="review-cell-key">{t.reviewHpLabel}</td>
+                  <td>{phase1.combat.hp.breakdown.hitDie}</td>
+                  <td>{phase1.combat.hp.breakdown.con}</td>
+                  <td>{phase1.combat.hp.breakdown.misc}</td>
+                  <td>{phase1.combat.hp.total}</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+
+          <article className="sheet">
+            <h3>{t.reviewAttackLines}</h3>
+            <table className="review-table">
+              <thead>
+                <tr>
+                  <th>{t.reviewAttackTypeColumn}</th>
+                  <th>{t.reviewAttackItemColumn}</th>
+                  <th>{t.reviewAttackBonusColumn}</th>
+                  <th>{t.reviewDamageColumn}</th>
+                  <th>{t.reviewCritColumn}</th>
+                  <th>{t.reviewRangeColumn}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {phase1.combat.attacks.melee.map((attack) => (
+                  <tr key={`melee-${attack.itemId}`}>
+                    <td className="review-cell-key">{t.reviewAttackMeleeLabel}</td>
+                    <td>{attack.name}</td>
+                    <td>{formatSigned(attack.attackBonus)}</td>
+                    <td>{attack.damage}</td>
+                    <td>{attack.crit}</td>
+                    <td>-</td>
+                  </tr>
+                ))}
+                {phase1.combat.attacks.ranged.map((attack) => (
+                  <tr key={`ranged-${attack.itemId}`}>
+                    <td className="review-cell-key">{t.reviewAttackRangedLabel}</td>
+                    <td>{attack.name}</td>
+                    <td>{formatSigned(attack.attackBonus)}</td>
+                    <td>{attack.damage}</td>
+                    <td>{attack.crit}</td>
+                    <td>{attack.range ?? '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </article>
+
+          <article className="sheet">
+            <h3>{t.reviewFeatSummary}</h3>
+            {phase2.feats.length === 0 ? (
+              <p className="review-muted">-</p>
+            ) : (
+              <ul className="calc-list">
+                {phase2.feats.map((feat) => (
+                  <li key={feat.id}>
+                    <strong>{feat.name}</strong>: {feat.summary}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className="sheet">
+            <h3>{t.reviewTraitSummary}</h3>
+            {phase2.traits.length === 0 ? (
+              <p className="review-muted">-</p>
+            ) : (
+              <ul className="calc-list">
+                {phase2.traits.map((trait, index) => (
+                  <li key={`${trait.name}-${index}`}>
+                    <strong>{trait.name}</strong>: {trait.summary}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
 
           <article className="sheet">
             <h3>{t.reviewAbilityBreakdown}</h3>
@@ -521,23 +654,50 @@ export function App() {
                   <th>{t.reviewRanksColumn}</th>
                   <th>{t.reviewAbilityColumn}</th>
                   <th>{t.reviewRacialColumn}</th>
+                  <th>{t.reviewMiscColumn}</th>
+                  <th>{t.reviewAcpColumn}</th>
                   <th>{t.reviewTotalColumn}</th>
                   <th>{t.reviewPointCostColumn}</th>
                 </tr>
               </thead>
               <tbody>
-                {reviewSkills.map(([skillId, skill]) => (
-                  <tr key={skillId}>
-                    <td className="review-cell-key">{localizeEntityText('skills', skillId, 'name', skill.name)}</td>
-                    <td>{skill.ranks}</td>
-                    <td>{formatSigned(skill.abilityMod)} ({localizeAbilityLabel(skill.ability)})</td>
-                    <td>{formatSigned(skill.racialBonus)}</td>
-                    <td>{skill.total}</td>
-                    <td>{skill.costSpent} ({skill.costPerRank}{t.reviewPerRankUnit})</td>
-                  </tr>
-                ))}
+                {reviewSkills.map(([skillId, skill]) => {
+                  const phase2Skill = phase2SkillMap.get(skillId);
+                  return (
+                    <tr key={skillId}>
+                      <td className="review-cell-key">{localizeEntityText('skills', skillId, 'name', skill.name)}</td>
+                      <td>{skill.ranks}</td>
+                      <td>{formatSigned(skill.abilityMod)} ({localizeAbilityLabel(skill.ability)})</td>
+                      <td>{formatSigned(skill.racialBonus)}</td>
+                      <td>{formatSigned(phase2Skill?.misc ?? 0)}</td>
+                      <td>{formatSigned(phase2Skill?.acp ?? 0)}</td>
+                      <td>{phase2Skill?.total ?? skill.total}</td>
+                      <td>{skill.costSpent} ({skill.costPerRank}{t.reviewPerRankUnit})</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+          </article>
+
+          <article className="sheet review-decisions">
+            <h3>{t.reviewEquipmentLoad}</h3>
+            <p>
+              {t.reviewSelectedItemsLabel}:{' '}
+              {phase2.equipment.selectedItems
+                .map((itemId) => localizeEntityText('items', itemId, 'name', itemId))
+                .join(', ') || '-'}
+            </p>
+            <p>{t.reviewTotalWeightLabel}: {phase2.equipment.totalWeight}</p>
+            <p>{t.reviewLoadCategoryLabel}: {phase2.equipment.loadCategory}</p>
+            <p>{t.reviewSpeedImpactLabel}: {phase2.equipment.speedImpact}</p>
+          </article>
+
+          <article className="sheet review-decisions">
+            <h3>{t.reviewMovementDetail}</h3>
+            <p>{t.reviewSpeedBaseLabel}: {phase2.movement.base}</p>
+            <p>{t.reviewSpeedAdjustedLabel}: {phase2.movement.adjusted}</p>
+            <p>{t.reviewMovementNotesLabel}: {phase2.movement.notes.join(' | ')}</p>
           </article>
 
           <article className="sheet review-decisions">

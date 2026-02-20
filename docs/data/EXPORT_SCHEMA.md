@@ -93,6 +93,52 @@ Add:
 - `equipment`: equipped slots, carry weight, load category, speed impact.
 - `movement`: detailed movement modes when present.
 
+Example structural target:
+
+```json
+{
+  "phase2": {
+    "traits": [
+      {
+        "source": "race",
+        "name": "Darkvision",
+        "summary": "Can see in darkness up to 60 ft."
+      }
+    ],
+    "feats": [
+      {
+        "id": "power-attack",
+        "name": "Power Attack",
+        "summary": "Trade attack bonus for extra melee damage."
+      }
+    ],
+    "skills": [
+      {
+        "id": "climb",
+        "name": "Climb",
+        "ranks": 2,
+        "ability": 3,
+        "racial": 0,
+        "misc": 0,
+        "acp": -5,
+        "total": 0
+      }
+    ],
+    "equipment": {
+      "selectedItems": ["longsword", "chainmail", "heavy-wooden-shield"],
+      "totalWeight": 48,
+      "loadCategory": "medium",
+      "speedImpact": "Reduced to 20 ft."
+    },
+    "movement": {
+      "base": 30,
+      "adjusted": 20,
+      "notes": ["Armor or load reduces movement speed."]
+    }
+  }
+}
+```
+
 ## Phase 3 Target (Caster + progression)
 
 Add:
