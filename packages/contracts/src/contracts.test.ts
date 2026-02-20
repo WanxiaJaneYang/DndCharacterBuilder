@@ -44,4 +44,32 @@ describe("pack contracts", () => {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it("keeps key PHB race mechanics encoded in races data", () => {
+    const racesPath = path.resolve(process.cwd(), "../../packs/srd-35e-minimal/entities/races.json");
+    const races = JSON.parse(fs.readFileSync(racesPath, "utf8")) as Array<{
+      id: string;
+      data?: {
+        saveBonuses?: Array<{ target?: string; bonus?: number }>;
+        attackBonuses?: Array<{ target?: string; bonus?: number }>;
+        racialTraits?: Array<{ id?: string }>;
+      };
+    }>;
+
+    const byId = new Map(races.map((race) => [race.id, race]));
+
+    const dwarf = byId.get("dwarf");
+    expect(dwarf?.data?.attackBonuses?.some((bonus) => bonus.target === "orcs-and-half-orcs" && bonus.bonus === 1)).toBe(true);
+    expect(dwarf?.data?.attackBonuses?.some((bonus) => bonus.target === "goblinoids" && bonus.bonus === 1)).toBe(true);
+
+    const gnome = byId.get("gnome");
+    expect(gnome?.data?.saveBonuses?.some((bonus) => bonus.target === "illusions" && bonus.bonus === 2)).toBe(true);
+
+    const halfling = byId.get("halfling");
+    expect(halfling?.data?.saveBonuses?.some((bonus) => bonus.target === "all" && bonus.bonus === 1)).toBe(true);
+    expect(halfling?.data?.saveBonuses?.some((bonus) => bonus.target === "fear" && bonus.bonus === 2)).toBe(true);
+
+    const halfOrc = byId.get("half-orc");
+    expect(halfOrc?.data?.racialTraits?.some((trait) => trait.id === "minimum-intelligence")).toBe(true);
+  });
 });

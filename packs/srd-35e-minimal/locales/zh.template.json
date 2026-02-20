@@ -297,7 +297,7 @@
         "data.skillBonuses.2.type": "racial",
         "data.skillBonuses.3.skill": "move-silently",
         "data.skillBonuses.3.type": "racial",
-        "data.saveBonuses.0.target": "fear",
+        "data.saveBonuses.0.target": "all",
         "data.saveBonuses.0.type": "racial",
         "data.attackBonuses.0.target": "thrown-weapons-and-slings",
         "data.attackBonuses.0.type": "racial"
