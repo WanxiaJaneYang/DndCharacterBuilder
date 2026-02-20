@@ -15,7 +15,7 @@ Status legend:
 ## Dwarf
 - [x] Ability modifiers / speed / darkvision / languages / favored class (`encoded`, `structured`)
 - [x] Save bonuses vs poison and spells (`encoded`, `structured`)
-- [ ] Movement exception (no speed reduction in medium/heavy armor) (`pending`)
+- [x] Movement exception (no speed reduction in medium/heavy armor) (`structured`)
 - [ ] Stonecunning mechanics beyond text (`pending`)
 - [ ] Stability mechanics beyond text (`pending`)
 - [ ] Weapon familiarity mechanics beyond text (`pending`)
@@ -31,22 +31,22 @@ Status legend:
 ## Gnome
 - [x] Ability modifiers / speed / darkvision / languages / favored class (`encoded`, `structured`)
 - [x] Attack/save/skill bonuses + SLA list (`encoded`, `structured`)
-- [ ] Small-size derived modifiers represented structurally (`pending`)
-- [ ] Spell DC bonuses for illusion school (`pending`)
+- [x] Small-size derived modifiers represented structurally (`structured`)
+- [x] Spell DC bonuses for illusion school (`structured`)
 - [ ] Creature-type conditional bonuses fully runtime-applied (`pending`)
 
 ## Half-Elf
 - [x] Core fields + diplomacy/gather-info/listen/search/spot bonuses (`encoded`, `structured`)
-- [ ] Elven-blood race tag semantics as first-class data (`pending`)
+- [x] Elven-blood race tag semantics as first-class data (`structured`)
 - [ ] Sleep immunity as machine rule (`pending`)
 
 ## Half-Orc
 - [x] Core fields (`encoded`, `structured`)
-- [ ] Orc-blood race tag semantics as first-class data (`pending`)
+- [x] Orc-blood race tag semantics as first-class data (`encoded`, `structured`)
 - [ ] Intelligence floor edge rule (`pending`)
 
 ## Halfling
 - [x] Core fields + bonuses (`encoded`, `structured`)
-- [ ] Small-size derived modifiers represented structurally (`pending`)
+- [x] Small-size derived modifiers represented structurally (`structured`)
 - [ ] Thrown/sling and fear bonuses runtime-applied (`pending`)
 

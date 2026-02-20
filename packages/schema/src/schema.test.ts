@@ -141,7 +141,7 @@ describe("race entity schema", () => {
     ).toThrow(/invalid races\.data/i);
   });
 
-  it("accepts race v2 structured fields for ancestry, size modifiers, and movement overrides", () => {
+  it("accepts race v2 structured fields for ancestry, size modifiers, movement overrides, AC bonuses, and spell DC bonuses", () => {
     const parsed = EntitySchema.parse({
       id: "half-elf",
       name: "Half-Elf",
