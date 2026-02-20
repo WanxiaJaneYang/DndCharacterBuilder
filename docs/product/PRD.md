@@ -83,6 +83,24 @@ Phase 1 acceptance:
 - Export JSON includes the same fields.
 - Engine tests validate deterministic totals and component breakdown math.
 
+### Phase 1 execution order (2026-02-20)
+
+For this delivery, implementation proceeds in strict order:
+
+1. Product requirements update (this document) to lock scope and acceptance.
+2. UX/UI review-step redesign docs update (`docs/ux/steps/08_review_export.md` and `docs/ui/UI_SPEC.md`).
+3. Engine + web implementation for Phase 1 fields and review surfaces.
+
+Phase 1 in-scope for this pass:
+- identity/progression basics in final sheet surfaces (`level`, `xp`, race/class/size context).
+- combat headline parity in review/export (`ac.total`, `ac.touch`, `ac.flatFooted`, `initiative.total`, `grapple.total`).
+- attack-line visibility for selected equipment with deterministic placeholders when full weapon-profile data is unavailable.
+- explicit save/HP component breakdowns (`base`, `ability`, `misc`, `total`) backed by deterministic calculation rules.
+
+Out of scope for this pass:
+- Phase 2 non-caster completeness (`traits`, rich equipment/load movement penalties, full skill misc/ACP parity).
+- Phase 3 caster/progression expansion surfaces.
+
 ### Phase 2: Sheet Completeness for Non-casters
 
 Goal: close major remaining gaps for common SRD 3.5 non-caster builds.
@@ -101,6 +119,24 @@ Goal: close major remaining gaps for common SRD 3.5 non-caster builds.
 Phase 2 acceptance:
 - Final sheet explains where each non-caster number comes from without external lookup.
 - Data pack can encode required modifiers without UI hardcoding.
+
+### Phase 2 execution order (2026-02-20)
+
+For this delivery, implementation proceeds in strict order:
+
+1. Product requirements update (this document) to lock scope and acceptance.
+2. UX/UI review-step redesign docs update (`docs/ux/steps/08_review_export.md`, `docs/ui/UI_SPEC.md`, `docs/data/EXPORT_SCHEMA.md`).
+3. Engine + web implementation for Phase 2 non-caster sheet completeness.
+
+Phase 2 in-scope for this pass:
+- explicit feat list with short effect summaries in final review/export.
+- explicit racial/passive trait visibility in final review/export.
+- skill visibility channels for `misc` and ACP-related indicators.
+- equipment/load summary including carried weight, load category, and movement impact summary.
+- movement detail showing base vs adjusted speed in final review/export.
+
+Out of scope for this pass:
+- Phase 3 caster/multiclass progression surfaces.
 
 ### Phase 3: Caster + Progression Expansion
 

@@ -108,6 +108,98 @@ export interface DecisionSummary {
   };
 }
 
+export interface AttackLine {
+  itemId: string;
+  name: string;
+  attackBonus: number;
+  damage: string;
+  crit: string;
+  range?: string;
+}
+
+export interface Phase1Sheet {
+  identity: {
+    raceId: string | null;
+    classId: string | null;
+    level: number;
+    xp: number;
+    size: string;
+    speed: {
+      base: number;
+      adjusted: number;
+    };
+  };
+  combat: {
+    ac: {
+      total: number;
+      touch: number;
+      flatFooted: number;
+      breakdown: {
+        armor: number;
+        shield: number;
+        dex: number;
+        size: number;
+        natural: number;
+        deflection: number;
+        misc: number;
+      };
+    };
+    initiative: { total: number; dex: number; misc: number };
+    grapple: { total: number; bab: number; str: number; size: number; misc: number };
+    attacks: {
+      melee: AttackLine[];
+      ranged: AttackLine[];
+    };
+    saves: {
+      fort: { total: number; base: number; ability: number; misc: number };
+      ref: { total: number; base: number; ability: number; misc: number };
+      will: { total: number; base: number; ability: number; misc: number };
+    };
+    hp: {
+      total: number;
+      breakdown: {
+        hitDie: number;
+        con: number;
+        misc: number;
+      };
+    };
+  };
+}
+
+export interface Phase2Sheet {
+  feats: Array<{
+    id: string;
+    name: string;
+    summary: string;
+  }>;
+  traits: Array<{
+    source: "race";
+    name: string;
+    summary: string;
+  }>;
+  skills: Array<{
+    id: string;
+    name: string;
+    ranks: number;
+    ability: number;
+    racial: number;
+    misc: number;
+    acp: number;
+    total: number;
+  }>;
+  equipment: {
+    selectedItems: string[];
+    totalWeight: number;
+    loadCategory: "light" | "medium" | "heavy";
+    speedImpact: string;
+  };
+  movement: {
+    base: number;
+    adjusted: number;
+    notes: string[];
+  };
+}
+
 export interface CharacterSheet {
   metadata: { name: string };
   abilities: Record<string, { score: number; mod: number }>;
@@ -115,6 +207,8 @@ export interface CharacterSheet {
   selections: Record<string, unknown>;
   skills: Record<string, SkillBreakdown>;
   decisions: DecisionSummary;
+  phase1: Phase1Sheet;
+  phase2: Phase2Sheet;
   provenance: ProvenanceRecord[];
   packSetFingerprint: string;
 }
@@ -729,6 +823,176 @@ function applyEffect(effect: Effect, sheet: Record<string, any>, provenance: Pro
   }
 }
 
+function getGrappleSizeModifier(size: string | undefined): number {
+  switch (String(size ?? "").trim().toLowerCase()) {
+    case "fine": return -16;
+    case "diminutive": return -12;
+    case "tiny": return -8;
+    case "small": return -4;
+    case "large": return 4;
+    case "huge": return 8;
+    case "gargantuan": return 12;
+    case "colossal": return 16;
+    default: return 0;
+  }
+}
+
+const SRD_MEDIUM_LOAD_TABLE: Array<{ light: number; medium: number; heavy: number } | null> = [
+  null,
+  { light: 3, medium: 6, heavy: 10 },
+  { light: 6, medium: 13, heavy: 20 },
+  { light: 10, medium: 20, heavy: 30 },
+  { light: 13, medium: 26, heavy: 40 },
+  { light: 16, medium: 33, heavy: 50 },
+  { light: 20, medium: 40, heavy: 60 },
+  { light: 23, medium: 46, heavy: 70 },
+  { light: 26, medium: 53, heavy: 80 },
+  { light: 30, medium: 60, heavy: 90 },
+  { light: 33, medium: 66, heavy: 100 },
+  { light: 38, medium: 76, heavy: 115 },
+  { light: 43, medium: 86, heavy: 130 },
+  { light: 50, medium: 100, heavy: 150 },
+  { light: 58, medium: 116, heavy: 175 },
+  { light: 66, medium: 133, heavy: 200 },
+  { light: 76, medium: 153, heavy: 230 },
+  { light: 86, medium: 173, heavy: 260 },
+  { light: 100, medium: 200, heavy: 300 },
+  { light: 116, medium: 233, heavy: 350 },
+  { light: 133, medium: 266, heavy: 400 },
+  { light: 153, medium: 306, heavy: 460 },
+  { light: 173, medium: 346, heavy: 520 },
+  { light: 200, medium: 400, heavy: 600 },
+  { light: 233, medium: 466, heavy: 700 },
+  { light: 266, medium: 533, heavy: 800 },
+  { light: 306, medium: 613, heavy: 920 },
+  { light: 346, medium: 693, heavy: 1040 },
+  { light: 400, medium: 800, heavy: 1200 },
+  { light: 466, medium: 933, heavy: 1400 }
+];
+
+function getSrdMediumLoadLimits(strScore: number): { light: number; medium: number; heavy: number } {
+  const normalizedScore = Number.isFinite(strScore) ? Math.max(1, Math.floor(strScore)) : 10;
+  if (normalizedScore < SRD_MEDIUM_LOAD_TABLE.length) {
+    return SRD_MEDIUM_LOAD_TABLE[normalizedScore] ?? { light: 0, medium: 0, heavy: 0 };
+  }
+  const baseEntry = SRD_MEDIUM_LOAD_TABLE[20]!;
+  const incrementsOfTen = Math.floor((normalizedScore - 20) / 10);
+  const remainderScore = normalizedScore - (incrementsOfTen * 10);
+  const remainderEntry = SRD_MEDIUM_LOAD_TABLE[remainderScore] ?? baseEntry;
+  const multiplier = 4 ** incrementsOfTen;
+  return {
+    light: remainderEntry.light * multiplier,
+    medium: remainderEntry.medium * multiplier,
+    heavy: remainderEntry.heavy * multiplier
+  };
+}
+
+function inferAcBreakdown(
+  provenance: ProvenanceRecord[],
+  selectedEquipmentIds: Set<string>,
+  selectedEquipmentById: Map<string, ResolvedEntity>,
+  dexModifier: number,
+  sizeModifier: number,
+  acTotal: number
+): Phase1Sheet["combat"]["ac"] {
+  const acRecords = provenance.filter((record) => record.targetPath === "stats.ac");
+  let base = 10;
+  let armor = 0;
+  let shield = 0;
+  let misc = 0;
+  for (const record of acRecords) {
+    const sourceId = String(record.source.entityId ?? "").trim().toLowerCase();
+    if (record.setValue !== undefined && Number.isFinite(record.setValue)) {
+      base = Number(record.setValue);
+      continue;
+    }
+    if (record.delta === undefined || !Number.isFinite(record.delta)) continue;
+    const delta = Number(record.delta);
+    const sourceItem = selectedEquipmentById.get(sourceId);
+    const sourceCategory = getEntityDataString(sourceItem, "category").toLowerCase();
+    const isShield = sourceCategory === "shield" || (sourceCategory.length === 0 && sourceId.includes("shield") && selectedEquipmentIds.has(sourceId));
+    if (isShield) {
+      shield += delta;
+      continue;
+    }
+    if (selectedEquipmentIds.has(sourceId)) {
+      armor += delta;
+      continue;
+    }
+    misc += delta;
+  }
+  const natural = 0;
+  const deflection = 0;
+  const touch = acTotal - armor - shield - natural;
+  const flatFooted = acTotal - Math.max(dexModifier, 0);
+  return {
+    total: acTotal,
+    touch,
+    flatFooted,
+    breakdown: {
+      armor,
+      shield,
+      dex: dexModifier,
+      size: sizeModifier,
+      natural,
+      deflection,
+      misc
+    }
+  };
+}
+
+function getEntityDataRecord(entity: ResolvedEntity | undefined): Record<string, unknown> {
+  const rawData = entity?.data;
+  if (!rawData || typeof rawData !== "object" || Array.isArray(rawData)) {
+    return {};
+  }
+  return rawData as Record<string, unknown>;
+}
+
+function getEntityDataNumber(entity: ResolvedEntity | undefined, key: string, fallback = 0): number {
+  const value = getEntityDataRecord(entity)[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function getEntityDataString(entity: ResolvedEntity | undefined, key: string): string {
+  const value = getEntityDataRecord(entity)[key];
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function isArmorOrShieldItem(item: ResolvedEntity): boolean {
+  const category = getEntityDataString(item, "category").toLowerCase();
+  if (category === "armor" || category === "shield") return true;
+  return (item.effects ?? []).some((effect) =>
+    effect.targetPath === "stats.ac" || effect.targetPath === "stats.speed"
+  );
+}
+
+function isRangedWeaponItem(item: ResolvedEntity): boolean {
+  const category = getEntityDataString(item, "category").toLowerCase();
+  const weaponType = getEntityDataString(item, "weaponType").toLowerCase();
+  if (category !== "weapon") return false;
+  if (weaponType === "ranged") return true;
+  return getEntityDataString(item, "range").length > 0;
+}
+
+function getItemWeight(item: ResolvedEntity): number {
+  return getEntityDataNumber(item, "weight", 0);
+}
+
+function getItemArmorCheckPenalty(item: ResolvedEntity): number {
+  return getEntityDataNumber(item, "armorCheckPenalty", 0);
+}
+
+function skillIsAffectedByArmorCheckPenalty(skillEntity: ResolvedEntity | undefined): boolean {
+  const value = getEntityDataRecord(skillEntity).armorCheckPenaltyApplies;
+  return value === true;
+}
+
+function formatDamageWithModifier(baseDamage: string, modifier: number): string {
+  if (!Number.isFinite(modifier) || modifier === 0) return baseDamage;
+  return `${baseDamage}${modifier > 0 ? "+" : ""}${modifier}`;
+}
+
 export function finalizeCharacter(state: CharacterState, context: EngineContext): CharacterSheet {
   const abilities = Object.fromEntries(
     Object.entries(state.abilities).map(([k, score]) => [k, { score, mod: abilityMod(score) }])
@@ -792,11 +1056,214 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   }
 
   const decisions = buildDecisionSummary(state, context, finalAbilities);
-  sheet.stats.initiative = finalAbilities.dex?.mod ?? 0;
+  const initiativeTotal = Number(sheet.stats.initiative ?? 0);
+  const initiativeDex = finalAbilities.dex?.mod ?? 0;
+  const initiativeMisc = initiativeTotal - initiativeDex;
   sheet.stats.ac = Number(sheet.stats.ac ?? 0) + decisions.sizeModifiers.ac;
   sheet.stats.attackBonus = (sheet.stats.bab as number) + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack;
   sheet.stats.damageBonus = finalAbilities.str?.mod ?? 0;
+  const selectedRace = raceId ? entityBuckets.races?.[raceId] : undefined;
+  const raceSize = String(selectedRace?.data?.size ?? "medium").trim().toLowerCase();
+  const selectedClassLevel = classIdLevel(String(classId ?? ""));
+  const selectedClassHitDie = Number(selectedClass?.data?.hitDie ?? 0);
+  const hpTotal = Number(sheet.stats.hp ?? 0);
+  const hpConPerLevel = finalAbilities.con?.mod ?? 0;
+  const effectiveLevel = Number.isFinite(selectedClassLevel) && selectedClassLevel > 0 ? selectedClassLevel : 1;
+  const hpCon = hpConPerLevel * effectiveLevel;
+  const inferredHitDieHp = Number.isFinite(selectedClassHitDie) && selectedClassHitDie > 0
+    ? Math.floor(selectedClassHitDie * effectiveLevel)
+    : 0;
+  const maxHitDieHp = Math.max(hpTotal - hpCon, 0);
+  const hpHitDie = inferredHitDieHp > 0 ? Math.min(inferredHitDieHp, maxHitDieHp) : maxHitDieHp;
+  const hpMisc = hpTotal - hpHitDie - hpCon;
+  const selectedEquipmentEntities = ((state.selections.equipment as string[] | undefined) ?? [])
+    .map((itemId) => entityBuckets.items?.[itemId])
+    .filter((entity): entity is ResolvedEntity => Boolean(entity));
+  const selectedEquipmentIds = new Set(
+    (((state.selections.equipment as string[] | undefined) ?? []).map((itemId) => String(itemId).trim().toLowerCase()))
+  );
+  const selectedEquipmentById = new Map(
+    selectedEquipmentEntities.map((item) => [item.id.trim().toLowerCase(), item] as const)
+  );
+  const acTotal = Number(sheet.stats.ac ?? 0);
+  const acBreakdown = inferAcBreakdown(
+    provenance,
+    selectedEquipmentIds,
+    selectedEquipmentById,
+    finalAbilities.dex?.mod ?? 0,
+    decisions.sizeModifiers.ac,
+    acTotal
+  );
+  const bab = Number(sheet.stats.bab ?? 0);
+  const grappleSize = getGrappleSizeModifier(raceSize);
+  const grapple = {
+    total: bab + (finalAbilities.str?.mod ?? 0) + grappleSize,
+    bab,
+    str: finalAbilities.str?.mod ?? 0,
+    size: grappleSize,
+    misc: 0
+  };
+  sheet.stats.grapple = grapple.total;
+  const attackItems = selectedEquipmentEntities.filter((entity) => !isArmorOrShieldItem(entity));
+  const meleeAttacks: AttackLine[] = [];
+  const rangedAttacks: AttackLine[] = [];
+  for (const item of attackItems) {
+    const baseLine = {
+      itemId: item.id,
+      name: item.name
+    };
+    if (isRangedWeaponItem(item)) {
+      rangedAttacks.push({
+        ...baseLine,
+        attackBonus: bab + (finalAbilities.dex?.mod ?? 0) + decisions.sizeModifiers.attack,
+        damage: getEntityDataString(item, "damage") || "1d8",
+        crit: getEntityDataString(item, "crit") || "x2",
+        range: getEntityDataString(item, "range") || "varies"
+      });
+    } else {
+      meleeAttacks.push({
+        ...baseLine,
+        attackBonus: bab + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack,
+        damage: getEntityDataString(item, "damage") || formatDamageWithModifier("1d8", finalAbilities.str?.mod ?? 0),
+        crit: getEntityDataString(item, "crit") || "x2"
+      });
+    }
+  }
+  if (meleeAttacks.length === 0 && rangedAttacks.length === 0) {
+    meleeAttacks.push({
+      itemId: "unarmed-strike",
+      name: "Unarmed Strike",
+      attackBonus: bab + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack,
+      damage: formatDamageWithModifier("1d3", finalAbilities.str?.mod ?? 0),
+      crit: "x2"
+    });
+  }
+  const fortBase = Number(sheet.stats.fort ?? 0);
+  const refBase = Number(sheet.stats.ref ?? 0);
+  const willBase = Number(sheet.stats.will ?? 0);
+  const saveBreakdown = {
+    fort: {
+      total: fortBase + (finalAbilities.con?.mod ?? 0),
+      base: fortBase,
+      ability: finalAbilities.con?.mod ?? 0,
+      misc: 0
+    },
+    ref: {
+      total: refBase + (finalAbilities.dex?.mod ?? 0),
+      base: refBase,
+      ability: finalAbilities.dex?.mod ?? 0,
+      misc: 0
+    },
+    will: {
+      total: willBase + (finalAbilities.wis?.mod ?? 0),
+      base: willBase,
+      ability: finalAbilities.wis?.mod ?? 0,
+      misc: 0
+    }
+  };
+  const phase1: Phase1Sheet = {
+    identity: {
+      raceId: raceId ?? null,
+      classId: classIdBase(classId) ?? null,
+      level: selectedClassLevel,
+      xp: 0,
+      size: raceSize,
+      speed: {
+        base: Number(selectedRace?.data?.baseSpeed ?? DEFAULT_STATS.speed),
+        adjusted: Number(sheet.stats.speed ?? DEFAULT_STATS.speed)
+      }
+    },
+    combat: {
+      ac: acBreakdown,
+      initiative: {
+        total: initiativeTotal,
+        dex: initiativeDex,
+        misc: initiativeMisc
+      },
+      grapple,
+      attacks: {
+        melee: meleeAttacks,
+        ranged: rangedAttacks
+      },
+      saves: saveBreakdown,
+      hp: {
+        total: hpTotal,
+        breakdown: {
+          hitDie: hpHitDie,
+          con: hpCon,
+          misc: hpMisc
+        }
+      }
+    }
+  };
   const skills = buildSkillBreakdown(state, context, finalAbilities, decisions);
+  const selectedFeatIds = getSelectedFeatIds(state);
+  const phase2Feats = selectedFeatIds.map((featId) => {
+    const feat = entityBuckets.feats?.[featId];
+    return {
+      id: featId,
+      name: feat?.name ?? featId,
+      summary: feat?.summary ?? feat?.description ?? featId
+    };
+  });
+  const raceTraits = ((selectedRace?.data?.racialTraits as Array<{ name?: unknown; description?: unknown }> | undefined) ?? [])
+    .map((trait) => ({
+      source: "race" as const,
+      name: String(trait.name ?? "").trim(),
+      summary: String(trait.description ?? "").trim()
+    }))
+    .filter((trait) => trait.name.length > 0 || trait.summary.length > 0);
+  const selectedEquipment = ((state.selections.equipment as string[] | undefined) ?? []).map((itemId) => String(itemId));
+  const totalWeight = selectedEquipmentEntities.reduce((sum, item) => sum + getItemWeight(item), 0);
+  const strScore = Number(finalAbilities.str?.score ?? 10);
+  const carryingMultiplier = Number(decisions.sizeModifiers.carryingCapacityMultiplier ?? 1);
+  const srdLimits = getSrdMediumLoadLimits(strScore);
+  const lightLoadLimit = srdLimits.light * carryingMultiplier;
+  const mediumLoadLimit = srdLimits.medium * carryingMultiplier;
+  const loadCategory: "light" | "medium" | "heavy" = totalWeight <= lightLoadLimit
+    ? "light"
+    : totalWeight <= mediumLoadLimit
+      ? "medium"
+      : "heavy";
+  const acpPenalty = selectedEquipmentEntities.reduce((sum, item) => sum + getItemArmorCheckPenalty(item), 0);
+  const phase2Skills = Object.entries(skills)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([skillId, skill]) => {
+      const misc = 0;
+      const skillEntity = entityBuckets.skills?.[skillId];
+      const acp = skillIsAffectedByArmorCheckPenalty(skillEntity) ? acpPenalty : 0;
+      return {
+        id: skillId,
+        name: skill.name,
+        ranks: skill.ranks,
+        ability: skill.abilityMod,
+        racial: skill.racialBonus,
+        misc,
+        acp,
+        total: skill.total + misc + acp
+      };
+    });
+  const adjustedSpeed = Number(sheet.stats.speed ?? DEFAULT_STATS.speed);
+  const phase2: Phase2Sheet = {
+    feats: phase2Feats,
+    traits: raceTraits,
+    skills: phase2Skills,
+    equipment: {
+      selectedItems: selectedEquipment,
+      totalWeight,
+      loadCategory,
+      speedImpact: adjustedSpeed < Number(selectedRace?.data?.baseSpeed ?? DEFAULT_STATS.speed)
+        ? `Reduced to ${adjustedSpeed} ft.`
+        : "No speed reduction"
+    },
+    movement: {
+      base: Number(selectedRace?.data?.baseSpeed ?? DEFAULT_STATS.speed),
+      adjusted: adjustedSpeed,
+      notes: adjustedSpeed < Number(selectedRace?.data?.baseSpeed ?? DEFAULT_STATS.speed)
+        ? ["Armor or load reduces movement speed."]
+        : ["No movement penalty detected."]
+    }
+  };
 
   return {
     metadata: { name: sheet.metadata.name },
@@ -805,6 +1272,8 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     selections: state.selections,
     skills,
     decisions,
+    phase1,
+    phase2,
     provenance,
     packSetFingerprint: context.resolvedData.fingerprint
   };

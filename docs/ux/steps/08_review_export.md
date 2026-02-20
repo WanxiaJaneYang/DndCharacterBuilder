@@ -22,13 +22,20 @@ This step should be implemented in phases aligned with `docs/product/PRD.md`:
 The review page should display sections summarising each aspect of the character:
 
 - **Identity:** Character name, level, race, class, alignment (if chosen), background (if applicable).
+- **Phase 1 Combat Headline Cards:** AC total/touch/flat-footed, HP total, initiative total, grapple total.
+- **Phase 1 Saves & HP Breakdown:** Compact rows showing `base | ability | misc | total` for Fort/Ref/Will and HP.
+- **Phase 1 Attack Lines:** At least one melee/ranged line surface per equipped attack item with attack bonus, damage and crit/range placeholders when full weapon profile data is not yet present.
 - **Abilities:** A breakdown table with `Ability | Base | Adjustments | Final | Modifier`.  
   - `Base`: user-entered score.  
   - `Adjustments`: each racial/class/rule/item modifier from provenance.  
   - `Final` + `Modifier`: computed end result.
 - **Feats:** List of selected feats with brief reminders of their effects; clicking a feat reveals full text.
+- **Phase 2 Feats Summary:** Always-visible list of selected feats with compact effect-summary text.
+- **Phase 2 Traits Summary:** Racial/passive traits summary list (vision/senses/resistance-style notes where available).
 - **Skills:** List of skills with ranks, modifiers, class/cross-class indicators and ability dependencies.
+- **Phase 2 Skills Detail:** Include visible `misc` and ACP-impact channels even when value is `0`, so users can audit totals consistently.
 - **Equipment:** Items selected, starting equipment mode (kit vs gold), total weight and cost (if applicable).
+- **Phase 2 Equipment & Load:** Show carried/equipped summary, total carried weight, load category, and movement impact statement.
 - **Derived Stats:** HP, AC, initiative, speed, BAB, saves (Fort/Ref/Will); shown in a table with `Base | Adjustments | Final`.
 - **Calculation Trace:** adjustments must be listed as readable rows (`+2 Elf`, `=10 Fighter`, etc.) so users can follow the formula without opening raw JSON.
 - **Pack Info:** Display the selected edition/version and the list of enabled rule packs with versions.  Show the pack fingerprint hash for reproducibility.
@@ -42,6 +49,15 @@ The review page should display sections summarising each aspect of the character
 The engine must provide:
 
 - Final derived stats with provenance chains per field.
+- A Phase 1 structured block for review/export surfaces:
+  - `identity`: `raceId`, `classId`, `level`, `xp`, `size`, `speed.base`, `speed.adjusted`.
+  - `combat`: AC (`total/touch/flatFooted`), initiative breakdown, grapple breakdown, attacks (`melee[]`, `ranged[]`), save breakdowns, HP breakdown.
+- A Phase 2 structured block for review/export surfaces:
+  - `feats[]`: selected feats with summary/effect reminder text.
+  - `traits[]`: race/passive trait summaries.
+  - `skills[]`: visible channels for rank, ability, racial, misc, acp, and total.
+  - `equipment`: selected items plus weight/load summary.
+  - `movement`: base vs adjusted speed and short impact explanation.
 - The list of enabled packs and their versions.
 - The pack set fingerprint.
 - A serialisable state of user choices (race, class, abilities, feats, skills, items) and any starting equipment mode.
@@ -56,6 +72,16 @@ The UI must be able to render these structures and provide interactive provenanc
 ## Acceptance Criteria
 
 - The review page shows all selections and derived stats clearly.
+- Phase 1 cards and tables are visible without expanding raw JSON:
+  - AC total/touch/flat-footed
+  - initiative/grapple totals
+  - save and HP component breakdown rows
+  - attack lines for equipped weapons
+- Phase 2 non-caster completeness surfaces are visible without opening raw JSON:
+  - selected feat summaries
+  - racial/passive trait summaries
+  - skill misc + ACP channels
+  - equipment/load and movement detail summary
 - Provenance can be accessed for each derived number (e.g. AC shows base 10 + armor + shield + Dex modifier).  This may use tooltips or an expandable explanation panel.
 - The user can go back to any previous step and return to review without losing progress.
 - Export JSON includes all required fields and the pack fingerprint.
@@ -74,5 +100,10 @@ The UI must be able to render these structures and provide interactive provenanc
 - [x] Review page implemented with sections for identity, abilities, combat/defense, skills, rules decisions, and pack info.
 - [x] Provenance display implemented (calculation rows plus raw provenance panel toggle).
 - [x] Export JSON logic implemented and tested.
+- [x] Phase 1 structured identity/combat block available in export payload.
+- [x] Phase 1 cards/tables implemented in review UI (touch/flat-footed AC, initiative/grapple, save/HP breakdown, attack lines).
+- [x] Phase 2 feat and trait summary sections implemented in review and export.
+- [x] Phase 2 skills misc/ACP channels visible in review and export.
+- [x] Phase 2 equipment/load and movement detail sections implemented in review and export.
 - [ ] Navigation back to previous steps and forward again works without data loss.
 - [x] Pack fingerprint displayed.
