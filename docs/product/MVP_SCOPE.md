@@ -15,7 +15,10 @@ This document defines the minimal viable product boundaries for the DnDCharacter
 1. **Version and Source selection** – only 3.5 available; base SRD pack locked.
 2. **Race selection** – minimal set of races in `srd-35e-minimal`.
 3. **Class selection** – minimal set of classes in `srd-35e-minimal`.
-4. **Ability Score assignment** – either manual entry or 32‑point buy, method determined by flow JSON.
+4. **Ability Score assignment** - data-driven by flow JSON and edition pack config:
+   - Point Buy (with configurable point-cap bounds)
+   - PHB method
+   - Roll Sets (generate 5 sets, pick one)
 5. **Feat selection** – limited to feats provided in the minimal pack.
 6. **Skill selection** – simplified 3.5 skill allocation: obey budget and max ranks.
 7. **Equipment selection** – choose items from minimal pack; starting equipment mode recorded.
@@ -28,7 +31,7 @@ This document defines the minimal viable product boundaries for the DnDCharacter
 - Spells and advanced class features beyond level 1.
 - Full 3.5 skill rules (synergy, cross‑class cost) – only basic budget enforcement.
 - Rich hints, tooltips or AI guidance.
-- Multi‑edition support (future tasks).
+- Full custom point-buy table authoring and saved custom templates.
 - PDF export (only JSON and HTML view for MVP).
 
 ## Success Metrics
@@ -40,7 +43,7 @@ This document defines the minimal viable product boundaries for the DnDCharacter
 
 ## TODO
 
-- Define the exact point buy formula and manual entry range.
+- Define 3e and 5e default `abilitiesConfig` payloads in pack data.
 - Clarify which races and classes are included in the minimal pack.
 - Define starting equipment modes and initial kits.
 - Add success metrics for load performance and accessibility.

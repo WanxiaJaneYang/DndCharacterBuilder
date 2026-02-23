@@ -6,6 +6,43 @@ type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 const ABILITY_KEYS: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 const FIRST_LEVEL_SKILL_MULTIPLIER = 4;
 const FEAT_SLOT_TYPE = "feat";
+const ABILITY_STEP_ID = "abilities";
+
+type AbilityGenerationMode = "pointBuy" | "phb" | "rollSets";
+
+type AbilityScoresRecord = Record<string, number>;
+
+type AbilitySelectionPayload = {
+  mode?: AbilityGenerationMode;
+  pointCap?: number;
+  scores?: AbilityScoresRecord;
+  rollSets?: {
+    generatedSets?: number[][];
+    selectedSetIndex?: number;
+  };
+};
+
+type AbilityStepConfig = {
+  modes?: AbilityGenerationMode[];
+  defaultMode?: AbilityGenerationMode;
+  pointBuy?: {
+    costTable?: Record<string, number>;
+    defaultPointCap?: number;
+    minPointCap?: number;
+    maxPointCap?: number;
+    pointCapStep?: number;
+    minScore?: number;
+    maxScore?: number;
+  };
+  phb?: {
+    methodType?: "standardArray" | "manualRange";
+    standardArray?: number[];
+    manualRange?: { minScore?: number; maxScore?: number };
+  };
+  rollSets?: {
+    setsCount?: number;
+  };
+};
 
 function normalizeSkillId(id: string): string {
   return id.trim().toLowerCase();
@@ -392,6 +429,42 @@ function getSelectionCountForStep(step: EntityTypeFlowStep, state: CharacterStat
   return 1;
 }
 
+function getAbilityStepConfig(context: EngineContext): AbilityStepConfig | undefined {
+  const abilityStep = context.resolvedData.flow.steps.find((step) => step.id === ABILITY_STEP_ID) as
+    | { abilitiesConfig?: unknown }
+    | undefined;
+  if (!abilityStep?.abilitiesConfig || typeof abilityStep.abilitiesConfig !== "object") return undefined;
+  return abilityStep.abilitiesConfig as AbilityStepConfig;
+}
+
+function getAbilityModeFromState(state: CharacterState, config?: { defaultMode?: AbilityGenerationMode }): AbilityGenerationMode | undefined {
+  const meta = state.selections.abilitiesMeta as { mode?: unknown } | undefined;
+  const mode = typeof meta?.mode === "string" ? (meta.mode as AbilityGenerationMode) : undefined;
+  return mode ?? config?.defaultMode;
+}
+
+function getAbilityScoreBounds(
+  state: CharacterState,
+  context: EngineContext,
+  mode: AbilityGenerationMode | undefined
+): { min: number; max: number } {
+  const fallback = { min: 3, max: 18 };
+  const cfg = getAbilityStepConfig(context);
+  if (!cfg || !mode) return fallback;
+
+  if (mode === "pointBuy" && cfg.pointBuy?.minScore !== undefined && cfg.pointBuy?.maxScore !== undefined) {
+    return { min: cfg.pointBuy.minScore, max: cfg.pointBuy.maxScore };
+  }
+
+  if (mode === "phb" && cfg.phb?.methodType === "manualRange") {
+    const min = Number(cfg.phb.manualRange?.minScore);
+    const max = Number(cfg.phb.manualRange?.maxScore);
+    if (Number.isFinite(min) && Number.isFinite(max)) return { min, max };
+  }
+
+  return fallback;
+}
+
 function classIdBase(classId: string | undefined): string | undefined {
   if (!classId) return undefined;
   return classId.replace(/-\d+$/, "");
@@ -682,6 +755,17 @@ export function applyChoice(state: CharacterState, choiceId: string, selection: 
     return { ...state, metadata: { ...state.metadata, name: String(selection) } };
   }
   if (choiceId === "abilities") {
+    const payload = selection as AbilitySelectionPayload;
+    const isStructuredPayload = payload && typeof payload === "object" && !Array.isArray(payload) && payload.scores && typeof payload.scores === "object";
+    if (isStructuredPayload) {
+      const nextSelections = { ...state.selections };
+      nextSelections.abilitiesMeta = {
+        mode: payload.mode,
+        pointCap: payload.pointCap,
+        rollSets: payload.rollSets
+      };
+      return { ...state, abilities: payload.scores as Record<string, number>, selections: nextSelections };
+    }
     return { ...state, abilities: selection as Record<string, number> };
   }
   if (choiceId === "feat") {
@@ -708,9 +792,151 @@ export function applyChoice(state: CharacterState, choiceId: string, selection: 
 export function validateState(state: CharacterState, context: EngineContext): ValidationError[] {
   const errors: ValidationError[] = [];
   if (!state.metadata.name) errors.push({ code: "NAME_REQUIRED", message: "Character name is required.", stepId: "name" });
+  const abilityConfig = getAbilityStepConfig(context);
+  const abilityMode = getAbilityModeFromState(state, abilityConfig);
+  const abilityBounds = getAbilityScoreBounds(state, context, abilityMode);
   for (const ability of ABILITY_KEYS) {
     const score = state.abilities[ability];
-    if (score === undefined || !Number.isInteger(score) || score < 3 || score > 18) errors.push({ code: "ABILITY_RANGE", message: `${ability.toUpperCase()} must be between 3 and 18.`, stepId: "abilities" });
+    if (score === undefined || !Number.isInteger(score) || score < abilityBounds.min || score > abilityBounds.max) {
+      errors.push({
+        code: "ABILITY_RANGE",
+        message: `${ability.toUpperCase()} must be between ${abilityBounds.min} and ${abilityBounds.max}.`,
+        stepId: ABILITY_STEP_ID
+      });
+    }
+  }
+
+  if (abilityConfig && abilityMode) {
+    if (!abilityConfig.modes?.includes(abilityMode)) {
+      errors.push({
+        code: "ABILITY_MODE_INVALID",
+        message: `Ability mode ${abilityMode} is not enabled for this flow.`,
+        stepId: ABILITY_STEP_ID
+      });
+    } else if (abilityMode === "pointBuy") {
+      const pointBuyCfg = abilityConfig.pointBuy;
+      if (!pointBuyCfg) {
+        errors.push({
+          code: "ABILITY_MODE_CONFIG_MISSING",
+          message: "Point-buy mode is enabled but pointBuy config is missing.",
+          stepId: ABILITY_STEP_ID
+        });
+      } else {
+        const costTable = pointBuyCfg.costTable ?? {};
+        const meta = state.selections.abilitiesMeta as { pointCap?: unknown } | undefined;
+        const baseCapRaw = Number(meta?.pointCap ?? pointBuyCfg.defaultPointCap ?? 0);
+        const minCap = Number(pointBuyCfg.minPointCap);
+        const maxCap = Number(pointBuyCfg.maxPointCap);
+        const step = Number(pointBuyCfg.pointCapStep);
+        const hasMinCap = Number.isFinite(minCap);
+        const hasMaxCap = Number.isFinite(maxCap);
+        const hasStep = Number.isFinite(step) && step > 0;
+
+        let sanitizedCap = Number.isFinite(baseCapRaw) ? Math.round(baseCapRaw) : 0;
+        if (hasMinCap) sanitizedCap = Math.max(minCap, sanitizedCap);
+        if (hasMaxCap) sanitizedCap = Math.min(maxCap, sanitizedCap);
+        if (hasStep) {
+          const stepBase = hasMinCap ? minCap : 0;
+          const stepsFromBase = Math.round((sanitizedCap - stepBase) / step);
+          sanitizedCap = stepBase + stepsFromBase * step;
+          if (hasMinCap) sanitizedCap = Math.max(minCap, sanitizedCap);
+          if (hasMaxCap) sanitizedCap = Math.min(maxCap, sanitizedCap);
+        }
+
+        let totalCost = 0;
+        let missingCost = false;
+        for (const ability of ABILITY_KEYS) {
+          const score = state.abilities[ability];
+          const cost = costTable[String(score)];
+          if (typeof cost !== "number" || !Number.isFinite(cost)) {
+            missingCost = true;
+            break;
+          }
+          totalCost += cost;
+        }
+        if (missingCost) {
+          errors.push({
+            code: "ABILITY_POINTBUY_SCORE_INVALID",
+            message: "Point-buy score is missing from the configured cost table.",
+            stepId: ABILITY_STEP_ID
+          });
+        } else if (totalCost > sanitizedCap) {
+          errors.push({
+            code: "ABILITY_POINTBUY_EXCEEDED",
+            message: `Point-buy cost ${totalCost} exceeds cap ${sanitizedCap}.`,
+            stepId: ABILITY_STEP_ID
+          });
+        }
+      }
+    } else if (abilityMode === "phb") {
+      const phbCfg = abilityConfig.phb;
+      if (!phbCfg) {
+        errors.push({
+          code: "ABILITY_MODE_CONFIG_MISSING",
+          message: "PHB mode is enabled but phb config is missing.",
+          stepId: ABILITY_STEP_ID
+        });
+      }
+      if (phbCfg?.methodType === "standardArray" && Array.isArray(phbCfg.standardArray)) {
+        const expected = [...phbCfg.standardArray].sort((a, b) => a - b);
+        const actual = ABILITY_KEYS.map((ability) => Number(state.abilities[ability])).sort((a, b) => a - b);
+        const sameLength = expected.length === actual.length;
+        const sameValues = sameLength && expected.every((value, index) => value === actual[index]);
+        if (!sameValues) {
+          errors.push({
+            code: "ABILITY_PHB_ARRAY_INVALID",
+            message: "Assigned ability scores must use the configured PHB standard array exactly once.",
+            stepId: ABILITY_STEP_ID
+          });
+        }
+      }
+    } else if (abilityMode === "rollSets") {
+      const rollCfg = abilityConfig.rollSets;
+      if (!rollCfg) {
+        errors.push({
+          code: "ABILITY_MODE_CONFIG_MISSING",
+          message: "Roll-sets mode is enabled but rollSets config is missing.",
+          stepId: ABILITY_STEP_ID
+        });
+      } else {
+        const meta = state.selections.abilitiesMeta as {
+          rollSets?: { generatedSets?: unknown; selectedSetIndex?: unknown };
+        } | undefined;
+        const generatedSets = Array.isArray(meta?.rollSets?.generatedSets) ? meta?.rollSets?.generatedSets : [];
+        const selectedSetIndexRaw = Number(meta?.rollSets?.selectedSetIndex);
+        const selectedSetIndex = Number.isInteger(selectedSetIndexRaw) ? selectedSetIndexRaw : -1;
+        const requiredSets = Number(rollCfg.setsCount ?? 0);
+        if (generatedSets.length < requiredSets || selectedSetIndex < 0 || selectedSetIndex >= generatedSets.length) {
+          errors.push({
+            code: "ABILITY_ROLLSETS_SELECTION_REQUIRED",
+            message: "Roll-sets mode requires selecting one generated set before continuing.",
+            stepId: ABILITY_STEP_ID
+          });
+        } else {
+          const selectedSet = generatedSets[selectedSetIndex];
+          const validSet = Array.isArray(selectedSet) && selectedSet.every((value) => Number.isFinite(Number(value)));
+          if (!validSet) {
+            errors.push({
+              code: "ABILITY_ROLLSETS_SELECTION_REQUIRED",
+              message: "Roll-sets mode requires selecting one generated set before continuing.",
+              stepId: ABILITY_STEP_ID
+            });
+          } else {
+            const expected = [...selectedSet.map((value) => Number(value))].sort((a, b) => a - b);
+            const actual = ABILITY_KEYS.map((ability) => Number(state.abilities[ability])).sort((a, b) => a - b);
+            const sameLength = expected.length === actual.length;
+            const sameValues = sameLength && expected.every((value, index) => value === actual[index]);
+            if (!sameValues) {
+              errors.push({
+                code: "ABILITY_ROLLSETS_SET_MISMATCH",
+                message: "Assigned ability scores must come from the selected roll-set.",
+                stepId: ABILITY_STEP_ID
+              });
+            }
+          }
+        }
+      }
+    }
   }
 
   for (const step of context.resolvedData.flow.steps.filter(isEntityTypeFlowStep)) {
