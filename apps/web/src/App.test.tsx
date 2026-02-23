@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
@@ -18,6 +18,10 @@ const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?)
 
 afterEach(() => {
   cleanup();
+});
+
+beforeEach(() => {
+  Object.defineProperty(window.navigator, 'language', { configurable: true, value: 'en-US' });
 });
 
 function withNavigatorLanguage(language: string, fn: () => Promise<void>) {
@@ -42,6 +46,8 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.selectOptions(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i }), 'pointBuy');
+    await user.click(screen.getByRole('button', { name: /Use This Method|使用此方式/i }));
 
     const strInput = screen.getByLabelText('STR');
     await user.clear(strInput);
@@ -142,6 +148,7 @@ describe('role and language behavior', () => {
 
       await user.click(screen.getByLabelText(fighterLabelPattern));
       await user.click(screen.getByRole('button', { name: zh.next }));
+      await user.click(screen.getByRole('button', { name: /Use This Method|使用此方式/i }));
 
       expect(screen.getByLabelText('力量')).toBeTruthy();
       expect(screen.getByLabelText('敏捷')).toBeTruthy();
@@ -152,7 +159,27 @@ describe('role and language behavior', () => {
     });
   });
 
-  it('renders ability mode selector and point-buy cap controls from flow config', async () => {
+  it('renders ability mode selector and reveals point-buy controls after selecting point buy', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    const selector = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
+    expect(selector).toBeTruthy();
+    expect(screen.getByText(/Recommended for first-time players|推荐给新手/i)).toBeTruthy();
+    await user.selectOptions(selector, 'pointBuy');
+    expect(screen.getByRole('spinbutton', { name: /Point Cap|点数上限/i })).toBeTruthy();
+    expect(screen.getByText(/Points Remaining|剩余点数/i)).toBeTruthy();
+    expect(screen.getByText(/Point Buy Cost Table|点购花费表/i)).toBeTruthy();
+  });
+
+  it('shows ask-only abilities view before method confirmation', async () => {
     const user = userEvent.setup();
     render(<App />);
 
@@ -164,37 +191,11 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     expect(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i })).toBeTruthy();
-    expect(screen.getByRole('option', { name: /Point Buy|点购/i })).toBeTruthy();
-    expect(screen.getByRole('spinbutton', { name: /Point Cap|点数上限/i })).toBeTruthy();
-    expect(screen.getByText(/Points Remaining|剩余点数/i)).toBeTruthy();
-  });
+    expect(screen.queryByLabelText(/STR|力量/i)).toBeNull();
+    expect(screen.queryByText(/Existing Modifiers|现有调整/i)).toBeNull();
 
-  it('shows contextual ability method hint and updates when mode changes', async () => {
-    const user = userEvent.setup();
-    render(<App />);
-
-    await user.click(screen.getByRole('button', { name: playerNamePattern }));
-    await user.click(screen.getByRole('button', { name: startWizardPattern }));
-    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
-    await user.click(screen.getByRole('button', { name: nextPattern }));
-    await user.click(screen.getByLabelText(fighterLabelPattern));
-    await user.click(screen.getByRole('button', { name: nextPattern }));
-
-    const hintTrigger = screen.getByRole('button', { name: /About ability generation methods|生成方式说明/i });
-    await user.hover(hintTrigger);
-    const firstHint = screen.getByRole('tooltip').textContent ?? '';
-    expect(firstHint.length).toBeGreaterThan(0);
-
-    const modeSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
-    await user.selectOptions(modeSelect, 'rollSets');
-    await user.hover(hintTrigger);
-    const secondHint = screen.getByRole('tooltip').textContent ?? '';
-    expect(secondHint.length).toBeGreaterThan(0);
-    expect(secondHint).not.toBe(firstHint);
-
-    hintTrigger.focus();
-    await user.keyboard('{Escape}');
-    expect(screen.queryByRole('tooltip')).toBeNull();
+    await user.click(screen.getByRole('button', { name: /Use This Method|使用此方式/i }));
+    expect(screen.getByLabelText(/STR|力量/i)).toBeTruthy();
   });
 
   it('shows existing ability modifiers on the ability step', async () => {
@@ -207,6 +208,7 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.selectOptions(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i }), 'pointBuy');
 
     expect(screen.getAllByText(/Existing Modifiers|现有调整/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/\+2/).length).toBeGreaterThan(0);
@@ -223,6 +225,7 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.selectOptions(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i }), 'pointBuy');
 
     const strInput = screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement;
     const before = Number(strInput.value);
@@ -246,11 +249,10 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    const modeSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
-    await user.selectOptions(modeSelect, 'rollSets');
-    expect(screen.getAllByRole('radio', { name: /^(?:Set|第)\s*\d+/i }).length).toBe(5);
+    await user.click(screen.getByRole('button', { name: /Use This Method|使用此方式/i }));
+    expect(screen.getAllByRole('radio', { name: /^(?:Set|第\s*\d+)/i }).length).toBe(5);
 
-    await user.click(screen.getByRole('radio', { name: /^(?:Set|第)\s*1/i }));
+    await user.click(screen.getByRole('radio', { name: /^Set 1/i }));
     expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value).toBe('3');
     expect((screen.getByRole('spinbutton', { name: /DEX|敏捷/i }) as HTMLInputElement).value).toBe('3');
 
@@ -269,12 +271,11 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    const modeSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
-    await user.selectOptions(modeSelect, 'rollSets');
+    await user.click(screen.getByRole('button', { name: /Use This Method|使用此方式/i }));
 
     expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: /Increase STR|提高 力量/i }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: /Decrease STR|降低 力量/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByRole('button', { name: /Increase STR|提高 力量/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Decrease STR|降低 力量/i })).toBeNull();
 
     randomSpy.mockRestore();
   });
@@ -289,9 +290,9 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.selectOptions(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i }), 'pointBuy');
 
-    expect(screen.getAllByText(/Elf|精灵/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Race/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle(/Race/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Fighter|战士/i)).toBeNull();
   });
 
@@ -327,6 +328,8 @@ describe('role and language behavior', () => {
       await user.click(screen.getByRole('button', { name: nextPattern }));
       await user.click(screen.getByLabelText(fighterLabelPattern));
       await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.selectOptions(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i }), 'pointBuy');
+      await user.click(screen.getByRole('button', { name: /Use This Method|使用此方式/i }));
       await user.click(screen.getByRole('button', { name: nextPattern }));
       const featFieldset = screen.getByRole('group', { name: /Feat|专长/i });
       const featChoices = within(featFieldset).getAllByRole('checkbox');
