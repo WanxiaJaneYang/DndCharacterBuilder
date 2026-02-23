@@ -29,20 +29,18 @@ Each ability row displays:
 - Existing modifier total (sum of active prior effects for that ability)
 - Final score
 - Final derived modifier
-- Expand/collapse control for source breakdown
+- Existing modifier source summary
 
 ### Score Stepper Ergonomics (Point Buy / Range Inputs)
 
 - Use prominent `-` and `+` steppers beside each score input with a minimum 40x40 hit target (mobile-first).
-- Single tap/click adjusts by 1 step; press-and-hold repeats after a short delay for fast tuning.
-- Support keyboard controls on focused score input:
-  - `ArrowUp` / `ArrowDown`: plus/minus 1
-  - `Shift` + arrow: accelerated stepping (when valid for the mode)
+- Single tap/click adjusts by 1 step in MVP.
+- Native number input keyboard behavior is supported in MVP; custom accelerated shortcuts are out of current scope.
 - Disable stepper buttons when min/max or point-cap constraints would be violated.
 - Keep spent/remaining points visible while stepping so users can adjust without scanning elsewhere.
 - Provide subtle feedback for blocked actions (disabled state + brief reason text near row).
 
-### Source Breakdown (expandable per ability)
+### Source Breakdown (MVP table)
 
 - Group by dynamic `sourceType` values from active effects (for example: race, class, feat, template, rules module, extension content).
 - Render only groups with non-zero net effect for that ability.

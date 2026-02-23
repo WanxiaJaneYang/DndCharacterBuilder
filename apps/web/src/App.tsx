@@ -230,9 +230,10 @@ export function App() {
   const selectedRollSet = selectedRollSetIndex >= 0 && selectedRollSetIndex < generatedRollSets.length
     ? generatedRollSets[selectedRollSetIndex]
     : undefined;
+  const rollSetNeedsSelection = selectedAbilityMode === 'rollSets' && generatedRollSets.length > 0 && !selectedRollSet;
   const rollScoresPool = selectedRollSet && selectedRollSet.length > 0
     ? selectedRollSet
-    : generatedRollSets.flat();
+    : [];
   const currentScores = ABILITY_ORDER.map((ability) => Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN));
   const phbStandardArray = abilityStepConfig?.phb?.methodType === 'standardArray'
     ? (abilityStepConfig.phb.standardArray ?? [])
@@ -830,8 +831,9 @@ export function App() {
             {ABILITY_ORDER.map((key) => {
               const value = Number(state.abilities[key] ?? 0);
               const label = localizeAbilityLabel(key);
-              const canDecrease = value > abilityMinScore;
-              const canIncrease = value < abilityMaxScore;
+              const canEditAbility = !rollSetNeedsSelection;
+              const canDecrease = canEditAbility && value > abilityMinScore;
+              const canIncrease = canEditAbility && value < abilityMaxScore;
               return (
                 <div key={key} className="ability-input-row">
                   <label htmlFor={`ability-input-${key}`}>{label}</label>
@@ -848,6 +850,7 @@ export function App() {
                     <input
                       id={`ability-input-${key}`}
                       type="number"
+                      disabled={!canEditAbility}
                       min={abilityMinScore}
                       max={abilityMaxScore}
                       step={1}

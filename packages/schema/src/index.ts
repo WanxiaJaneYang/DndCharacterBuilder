@@ -197,6 +197,20 @@ const ChoiceStepSchema = z.object({
         path: ["abilitiesConfig", "pointBuy"]
       });
     } else {
+      if (cfg.pointBuy.minPointCap > cfg.pointBuy.maxPointCap) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "pointBuy minPointCap cannot be greater than maxPointCap",
+          path: ["abilitiesConfig", "pointBuy", "minPointCap"]
+        });
+      }
+      if (cfg.pointBuy.defaultPointCap < cfg.pointBuy.minPointCap || cfg.pointBuy.defaultPointCap > cfg.pointBuy.maxPointCap) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "pointBuy defaultPointCap must be between minPointCap and maxPointCap",
+          path: ["abilitiesConfig", "pointBuy", "defaultPointCap"]
+        });
+      }
       if (cfg.pointBuy.minScore > cfg.pointBuy.maxScore) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -235,6 +249,16 @@ const ChoiceStepSchema = z.object({
         code: z.ZodIssueCode.custom,
         message: "phb.manualRange is required for manualRange method",
         path: ["abilitiesConfig", "phb", "manualRange"]
+      });
+    } else if (
+      cfg.phb.methodType === "manualRange" &&
+      cfg.phb.manualRange &&
+      cfg.phb.manualRange.minScore > cfg.phb.manualRange.maxScore
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "phb manualRange minScore cannot be greater than maxScore",
+        path: ["abilitiesConfig", "phb", "manualRange", "minScore"]
       });
     }
   }

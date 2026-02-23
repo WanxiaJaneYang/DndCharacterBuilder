@@ -14,7 +14,7 @@ const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
 const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
 const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
 const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
-const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|\u6218\u58EB(?:\uFF081\u7EA7\uFF09)?)$/i;
+const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?)$/i;
 
 afterEach(() => {
   cleanup();
@@ -206,7 +206,6 @@ describe('role and language behavior', () => {
     expect(Number((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value)).toBe(before);
   });
 
-
   it('supports roll-sets mode by generating 5 sets and applying the selected set', async () => {
     const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
     const user = userEvent.setup();
@@ -228,6 +227,28 @@ describe('role and language behavior', () => {
 
     randomSpy.mockRestore();
   });
+
+  it('disables ability score editing in roll-sets mode until a set is selected', async () => {
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    await user.click(screen.getByRole('radio', { name: /Roll Sets|掷骰组/i }));
+
+    expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /Increase STR|提高 力量/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /Decrease STR|降低 力量/i }) as HTMLButtonElement).disabled).toBe(true);
+
+    randomSpy.mockRestore();
+  });
+
   it('shows modifier source attribution groups and hides non-impacting source types', async () => {
     const user = userEvent.setup();
     render(<App />);

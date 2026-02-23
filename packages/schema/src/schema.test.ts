@@ -165,6 +165,112 @@ describe("flow schema", () => {
     ).toThrow(/pointBuy.costTable must include all scores in configured range/i);
   });
 
+  it("rejects point-buy config when minPointCap is greater than maxPointCap", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["pointBuy"],
+              defaultMode: "pointBuy",
+              pointBuy: {
+                costTable: {
+                  "8": 0,
+                  "9": 1,
+                  "10": 2,
+                  "11": 3,
+                  "12": 4,
+                  "13": 5,
+                  "14": 6,
+                  "15": 8,
+                  "16": 10,
+                  "17": 13,
+                  "18": 16
+                },
+                defaultPointCap: 32,
+                minPointCap: 40,
+                maxPointCap: 20,
+                pointCapStep: 1,
+                minScore: 8,
+                maxScore: 18
+              }
+            }
+          }
+        ]
+      })
+    ).toThrow(/pointBuy minPointCap cannot be greater than maxPointCap/i);
+  });
+
+  it("rejects point-buy config when defaultPointCap is outside min and max bounds", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["pointBuy"],
+              defaultMode: "pointBuy",
+              pointBuy: {
+                costTable: {
+                  "8": 0,
+                  "9": 1,
+                  "10": 2,
+                  "11": 3,
+                  "12": 4,
+                  "13": 5,
+                  "14": 6,
+                  "15": 8,
+                  "16": 10,
+                  "17": 13,
+                  "18": 16
+                },
+                defaultPointCap: 19,
+                minPointCap: 20,
+                maxPointCap: 40,
+                pointCapStep: 1,
+                minScore: 8,
+                maxScore: 18
+              }
+            }
+          }
+        ]
+      })
+    ).toThrow(/pointBuy defaultPointCap must be between minPointCap and maxPointCap/i);
+  });
+
+  it("rejects phb manualRange when minScore is greater than maxScore", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["phb"],
+              defaultMode: "phb",
+              phb: {
+                methodType: "manualRange",
+                manualRange: {
+                  minScore: 18,
+                  maxScore: 8
+                }
+              }
+            }
+          }
+        ]
+      })
+    ).toThrow(/phb manualRange minScore cannot be greater than maxScore/i);
+  });
+
   it("rejects rollSets config with setsCount lower than 1", () => {
     expect(() =>
       FlowSchema.parse({
@@ -190,7 +296,7 @@ describe("flow schema", () => {
     ).toThrow();
   });
 
-  it("rejects legacy fixed modifierSources in abilityPresentation", () => {
+  it("rejects unknown legacy modifierSources field in abilityPresentation", () => {
     expect(() =>
       FlowSchema.parse({
         steps: [
