@@ -17,7 +17,7 @@ Keep ability assignment clear for new players while preserving full ruleset flex
 
 ### Structure
 
-- Top: mode selector, driven by `abilitiesConfig.modes`.
+- Top: mode selector dropdown (`select`), driven by `abilitiesConfig.modes`.
 - Main area: mode-specific controls (Point Buy, PHB, Roll Sets).
 - Summary area: six ability rows (STR/DEX/CON/INT/WIS/CHA), one row per ability.
 
@@ -34,17 +34,25 @@ Each ability row displays:
 ### Score Stepper Ergonomics (Point Buy / Range Inputs)
 
 - Use prominent `-` and `+` steppers beside each score input with a minimum 40x40 hit target (mobile-first).
+- Keep both steppers on the same side of the score input (stacked or grouped vertically) to reduce left-right scanning.
 - Single tap/click adjusts by 1 step in MVP.
 - Native number input keyboard behavior is supported in MVP; custom accelerated shortcuts are out of current scope.
 - Disable stepper buttons when min/max or point-cap constraints would be violated.
 - Keep spent/remaining points visible while stepping so users can adjust without scanning elsewhere.
 - Provide subtle feedback for blocked actions (disabled state + brief reason text near row).
 
+### Roll Sets Assignment UX (MVP)
+
+- Roll Sets mode uses pick-and-assign interaction, not free score editing.
+- After set generation and chosen set selection, users assign values to abilities via drag/drop chips into ability slots.
+- Standard point-buy/range steppers are not shown in this mode.
+- Once mode is `rollSets`, base values come only from selected rolled values (no direct number-input adjustments).
+
 ### Source Breakdown (MVP table)
 
 - Group by dynamic `sourceType` values from active effects (for example: race, class, feat, template, rules module, extension content).
 - Render only groups with non-zero net effect for that ability.
-- Within each rendered group, show line items with source label and signed value.
+- Show source details on hover/focus affordance (tooltip/popover) rather than expanded nested lists in default table view.
 - If no active effects impact the ability, show `No current modifiers` and no empty groups.
 
 This keeps the default view simple while preserving explainability.
@@ -77,6 +85,12 @@ No UI hardcoded defaults for mode rules or modifier source categories.
 - Next is enabled only when engine validation for the selected mode passes.
 - UI provides immediate guardrails and error messages, but engine remains source of truth.
 - Missing required mode config is surfaced as a configuration error (no silent fallback mode/values).
+- For roll-sets mode, validation requires complete assignment of all rolled values to all ability slots.
+
+## Point Buy Reference
+
+- Point Buy mode includes an inline collapsible rules reference that shows the score-to-cost table from `abilitiesConfig.pointBuy.costTable`.
+- If desired by pack presentation, the same section may also provide an external rules link.
 
 ## Responsive Behavior
 

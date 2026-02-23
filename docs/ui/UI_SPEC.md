@@ -7,7 +7,7 @@ This document describes the high‑level user interface of the D&D Character Bui
 The character creation wizard is a multi‑step form displayed as a **sidebar with a step checklist** and a **main content area**:
 
 * **Sidebar** – shows the list of steps defined in the flow.  Each step displays its label, status (pending/active/done/error) and allows navigation back to previous steps.  Steps cannot be skipped if they are invalid.
-* **Main content area** – displays the inputs for the current step, such as cards for race and class selection, point‑buy sliders for ability scores, lists of feats and skills, or item pickers.
+* **Main content area** – displays the inputs for the current step, such as cards for race and class selection, point‑buy controls for ability scores, lists of feats and skills, or item pickers.
 * **Navigation buttons** – “Back” and “Next” buttons appear at the bottom of the main area.  The “Next” button is disabled until the current step is valid according to the engine’s `validateState` function.
 
 ### Desktop vs Mobile
@@ -22,7 +22,7 @@ The following pages correspond to flow steps defined in the pack.  Each page is 
 2. **Rules Setup** – choose version and rule sources (see `ux/steps/01_rules_setup.md`).
 3. **Race Selection** – pick one race from cards with image and summary (`ux/steps/02_race_selection.md`).
 4. **Class Selection** – pick one class from cards (`ux/steps/03_class_selection.md`).
-5. **Ability Scores** – assign ability scores using point‑buy or manual entry (`ux/steps/04_ability_scores.md`).
+5. **Ability Scores** – assign ability scores using configured generation modes (point buy, PHB, roll sets) (`ux/steps/04_ability_scores.md`).
 6. **Feats** – choose feats with prerequisite filtering (`ux/steps/05_feats.md`).
 7. **Skills** – allocate skill points (`ux/steps/06_skills.md`).
 8. **Equipment** – select starting kit or items (`ux/steps/07_equipment.md`).
@@ -93,11 +93,14 @@ Displays a full description of an entity (race, class, feat, item).  Requirement
 
 ### AbilityAllocator
 
-Used in the ability scores step.  Must support different methods (manual entry, point‑buy).  Requirements:
+Used in the ability scores step. Must support configured methods (point buy, PHB, roll sets). Requirements:
 
-- For **point buy**: show remaining points, slider or number input for each ability (STR, DEX, CON, INT, WIS, CHA).  Validate that total points spent does not exceed the budget.
-- For **manual**: provide number input fields with min/max constraints.
+- Generation mode selector uses a dropdown (`select`) fed from flow config.
+- For **point buy**: show remaining points, number input per ability, and same-side `+`/`-` steppers. Validate that total points spent does not exceed the budget. Include a collapsible point-buy cost table reference.
+- For **PHB/manual-range**: provide constrained number inputs based on configured range.
+- For **roll sets**: provide set selection and drag/drop assignment of rolled values to abilities; direct manual score editing is disabled.
 - Show current modifier derived from the value.
+- Show concise modifier totals in-row; reveal source detail on hover/focus.
 
 ### SkillAllocator
 
