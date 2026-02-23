@@ -6,6 +6,13 @@ This document defines the Ability Scores step for a data-driven, edition-bound f
 
 Keep ability assignment clear for new players while preserving full ruleset flexibility.
 
+The Ability Scores step now follows a lazy-loading pattern:
+- Begin with an "ask first" hero block that names the three generation modes, explains the intent, and recommends `rollSets` for first-time players.
+- After a method is chosen and confirmed, render its controls (point-buy cap + cost table, PHB ranges, or roll-set list) and scroll the view to the six-ability summary table.
+- Point Buy includes a visible cost grid and remaining point readout; the ability rows only show manual controls when the method allows editing (i.e. not while roll-sets are pending a selection).
+- The base-score input always keeps the increment/decrement buttons on the same side as the input, and those buttons are entirely hidden when the roll-set picker is active so players cannot mutate values after choosing that workflow.
+- Modifiers keep the same summary table format as the review page, but hover/tap reveals the source attribution only when needed to prevent clutter.
+
 - Support exactly three generation modes from data config:
   1. Point Buy
   2. PHB Method
