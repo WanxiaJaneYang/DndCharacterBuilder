@@ -17,6 +17,7 @@ This living document tracks the engineering tasks required to implement the DnDC
    - [x] Implement race, class, ability, feat, skill and equipment steps using card and allocator components.
    - [ ] Implement review & export step with provenance display.
    - [ ] Wire validation and gating for each step.
+   - [ ] Implement approved Ability-step UI improvements from the 2026-02-23 design update.
 
 3. **Data packs**
    - [x] Create minimal SRD 3.5 pack (human, fighter, basic feats, skills, items).
