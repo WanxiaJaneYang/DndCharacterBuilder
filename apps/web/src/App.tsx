@@ -1221,8 +1221,10 @@ function RoleSelectionGate({
             <span className="role-tab-subtitle">{text.playerSubtitle}</span>
           </button>
         </div>
-        <h1 className="role-question tabs-overlay">{text.roleQuestion}</h1>
-        <p className="role-intro tabs-intro">{text.roleIntro}</p>
+        <div className="role-copy-overlay">
+          <h1 className="role-question tabs-overlay">{text.roleQuestion}</h1>
+          <p className="role-intro tabs-intro">{text.roleIntro}</p>
+        </div>
         {role === 'dm' && <p className="role-message" aria-live="polite">{text.dmUnsupported}</p>}
       </section>
     </main>
