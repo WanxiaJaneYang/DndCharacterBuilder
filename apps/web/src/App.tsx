@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
 import { DEFAULT_STATS, applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
@@ -80,6 +80,9 @@ export function App() {
   const [selectedEditionId, setSelectedEditionId] = useState<string>(() => defaultEditionId(EDITIONS));
   const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<string[]>([]);
   const [rulesReady, setRulesReady] = useState(false);
+  const [isAbilityMethodHintOpen, setIsAbilityMethodHintOpen] = useState(false);
+  const [isAbilityMethodHintPinned, setIsAbilityMethodHintPinned] = useState(false);
+  const abilityMethodHelpRef = useRef<HTMLDivElement | null>(null);
 
   const selectedEdition = useMemo(
     () => EDITIONS.find((edition) => edition.id === selectedEditionId) ?? EDITIONS[0] ?? FALLBACK_EDITION,
@@ -110,6 +113,25 @@ export function App() {
       setStepIndex(0);
     }
   }, [stepIndex, wizardSteps.length]);
+
+  useEffect(() => {
+    if (currentStep?.kind !== 'abilities') {
+      setIsAbilityMethodHintOpen(false);
+      setIsAbilityMethodHintPinned(false);
+    }
+  }, [currentStep?.kind]);
+
+  useEffect(() => {
+    if (!isAbilityMethodHintPinned) return;
+    const handleDocumentPointerDown = (event: MouseEvent) => {
+      if (!abilityMethodHelpRef.current) return;
+      if (abilityMethodHelpRef.current.contains(event.target as Node)) return;
+      setIsAbilityMethodHintPinned(false);
+      setIsAbilityMethodHintOpen(false);
+    };
+    document.addEventListener('mousedown', handleDocumentPointerDown);
+    return () => document.removeEventListener('mousedown', handleDocumentPointerDown);
+  }, [isAbilityMethodHintPinned]);
 
   const t = uiText[language];
   const localizeAbilityLabel = useCallback((ability: string): string => {
@@ -300,6 +322,25 @@ export function App() {
     if (!rollSetsConfig) return;
     const generatedSets = generateRollSets(rollSetsConfig);
     applyAbilitySelection({ ...state.abilities }, { rollSets: { generatedSets, selectedSetIndex: -1 } });
+  };
+
+  const abilityModeLabel = (mode: AbilityMode): string => {
+    if (mode === 'pointBuy') return t.abilityModePointBuy;
+    if (mode === 'phb') return t.abilityModePhb;
+    return t.abilityModeRollSets;
+  };
+
+  const setAbilityMode = (mode: AbilityMode) => {
+    if (mode === 'rollSets') {
+      const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
+      const generatedSets = currentSets.length > 0 ? currentSets : generateRollSets(rollSetsConfig);
+      applyAbilitySelection(
+        { ...state.abilities },
+        { mode, rollSets: { generatedSets, selectedSetIndex: selectedRollSetIndex } }
+      );
+      return;
+    }
+    applyAbilitySelection({ ...state.abilities }, { mode });
   };
 
   const stepAbility = (key: string, delta: number) => {
@@ -756,31 +797,65 @@ export function App() {
       return (
         <section>
           <h2>{currentStep.label}</h2>
-          <fieldset role="radiogroup" aria-label={t.abilityGenerationLabel}>
-            <legend>{t.abilityGenerationLabel}</legend>
-            {abilityModes.map((mode) => (
-              <label key={mode}>
-                <input
-                  type="radio"
-                  name="ability-generation-mode"
-                  checked={selectedAbilityMode === mode}
-                  onChange={() => {
-                    if (mode === 'rollSets') {
-                      const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
-                      const generatedSets = currentSets.length > 0 ? currentSets : generateRollSets(rollSetsConfig);
-                      applyAbilitySelection(
-                        { ...state.abilities },
-                        { mode, rollSets: { generatedSets, selectedSetIndex: selectedRollSetIndex } }
-                      );
-                      return;
-                    }
-                    applyAbilitySelection({ ...state.abilities }, { mode });
-                  }}
-                />
-                {mode === 'pointBuy' ? t.abilityModePointBuy : mode === 'phb' ? t.abilityModePhb : t.abilityModeRollSets}
-              </label>
-            ))}
-          </fieldset>
+          <div className="ability-mode-row">
+            <label htmlFor="ability-generation-select">{t.abilityGenerationLabel}</label>
+            <div
+              className="ability-mode-help"
+              ref={abilityMethodHelpRef}
+              onMouseEnter={() => setIsAbilityMethodHintOpen(true)}
+              onMouseLeave={() => {
+                if (!isAbilityMethodHintPinned) setIsAbilityMethodHintOpen(false);
+              }}
+            >
+              <button
+                type="button"
+                className="ability-mode-help-trigger"
+                aria-label={t.abilityMethodHelpLabel}
+                aria-expanded={isAbilityMethodHintOpen}
+                aria-controls="ability-generation-help"
+                onFocus={() => setIsAbilityMethodHintOpen(true)}
+                onBlur={() => {
+                  if (!isAbilityMethodHintPinned) setIsAbilityMethodHintOpen(false);
+                }}
+                onClick={() => {
+                  setIsAbilityMethodHintPinned((prev) => {
+                    const next = !prev;
+                    setIsAbilityMethodHintOpen(next);
+                    return next;
+                  });
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Escape') return;
+                  event.preventDefault();
+                  setIsAbilityMethodHintPinned(false);
+                  setIsAbilityMethodHintOpen(false);
+                }}
+              >
+                ?
+              </button>
+              {isAbilityMethodHintOpen && (
+                <div id="ability-generation-help" role="tooltip" className="ability-mode-help-panel">
+                  <p>{t.abilityMethodHintPointBuy}</p>
+                  <p>{t.abilityMethodHintPhb}</p>
+                  <p>{t.abilityMethodHintRollSets}</p>
+                </div>
+              )}
+            </div>
+            <select
+              id="ability-generation-select"
+              aria-label={t.abilityGenerationLabel}
+              value={selectedAbilityMode ?? ''}
+              onChange={(event) => {
+                const mode = event.target.value as AbilityMode;
+                if (!abilityModes.includes(mode)) return;
+                setAbilityMode(mode);
+              }}
+            >
+              {abilityModes.map((mode) => (
+                <option key={mode} value={mode}>{abilityModeLabel(mode)}</option>
+              ))}
+            </select>
+          </div>
           {selectedAbilityMode === 'pointBuy' && abilityStepConfig?.pointBuy && (
             <div>
               <label>
