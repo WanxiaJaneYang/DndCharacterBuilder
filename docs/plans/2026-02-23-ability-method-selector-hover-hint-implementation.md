@@ -1,54 +1,50 @@
-# Ability Method Selector + Hover Hint Implementation Plan
+ï»¿# Ability Method Selector + Hover Hint Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Replace the ability-generation radio group with a dropdown and add an accessible hover/focus/click hint explaining each method.
+**Goal:** Replace the ability-generation radio group with a dropdown and add an accessible hover/focus/click hint that is dynamic per configured mode and localization data.
 
-**Architecture:** Keep all logic in `apps/web/src/App.tsx` to preserve current state/data flow and avoid creating a parallel form system. Use a native `<select>` for reliability and a lightweight tooltip/popover state model tied to the existing Ability step render path. Keep localization in `uiText.json`/`uiText.ts` and style in `styles.css`.
+**Architecture:** Keep all logic in `apps/web/src/App.tsx` to preserve current state/data flow. Use a native `<select>` for reliability and a lightweight tooltip/popover model. Mode labels and hint text must come from pack-owned presentation config + localization keys (no hardcoded mode-copy mapping).
 
 **Tech Stack:** React + TypeScript (Vite), RTL/Vitest, existing CSS.
 
 ---
 
-### Task 1: Add localization keys for selector hint UI
+### Task 1: Add data-driven mode UI contract and localization keys
 
 **Files:**
 - Modify: `apps/web/src/uiText.ts`
 - Modify: `apps/web/src/uiText.json`
+- Modify: pack flow/presentation config files (ability step)
 - Test: `apps/web/src/App.test.tsx`
 
 **Step 1: Write the failing test**
 
-Add an assertion in ability-step test that checks hint trigger label and one hint line text exists (EN path).
-
-```ts
-expect(screen.getByRole('button', { name: /About ability generation methods/i })).toBeTruthy();
-```
+Add an assertion in ability-step test that checks hint trigger label and dynamic hint text lookup for active mode.
 
 **Step 2: Run test to verify it fails**
 
-Run: `npm --workspace @dcb/web run test -- App.test.tsx --runInBand`
-Expected: FAIL (missing text key or trigger not rendered)
+Run: `npm --workspace @dcb/web run test -- App.test.tsx`
+Expected: FAIL (missing data-driven lookup path)
 
 **Step 3: Write minimal implementation**
 
-- Add new `UIText` keys:
-  - `abilityMethodHelpLabel`
-  - `abilityMethodHintPointBuy`
-  - `abilityMethodHintPhb`
-  - `abilityMethodHintRollSets`
-- Populate EN + ZH values in JSON.
+- Add generic UI key: `abilityMethodHelpLabel`.
+- Add pack-owned map (example): `abilityPresentation.modeUi[modeId]` with:
+  - `labelKey`
+  - `hintKey`
+- Add localization entries for each enabled mode label + hint.
 
 **Step 4: Run test to verify it passes**
 
 Run same test command.
-Expected: PASS for localization lookup path.
+Expected: PASS for data-driven localization lookup.
 
 **Step 5: Commit**
 
 ```bash
-git add apps/web/src/uiText.ts apps/web/src/uiText.json apps/web/src/App.test.tsx
-git commit -m "feat(web): add localized copy for ability method selector hint"
+git add apps/web/src/uiText.ts apps/web/src/uiText.json packs/** apps/web/src/App.test.tsx
+git commit -m "feat(web): add data-driven mode label/hint localization contract"
 ```
 
 ### Task 2: Replace ability mode radio group with dropdown
@@ -56,31 +52,26 @@ git commit -m "feat(web): add localized copy for ability method selector hint"
 **Files:**
 - Modify: `apps/web/src/App.tsx`
 - Modify: `apps/web/src/App.test.tsx`
-- Test: `apps/web/src/App.test.tsx`
 
 **Step 1: Write the failing test**
 
-Update existing test to expect a combobox instead of radiogroup/radios.
-
-```ts
-expect(screen.getByRole('combobox', { name: /Ability Generation|Éú³É·½Ê½/i })).toBeTruthy();
-```
+Expect `combobox` instead of `radiogroup/radio`.
 
 **Step 2: Run test to verify it fails**
 
-Run: `npm --workspace @dcb/web run test -- App.test.tsx --runInBand`
-Expected: FAIL (radio UI still present)
+Run: `npm --workspace @dcb/web run test -- App.test.tsx`
+Expected: FAIL
 
 **Step 3: Write minimal implementation**
 
-- Replace radio fieldset block with label + `<select>`.
-- Keep existing mode-switch logic by routing selected value through current `applyAbilitySelection` flow.
-- Preserve existing roll-sets initialization behavior when choosing `rollSets`.
+- Replace radio block with label + `<select>`.
+- Keep existing mode-switch logic and roll-sets initialization path.
+- Mode option labels must resolve from config/localization mapping.
 
 **Step 4: Run test to verify it passes**
 
 Run same test command.
-Expected: PASS for selector rendering and mode switching tests.
+Expected: PASS.
 
 **Step 5: Commit**
 
@@ -89,114 +80,83 @@ git add apps/web/src/App.tsx apps/web/src/App.test.tsx
 git commit -m "feat(web): use dropdown for ability generation mode"
 ```
 
-### Task 3: Add accessible hint trigger + panel interactions
+### Task 3: Add accessible dynamic hint trigger + panel
 
 **Files:**
 - Modify: `apps/web/src/App.tsx`
 - Modify: `apps/web/src/App.test.tsx`
-- Test: `apps/web/src/App.test.tsx`
 
 **Step 1: Write the failing test**
 
 Add tests for:
 - open on hover/focus/click
 - close on `Escape`
-- hint text renders all three method descriptions
-
-```ts
-await user.hover(screen.getByRole('button', { name: /About ability generation methods/i }));
-expect(screen.getByText(/Spend points to raise scores within budget/i)).toBeTruthy();
-```
+- hint text resolves for selected mode and focused/browsed option
 
 **Step 2: Run test to verify it fails**
 
-Run: `npm --workspace @dcb/web run test -- App.test.tsx --runInBand`
-Expected: FAIL (hint UI absent)
+Run: `npm --workspace @dcb/web run test -- App.test.tsx`
+Expected: FAIL
 
 **Step 3: Write minimal implementation**
 
-- Add local UI state (`isAbilityMethodHintOpen`).
-- Render hint trigger button near selector label.
-- Render hint panel with localized method lines.
-- Implement hover/focus/click open paths and `Escape` close behavior.
-- Add `aria-label`, `aria-expanded`, `aria-controls`, and tooltip id wiring.
+- Add hint open/pinned state.
+- Render trigger near selector label.
+- Render hint panel content by mode id -> `hintKey` lookup.
+- During dropdown browsing, update hint to focused option where possible; fallback to selected mode.
+- Add required ARIA attributes.
 
 **Step 4: Run test to verify it passes**
 
 Run same test command.
-Expected: PASS for hint interaction tests.
+Expected: PASS.
 
 **Step 5: Commit**
 
 ```bash
 git add apps/web/src/App.tsx apps/web/src/App.test.tsx
-git commit -m "feat(web): add accessible ability method hint popover"
+git commit -m "feat(web): add accessible dynamic ability method hint"
 ```
 
 ### Task 4: Style selector row and hint panel
 
 **Files:**
 - Modify: `apps/web/src/styles.css`
-- Test: `tests/visual/wizard.visual.spec.ts` (if snapshots affected)
+- Optional visual snapshots: `tests/visual/**`
 
-**Step 1: Write the failing test**
+**Step 1: Write failing visual/assertion test**
 
-If visual regression is tracked for Ability step, add/update snapshot expectation path first.
+Add/update visual expectation for Ability step control row.
 
 **Step 2: Run test to verify it fails**
 
-Run: `npm run test:visual -- --grep "ability"` (or project-equivalent visual command)
-Expected: snapshot mismatch/fail.
+Run visual suite command.
+Expected: FAIL/mismatch.
 
 **Step 3: Write minimal implementation**
 
-- Add layout class for selector+hint row.
-- Add accessible focus-visible styling for hint trigger.
-- Add compact tooltip panel styling with responsive width constraints.
-- Ensure mobile wrapping keeps label and hint together.
+- Add layout classes for label + trigger + select.
+- Add focus-visible states.
+- Add compact panel styling and responsive behavior.
 
-**Step 4: Run test to verify it passes**
+**Step 4: Run tests to verify it passes**
 
-Run visual test (or standard test suite if visual not configured for this step).
+Run visual and unit tests.
 Expected: PASS.
 
 **Step 5: Commit**
 
 ```bash
-git add apps/web/src/styles.css tests/visual/wizard.visual.spec.ts-snapshots
-git commit -m "style(web): polish ability method selector row and hint panel"
+git add apps/web/src/styles.css tests/visual/**
+git commit -m "style(web): polish ability selector and dynamic hint panel"
 ```
 
-### Task 5: Accessibility and regression verification
+### Task 5: Verification
 
-**Files:**
-- Verify only (no required file edits)
+**Step 1:** `npm --workspace @dcb/web run test -- App.test.tsx`
 
-**Step 1: Run targeted unit tests**
+**Step 2:** `npm -ws run typecheck`
 
-Run: `npm --workspace @dcb/web run test -- App.test.tsx --runInBand`
-Expected: PASS
+**Step 3:** optional `npm test`
 
-**Step 2: Run workspace checks**
-
-Run: `npm -ws run typecheck`
-Expected: PASS
-
-**Step 3: Run full test suite (if feasible)**
-
-Run: `npm test`
-Expected: PASS or known unrelated failures documented.
-
-**Step 4: Manual accessibility spot-check**
-
-- Keyboard Tab order reaches selector then hint button.
-- Enter/Space toggles hint.
-- Escape closes hint.
-- Hover behavior has click/focus fallback.
-
-**Step 5: Commit verification note (optional docs update)**
-
-```bash
-git add docs/engineering/WORK_PLAN.md
-git commit -m "docs: record ability selector hint verification status"
-```
+**Step 4:** manual a11y check (tab order, enter/space, escape, touch fallback)

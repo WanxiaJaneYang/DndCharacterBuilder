@@ -19,7 +19,7 @@ Improve method selection clarity without adding visual clutter by replacing the 
 
 - Use a native `select` for ability generation mode.
 - Add a hint trigger (`?`) beside the label.
-- Show concise method explanations in a hover/focus/click popover.
+- Show mode-specific explanations in a hover/focus/click popover tied to the currently selected or currently browsed option.
 - Keep current visual theme and spacing rhythm.
 
 ## 4. Interaction Model
@@ -29,10 +29,7 @@ Improve method selection clarity without adding visual clutter by replacing the 
 - Label: `Ability Generation Method`.
 - Control: native `<select>` populated from `abilitiesConfig.modes` in configured order.
 - Default selection: `abilitiesConfig.defaultMode`.
-- Option labels:
-  - Point Buy
-  - PHB Method
-  - Roll 5 Sets
+- Option labels are dynamic and must come from pack/localization data, not hardcoded UI constants.
 
 ### 4.2 Hint Trigger
 
@@ -42,9 +39,10 @@ Improve method selection clarity without adding visual clutter by replacing the 
 
 ### 4.3 Hint Content
 
-- Point Buy: Spend points to raise scores within budget.
-- PHB Method: Assign predefined values by PHB rules.
-- Roll 5 Sets: Roll five arrays, pick one, then assign values. No manual adjustment.
+- Hint content is dynamic per mode and sourced from pack/localization data.
+- UI should render the hint for:
+  - currently selected mode (default state), and
+  - currently highlighted mode while user is browsing dropdown options (when detectable), with fallback to selected mode.
 
 ### 4.4 Hint Behaviors
 
@@ -52,6 +50,7 @@ Improve method selection clarity without adding visual clutter by replacing the 
 - Keyboard: open while trigger has focus; close on blur or `Escape`.
 - Touch: toggle on tap, close on outside tap.
 - Keep one hint panel instance only.
+- During option browsing, hint body updates to the focused option's help text; when browsing ends, it returns to selected mode.
 
 ## 5. Information Architecture
 
@@ -81,6 +80,7 @@ Improve method selection clarity without adding visual clutter by replacing the 
 - One sentence per method.
 - Plain-language and rules-correct.
 - English and Chinese localization keys required.
+- Do not hardcode mode ids (`pointBuy`, `phb`, `rollSets`) in view copy logic; copy mapping must be data-driven.
 
 ## 9. Responsive Behavior
 
@@ -98,10 +98,22 @@ Improve method selection clarity without adding visual clutter by replacing the 
 
 - Dropdown replaces radio group for method selection.
 - Hint content appears on hover/focus/click and is dismissible.
+- Hint content reflects selected mode and updates when user browses different options in the dropdown.
 - Keyboard users can open/close hint without pointer.
 - Touch users can open/close hint reliably.
 - No regression in mode switching behavior.
-- Localized copy available in EN and ZH.
+- Localized copy available in EN and ZH via pack/localization mapping.
+
+## 11.1 Data Contract Additions (Required)
+
+- Extend ability-step presentation data to support dynamic labels/help:
+  - `abilityPresentation.modeUi`: map keyed by `modeId`.
+  - Each entry:
+    - `labelKey`: localization key for mode label.
+    - `hintKey`: localization key for mode help text.
+- Localization payload must include corresponding strings for every enabled mode in every supported locale.
+- Fallback rule:
+  - If `modeUi` is missing for a mode, UI shows mode id text and suppresses hint line for that mode, with a config-warning state.
 
 ## 12. Detailed Visual Design Guide
 
@@ -205,6 +217,10 @@ Improve method selection clarity without adding visual clutter by replacing the 
 - Keep each line concise; avoid wrapping beyond 2 lines on desktop when possible.
 - If translated strings are long, allow panel height growth before reducing font size.
 - Never truncate method explanation text with ellipsis.
+- Mode label and hint text retrieval order:
+  1. `abilityPresentation.modeUi[modeId].labelKey/hintKey`
+  2. locale map lookup
+  3. fallback mode id (label only)
 
 ### 12.9 Accessibility and Usability QA Checklist
 
