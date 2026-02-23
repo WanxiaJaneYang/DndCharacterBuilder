@@ -46,58 +46,53 @@ h1, h2, h3 { font-family: inherit; color: #3a2717; }
   align-items: center;
 }
 .ability-step-btn {
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   margin-right: 0;
   padding: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1;
-}
-.ability-method-ask {
-  display: grid;
-  gap: 0.65rem;
 }
 .ability-mode-row {
   display: grid;
-  gap: 0.45rem;
+  grid-template-columns: auto auto minmax(220px, 260px);
+  gap: 0.75rem;
+  align-items: center;
+  margin: 0.75rem 0;
 }
-.ability-mode-select {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid #b9924f;
-  border-radius: 8px;
-  background: #fff9eb;
-  color: #3b2715;
-  font-size: 1rem;
-  font-weight: 600;
-  padding: 0.5rem 0.75rem;
+.ability-mode-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
-.ability-mode-recommend {
+.ability-mode-help-trigger {
+  width: 30px;
+  height: 30px;
+  padding: 0;
   margin: 0;
-  font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
-  color: #5a4324;
-}
-.point-buy-panel {
-  display: grid;
-  gap: 0.6rem;
-}
-.point-buy-reference summary {
-  cursor: pointer;
+  border-radius: 999px;
+  font-size: 0.95rem;
   font-weight: 700;
 }
-.point-buy-table td,
-.point-buy-table th {
-  width: 50%;
+.ability-mode-help-trigger:focus-visible {
+  outline: 2px solid #201306;
+  outline-offset: 2px;
 }
-.ability-base-cell {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+.ability-mode-help-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 4;
+  width: min(320px, calc(100vw - 2rem));
+  border: 1px solid #c9ad79;
+  border-radius: 8px;
+  background: #fff8e6;
+  box-shadow: 0 8px 18px rgba(34, 20, 8, 0.14);
+  padding: 0.6rem 0.7rem;
+  font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
 }
-.ability-base-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
+.ability-mode-help-panel p {
+  margin: 0;
 }
 .rollsets-header {
   display: flex;
@@ -411,17 +406,15 @@ input { border: 1px solid #bca57d; border-radius: 6px; padding: 0.35rem 0.5rem; 
     grid-template-columns: 1fr;
   }
   .ability-mode-row {
-    gap: 0.35rem;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+  .ability-mode-row select {
+    grid-column: 1 / span 2;
+    width: 100%;
   }
   .ability-stepper {
     grid-template-columns: 44px minmax(0, 1fr) 44px;
-  }
-  .ability-base-cell {
-    width: 100%;
-  }
-  .ability-base-cell input {
-    width: 100%;
-    min-width: 0;
   }
 }
 

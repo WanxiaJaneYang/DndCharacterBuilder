@@ -81,8 +81,9 @@ export function App() {
   const [selectedEditionId, setSelectedEditionId] = useState<string>(() => defaultEditionId(EDITIONS));
   const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<string[]>([]);
   const [rulesReady, setRulesReady] = useState(false);
-  const [abilityModeConfirmed, setAbilityModeConfirmed] = useState(false);
-  const abilityScoresRef = useRef<HTMLDivElement | null>(null);
+  const [isAbilityMethodHintOpen, setIsAbilityMethodHintOpen] = useState(false);
+  const [isAbilityMethodHintPinned, setIsAbilityMethodHintPinned] = useState(false);
+  const abilityMethodHintRef = useRef<HTMLDivElement | null>(null);
 
   const selectedEdition = useMemo(
     () => EDITIONS.find((edition) => edition.id === selectedEditionId) ?? EDITIONS[0] ?? FALLBACK_EDITION,
@@ -115,12 +116,21 @@ export function App() {
   }, [stepIndex, wizardSteps.length]);
 
   useEffect(() => {
-    if (currentStep?.kind !== 'abilities') {
-      setAbilityModeConfirmed(false);
-      return;
-    }
-    setAbilityModeConfirmed(Boolean((state.selections.abilitiesMeta as { mode?: AbilityMode } | undefined)?.mode));
-  }, [currentStep?.kind, state.selections.abilitiesMeta]);
+    if (currentStep?.kind === 'abilities') return;
+    setIsAbilityMethodHintOpen(false);
+    setIsAbilityMethodHintPinned(false);
+  }, [currentStep?.kind]);
+
+  useEffect(() => {
+    if (!isAbilityMethodHintPinned) return;
+    const handlePointerDown = (event: MouseEvent) => {
+      if (abilityMethodHintRef.current?.contains(event.target as Node)) return;
+      setIsAbilityMethodHintPinned(false);
+      setIsAbilityMethodHintOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, [isAbilityMethodHintPinned]);
 
   const t = uiText[language];
   const localizeAbilityLabel = useCallback((ability: string): string => {
@@ -233,12 +243,7 @@ export function App() {
     pointCap?: number;
     rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
   } | undefined) ?? {};
-  const selectedAbilityMode: AbilityMode | undefined = abilityMeta.mode;
-  const recommendedAbilityMode: AbilityMode | undefined = abilityModes.includes('rollSets') ? 'rollSets' : undefined;
-  const effectiveAbilityMode: AbilityMode | undefined = selectedAbilityMode
-    ?? recommendedAbilityMode
-    ?? abilityStepConfig?.defaultMode
-    ?? abilityModes[0];
+  const selectedAbilityMode: AbilityMode | undefined = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0];
   const rollSetsConfig = abilityStepConfig?.rollSets;
   const generatedRollSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
   const selectedRollSetIndexRaw = Number(abilityMeta.rollSets?.selectedSetIndex);
@@ -246,7 +251,7 @@ export function App() {
   const selectedRollSet = selectedRollSetIndex >= 0 && selectedRollSetIndex < generatedRollSets.length
     ? generatedRollSets[selectedRollSetIndex]
     : undefined;
-  const rollSetNeedsSelection = effectiveAbilityMode === 'rollSets' && generatedRollSets.length > 0 && !selectedRollSet;
+  const rollSetNeedsSelection = selectedAbilityMode === 'rollSets' && generatedRollSets.length > 0 && !selectedRollSet;
   const rollScoresPool = selectedRollSet && selectedRollSet.length > 0
     ? selectedRollSet
     : [];
@@ -254,22 +259,22 @@ export function App() {
   const phbStandardArray = abilityStepConfig?.phb?.methodType === 'standardArray'
     ? (abilityStepConfig.phb.standardArray ?? [])
     : [];
-  const abilityMinScore = effectiveAbilityMode === 'pointBuy'
+  const abilityMinScore = selectedAbilityMode === 'pointBuy'
     ? Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN)
-    : effectiveAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
+    : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
       ? Number(abilityStepConfig.phb.manualRange?.minScore ?? DEFAULT_ABILITY_MIN)
-      : effectiveAbilityMode === 'phb' && phbStandardArray.length
+      : selectedAbilityMode === 'phb' && phbStandardArray.length
         ? Math.min(...phbStandardArray)
-        : effectiveAbilityMode === 'rollSets' && rollScoresPool.length
+        : selectedAbilityMode === 'rollSets' && rollScoresPool.length
           ? Math.min(...rollScoresPool)
           : Math.min(...currentScores, DEFAULT_ABILITY_MIN);
-  const abilityMaxScore = effectiveAbilityMode === 'pointBuy'
+  const abilityMaxScore = selectedAbilityMode === 'pointBuy'
     ? Number(abilityStepConfig?.pointBuy?.maxScore ?? DEFAULT_ABILITY_MAX)
-    : effectiveAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
+    : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
       ? Number(abilityStepConfig.phb.manualRange?.maxScore ?? DEFAULT_ABILITY_MAX)
-      : effectiveAbilityMode === 'phb' && phbStandardArray.length
+      : selectedAbilityMode === 'phb' && phbStandardArray.length
         ? Math.max(...phbStandardArray)
-        : effectiveAbilityMode === 'rollSets' && rollScoresPool.length
+        : selectedAbilityMode === 'rollSets' && rollScoresPool.length
           ? Math.max(...rollScoresPool)
           : Math.max(...currentScores, DEFAULT_ABILITY_MAX);
   const pointBuyCostTable = abilityStepConfig?.pointBuy?.costTable ?? {};
@@ -287,7 +292,7 @@ export function App() {
   ) => {
     setState((prev) => {
       const prevMeta = (prev.selections.abilitiesMeta as Record<string, unknown> | undefined) ?? {};
-      const nextMode = metaPatch?.mode ?? effectiveAbilityMode ?? abilityModes[0];
+      const nextMode = metaPatch?.mode ?? selectedAbilityMode ?? abilityModes[0];
       if (!nextMode) return applyChoice(prev, STEP_ID_ABILITIES, nextScores, context);
       const nextMeta = { ...prevMeta, ...metaPatch, mode: nextMode };
       return applyChoice(
@@ -331,15 +336,6 @@ export function App() {
     applyAbilitySelection({ ...state.abilities }, { mode });
   };
 
-  const selectAbilityMode = (mode: AbilityMode) => {
-    setAbilityMode(mode);
-    setAbilityModeConfirmed(true);
-    requestAnimationFrame(() => {
-      if (typeof abilityScoresRef.current?.scrollIntoView !== 'function') return;
-      abilityScoresRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  };
-
   const abilityModeFallbackLabel = (mode: AbilityMode): string => {
     if (mode === 'pointBuy') return t.abilityModePointBuy;
     if (mode === 'phb') return t.abilityModePhb;
@@ -354,6 +350,9 @@ export function App() {
     return typeof value === 'string' && value.length > 0 ? value : fallback;
   };
   const abilityModeLabel = (mode: AbilityMode): string => resolveTextByKey(getModeUi(mode)?.labelKey, abilityModeFallbackLabel(mode));
+  const selectedAbilityModeHint = selectedAbilityMode
+    ? resolveTextByKey(getModeUi(selectedAbilityMode)?.hintKey, '')
+    : '';
 
   const stepAbility = (key: string, delta: number) => {
     const current = Number(state.abilities[key] ?? 0);
@@ -809,52 +808,66 @@ export function App() {
       return (
         <section>
           <h2>{currentStep.label}</h2>
-          <article className="sheet ability-method-ask">
-            <h3>{language === 'zh' ? '选择能力值生成方式' : 'Choose Ability Generation Method'}</h3>
-            <p className="review-muted">
-              {language === 'zh'
-                ? '先选择一种方式，然后展开对应规则并自动跳转到六项能力分配区。'
-                : 'Pick one method first. We will reveal the matching rules and jump you to the six-ability allocation section.'}
-            </p>
-            <div className="ability-mode-row">
-              <label htmlFor="ability-generation-select">{t.abilityGenerationLabel}</label>
-              <select
-                id="ability-generation-select"
-                className="ability-mode-select"
-                value={effectiveAbilityMode ?? ''}
-                onChange={(event) => {
-                  const mode = event.target.value as AbilityMode;
-                  if (!abilityModes.includes(mode)) return;
-                  selectAbilityMode(mode);
-                }}
-              >
-                {abilityModes.map((mode) => (
-                  <option key={mode} value={mode}>
-                    {abilityModeLabel(mode)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                if (!effectiveAbilityMode) return;
-                selectAbilityMode(effectiveAbilityMode);
+          <div className="ability-mode-row">
+            <label htmlFor="ability-generation-select">{t.abilityGenerationLabel}</label>
+            <div
+              className="ability-mode-help"
+              ref={abilityMethodHintRef}
+              onMouseEnter={() => setIsAbilityMethodHintOpen(true)}
+              onMouseLeave={() => {
+                if (!isAbilityMethodHintPinned) setIsAbilityMethodHintOpen(false);
               }}
             >
-              {language === 'zh' ? '使用此方式' : 'Use This Method'}
-            </button>
-            {recommendedAbilityMode === 'rollSets' && (
-              <p
-                className="ability-mode-recommend"
-                title={language === 'zh' ? '新手推荐：掷骰组更直观，能更快开始。' : 'Recommended for first-time players: roll-set is fast and intuitive to start with.'}
+              <button
+                type="button"
+                className="ability-mode-help-trigger"
+                aria-label={t.abilityMethodHelpLabel}
+                aria-expanded={isAbilityMethodHintOpen}
+                aria-controls="ability-generation-help"
+                onFocus={() => setIsAbilityMethodHintOpen(true)}
+                onBlur={() => {
+                  if (!isAbilityMethodHintPinned) setIsAbilityMethodHintOpen(false);
+                }}
+                onClick={() => {
+                  setIsAbilityMethodHintPinned((current) => {
+                    const next = !current;
+                    setIsAbilityMethodHintOpen(next);
+                    return next;
+                  });
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== 'Escape') return;
+                  event.preventDefault();
+                  setIsAbilityMethodHintPinned(false);
+                  setIsAbilityMethodHintOpen(false);
+                }}
               >
-                {language === 'zh' ? '推荐给新手：掷骰 5 组（4d6 去最低）' : 'Recommended for first-time players: Roll 5 sets (4d6 drop lowest)'}
-              </p>
-            )}
-          </article>
-          {abilityModeConfirmed && effectiveAbilityMode === 'pointBuy' && abilityStepConfig?.pointBuy && (
-            <article className="sheet point-buy-panel">
+                ?
+              </button>
+              {isAbilityMethodHintOpen && selectedAbilityModeHint.length > 0 && (
+                <div id="ability-generation-help" role="tooltip" className="ability-mode-help-panel">
+                  <p>{selectedAbilityModeHint}</p>
+                </div>
+              )}
+            </div>
+            <select
+              id="ability-generation-select"
+              value={selectedAbilityMode ?? ''}
+              onChange={(event) => {
+                const mode = event.target.value as AbilityMode;
+                if (!abilityModes.includes(mode)) return;
+                setAbilityMode(mode);
+              }}
+            >
+              {abilityModes.map((mode) => (
+                <option key={mode} value={mode}>
+                  {abilityModeLabel(mode)}
+                </option>
+              ))}
+            </select>
+          </div>
+          {selectedAbilityMode === 'pointBuy' && abilityStepConfig?.pointBuy && (
+            <div>
               <label>
                 {t.pointCapLabel}
                 <input
@@ -872,38 +885,17 @@ export function App() {
                 />
               </label>
               <p>{t.pointBuyRemainingLabel}: {pointBuyRemaining}</p>
-              <details className="point-buy-reference" open>
-                <summary>{language === 'zh' ? '点购花费表' : 'Point Buy Cost Table'}</summary>
-                <table className="review-table point-buy-table">
-                  <thead>
-                    <tr>
-                      <th>{language === 'zh' ? '能力值' : 'Score'}</th>
-                      <th>{language === 'zh' ? '花费' : 'Cost'}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(pointBuyCostTable)
-                      .sort((a, b) => Number(a[0]) - Number(b[0]))
-                      .map(([score, cost]) => (
-                        <tr key={`${score}-${cost}`}>
-                          <td>{score}</td>
-                          <td>{cost}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </details>
-            </article>
+            </div>
           )}
-          {abilityModeConfirmed && effectiveAbilityMode === 'rollSets' && rollSetsConfig && (
+          {selectedAbilityMode === 'rollSets' && rollSetsConfig && (
             <section className="sheet">
               <div className="rollsets-header">
-                <h3>{language === 'zh' ? '掷骰组选择' : 'Roll-Set Selection'}</h3>
+                <h3>{language === 'zh' ? '掷骰组选取' : 'Roll-Set Selection'}</h3>
                 <button type="button" onClick={regenerateRollSetOptions}>
                   {language === 'zh' ? '重新掷骰' : 'Reroll Sets'}
                 </button>
               </div>
-              <p>{language === 'zh' ? '掷出多组属性，选择一组后再分配到六项能力。' : 'Roll multiple sets, pick one, then assign scores as you wish.'}</p>
+              <p>{language === 'zh' ? '掷出多个属性组，选择一组并按你的意愿分配。' : 'Roll multiple sets, pick one, then assign scores as you wish.'}</p>
               <fieldset role="radiogroup" aria-label={language === 'zh' ? '掷骰组列表' : 'Roll-Set Options'}>
                 {generatedRollSets.map((set, index) => (
                   <label key={`roll-set-${index}`} className="rollset-option">
@@ -920,79 +912,52 @@ export function App() {
               </fieldset>
             </section>
           )}
-          {abilityModeConfirmed && (
-            <article className="sheet" ref={abilityScoresRef}>
-              <h3>{language === 'zh' ? '鍏」鑳藉姏鍒嗛厤' : 'Six Ability Scores'}</h3>
-              <table className="review-table ability-edit-table">
-                <thead>
-                  <tr>
-                    <th>{t.reviewAbilityColumn}</th>
-                    <th>{t.reviewBaseColumn}</th>
-                    <th>{t.reviewFinalColumn}</th>
-                    <th>{t.reviewModifierColumn}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ABILITY_ORDER.map((key) => {
-                    const value = Number(state.abilities[key] ?? 0);
-                    const label = localizeAbilityLabel(key);
-                    const canEditAbility = !rollSetNeedsSelection;
-                    const canDecrease = canEditAbility && value > abilityMinScore;
-                    const canIncrease = canEditAbility && value < abilityMaxScore;
-                    const finalScore = Number(sheet.abilities[key]?.score ?? value);
-                    const finalMod = Number(sheet.abilities[key]?.mod ?? 0);
-                    const showAdjustmentButtons = effectiveAbilityMode !== 'rollSets';
-                    return (
-                      <tr key={key}>
-                        <td>{label}</td>
-                        <td>
-                          <div className="ability-base-cell">
-                            <input
-                              id={`ability-input-${key}`}
-                              aria-label={label}
-                              type="number"
-                              disabled={!canEditAbility}
-                              min={abilityMinScore}
-                              max={abilityMaxScore}
-                              step={1}
-                              value={value}
-                              onChange={(e) => setAbility(key, Number(e.target.value))}
-                              onBlur={() => clampAbilityOnBlur(key)}
-                            />
-                            {showAdjustmentButtons && (
-                              <span className="ability-base-controls">
-                                <button
-                                  type="button"
-                                  className="ability-step-btn"
-                                  aria-label={language === 'zh' ? `提高 ${label}` : `Increase ${label}`}
-                                  disabled={!canIncrease}
-                                  onClick={() => stepAbility(key, 1)}
-                                >
-                                  +
-                                </button>
-                                <button
-                                  type="button"
-                                  className="ability-step-btn"
-                                  aria-label={language === 'zh' ? `降低 ${label}` : `Decrease ${label}`}
-                                  disabled={!canDecrease}
-                                  onClick={() => stepAbility(key, -1)}
-                                >
-                                  -
-                                </button>
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td>{finalScore}</td>
-                        <td>{formatSigned(finalMod)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </article>
-          )}
-          {abilityModeConfirmed && showModifierTable && <article className="sheet">
+          <div className="grid">
+            {ABILITY_ORDER.map((key) => {
+              const value = Number(state.abilities[key] ?? 0);
+              const label = localizeAbilityLabel(key);
+              const canEditAbility = !rollSetNeedsSelection;
+              const canDecrease = canEditAbility && value > abilityMinScore;
+              const canIncrease = canEditAbility && value < abilityMaxScore;
+              return (
+                <div key={key} className="ability-input-row">
+                  <label htmlFor={`ability-input-${key}`}>{label}</label>
+                  <div className="ability-stepper">
+                    <button
+                      type="button"
+                      className="ability-step-btn"
+                      aria-label={language === 'zh' ? `降低 ${label}` : `Decrease ${label}`}
+                      disabled={!canDecrease}
+                      onClick={() => stepAbility(key, -1)}
+                    >
+                      -
+                    </button>
+                    <input
+                      id={`ability-input-${key}`}
+                      type="number"
+                      disabled={!canEditAbility}
+                      min={abilityMinScore}
+                      max={abilityMaxScore}
+                      step={1}
+                      value={value}
+                      onChange={(e) => setAbility(key, Number(e.target.value))}
+                      onBlur={() => clampAbilityOnBlur(key)}
+                    />
+                    <button
+                      type="button"
+                      className="ability-step-btn"
+                      aria-label={language === 'zh' ? `提高 ${label}` : `Increase ${label}`}
+                      disabled={!canIncrease}
+                      onClick={() => stepAbility(key, 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {showModifierTable && <article className="sheet">
             <h3>{t.abilityExistingModifiersLabel}</h3>
             <table className="review-table">
               <thead>
@@ -1028,14 +993,6 @@ export function App() {
                       total: items.reduce((sum, item) => sum + item.delta, 0)
                     }))
                     .filter((group) => !hideZeroGroups || group.total !== 0);
-                  const hoverAttribution = groupsToRender
-                    .map((group) => {
-                      const sources = group.items
-                        .map((item) => `${formatSigned(item.delta)} ${item.sourceLabel}`)
-                        .join(', ');
-                      return `${groupLabel(group.sourceType)} ${formatSigned(group.total)}: ${sources}`;
-                    })
-                    .join('\n');
                   const finalScore = Number(sheet.abilities[ability]?.score ?? baseScore);
                   const finalMod = Number(sheet.abilities[ability]?.mod ?? 0);
                   return (
@@ -1043,7 +1000,23 @@ export function App() {
                       <td>{localizeAbilityLabel(ability)}</td>
                       <td>{baseScore}</td>
                       <td>
-                        <span title={hoverAttribution || undefined}>{formatSigned(adjustment)}</span>
+                        <div>{formatSigned(adjustment)}</div>
+                        {groupsToRender.length > 0 && (
+                          <ul className="calc-list">
+                            {groupsToRender.map((group) => (
+                              <li key={`${ability}-${group.sourceType}`}>
+                                <strong>{groupLabel(group.sourceType)}</strong>: {formatSigned(group.total)}
+                                <ul className="calc-list">
+                                  {group.items.map((item, index) => (
+                                    <li key={`${ability}-${group.sourceType}-${index}`}>
+                                      <code>{formatSigned(item.delta)}</code> {item.sourceLabel}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </td>
                       <td>{finalScore}</td>
                       <td>{formatSigned(finalMod)}</td>
@@ -1200,9 +1173,6 @@ export function App() {
     );
   }
 
-  const isAbilityStepActive = currentStep?.kind === 'abilities';
-  const disableNext = stepIndex === wizardSteps.length - 1 || (isAbilityStepActive && !abilityModeConfirmed);
-
   return (
     <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
       <LanguageSwitch language={language} onLanguageChange={setLanguage} text={t} />
@@ -1222,7 +1192,7 @@ export function App() {
         >
           {t.back}
         </button>
-        <button disabled={disableNext} onClick={() => setStepIndex((s) => s + 1)}>{t.next}</button>
+        <button disabled={stepIndex === wizardSteps.length - 1} onClick={() => setStepIndex((s) => s + 1)}>{t.next}</button>
       </footer>
     </main>
   );
