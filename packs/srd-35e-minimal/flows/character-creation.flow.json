@@ -66,6 +66,20 @@
         "showExistingModifiers": true,
         "groupBy": "sourceType",
         "hideZeroEffectGroups": true,
+        "modeUi": {
+          "pointBuy": {
+            "labelKey": "abilityModePointBuy",
+            "hintKey": "abilityMethodHintPointBuy"
+          },
+          "phb": {
+            "labelKey": "abilityModePhb",
+            "hintKey": "abilityMethodHintPhb"
+          },
+          "rollSets": {
+            "labelKey": "abilityModeRollSets",
+            "hintKey": "abilityMethodHintRollSets"
+          }
+        },
         "sourceTypeLabels": {
           "races": "Race",
           "classes": "Class",
