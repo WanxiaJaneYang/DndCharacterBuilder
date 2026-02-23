@@ -163,10 +163,32 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    expect(screen.getByRole('radiogroup', { name: /Ability Generation|生成方式/i })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: /Point Buy|点购/i })).toBeTruthy();
+    expect(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i })).toBeTruthy();
+    expect(screen.getByRole('option', { name: /Point Buy|点购/i })).toBeTruthy();
     expect(screen.getByRole('spinbutton', { name: /Point Cap|点数上限/i })).toBeTruthy();
     expect(screen.getByText(/Points Remaining|剩余点数/i)).toBeTruthy();
+  });
+
+  it('shows ability method hint content on hover and closes on escape', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    const hintTrigger = screen.getByRole('button', { name: /About ability generation methods|生成方式说明/i });
+    await user.hover(hintTrigger);
+    expect(screen.getByText(/Spend points to raise scores within budget|点购：在点数预算内提升属性值/i)).toBeTruthy();
+    expect(screen.getByText(/Assign predefined values by PHB rules|PHB 方法：按照 PHB 规则分配预设数值/i)).toBeTruthy();
+    expect(screen.getByText(/Roll five arrays, pick one, then assign values|掷骰组：掷 5 组，选择 1 组再分配/i)).toBeTruthy();
+
+    hintTrigger.focus();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByText(/Spend points to raise scores within budget|点购：在点数预算内提升属性值/i)).toBeNull();
   });
 
   it('shows existing ability modifiers on the ability step', async () => {
@@ -218,7 +240,8 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    await user.click(screen.getByRole('radio', { name: /Roll Sets|掷骰组/i }));
+    const modeSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
+    await user.selectOptions(modeSelect, 'rollSets');
     expect(screen.getAllByRole('radio', { name: /^(?:Set|第)\s*\d+/i }).length).toBe(5);
 
     await user.click(screen.getByRole('radio', { name: /^(?:Set|第)\s*1/i }));
@@ -240,7 +263,8 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    await user.click(screen.getByRole('radio', { name: /Roll Sets|掷骰组/i }));
+    const modeSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
+    await user.selectOptions(modeSelect, 'rollSets');
 
     expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: /Increase STR|提高 力量/i }) as HTMLButtonElement).disabled).toBe(true);
