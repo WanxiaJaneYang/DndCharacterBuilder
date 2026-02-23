@@ -162,3 +162,24 @@ Proceed to implementation planning with explicit tasks for:
 - engine validation and state model
 - web UI rendering
 - tests and localization updates
+
+## 13) Follow-Up Implementation Task List (UI Improvements)
+
+- [ ] Replace Ability mode radio group with dropdown selector (`pointBuy` / `phb` / `rollSets`).
+- [ ] Refactor mode-change state handling to keep existing `abilitiesMeta` compatibility.
+- [ ] Build Roll Sets drag/drop assignment UI (draggable score chips + six ability drop targets).
+- [ ] Enforce one-use-per-rolled-value assignment in Roll Sets mode.
+- [ ] Disable direct number-input and stepper edits while `rollSets` mode is active.
+- [ ] Persist roll assignment map in `abilitiesMeta` for deterministic review/export.
+- [ ] Add completion validation for roll-set assignment (all six abilities assigned) and gate `Next`.
+- [ ] Add Point Buy collapsible cost-reference section sourced from `abilitiesConfig.pointBuy.costTable`.
+- [ ] Optionally support pack-provided external rules link in Point Buy reference section.
+- [ ] Move point-buy `+` / `-` steppers to the same side of each number input.
+- [ ] Keep stepper hit targets >= 40x40 across breakpoints after layout change.
+- [ ] Change modifier-source details from expanded nested lists to hover/focus tooltip/popover.
+- [ ] Add accessible fallback for source details (keyboard focus + `aria-describedby`/title behavior).
+- [ ] Update English + Chinese UI copy keys for new controls (dropdown label text, point-buy reference labels, roll-set assignment hints).
+- [ ] Update ability-step RTL tests for new interaction model.
+- [ ] Add tests for drag/drop assignment invariants and mode-based edit restrictions.
+- [ ] Add tests for point-buy reference collapse/expand behavior.
+- [ ] Add tests for modifier-source hover/focus detail reveal.
