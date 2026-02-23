@@ -31,6 +31,7 @@ Suggested effect shape:
 ### Mode Workspace
 
 - Render enabled modes from `abilitiesConfig.modes` only.
+- Use a single dropdown (`select`) control for mode switching.
 - Use `abilitiesConfig.defaultMode` as initial mode.
 - Do not apply code-side fallback mode defaults when config is missing.
 
@@ -43,6 +44,7 @@ Suggested effect shape:
 ### Score Controls (Usability Requirements)
 
 - For editable score fields, render adjacent `-` and `+` steppers with large hit areas (minimum 40x40).
+- Keep both steppers on the same side of the numeric field.
 - Click/tap changes by one step; press-and-hold performs repeat stepping for quick adjustments.
 - Keyboard parity:
   - `ArrowUp` / `ArrowDown` adjust by one step.
@@ -50,13 +52,25 @@ Suggested effect shape:
 - Buttons must be disabled when constraints would be violated (min/max score, point cap, mode rules).
 - Expose immediate feedback for blocked increments/decrements (disabled affordance + short inline reason).
 
+### Roll Sets Assignment (Usability Requirements)
+
+- In `rollSets` mode, do not expose direct score steppers/number-editing controls.
+- Show rolled values as draggable tokens/chips.
+- Show one drop target per ability and enforce one-time assignment per rolled value.
+- Until all six assignments are complete, keep validation state incomplete.
+
 ### Dynamic Source Groups
 
 - Group row details by `sourceType` (or configured grouping key).
 - Render only groups whose net value for that ability is non-zero.
-- Show each line item with source label and signed modifier.
+- Default table view shows concise totals only; line-level sources are revealed via hover/focus tooltip/popover.
 - Hide groups with no impact to reduce noise.
 - If no effects apply to an ability, show `No current modifiers` in collapsed detail state.
+
+### Point Buy Rules Reference
+
+- Point Buy workspace includes an inline collapsible section showing the active score-cost table.
+- Optional external rules link may be shown when provided by pack presentation metadata.
 
 ### Ruleset and Extension Awareness
 
