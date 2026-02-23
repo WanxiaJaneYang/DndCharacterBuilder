@@ -26,7 +26,7 @@ Improve method selection clarity without adding visual clutter by replacing the 
 
 ### 4.1 Selector
 
-- Label: `Ability Generation Method`.
+- Label text is dynamic and sourced from localization/config (example EN value: `Ability Generation Method`).
 - Control: native `<select>` populated from `abilitiesConfig.modes` in configured order.
 - Default selection: `abilitiesConfig.defaultMode`.
 - Option labels are dynamic and must come from pack/localization data, not hardcoded UI constants.
@@ -50,7 +50,8 @@ Improve method selection clarity without adding visual clutter by replacing the 
 - Keyboard: open while trigger has focus; close on blur or `Escape`.
 - Touch: toggle on tap, close on outside tap.
 - Keep one hint panel instance only.
-- During option browsing, hint body updates to the focused option's help text; when browsing ends, it returns to selected mode.
+- During option browsing, hint body updates to the focused option's help text when the browser exposes focused-option context.
+- Fallback: if focused-option context is unavailable for native select, update hint on `change` and otherwise show selected-mode hint.
 
 ## 5. Information Architecture
 
