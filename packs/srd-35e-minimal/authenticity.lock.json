@@ -1,8 +1,8 @@
 {
   "packId": "srd-35e-minimal",
   "officialRuleset": true,
-  "generatedAt": "2026-02-20T22:40:00.000Z",
-  "generatedBy": "ability presentation config update",
+  "generatedAt": "2026-02-24T02:30:00.000Z",
+  "generatedBy": "narrow authenticity scope to canonical entity data only",
   "sourceAuthorities": [
     {
       "title": "D&D 3.5 System Reference Document",
@@ -10,14 +10,6 @@
     }
   ],
   "artifacts": [
-    {
-      "path": "manifest.json",
-      "sha256": "1faa8333e85b7f8fcd1ce7a3d8bf994ca457854594d4830038032539b610a2dc"
-    },
-    {
-      "path": "flows/character-creation.flow.json",
-      "sha256": "fb81d3c843968dd9cc1c107b97ac218a1b704955b593b091d1a91a4719649988"
-    },
     {
       "path": "entities/races.json",
       "sha256": "1484ba60454606a3eee5d4d7934e1264dc1af4b2b3f26a9eccc6162030e89518"
