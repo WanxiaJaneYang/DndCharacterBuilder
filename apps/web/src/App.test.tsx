@@ -163,10 +163,38 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    expect(screen.getByRole('radiogroup', { name: /Ability Generation|生成方式/i })).toBeTruthy();
-    expect(screen.getByRole('radio', { name: /Point Buy|点购/i })).toBeTruthy();
+    expect(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i })).toBeTruthy();
+    expect(screen.getByRole('option', { name: /Point Buy|点购/i })).toBeTruthy();
     expect(screen.getByRole('spinbutton', { name: /Point Cap|点数上限/i })).toBeTruthy();
     expect(screen.getByText(/Points Remaining|剩余点数/i)).toBeTruthy();
+  });
+
+  it('shows contextual ability method hint and updates when mode changes', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(/^(?:Human|人类)$/));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    const hintTrigger = screen.getByRole('button', { name: /About ability generation methods|生成方式说明/i });
+    await user.hover(hintTrigger);
+    const firstHint = screen.getByRole('tooltip').textContent ?? '';
+    expect(firstHint.length).toBeGreaterThan(0);
+
+    const modeSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
+    await user.selectOptions(modeSelect, 'rollSets');
+    await user.hover(hintTrigger);
+    const secondHint = screen.getByRole('tooltip').textContent ?? '';
+    expect(secondHint.length).toBeGreaterThan(0);
+    expect(secondHint).not.toBe(firstHint);
+
+    hintTrigger.focus();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('tooltip')).toBeNull();
   });
 
   it('shows existing ability modifiers on the ability step', async () => {
@@ -218,7 +246,8 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    await user.click(screen.getByRole('radio', { name: /Roll Sets|掷骰组/i }));
+    const modeSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
+    await user.selectOptions(modeSelect, 'rollSets');
     expect(screen.getAllByRole('radio', { name: /^(?:Set|第)\s*\d+/i }).length).toBe(5);
 
     await user.click(screen.getByRole('radio', { name: /^(?:Set|第)\s*1/i }));
@@ -240,7 +269,8 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    await user.click(screen.getByRole('radio', { name: /Roll Sets|掷骰组/i }));
+    const modeSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
+    await user.selectOptions(modeSelect, 'rollSets');
 
     expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: /Increase STR|提高 力量/i }) as HTMLButtonElement).disabled).toBe(true);

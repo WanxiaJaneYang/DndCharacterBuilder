@@ -102,6 +102,11 @@ describe("flow schema", () => {
             showExistingModifiers: true,
             groupBy: "sourceType",
             hideZeroEffectGroups: true,
+            modeUi: {
+              pointBuy: { labelKey: "abilityModePointBuy", hintKey: "abilityMethodHintPointBuy" },
+              phb: { labelKey: "abilityModePhb", hintKey: "abilityMethodHintPhb" },
+              rollSets: { labelKey: "abilityModeRollSets", hintKey: "abilityMethodHintRollSets" }
+            },
             sourceTypeLabels: {
               races: "Race",
               classes: "Class",
@@ -333,6 +338,27 @@ describe("flow schema", () => {
             abilityPresentation: {
               showExistingModifiers: true,
               modifierSources: ["race"]
+            }
+          }
+        ]
+      })
+    ).toThrow();
+  });
+
+  it("rejects unknown ability mode key in abilityPresentation.modeUi", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilityPresentation: {
+              showExistingModifiers: true,
+              modeUi: {
+                customMode: { labelKey: "abilityModeCustom", hintKey: "abilityMethodHintCustom" }
+              }
             }
           }
         ]

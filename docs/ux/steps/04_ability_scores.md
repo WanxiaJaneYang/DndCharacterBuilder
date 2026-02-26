@@ -34,6 +34,7 @@ Each ability row displays:
 ### Score Stepper Ergonomics (Point Buy / Range Inputs)
 
 - Use prominent `-` and `+` steppers beside each score input with a minimum 40x40 hit target (mobile-first).
+- Keep both steppers on the **right side** of the score input (stacked vertically) to reduce left-right scanning.
 - Single tap/click adjusts by 1 step in MVP.
 - Native number input keyboard behavior is supported in MVP; custom accelerated shortcuts are out of current scope.
 - Disable stepper buttons when min/max or point-cap constraints would be violated.
