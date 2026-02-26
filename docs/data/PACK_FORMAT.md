@@ -22,7 +22,10 @@ packs/<pack-id>/
 ```
 
 For official SRD-derived packs, `authenticity.lock.json` is used by automated tests to verify
-that critical data artifacts match an approved checksum baseline.
+that canonical SRD data artifacts (`entities/*.json`) match an approved checksum baseline.
+
+`flows/*`, `locales/*`, and other presentation/configuration files are intentionally excluded
+from authenticity locks so normal UI/UX iteration does not require lockfile churn.
 
 ## Entity validation
 

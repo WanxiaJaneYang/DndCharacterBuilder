@@ -11,7 +11,7 @@ An automated lockfile-based integrity check for official packs:
 1. Each official pack can include `authenticity.lock.json`.
 2. The lock records:
    - official source authorities
-   - the expected SHA-256 hash for each critical data artifact
+   - the expected SHA-256 hash for each canonical SRD entity artifact (`entities/*.json`)
 3. `@dcb/contracts` now validates these hashes during test runs.
 4. Any drift in locked files fails CI with a clear checksum mismatch error.
 
@@ -20,6 +20,19 @@ This is enforced by:
 - `packages/contracts/src/authenticity.ts`
 - `packages/contracts/src/contracts.test.ts`
 - `packs/srd-35e-minimal/authenticity.lock.json`
+
+## Scope policy (important)
+
+To reduce false-positive churn, authenticity locks should include only canonical SRD data files:
+
+- `entities/races.json`
+- `entities/classes.json`
+- `entities/feats.json`
+- `entities/items.json`
+- `entities/skills.json`
+- `entities/rules.json`
+
+Do **not** include UI/presentation artifacts like `flows/*` or `locales/*` in authenticity locks.
 
 ## Why this helps
 
