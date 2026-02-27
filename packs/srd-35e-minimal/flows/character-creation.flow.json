@@ -28,7 +28,11 @@
         "type": "manual"
       },
       "abilitiesConfig": {
-        "modes": ["pointBuy", "phb", "rollSets"],
+        "modes": [
+          "pointBuy",
+          "phb",
+          "rollSets"
+        ],
         "defaultMode": "pointBuy",
         "pointBuy": {
           "costTable": {
@@ -53,7 +57,14 @@
         },
         "phb": {
           "methodType": "standardArray",
-          "standardArray": [15, 14, 13, 12, 10, 8]
+          "standardArray": [
+            15,
+            14,
+            13,
+            12,
+            10,
+            8
+          ]
         },
         "rollSets": {
           "setsCount": 5,
@@ -71,6 +82,20 @@
           "classes": "Class",
           "rules": "Rules",
           "feats": "Feats"
+        },
+        "modeUi": {
+          "pointBuy": {
+            "labelKey": "abilityModePointBuy",
+            "hintKey": "abilityMethodHintPointBuy"
+          },
+          "phb": {
+            "labelKey": "abilityModePhb",
+            "hintKey": "abilityMethodHintPhb"
+          },
+          "rollSets": {
+            "labelKey": "abilityModeRollSets",
+            "hintKey": "abilityMethodHintRollSets"
+          }
         }
       }
     },
