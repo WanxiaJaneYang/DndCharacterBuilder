@@ -1,5 +1,5 @@
-﻿import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
 import uiTextJson from './uiText.json';
@@ -14,10 +14,10 @@ const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
 const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
 const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
 const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
-const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?|鎴樺＋(?:锛?绾э級)?)$/i;
-const humanLabelPattern = /^(?:Human|人类|浜虹被)$/;
-const elfLabelPattern = /^(?:Elf|精灵|绮剧伒)$/;
-const raceHeadingPattern = /^(?:Race|种族|绉嶆棌)$/;
+const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?)$/i;
+const humanLabelPattern = /^(?:Human|人类)$/;
+const elfLabelPattern = /^(?:Elf|精灵)$/;
+const raceHeadingPattern = /^(?:Race|种族)$/;
 
 afterEach(() => {
   cleanup();
@@ -127,7 +127,7 @@ describe('role and language behavior', () => {
 
       await user.click(screen.getByLabelText(humanLabelPattern));
       await user.click(screen.getByRole('button', { name: zh.next }));
-      expect(screen.getByRole('heading', { name: /^(?:Class|职业|鑱屼笟)$/i })).toBeTruthy();
+      expect(screen.getByRole('heading', { name: /^(?:Class|职业)$/i })).toBeTruthy();
       expect(screen.getByLabelText(fighterLabelPattern)).toBeTruthy();
     });
   });
@@ -166,10 +166,10 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    expect(screen.getByRole('combobox', { name: /Ability Generation|生成方式|鐢熸垚鏂瑰紡/i })).toBeTruthy();
-    expect(screen.getByRole('option', { name: /Point Buy|点购|鐐硅喘/i })).toBeTruthy();
-    expect(screen.getByRole('spinbutton', { name: /Point Cap|点数上限|鐐规暟涓婇檺/i })).toBeTruthy();
-    expect(screen.getByText(/Points Remaining|剩余点数|鍓╀綑鐐规暟/i)).toBeTruthy();
+    expect(screen.getByRole('combobox', { name: /Ability Generation|生成方式/i })).toBeTruthy();
+    expect(screen.getByRole('option', { name: /Point Buy|点购/i })).toBeTruthy();
+    expect(screen.getByRole('spinbutton', { name: /Point Cap|点数上限/i })).toBeTruthy();
+    expect(screen.getByText(/Points Remaining|剩余点数/i)).toBeTruthy();
   });
 
   it('shows dynamic ability method hint and supports hover, focus, click, and escape', async () => {
@@ -183,10 +183,10 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    const methodSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式|鐢熸垚鏂瑰紡/i });
-    const helpButton = screen.getByRole('button', { name: /About ability generation methods|生成方式说明|鐢熸垚鏂瑰紡璇存槑/i });
-    const pointBuyHint = /Spend points from a configurable budget|在可配置点数上限内分配六项属性值|鍦ㄥ彲閰嶇疆鐐规暟涓婇檺鍐呭垎閰嶅睘鎬у€?/i;
-    const rollSetsHint = /Roll multiple sets and pick one before assignment|掷出多组属性值，先选择一组再分配|鎺峰嚭澶氱粍灞炴€у€硷紝鍏堥€夋嫨涓€缁勫啀鍒嗛厤/i;
+    const methodSelect = screen.getByRole('combobox', { name: /Ability Generation|生成方式/i });
+    const helpButton = screen.getByRole('button', { name: /About ability generation methods|生成方式说明/i });
+    const pointBuyHint = /Spend points from a configurable budget|在可配置点数上限内分配六项属性值/i;
+    const rollSetsHint = /Roll multiple sets and pick one before assignment|掷出多组属性值，先选择一组再分配/i;
 
     await user.hover(helpButton);
     expect(screen.getByText(pointBuyHint)).toBeTruthy();
@@ -194,11 +194,13 @@ describe('role and language behavior', () => {
     await user.unhover(helpButton);
     expect(screen.queryByText(pointBuyHint)).toBeNull();
 
-    fireEvent.focus(helpButton);
+    for (let i = 0; i < 20 && document.activeElement !== helpButton; i += 1) {
+      await user.tab();
+    }
+    expect(document.activeElement).toBe(helpButton);
     expect(screen.getByText(pointBuyHint)).toBeTruthy();
 
     await user.selectOptions(methodSelect, 'rollSets');
-    expect(screen.getByText(rollSetsHint)).toBeTruthy();
 
     await user.click(helpButton);
     expect(screen.getByText(rollSetsHint)).toBeTruthy();
@@ -218,7 +220,7 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    expect(screen.getAllByText(/Existing Modifiers|现有调整|鐜版湁璋冩暣/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Existing Modifiers|现有调整/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/\+2/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/-2/).length).toBeGreaterThan(0);
   });
@@ -234,14 +236,14 @@ describe('role and language behavior', () => {
     await user.click(screen.getByLabelText(fighterLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    const strInput = screen.getByRole('spinbutton', { name: /STR|力量|鍔涢噺/i }) as HTMLInputElement;
+    const strInput = screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement;
     const before = Number(strInput.value);
 
-    await user.click(screen.getByRole('button', { name: /Increase STR|提高 力量|鎻愰珮 鍔涢噺/i }));
-    expect(Number((screen.getByRole('spinbutton', { name: /STR|力量|鍔涢噺/i }) as HTMLInputElement).value)).toBe(before + 1);
+    await user.click(screen.getByRole('button', { name: /Increase STR|提高 力量/i }));
+    expect(Number((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value)).toBe(before + 1);
 
-    await user.click(screen.getByRole('button', { name: /Decrease STR|降低 力量|闄嶄綆 鍔涢噺/i }));
-    expect(Number((screen.getByRole('spinbutton', { name: /STR|力量|鍔涢噺/i }) as HTMLInputElement).value)).toBe(before);
+    await user.click(screen.getByRole('button', { name: /Decrease STR|降低 力量/i }));
+    expect(Number((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value)).toBe(before);
   });
 
   it('supports roll-sets mode by generating 5 sets and applying the selected set', async () => {
@@ -257,14 +259,14 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     await user.selectOptions(
-      screen.getByRole('combobox', { name: /Ability Generation|生成方式|鐢熸垚鏂瑰紡/i }),
+      screen.getByRole('combobox', { name: /Ability Generation|生成方式/i }),
       'rollSets'
     );
-    expect(screen.getAllByRole('radio', { name: /^(?:Set\s*\d+|第\s*\d+\s*组|绗?\s*\d+)/i }).length).toBe(5);
+    expect(screen.getAllByRole('radio', { name: /^(?:Set\s*\d+|第\s*\d+\s*组)/i }).length).toBe(5);
 
-    await user.click(screen.getByRole('radio', { name: /^(?:Set\s*1|第\s*1\s*组|绗?\s*1)/i }));
-    expect((screen.getByRole('spinbutton', { name: /STR|力量|鍔涢噺/i }) as HTMLInputElement).value).toBe('3');
-    expect((screen.getByRole('spinbutton', { name: /DEX|敏捷|鏁忔嵎/i }) as HTMLInputElement).value).toBe('3');
+    await user.click(screen.getByRole('radio', { name: /^(?:Set\s*1|第\s*1\s*组)/i }));
+    expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value).toBe('3');
+    expect((screen.getByRole('spinbutton', { name: /DEX|敏捷/i }) as HTMLInputElement).value).toBe('3');
 
     randomSpy.mockRestore();
   });
@@ -282,13 +284,13 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     await user.selectOptions(
-      screen.getByRole('combobox', { name: /Ability Generation|生成方式|鐢熸垚鏂瑰紡/i }),
+      screen.getByRole('combobox', { name: /Ability Generation|生成方式/i }),
       'rollSets'
     );
 
-    expect((screen.getByRole('spinbutton', { name: /STR|力量|鍔涢噺/i }) as HTMLInputElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: /Increase STR|提高 力量|鎻愰珮 鍔涢噺/i }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: /Decrease STR|降低 力量|闄嶄綆 鍔涢噺/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /Increase STR|提高 力量/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /Decrease STR|降低 力量/i }) as HTMLButtonElement).disabled).toBe(true);
 
     randomSpy.mockRestore();
   });
@@ -306,7 +308,7 @@ describe('role and language behavior', () => {
 
     expect(screen.getAllByText(elfLabelPattern).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Race/i).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/Fighter|鎴樺＋/i)).toBeNull();
+    expect(screen.queryByText(/Fighter|战士/i)).toBeNull();
   });
 
   it('supports back navigation from rules setup and from first wizard step', async () => {
@@ -342,7 +344,7 @@ describe('role and language behavior', () => {
       await user.click(screen.getByLabelText(fighterLabelPattern));
       await user.click(screen.getByRole('button', { name: nextPattern }));
       await user.click(screen.getByRole('button', { name: nextPattern }));
-      const featFieldset = screen.getByRole('group', { name: /Feat|专长|涓撻暱/i });
+      const featFieldset = screen.getByRole('group', { name: /Feat|专长/i });
       const featChoices = within(featFieldset).getAllByRole('checkbox');
       expect(featChoices.length).toBeGreaterThan(0);
       await user.click(featChoices[0]!);

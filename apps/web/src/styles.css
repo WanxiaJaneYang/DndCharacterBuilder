@@ -84,6 +84,10 @@ h1, h2, h3 { font-family: inherit; color: #3a2717; }
   font-weight: 700;
   line-height: 1;
 }
+.ability-method-help-trigger:focus-visible {
+  outline: 3px solid #ffe08a;
+  outline-offset: 1px;
+}
 .ability-method-help-panel {
   position: absolute;
   top: calc(100% + 0.35rem);
@@ -94,6 +98,8 @@ h1, h2, h3 { font-family: inherit; color: #3a2717; }
   border-radius: 8px;
   background: #fff4dc;
   color: #3b2a17;
+  font-size: 0.88rem;
+  line-height: 1.4;
   box-shadow: 0 8px 18px rgba(45, 31, 19, 0.18);
   z-index: 6;
 }

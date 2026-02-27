@@ -250,6 +250,8 @@ export function App() {
     rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
   } | undefined) ?? {};
   const selectedAbilityMode: AbilityMode | undefined = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0];
+  const isAbilityMode = (value: string): value is AbilityMode => abilityModes.some((mode) => mode === value);
+  const selectedAbilityModeValue = selectedAbilityMode && isAbilityMode(selectedAbilityMode) ? selectedAbilityMode : (abilityModes[0] ?? '');
   const rollSetsConfig = abilityStepConfig?.rollSets;
   const generatedRollSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
   const selectedRollSetIndexRaw = Number(abilityMeta.rollSets?.selectedSetIndex);
@@ -854,7 +856,12 @@ export function App() {
                   ?
                 </button>
                 {abilityMethodHintOpen && activeModeHint.length > 0 && (
-                  <div id="ability-method-help-panel" className="ability-method-help-panel">
+                  <div
+                    id="ability-method-help-panel"
+                    className="ability-method-help-panel"
+                    role="tooltip"
+                    aria-label={t.abilityMethodHelpLabel}
+                  >
                     {activeModeHint}
                   </div>
                 )}
@@ -862,8 +869,12 @@ export function App() {
             </div>
             <select
               id="ability-generation-mode-select"
-              value={selectedAbilityMode ?? ''}
-              onChange={(event) => handleAbilityModeChange(event.target.value as AbilityMode)}
+              value={selectedAbilityModeValue}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (!isAbilityMode(value)) return;
+                handleAbilityModeChange(value);
+              }}
             >
               {abilityModes.map((mode) => (
                 <option key={mode} value={mode}>

@@ -110,7 +110,7 @@ const AbilityPresentationSchema = z.object({
   groupBy: z.enum(["sourceType"]).optional(),
   hideZeroEffectGroups: z.boolean().optional(),
   sourceTypeLabels: z.record(z.string().min(1), z.string().min(1)).optional(),
-  modeUi: z.record(z.string().min(1), z.object({
+  modeUi: z.record(AbilityGenerationModeSchema, z.object({
     labelKey: z.string().min(1),
     hintKey: z.string().min(1)
   })).optional()
