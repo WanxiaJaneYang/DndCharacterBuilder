@@ -99,6 +99,20 @@ Engine note:
 - `levelTable` remains useful as display/reference metadata.
 - `deferredMechanics` is the backlog bridge: use it to quickly identify and complete class updates when dependent systems are added.
 
+## Feat `data` model
+
+For `entityType = "feats"`, `data` captures imported SRD source fidelity metadata:
+
+- `sourcePages`: integer[] (book page span anchors from source extraction)
+- `text`: full feat source text block
+- `sourceKey` (optional): original source file/key identifier
+- `featType` (optional): feat bracket label (for example `GENERAL`, `METAMAGIC`, `ITEM CREATION`)
+- `prerequisite` (optional): extracted prerequisite text
+- `benefit` (optional): extracted benefit text
+- `benefitComputed` (optional): engine-oriented computed effects derived from `benefit` when deterministic
+- `normal` (optional): extracted normal text
+- `special` (optional): extracted special text
+
 ## Planned Extensions For Sheet Parity
 
 To support a more complete SRD-style final character sheet, additional entity `data` fields should be added in future phases.

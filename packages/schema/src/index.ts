@@ -109,11 +109,7 @@ const AbilityPresentationSchema = z.object({
   showExistingModifiers: z.boolean(),
   groupBy: z.enum(["sourceType"]).optional(),
   hideZeroEffectGroups: z.boolean().optional(),
-  sourceTypeLabels: z.record(z.string().min(1), z.string().min(1)).optional(),
-  modeUi: z.record(z.string().min(1), z.object({
-    labelKey: z.string().min(1),
-    hintKey: z.string().min(1)
-  })).optional()
+  sourceTypeLabels: z.record(z.string().min(1), z.string().min(1)).optional()
 }).strict();
 
 const ChoiceStepSchema = z.object({
@@ -592,6 +588,18 @@ const ClassDataSchema = z.object({
   });
 });
 
+const FeatDataSchema = z.object({
+  sourcePages: z.array(z.number().int().positive()).min(1),
+  text: z.string().min(1),
+  featType: z.string().min(1).optional(),
+  prerequisite: z.string().min(1).optional(),
+  benefit: z.string().min(1).optional(),
+  benefitComputed: z.array(EffectSchema).optional(),
+  normal: z.string().min(1).optional(),
+  special: z.string().min(1).optional(),
+  sourceKey: z.string().min(1).optional()
+}).strict();
+
 export const EntitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -624,6 +632,19 @@ export const EntitySchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Invalid classes.data: ${issue.message}`,
+          path: ["data", ...issue.path]
+        });
+      });
+    }
+  }
+
+  if (entity.entityType === "feats") {
+    const result = FeatDataSchema.safeParse(entity.data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid feats.data: ${issue.message}`,
           path: ["data", ...issue.path]
         });
       });
