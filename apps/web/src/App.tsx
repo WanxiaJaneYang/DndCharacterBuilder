@@ -797,6 +797,8 @@ export function App() {
       };
       const hintMode = selectedAbilityMode ?? abilityModes[0];
       const activeModeHint = hintMode ? getModeHint(hintMode) : '';
+      const hasActiveModeHint = activeModeHint.length > 0;
+      const isHintVisible = abilityMethodHintOpen && hasActiveModeHint;
       const handleAbilityModeChange = (mode: AbilityMode) => {
         if (mode === 'rollSets') {
           const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
@@ -819,9 +821,15 @@ export function App() {
               <div
                 ref={abilityMethodHintRef}
                 className="ability-method-help"
-                onMouseEnter={() => setAbilityMethodHintOpen(true)}
+                onMouseEnter={() => {
+                  if (!hasActiveModeHint) return;
+                  setAbilityMethodHintOpen(true);
+                }}
                 onMouseLeave={() => {
-                  if (!abilityMethodHintPinned) setAbilityMethodHintOpen(false);
+                  if (abilityMethodHintPinned) return;
+                  const activeElement = document.activeElement as Node | null;
+                  if (activeElement && abilityMethodHintRef.current?.contains(activeElement)) return;
+                  setAbilityMethodHintOpen(false);
                 }}
               >
                 <button
@@ -829,8 +837,12 @@ export function App() {
                   className="ability-method-help-trigger"
                   aria-label={t.abilityMethodHelpLabel}
                   aria-controls="ability-method-help-panel"
-                  aria-expanded={abilityMethodHintOpen}
-                  onFocus={() => setAbilityMethodHintOpen(true)}
+                  aria-expanded={isHintVisible}
+                  disabled={!hasActiveModeHint}
+                  onFocus={() => {
+                    if (!hasActiveModeHint) return;
+                    setAbilityMethodHintOpen(true);
+                  }}
                   onBlur={(event) => {
                     if (abilityMethodHintPinned) return;
                     const next = event.relatedTarget as Node | null;
@@ -838,6 +850,7 @@ export function App() {
                     setAbilityMethodHintOpen(false);
                   }}
                   onClick={() => {
+                    if (!hasActiveModeHint) return;
                     if (abilityMethodHintPinned) {
                       setAbilityMethodHintPinned(false);
                       setAbilityMethodHintOpen(false);
@@ -855,7 +868,7 @@ export function App() {
                 >
                   ?
                 </button>
-                {abilityMethodHintOpen && activeModeHint.length > 0 && (
+                {isHintVisible && (
                   <div
                     id="ability-method-help-panel"
                     className="ability-method-help-panel"
