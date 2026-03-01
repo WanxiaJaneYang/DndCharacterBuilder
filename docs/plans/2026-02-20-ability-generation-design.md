@@ -67,7 +67,12 @@ Conceptual shape:
 
 Presentation config:
 - `abilityPresentation.showExistingModifiers`
-- `abilityPresentation.modifierSources` (e.g. race/class/rules/feats)
+- `abilityPresentation.groupBy` (`sourceType` for grouped modifier summaries)
+- `abilityPresentation.hideZeroEffectGroups`
+- `abilityPresentation.sourceTypeLabels` for localized source-group labels
+- `abilityPresentation.modeUi`:
+  - `labelKey` per mode id (e.g. `pointBuy`, `phb`, `rollSets`) for selector labels
+  - `hintKey` per mode id for the helper tooltip content shown beside the selector
 
 ## 5) UX Interaction Model
 

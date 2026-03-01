@@ -188,25 +188,44 @@ describe('role and language behavior', () => {
     const pointBuyHint = /Spend points from a configurable budget|在可配置点数上限内分配六项属性值/i;
     const rollSetsHint = /Roll multiple sets and pick one before assignment|掷出多组属性值，先选择一组再分配/i;
 
+    expect(helpButton.getAttribute('aria-expanded')).toBe('false');
+    expect(helpButton.getAttribute('aria-controls')).toBeNull();
+    expect(helpButton.getAttribute('aria-describedby')).toBeNull();
+
     await user.hover(helpButton);
     expect(screen.getByText(pointBuyHint)).toBeTruthy();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('true');
+    expect(helpButton.getAttribute('aria-controls')).toBe('ability-method-help-panel');
+    expect(helpButton.getAttribute('aria-describedby')).toBe('ability-method-help-panel');
 
     await user.unhover(helpButton);
     expect(screen.queryByText(pointBuyHint)).toBeNull();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('false');
+    expect(helpButton.getAttribute('aria-controls')).toBeNull();
+    expect(helpButton.getAttribute('aria-describedby')).toBeNull();
 
     for (let i = 0; i < 20 && document.activeElement !== helpButton; i += 1) {
       await user.tab();
     }
     expect(document.activeElement).toBe(helpButton);
     expect(screen.getByText(pointBuyHint)).toBeTruthy();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('true');
+    expect(helpButton.getAttribute('aria-controls')).toBe('ability-method-help-panel');
+    expect(helpButton.getAttribute('aria-describedby')).toBe('ability-method-help-panel');
 
     await user.selectOptions(methodSelect, 'rollSets');
 
     await user.click(helpButton);
     expect(screen.getByText(rollSetsHint)).toBeTruthy();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('true');
+    expect(helpButton.getAttribute('aria-controls')).toBe('ability-method-help-panel');
+    expect(helpButton.getAttribute('aria-describedby')).toBe('ability-method-help-panel');
 
     await user.keyboard('{Escape}');
     expect(screen.queryByText(rollSetsHint)).toBeNull();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('false');
+    expect(helpButton.getAttribute('aria-controls')).toBeNull();
+    expect(helpButton.getAttribute('aria-describedby')).toBeNull();
   });
 
   it('shows existing ability modifiers on the ability step', async () => {

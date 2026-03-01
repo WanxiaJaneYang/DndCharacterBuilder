@@ -836,8 +836,9 @@ export function App() {
                   type="button"
                   className="ability-method-help-trigger"
                   aria-label={t.abilityMethodHelpLabel}
-                  aria-controls="ability-method-help-panel"
                   aria-expanded={isHintVisible}
+                  aria-controls={isHintVisible ? 'ability-method-help-panel' : undefined}
+                  aria-describedby={isHintVisible ? 'ability-method-help-panel' : undefined}
                   disabled={!hasActiveModeHint}
                   onFocus={() => {
                     if (!hasActiveModeHint) return;
