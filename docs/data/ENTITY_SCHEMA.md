@@ -109,9 +109,12 @@ For `entityType = "feats"`, `data` captures imported SRD source fidelity metadat
 - `featType` (optional): feat bracket label (for example `GENERAL`, `METAMAGIC`, `ITEM CREATION`)
 - `prerequisite` (optional): extracted prerequisite text
 - `benefit` (optional): extracted benefit text
-- `benefitComputed` (optional): engine-oriented computed effects derived from `benefit` when deterministic
 - `normal` (optional): extracted normal text
 - `special` (optional): extracted special text
+
+Engine note:
+- Keep source-faithful imported prose in `data`.
+- Keep engine-ready feat mechanics in the entity-level `effects` field so feats stay consistent with other entity buckets.
 
 ## Planned Extensions For Sheet Parity
 

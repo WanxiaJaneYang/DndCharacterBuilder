@@ -968,21 +968,22 @@ describe("feat entity schema", () => {
       description: "POWER ATTACK [GENERAL] ...",
       portraitUrl: null,
       iconUrl: null,
+      effects: [
+        { kind: "add", targetPath: "stats.attackBonus", value: { const: -1 } },
+        { kind: "add", targetPath: "stats.damage", value: { const: 1 } }
+      ],
       data: {
         sourcePages: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103],
         text: "POWER ATTACK [GENERAL] ...",
         featType: "GENERAL",
         prerequisite: "Str 13",
         benefit: "Trade attack bonus for damage.",
-        benefitComputed: [
-          { kind: "add", targetPath: "stats.attackBonus", value: { const: -1 } },
-          { kind: "add", targetPath: "stats.damage", value: { const: 1 } }
-        ],
         special: "A fighter may select this as a bonus feat."
       }
     });
 
     expect(parsed.id).toBe("power-attack");
+    expect(parsed.effects).toHaveLength(2);
   });
 
   it("rejects feats missing source metadata text", () => {
@@ -997,6 +998,27 @@ describe("feat entity schema", () => {
         iconUrl: null,
         data: {
           sourcePages: [90]
+        }
+      })
+    ).toThrow(/invalid feats\.data/i);
+  });
+
+  it("rejects engine effect data nested inside feat source metadata", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "power-attack",
+        name: "Power Attack",
+        entityType: "feats",
+        summary: "Trade melee attack bonus for extra damage.",
+        description: "POWER ATTACK [GENERAL] ...",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          sourcePages: [89],
+          text: "POWER ATTACK [GENERAL] ...",
+          benefitComputed: [
+            { kind: "add", targetPath: "stats.attackBonus", value: { const: -1 } }
+          ]
         }
       })
     ).toThrow(/invalid feats\.data/i);
