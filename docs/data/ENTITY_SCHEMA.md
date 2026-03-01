@@ -101,7 +101,7 @@ Engine note:
 
 ## Feat `data` model
 
-For `entityType = "feats"`, `data` captures imported SRD source fidelity metadata:
+For `entityType = "feats"`, `data` captures imported source-fidelity metadata:
 
 - `sourcePages`: integer[] (book page span anchors from source extraction)
 - `text`: full feat source text block
@@ -111,10 +111,18 @@ For `entityType = "feats"`, `data` captures imported SRD source fidelity metadat
 - `benefit` (optional): extracted benefit text
 - `normal` (optional): extracted normal text
 - `special` (optional): extracted special text
+- `deferredMechanics` (optional): list of feat-linked mechanics intentionally preserved for future engine work:
+  - `id`: stable identifier for the deferred feat rule/mechanic
+  - `category`: grouping tag (for example `feat-benefit`, `proficiency`, `spell-modifier`)
+  - `description`: clear statement of the source-preserved mechanic that is not implemented yet
+  - `dependsOn`: one or more dependency ids/names required before implementation
+  - `sourceRefs` (optional): source links/ids for authenticity traceability
+  - `impactPaths` (optional): expected model/engine areas impacted when implemented
 
 Engine note:
-- Keep source-faithful imported prose in `data`.
+- Keep source-faithful feat prose in `data`.
 - Keep engine-ready feat mechanics in the entity-level `effects` field so feats stay consistent with other entity buckets.
+- Use `data.deferredMechanics` when a feat should be present in the catalog but its benefit is not yet computable on the final character sheet.
 
 ## Planned Extensions For Sheet Parity
 

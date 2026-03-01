@@ -600,7 +600,8 @@ const FeatDataSchema = z.object({
   benefit: z.string().min(1).optional(),
   normal: z.string().min(1).optional(),
   special: z.string().min(1).optional(),
-  sourceKey: z.string().min(1).optional()
+  sourceKey: z.string().min(1).optional(),
+  deferredMechanics: z.array(DeferredMechanicBaseSchema).optional()
 }).strict();
 
 export const EntitySchema = z.object({

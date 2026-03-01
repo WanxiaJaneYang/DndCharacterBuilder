@@ -1023,6 +1023,60 @@ describe("feat entity schema", () => {
       })
     ).toThrow(/invalid feats\.data/i);
   });
+
+  it("accepts deferred mechanics metadata for not-yet-implemented feat rules", () => {
+    const parsed = EntitySchema.parse({
+      id: "manyshot",
+      name: "Manyshot",
+      entityType: "feats",
+      summary: "Fire multiple arrows simultaneously.",
+      description: "MANYSHOT [GENERAL] ...",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        sourcePages: [96],
+        text: "MANYSHOT [GENERAL] ...",
+        featType: "GENERAL",
+        prerequisite: "Dex 17, Point Blank Shot, Rapid Shot, base attack bonus +6.",
+        benefit: "As a standard action, fire two or more arrows at a single target.",
+        deferredMechanics: [
+          {
+            id: "manyshot-multi-arrow-resolution",
+            category: "attack-routine",
+            description: "Manyshot requires attack-sequence modeling beyond the current engine.",
+            dependsOn: ["iterative-ranged-attack-engine", "ammo-consumption-engine"],
+            impactPaths: ["stats.attackBonus", "combat.ranged.fullAttack"]
+          }
+        ]
+      }
+    });
+
+    expect(parsed.id).toBe("manyshot");
+  });
+
+  it("rejects malformed feat deferred mechanics metadata", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-feat-deferred",
+        name: "Broken Feat Deferred",
+        entityType: "feats",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          sourcePages: [96],
+          text: "BROKEN [GENERAL] ...",
+          deferredMechanics: [
+            {
+              id: "broken-deferred-mechanic",
+              category: "combat"
+            }
+          ]
+        }
+      })
+    ).toThrow(/invalid feats\.data/i);
+  });
 });
 
 
