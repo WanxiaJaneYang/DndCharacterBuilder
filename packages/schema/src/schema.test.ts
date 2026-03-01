@@ -1057,6 +1057,47 @@ describe("class entity schema", () => {
   });
 });
 
+describe("feat entity schema", () => {
+  it("accepts structured feat source metadata", () => {
+    const parsed = EntitySchema.parse({
+      id: "power-attack",
+      name: "Power Attack",
+      entityType: "feats",
+      summary: "Trade melee attack bonus for extra damage.",
+      description: "POWER ATTACK [GENERAL] ...",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        sourcePages: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103],
+        text: "POWER ATTACK [GENERAL] ...",
+        featType: "GENERAL",
+        prerequisite: "Str 13",
+        benefit: "Trade attack bonus for damage.",
+        special: "A fighter may select this as a bonus feat."
+      }
+    });
+
+    expect(parsed.id).toBe("power-attack");
+  });
+
+  it("rejects feats missing source metadata text", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-feat",
+        name: "Broken Feat",
+        entityType: "feats",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          sourcePages: [90]
+        }
+      })
+    ).toThrow(/invalid feats\.data/i);
+  });
+});
+
 
 describe("entity UI metadata", () => {
   it("requires summary/description on all entities", () => {
