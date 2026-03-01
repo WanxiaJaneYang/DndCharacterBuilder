@@ -68,9 +68,6 @@ Conceptual shape:
 Presentation config:
 - `abilityPresentation.showExistingModifiers`
 - `abilityPresentation.modifierSources` (e.g. race/class/rules/feats)
-- `abilityPresentation.modeUi`:
-  - keyed by mode id
-  - per mode: `labelKey` + `hintKey` for localization-driven selector labels and help text
 
 ## 5) UX Interaction Model
 

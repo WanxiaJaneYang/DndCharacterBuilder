@@ -53,6 +53,56 @@ h1, h2, h3 { font-family: inherit; color: #3a2717; }
   font-size: 1.1rem;
   line-height: 1;
 }
+.ability-method-row {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+.ability-method-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+.ability-method-label-row label {
+  margin: 0;
+}
+.ability-method-row select {
+  max-width: 280px;
+}
+.ability-method-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.ability-method-help-trigger {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  margin: 0;
+  padding: 0;
+  font-weight: 700;
+  line-height: 1;
+}
+.ability-method-help-trigger:focus-visible {
+  outline: 3px solid #ffe08a;
+  outline-offset: 1px;
+}
+.ability-method-help-panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  width: min(320px, 85vw);
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #c9ab72;
+  border-radius: 8px;
+  background: #fff4dc;
+  color: #3b2a17;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  box-shadow: 0 8px 18px rgba(45, 31, 19, 0.18);
+  z-index: 6;
+}
 .rollsets-header {
   display: flex;
   align-items: center;

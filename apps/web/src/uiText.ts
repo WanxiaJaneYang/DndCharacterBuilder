@@ -23,6 +23,10 @@ export type UIText = {
   abilityModePointBuy: string;
   abilityModePhb: string;
   abilityModeRollSets: string;
+  abilityMethodHelpLabel: string;
+  abilityMethodHintPointBuy: string;
+  abilityMethodHintPhb: string;
+  abilityMethodHintRollSets: string;
   pointCapLabel: string;
   pointBuyRemainingLabel: string;
   abilityExistingModifiersLabel: string;
@@ -147,6 +151,10 @@ const uiTextStringKeys: Array<Exclude<keyof UIText, 'abilityLabels'>> = [
   'abilityModePointBuy',
   'abilityModePhb',
   'abilityModeRollSets',
+  'abilityMethodHelpLabel',
+  'abilityMethodHintPointBuy',
+  'abilityMethodHintPhb',
+  'abilityMethodHintRollSets',
   'pointCapLabel',
   'pointBuyRemainingLabel',
   'abilityExistingModifiersLabel',
