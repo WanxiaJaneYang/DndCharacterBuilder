@@ -4,6 +4,8 @@ import { loadMinimalPack } from './loadMinimalPack';
 import { DEFAULT_STATS, applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
 import { EDITIONS, FALLBACK_EDITION, type EditionOption, defaultEditionId } from './editions';
 import { detectDefaultLanguage, uiText, type AbilityCode, type Language, type UIText } from './uiText';
+import { AbilityMethodSelector } from './components/AbilityMethodSelector';
+import { PointBuyPanel } from './components/PointBuyPanel';
 
 const embeddedPacks = [loadMinimalPack()];
 type Role = 'dm' | 'player' | null;
@@ -72,6 +74,14 @@ function clampAbilityScore(value: number, min: number, max: number): number {
   return Math.round(clamped);
 }
 
+function derivePointBuyBaseScore(costTable: Record<string, number>, fallback: number): number {
+  const zeroCostScores = Object.entries(costTable)
+    .filter(([, cost]) => Number(cost) === 0)
+    .map(([score]) => Number(score))
+    .filter((score) => Number.isFinite(score));
+  return zeroCostScores.length > 0 ? Math.min(...zeroCostScores) : fallback;
+}
+
 export function App() {
   const [state, setState] = useState<CharacterState>(initialState);
   const [stepIndex, setStepIndex] = useState(0);
@@ -83,6 +93,7 @@ export function App() {
   const [rulesReady, setRulesReady] = useState(false);
   const [abilityMethodHintOpen, setAbilityMethodHintOpen] = useState(false);
   const [abilityMethodHintPinned, setAbilityMethodHintPinned] = useState(false);
+  const [isPointBuyTableOpen, setIsPointBuyTableOpen] = useState(false);
   const abilityMethodHintRef = useRef<HTMLDivElement | null>(null);
 
   const selectedEdition = useMemo(
@@ -286,6 +297,14 @@ export function App() {
           ? Math.max(...rollScoresPool)
           : Math.max(...currentScores, DEFAULT_ABILITY_MAX);
   const pointBuyCostTable = abilityStepConfig?.pointBuy?.costTable ?? {};
+  const pointBuyBaseScore = derivePointBuyBaseScore(
+    pointBuyCostTable,
+    Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN)
+  );
+  const defaultPointBuyScores = useMemo(
+    () => Object.fromEntries(ABILITY_ORDER.map((ability) => [ability, pointBuyBaseScore])),
+    [pointBuyBaseScore]
+  );
   const pointCapMin = abilityStepConfig?.pointBuy?.minPointCap ?? 0;
   const pointCapMax = abilityStepConfig?.pointBuy?.maxPointCap ?? 0;
   const pointCapStep = abilityStepConfig?.pointBuy?.pointCapStep ?? 1;
@@ -293,6 +312,9 @@ export function App() {
   const selectedPointCap = Number.isFinite(Number(abilityMeta.pointCap)) ? Number(abilityMeta.pointCap) : pointCapDefault;
   const pointBuySpent = ABILITY_ORDER.reduce((sum, ability) => sum + Number(pointBuyCostTable[String(state.abilities[ability])] ?? 0), 0);
   const pointBuyRemaining = selectedPointCap - pointBuySpent;
+  const hasInitialAbilityScores = ABILITY_ORDER.every(
+    (ability) => Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN) === Number(initialState.abilities[ability])
+  );
 
   const applyAbilitySelection = (
     nextScores: Record<string, number>,
@@ -354,6 +376,22 @@ export function App() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  useEffect(() => {
+    if (currentStep?.kind !== 'abilities' || selectedAbilityMode !== 'pointBuy') {
+      setIsPointBuyTableOpen(false);
+      return;
+    }
+    if (abilityMeta.mode || !hasInitialAbilityScores) return;
+    applyAbilitySelection(defaultPointBuyScores, { mode: 'pointBuy', pointCap: selectedPointCap });
+  }, [
+    abilityMeta.mode,
+    currentStep?.kind,
+    defaultPointBuyScores,
+    hasInitialAbilityScores,
+    selectedAbilityMode,
+    selectedPointCap
+  ]);
 
   const renderCurrentStep = () => {
     if (!currentStep) return null;
@@ -815,107 +853,78 @@ export function App() {
       return (
         <section>
           <h2>{currentStep.label}</h2>
-          <div className="ability-method-row">
-            <div className="ability-method-label-row">
-              <label htmlFor="ability-generation-mode-select">{t.abilityGenerationLabel}</label>
-              <div
-                ref={abilityMethodHintRef}
-                className="ability-method-help"
-                onMouseEnter={() => {
-                  if (!hasActiveModeHint) return;
-                  setAbilityMethodHintOpen(true);
-                }}
-                onMouseLeave={() => {
-                  if (abilityMethodHintPinned) return;
-                  const activeElement = document.activeElement as Node | null;
-                  if (activeElement && abilityMethodHintRef.current?.contains(activeElement)) return;
-                  setAbilityMethodHintOpen(false);
-                }}
-              >
-                <button
-                  type="button"
-                  className="ability-method-help-trigger"
-                  aria-label={t.abilityMethodHelpLabel}
-                  aria-controls="ability-method-help-panel"
-                  aria-expanded={isHintVisible}
-                  disabled={!hasActiveModeHint}
-                  onFocus={() => {
-                    if (!hasActiveModeHint) return;
-                    setAbilityMethodHintOpen(true);
-                  }}
-                  onBlur={(event) => {
-                    if (abilityMethodHintPinned) return;
-                    const next = event.relatedTarget as Node | null;
-                    if (next && abilityMethodHintRef.current?.contains(next)) return;
-                    setAbilityMethodHintOpen(false);
-                  }}
-                  onClick={() => {
-                    if (!hasActiveModeHint) return;
-                    if (abilityMethodHintPinned) {
-                      setAbilityMethodHintPinned(false);
-                      setAbilityMethodHintOpen(false);
-                    } else {
-                      setAbilityMethodHintPinned(true);
-                      setAbilityMethodHintOpen(true);
-                    }
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key !== 'Escape') return;
-                    event.preventDefault();
-                    setAbilityMethodHintPinned(false);
-                    setAbilityMethodHintOpen(false);
-                  }}
-                >
-                  ?
-                </button>
-                {isHintVisible && (
-                  <div
-                    id="ability-method-help-panel"
-                    className="ability-method-help-panel"
-                    role="tooltip"
-                    aria-label={t.abilityMethodHelpLabel}
-                  >
-                    {activeModeHint}
-                  </div>
-                )}
-              </div>
-            </div>
-            <select
-              id="ability-generation-mode-select"
-              value={selectedAbilityModeValue}
-              onChange={(event) => {
-                const value = event.target.value;
-                if (!isAbilityMode(value)) return;
-                handleAbilityModeChange(value);
-              }}
-            >
-              {abilityModes.map((mode) => (
-                <option key={mode} value={mode}>
-                  {getModeLabel(mode)}
-                </option>
-              ))}
-            </select>
-          </div>
+          <AbilityMethodSelector
+            label={t.abilityGenerationLabel}
+            helpLabel={t.abilityMethodHelpLabel}
+            helpText={activeModeHint}
+            isHintVisible={isHintVisible}
+            isHintAvailable={hasActiveModeHint}
+            value={selectedAbilityModeValue}
+            options={abilityModes.map((mode) => ({ value: mode, label: getModeLabel(mode) }))}
+            onMouseEnter={() => {
+              if (!hasActiveModeHint) return;
+              setAbilityMethodHintOpen(true);
+            }}
+            onMouseLeave={() => {
+              if (abilityMethodHintPinned) return;
+              const activeElement = document.activeElement as Node | null;
+              if (activeElement && abilityMethodHintRef.current?.contains(activeElement)) return;
+              setAbilityMethodHintOpen(false);
+            }}
+            onFocus={() => {
+              if (!hasActiveModeHint) return;
+              setAbilityMethodHintOpen(true);
+            }}
+            onBlur={(event) => {
+              if (abilityMethodHintPinned) return;
+              const next = event.relatedTarget as Node | null;
+              if (next && abilityMethodHintRef.current?.contains(next)) return;
+              setAbilityMethodHintOpen(false);
+            }}
+            onClick={() => {
+              if (!hasActiveModeHint) return;
+              if (abilityMethodHintPinned) {
+                setAbilityMethodHintPinned(false);
+                setAbilityMethodHintOpen(false);
+              } else {
+                setAbilityMethodHintPinned(true);
+                setAbilityMethodHintOpen(true);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape') return;
+              event.preventDefault();
+              setAbilityMethodHintPinned(false);
+              setAbilityMethodHintOpen(false);
+            }}
+            onChange={(value) => {
+              if (!isAbilityMode(value)) return;
+              handleAbilityModeChange(value);
+            }}
+            helpRef={abilityMethodHintRef}
+          />
           {selectedAbilityMode === 'pointBuy' && abilityStepConfig?.pointBuy && (
-            <div>
-              <label>
-                {t.pointCapLabel}
-                <input
-                  type="number"
-                  min={pointCapMin}
-                  max={pointCapMax}
-                  step={pointCapStep}
-                  value={selectedPointCap}
-                  onChange={(event) => {
-                    const parsed = Number(event.target.value);
-                    if (!Number.isFinite(parsed)) return;
-                    const clamped = Math.min(pointCapMax, Math.max(pointCapMin, parsed));
-                    applyAbilitySelection({ ...state.abilities }, { pointCap: clamped });
-                  }}
-                />
-              </label>
-              <p>{t.pointBuyRemainingLabel}: {pointBuyRemaining}</p>
-            </div>
+            <PointBuyPanel
+              pointCapLabel={t.pointCapLabel}
+              pointCap={selectedPointCap}
+              pointCapMin={pointCapMin}
+              pointCapMax={pointCapMax}
+              pointCapStep={pointCapStep}
+              pointBuyRemainingLabel={t.pointBuyRemainingLabel}
+              pointBuyRemaining={pointBuyRemaining}
+              showTableLabel={t.pointBuyShowTableLabel}
+              hideTableLabel={t.pointBuyHideTableLabel}
+              tableCaption={t.pointBuyTableCaption}
+              scoreColumnLabel={t.pointBuyScoreColumn}
+              costColumnLabel={t.pointBuyCostColumn}
+              isTableOpen={isPointBuyTableOpen}
+              costTable={pointBuyCostTable}
+              onPointCapChange={(value) => {
+                const clamped = Math.min(pointCapMax, Math.max(pointCapMin, value));
+                applyAbilitySelection({ ...state.abilities }, { pointCap: clamped });
+              }}
+              onToggleTable={() => setIsPointBuyTableOpen((prev) => !prev)}
+            />
           )}
           {selectedAbilityMode === 'rollSets' && rollSetsConfig && (
             <section className="sheet">

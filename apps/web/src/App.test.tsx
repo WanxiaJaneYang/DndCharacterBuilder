@@ -172,6 +172,50 @@ describe('role and language behavior', () => {
     expect(screen.getByText(/Points Remaining|剩余点数/i)).toBeTruthy();
   });
 
+  it('starts point-buy abilities at the zero-cost score from config', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(humanLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    expect((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value).toBe('8');
+    expect((screen.getByRole('spinbutton', { name: /DEX|敏捷/i }) as HTMLInputElement).value).toBe('8');
+    expect((screen.getByRole('spinbutton', { name: /CON|体质/i }) as HTMLInputElement).value).toBe('8');
+    expect(screen.getByText(/Points Remaining:\s*32|剩余点数:\s*32/i)).toBeTruthy();
+  });
+
+  it('keeps the point-buy table collapsed by default and toggles it with a custom button', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(humanLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    const toggle = screen.getByRole('button', { name: /Show Point Buy Table|展开点购表/i });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('table', { name: /Point Buy Cost Table|点购花费表/i })).toBeNull();
+
+    await user.click(toggle);
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    const pointBuyTable = screen.getByRole('table', { name: /Point Buy Cost Table|点购花费表/i });
+    expect(pointBuyTable).toBeTruthy();
+    expect(within(pointBuyTable).getByRole('cell', { name: '0' })).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: /Hide Point Buy Table|收起点购表/i }));
+
+    expect(screen.queryByRole('table', { name: /Point Buy Cost Table|点购花费表/i })).toBeNull();
+  });
+
   it('shows dynamic ability method hint and supports hover, focus, click, and escape', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -188,25 +232,44 @@ describe('role and language behavior', () => {
     const pointBuyHint = /Spend points from a configurable budget|在可配置点数上限内分配六项属性值/i;
     const rollSetsHint = /Roll multiple sets and pick one before assignment|掷出多组属性值，先选择一组再分配/i;
 
+    expect(helpButton.getAttribute('aria-expanded')).toBe('false');
+    expect(helpButton.getAttribute('aria-controls')).toBeNull();
+    expect(helpButton.getAttribute('aria-describedby')).toBeNull();
+
     await user.hover(helpButton);
     expect(screen.getByText(pointBuyHint)).toBeTruthy();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('true');
+    expect(helpButton.getAttribute('aria-controls')).toBe('ability-method-help-panel');
+    expect(helpButton.getAttribute('aria-describedby')).toBe('ability-method-help-panel');
 
     await user.unhover(helpButton);
     expect(screen.queryByText(pointBuyHint)).toBeNull();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('false');
+    expect(helpButton.getAttribute('aria-controls')).toBeNull();
+    expect(helpButton.getAttribute('aria-describedby')).toBeNull();
 
     for (let i = 0; i < 20 && document.activeElement !== helpButton; i += 1) {
       await user.tab();
     }
     expect(document.activeElement).toBe(helpButton);
     expect(screen.getByText(pointBuyHint)).toBeTruthy();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('true');
+    expect(helpButton.getAttribute('aria-controls')).toBe('ability-method-help-panel');
+    expect(helpButton.getAttribute('aria-describedby')).toBe('ability-method-help-panel');
 
     await user.selectOptions(methodSelect, 'rollSets');
 
     await user.click(helpButton);
     expect(screen.getByText(rollSetsHint)).toBeTruthy();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('true');
+    expect(helpButton.getAttribute('aria-controls')).toBe('ability-method-help-panel');
+    expect(helpButton.getAttribute('aria-describedby')).toBe('ability-method-help-panel');
 
     await user.keyboard('{Escape}');
     expect(screen.queryByText(rollSetsHint)).toBeNull();
+    expect(helpButton.getAttribute('aria-expanded')).toBe('false');
+    expect(helpButton.getAttribute('aria-controls')).toBeNull();
+    expect(helpButton.getAttribute('aria-describedby')).toBeNull();
   });
 
   it('shows existing ability modifiers on the ability step', async () => {

@@ -113,7 +113,7 @@ const AbilityPresentationSchema = z.object({
   modeUi: z.record(AbilityGenerationModeSchema, z.object({
     labelKey: z.string().min(1),
     hintKey: z.string().min(1)
-  })).optional()
+  }).strict()).optional()
 }).strict();
 
 const ChoiceStepSchema = z.object({
