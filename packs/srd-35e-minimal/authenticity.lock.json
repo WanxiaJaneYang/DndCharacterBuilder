@@ -20,11 +20,11 @@
     },
     {
       "path": "entities/feats.json",
-      "sha256": "fb7c95b688f58b5904f6bbd0006a04168aa83f46ae8d72d28e37feefc778f2aa"
+      "sha256": "784b53685681c9023d03bd91700da7cb7abfdaf62e7cae4a98fb81e367afa452"
     },
     {
       "path": "entities/skills.json",
-      "sha256": "45acb712adaaa9d8f5be7d30b065f373e0ac3cec3f0b522c84d69657a8d36cb3"
+      "sha256": "90123cfe590cf2d1b5c753ac92ee12ac13c1a5c95be715adb74894162aca782c"
     },
     {
       "path": "entities/items.json",

@@ -3,6 +3,22 @@
     "id": "acrobatic",
     "name": "Acrobatic",
     "entityType": "feats",
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "skillBonuses.jump",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "skillBonuses.tumble",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
     "summary": "You have excellent body awareness and coordination.",
     "description": "ACROBATIC [GENERAL]\nYou have excellent body awareness and coordination.\nBenefit: You get a +2 bonus on all Jump checks and Tumble checks.",
     "portraitUrl": null,
@@ -49,6 +65,22 @@
     "id": "agile",
     "name": "Agile",
     "entityType": "feats",
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "skillBonuses.balance",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "skillBonuses.escape-artist",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
     "summary": "You are particularly flexible and poised.",
     "description": "AGILE [GENERAL]\nYou are particularly flexible and poised.\nBenefit: You get a +2 bonus on all Balance checks and Escape Artist checks.",
     "portraitUrl": null,
@@ -95,6 +127,22 @@
     "id": "alertness",
     "name": "Alertness",
     "entityType": "feats",
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "skillBonuses.listen",
+        "value": {
+          "const": 2
+        }
+      },
+      {
+        "kind": "add",
+        "targetPath": "skillBonuses.spot",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
     "summary": "You have finely tuned senses.",
     "description": "ALERTNESS [GENERAL]\nYou have finely tuned senses.\nBenefit: You get a +2 bonus on all Listen checks and Spot checks.\nSpecial: The master of a familiar (see the Familiars sidebar, page 52) gains the benefit of the Alertness feat whenever the familiar is within arm's reach.",
     "portraitUrl": null,

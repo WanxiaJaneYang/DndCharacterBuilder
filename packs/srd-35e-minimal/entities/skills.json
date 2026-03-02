@@ -52,6 +52,45 @@
     "iconUrl": null
   },
   {
+    "id": "balance",
+    "name": "Balance",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Balance (skill) option.",
+    "description": "Detailed reference entry for Balance in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "escape-artist",
+    "name": "Escape Artist",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Escape Artist (skill) option.",
+    "description": "Detailed reference entry for Escape Artist in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "tumble",
+    "name": "Tumble",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Tumble (skill) option.",
+    "description": "Detailed reference entry for Tumble in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
     "id": "diplomacy",
     "name": "Diplomacy",
     "entityType": "skills",
