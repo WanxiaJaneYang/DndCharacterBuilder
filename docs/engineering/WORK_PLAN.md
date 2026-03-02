@@ -66,6 +66,13 @@ This living document tracks the engineering tasks required to implement the DnDC
   - `extra-skill-points` now increases level-1 skill budget.
 - Added cross-class skill cost/rank validation and surfaced `favoredClass` XP-penalty metadata for future multiclass leveling logic.
 - Added race-level `deferredMechanics` tracking in schema and `races.json` so PHB-linked but not-yet-implemented race rules are indexed for fast follow-up when dependent systems land.
+- Recorded the approved deferred-mechanics normalization direction in docs so backlog metadata can migrate from engine-oriented path hints to stable concept IDs and capability IDs in a later implementation phase.
+
+## Deferred Mechanics Follow-up
+
+- Documentation phase: define the target vocabulary and migration rules for `deferredMechanics`.
+- Planning phase: map the approved vocabulary to exact schema, test, and data migration tasks.
+- Implementation phase: replace legacy `impactPaths` semantics with domain-oriented impacts and validate `dependsOn` against capability IDs.
 
 ## Checklist
 
