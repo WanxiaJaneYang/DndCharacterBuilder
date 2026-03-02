@@ -61,6 +61,11 @@ Examples:
 - `modifier:armor-check-penalty`
 - `attack:multi-projectile`
 
+Granularity rule:
+- use the most specific stable concept available without encoding engine state
+- prefer specific concepts such as `proficiency:armor:light` when the rule text is specific
+- use broader concepts only when the rule itself is broad and the extra specificity would be artificial
+
 ### 5.2 Capability IDs
 
 Implementation dependencies must be represented as capability IDs.
@@ -104,6 +109,8 @@ It does not answer:
 
 `impactPaths` is now legacy vocabulary. It reflects engine/model destination guesses and should be removed in the implementation phase after replacement with domain-oriented `impacts`.
 
+New data must not introduce `impactPaths`.
+
 ## 7. Numeric Modifier Guidance
 
 When a deferred rule is already representable as a numeric modifier in the effect system, prefer stable concept-keyed targets instead of ad hoc engine fields.
@@ -112,12 +119,19 @@ Preferred examples:
 - `bonuses.skill:jump`
 - `bonuses.skill:tumble`
 
+Separation rule:
+- `impacts` names rule concepts such as `skill:jump`
+- effect targets use modifier or engine channels such as `bonuses.skill:jump`
+- those two namespaces serve different purposes and should not be mixed
+
 Do not use concept-keyed bonus targets when the rule still depends on unmodeled conditional flow, actor choice, timing, or sequencing behavior. In those cases, keep the rule deferred and describe the affected concepts in `impacts`.
 
 ## 8. Migration Rules
 
 Implementation PR requirements:
 - add a canonical capability registry and validate `dependsOn` against it
+- choose the registry location and document it
+- define the validation strategy for capability IDs
 - add or rename schema support for domain-oriented `impacts`
 - migrate existing race/class/feat deferred metadata away from engine-path semantics
 - update docs and tests to use the new contract
@@ -134,7 +148,7 @@ Examples derived from current backlog patterns:
 | Current engine-oriented metadata | Domain-oriented replacement |
 |----------------------------------|-----------------------------|
 | `impactPaths: [stats.attackBonus, combat.ranged.fullAttack]` | `impacts: [combat:ranged, attack:multi-projectile]` |
-| `impactPaths: [selections.equipment, validation.race.proficiency]` | `impacts: [proficiency:weapon, proficiency:armor]` |
+| `impactPaths: [selections.equipment, validation.race.proficiency]` | `impacts: [proficiency:armor:light, proficiency:weapon:martial]` |
 | `impactPaths: [metadata.alignment, validation.class.alignment]` | `impacts: [alignment:restriction]` |
 | `impactPaths: [skills.jump, skills.tumble]` | `impacts: [skill:jump, skill:tumble]` |
 

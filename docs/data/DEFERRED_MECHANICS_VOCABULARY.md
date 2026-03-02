@@ -30,6 +30,11 @@ Examples:
 - `proficiency:armor:light`
 - `modifier:armor-check-penalty`
 
+Granularity rule:
+- use the most specific stable concept available without encoding engine state
+- prefer `proficiency:armor:light` over `proficiency:armor` when the rule is truly light-armor-specific
+- use broader concepts only when the rule meaning is intentionally broad
+
 ### Capability ID
 
 A stable identifier for an implementation capability that must exist before a deferred mechanic can be implemented.
@@ -71,10 +76,13 @@ Do not use it for:
 - engine object paths
 - current sheet model fields
 - speculative storage destinations
+- effect-target namespaces such as `bonuses.*`
 
 ### `impactPaths`
 
 `impactPaths` is legacy terminology. Existing datasets may still use it until the implementation phase lands, but new conventions should be written against `impacts` and rule concept IDs.
+
+New data MUST NOT introduce `impactPaths`.
 
 ## Writing Rules
 
@@ -111,6 +119,12 @@ Examples:
 - `bonuses.skill:jump`
 - `bonuses.skill:tumble`
 
+Separation rule:
+- `impacts` always names rule concepts such as `skill:jump`
+- effect targets always use modifier or engine channels such as `bonuses.skill:jump`
+- do not use `bonuses.*` values inside `impacts`
+- do not replace effect targets with raw rule concepts where the effect system needs a target channel
+
 Use concept-keyed bonus targets only when:
 - the rule is numeric
 - the target concept is stable
@@ -137,13 +151,18 @@ This list is illustrative for planning and naming consistency. The implementatio
 - `cap:ammo-consumption`
 - `cap:metamagic`
 
+Planning requirements for the registry:
+- choose and document the registry location
+- define the validation strategy for `dependsOn`
+- define how new capability IDs are added and reviewed
+
 ## Example Translations
 
 | Legacy metadata pattern | Preferred concept-oriented form |
 |-------------------------|---------------------------------|
 | `impactPaths: [skills.jump, skills.tumble]` | `impacts: [skill:jump, skill:tumble]` |
 | `impactPaths: [validation.class.alignment]` | `impacts: [alignment:restriction]` |
-| `impactPaths: [selections.equipment, validation.race.proficiency]` | `impacts: [proficiency:weapon, proficiency:armor]` |
+| `impactPaths: [selections.equipment, validation.race.proficiency]` | `impacts: [proficiency:armor:light, proficiency:weapon:martial]` |
 | `impactPaths: [combat.ranged.fullAttack]` | `impacts: [combat:ranged, attack:multi-projectile]` |
 
 ## Phase Boundary
