@@ -597,6 +597,33 @@ describe("engine determinism", () => {
     expect(sheet.decisions.ignoresMulticlassXpPenalty).toBe(true);
   });
 
+  it("applies selected feat skill bonuses to skill totals and phase-2 misc values", () => {
+    let state = applyChoice(initialState, "name", "Scout");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "feat", ["acrobatic", "agile", "alertness"]);
+    state = applyChoice(state, "skills", {
+      jump: 1,
+      tumble: 1,
+      balance: 1,
+      "escape-artist": 1,
+      listen: 1,
+      spot: 1
+    });
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(sheet.skills.jump?.total).toBe(3);
+    expect(sheet.skills.tumble?.total).toBe(3);
+    expect(sheet.skills.balance?.total).toBe(3);
+    expect(sheet.skills["escape-artist"]?.total).toBe(3);
+    expect(sheet.skills.listen?.total).toBe(3);
+    expect(sheet.skills.spot?.total).toBe(3);
+    expect(sheet.phase2.skills.find((skill) => skill.id === "jump")?.misc).toBe(2);
+    expect(sheet.phase2.skills.find((skill) => skill.id === "spot")?.misc).toBe(2);
+  });
+
   it("applies minimum level-1 skill budget floor before multiplier", () => {
     let state = applyChoice(initialState, "name", "LowInt");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 3, wis: 10, cha: 10 });

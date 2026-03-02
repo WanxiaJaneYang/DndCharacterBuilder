@@ -110,10 +110,20 @@ const AbilityPresentationSchema = z.object({
   groupBy: z.enum(["sourceType"]).optional(),
   hideZeroEffectGroups: z.boolean().optional(),
   sourceTypeLabels: z.record(z.string().min(1), z.string().min(1)).optional(),
-  modeUi: z.record(AbilityGenerationModeSchema, z.object({
-    labelKey: z.string().min(1),
-    hintKey: z.string().min(1)
-  }).strict()).optional()
+  modeUi: z.object({
+    pointBuy: z.object({
+      labelKey: z.string().min(1),
+      hintKey: z.string().min(1)
+    }).strict().optional(),
+    phb: z.object({
+      labelKey: z.string().min(1),
+      hintKey: z.string().min(1)
+    }).strict().optional(),
+    rollSets: z.object({
+      labelKey: z.string().min(1),
+      hintKey: z.string().min(1)
+    }).strict().optional()
+  }).strict().optional()
 }).strict();
 
 const ChoiceStepSchema = z.object({
@@ -592,6 +602,18 @@ const ClassDataSchema = z.object({
   });
 });
 
+const FeatDataSchema = z.object({
+  sourcePages: z.array(z.number().int().positive()).min(1),
+  text: z.string().min(1),
+  featType: z.string().min(1).optional(),
+  prerequisite: z.string().min(1).optional(),
+  benefit: z.string().min(1).optional(),
+  normal: z.string().min(1).optional(),
+  special: z.string().min(1).optional(),
+  sourceKey: z.string().min(1).optional(),
+  deferredMechanics: z.array(DeferredMechanicBaseSchema).optional()
+}).strict();
+
 export const EntitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -624,6 +646,19 @@ export const EntitySchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Invalid classes.data: ${issue.message}`,
+          path: ["data", ...issue.path]
+        });
+      });
+    }
+  }
+
+  if (entity.entityType === "feats") {
+    const result = FeatDataSchema.safeParse(entity.data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid feats.data: ${issue.message}`,
           path: ["data", ...issue.path]
         });
       });

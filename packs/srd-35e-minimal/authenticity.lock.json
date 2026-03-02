@@ -1,8 +1,8 @@
 {
   "packId": "srd-35e-minimal",
   "officialRuleset": true,
-  "generatedAt": "2026-02-24T02:30:00.000Z",
-  "generatedBy": "narrow authenticity scope to canonical entity data only",
+  "generatedAt": "2026-03-01T23:45:00.000Z",
+  "generatedBy": "phb feat catalog import from finalized phb-hierarchical-json-v6-final",
   "sourceAuthorities": [
     {
       "title": "D&D 3.5 System Reference Document",
@@ -20,11 +20,11 @@
     },
     {
       "path": "entities/feats.json",
-      "sha256": "93eb9088a54b78a913d46eceee101e0b747f738bc700d18d3a9ce541b6fae9db"
+      "sha256": "784b53685681c9023d03bd91700da7cb7abfdaf62e7cae4a98fb81e367afa452"
     },
     {
       "path": "entities/skills.json",
-      "sha256": "45acb712adaaa9d8f5be7d30b065f373e0ac3cec3f0b522c84d69657a8d36cb3"
+      "sha256": "1ac572e4cad8faa680477cdf73c87172257dd08835ce3a8df66a2d202499eca5"
     },
     {
       "path": "entities/items.json",

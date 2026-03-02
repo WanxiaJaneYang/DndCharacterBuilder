@@ -90,6 +90,7 @@ export interface SkillBreakdown {
   costSpent: number;
   abilityMod: number;
   racialBonus: number;
+  miscBonus: number;
   total: number;
 }
 
@@ -547,6 +548,18 @@ function buildRacialSkillBonusMap(state: CharacterState, context: EngineContext)
   }, {});
 }
 
+function buildEffectSkillBonusMap(sheet: Record<string, unknown>): Record<string, number> {
+  const raw = sheet.skillBonuses;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  return Object.entries(raw as Record<string, unknown>).reduce<Record<string, number>>((acc, [skillId, bonus]) => {
+    const normalizedSkillId = normalizeSkillId(skillId);
+    const numericBonus = Number(bonus);
+    if (!normalizedSkillId || !Number.isFinite(numericBonus)) return acc;
+    acc[normalizedSkillId] = (acc[normalizedSkillId] ?? 0) + numericBonus;
+    return acc;
+  }, {});
+}
+
 function parseRacialModifiers(raw: unknown): RacialModifierBreakdown[] {
   if (!Array.isArray(raw)) return [];
   const output: RacialModifierBreakdown[] = [];
@@ -704,7 +717,8 @@ function buildSkillBreakdown(
   state: CharacterState,
   context: EngineContext,
   abilities: Record<string, { score: number; mod: number }>,
-  decisions: DecisionSummary
+  decisions: DecisionSummary,
+  effectBonuses: Record<string, number>
 ): Record<string, SkillBreakdown> {
   const selectedRanks = getSelectedSkillRanks(state, context);
   const racialBonuses = buildRacialSkillBonusMap(state, context);
@@ -720,6 +734,7 @@ function buildSkillBreakdown(
     const costPerRank = classSkill ? 1 : 2;
     const costSpent = ranks * costPerRank;
     const racialBonus = racialBonuses[normalizeSkillId(skillEntity.id)] ?? 0;
+    const miscBonus = effectBonuses[normalizeSkillId(skillEntity.id)] ?? 0;
     const abilityModifier = abilities[ability]?.mod ?? 0;
 
     output[skillEntity.id] = {
@@ -732,7 +747,8 @@ function buildSkillBreakdown(
       costSpent,
       abilityMod: abilityModifier,
       racialBonus,
-      total: ranks + abilityModifier + racialBonus
+      miscBonus,
+      total: ranks + abilityModifier + racialBonus + miscBonus
     };
   }
 
@@ -1422,7 +1438,8 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
       }
     }
   };
-  const skills = buildSkillBreakdown(state, context, finalAbilities, decisions);
+  const effectSkillBonuses = buildEffectSkillBonusMap(sheet);
+  const skills = buildSkillBreakdown(state, context, finalAbilities, decisions, effectSkillBonuses);
   const selectedFeatIds = getSelectedFeatIds(state);
   const phase2Feats = selectedFeatIds.map((featId) => {
     const feat = entityBuckets.feats?.[featId];
@@ -1455,7 +1472,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   const phase2Skills = Object.entries(skills)
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([skillId, skill]) => {
-      const misc = 0;
+      const misc = skill.miscBonus;
       const skillEntity = entityBuckets.skills?.[skillId];
       const acp = skillIsAffectedByArmorCheckPenalty(skillEntity) ? acpPenalty : 0;
       return {
@@ -1466,7 +1483,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
         racial: skill.racialBonus,
         misc,
         acp,
-        total: skill.total + misc + acp
+        total: skill.total + acp
       };
     });
   const adjustedSpeed = Number(sheet.stats.speed ?? DEFAULT_STATS.speed);

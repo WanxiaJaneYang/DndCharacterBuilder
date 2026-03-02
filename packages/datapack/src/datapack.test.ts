@@ -41,6 +41,42 @@ describe("resolvePackSet", () => {
     expect(abilityStep?.abilitiesConfig?.modes).toEqual(["pointBuy", "phb", "rollSets"]);
   });
 
+  it("loads the finalized phb feat catalog with preserved modeled mechanics", () => {
+    const root = path.resolve(process.cwd(), "../../packs");
+    const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
+    const featIds = Object.keys(resolved.entities.feats ?? {}).sort();
+
+    expect(featIds.length).toBeGreaterThanOrEqual(107);
+    expect(featIds).toContain("power-attack");
+    expect(featIds).toContain("brew-potion");
+    expect(featIds).toContain("widen-spell");
+    expect(featIds).toContain("weapon-focus-longsword");
+
+    expect(resolved.entities.feats?.["power-attack"]?.data).toMatchObject({
+      featType: "GENERAL",
+      prerequisite: "Str 13.",
+      benefit: "On your action, before making attack rolls for a round, you may choose to subtract a number from all melee attack rolls and add the same number to all melee damage rolls. This number may not exceed your base attack bonus. The penalty on attacks and bonus on damage apply until your next turn."
+    });
+    expect(resolved.entities.feats?.["power-attack"]?.description).toContain("POWER ATTACK [GENERAL]");
+    expect(resolved.entities.feats?.["brew-potion"]?.data).toMatchObject({
+      featType: "ITEM CREATION",
+      deferredMechanics: expect.any(Array)
+    });
+    expect(resolved.entities.feats?.["widen-spell"]?.data).toMatchObject({
+      featType: "METAMAGIC"
+    });
+    expect(resolved.entities.feats?.["weapon-focus-longsword"]?.effects).toContainEqual({
+      kind: "add",
+      targetPath: "stats.attackBonus",
+      value: { const: 1 }
+    });
+    expect(resolved.entities.feats?.["weapon-focus-longsword"]?.data).toMatchObject({
+      featType: "GENERAL",
+      benefit: "You gain a +1 bonus on all attack rolls you make using the selected weapon."
+    });
+    expect(resolved.entities.feats?.["brew-potion"]?.description).not.toContain("Table 5");
+  });
+
   it("ensures all entities expose required UI metadata", () => {
     const root = path.resolve(process.cwd(), "../../packs");
     const resolved = resolvePackSet(root, ["srd-35e-minimal"]);

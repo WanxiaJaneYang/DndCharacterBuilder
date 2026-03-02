@@ -1057,6 +1057,127 @@ describe("class entity schema", () => {
   });
 });
 
+describe("feat entity schema", () => {
+  it("accepts structured feat source metadata", () => {
+    const parsed = EntitySchema.parse({
+      id: "power-attack",
+      name: "Power Attack",
+      entityType: "feats",
+      summary: "Trade melee attack bonus for extra damage.",
+      description: "POWER ATTACK [GENERAL] ...",
+      portraitUrl: null,
+      iconUrl: null,
+      effects: [
+        { kind: "add", targetPath: "stats.attackBonus", value: { const: -1 } },
+        { kind: "add", targetPath: "stats.damage", value: { const: 1 } }
+      ],
+      data: {
+        sourcePages: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103],
+        text: "POWER ATTACK [GENERAL] ...",
+        featType: "GENERAL",
+        prerequisite: "Str 13",
+        benefit: "Trade attack bonus for damage.",
+        special: "A fighter may select this as a bonus feat."
+      }
+    });
+
+    expect(parsed.id).toBe("power-attack");
+    expect(parsed.effects).toHaveLength(2);
+  });
+
+  it("rejects feats missing source metadata text", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-feat",
+        name: "Broken Feat",
+        entityType: "feats",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          sourcePages: [90]
+        }
+      })
+    ).toThrow(/invalid feats\.data/i);
+  });
+
+  it("rejects engine effect data nested inside feat source metadata", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "power-attack",
+        name: "Power Attack",
+        entityType: "feats",
+        summary: "Trade melee attack bonus for extra damage.",
+        description: "POWER ATTACK [GENERAL] ...",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          sourcePages: [89],
+          text: "POWER ATTACK [GENERAL] ...",
+          benefitComputed: [
+            { kind: "add", targetPath: "stats.attackBonus", value: { const: -1 } }
+          ]
+        }
+      })
+    ).toThrow(/invalid feats\.data/i);
+  });
+
+  it("accepts deferred mechanics metadata for not-yet-implemented feat rules", () => {
+    const parsed = EntitySchema.parse({
+      id: "manyshot",
+      name: "Manyshot",
+      entityType: "feats",
+      summary: "Fire multiple arrows simultaneously.",
+      description: "MANYSHOT [GENERAL] ...",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        sourcePages: [96],
+        text: "MANYSHOT [GENERAL] ...",
+        featType: "GENERAL",
+        prerequisite: "Dex 17, Point Blank Shot, Rapid Shot, base attack bonus +6.",
+        benefit: "As a standard action, fire two or more arrows at a single target.",
+        deferredMechanics: [
+          {
+            id: "manyshot-multi-arrow-resolution",
+            category: "attack-routine",
+            description: "Manyshot requires attack-sequence modeling beyond the current engine.",
+            dependsOn: ["iterative-ranged-attack-engine", "ammo-consumption-engine"],
+            impactPaths: ["stats.attackBonus", "combat.ranged.fullAttack"]
+          }
+        ]
+      }
+    });
+
+    expect(parsed.id).toBe("manyshot");
+  });
+
+  it("rejects malformed feat deferred mechanics metadata", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-feat-deferred",
+        name: "Broken Feat Deferred",
+        entityType: "feats",
+        summary: "Broken",
+        description: "Broken",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          sourcePages: [96],
+          text: "BROKEN [GENERAL] ...",
+          deferredMechanics: [
+            {
+              id: "broken-deferred-mechanic",
+              category: "combat"
+            }
+          ]
+        }
+      })
+    ).toThrow(/invalid feats\.data/i);
+  });
+});
+
 
 describe("entity UI metadata", () => {
   it("requires summary/description on all entities", () => {
