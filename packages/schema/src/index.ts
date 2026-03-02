@@ -110,10 +110,20 @@ const AbilityPresentationSchema = z.object({
   groupBy: z.enum(["sourceType"]).optional(),
   hideZeroEffectGroups: z.boolean().optional(),
   sourceTypeLabels: z.record(z.string().min(1), z.string().min(1)).optional(),
-  modeUi: z.record(AbilityGenerationModeSchema, z.object({
-    labelKey: z.string().min(1),
-    hintKey: z.string().min(1)
-  })).optional()
+  modeUi: z.object({
+    pointBuy: z.object({
+      labelKey: z.string().min(1),
+      hintKey: z.string().min(1)
+    }).optional(),
+    phb: z.object({
+      labelKey: z.string().min(1),
+      hintKey: z.string().min(1)
+    }).optional(),
+    rollSets: z.object({
+      labelKey: z.string().min(1),
+      hintKey: z.string().min(1)
+    }).optional()
+  }).strict().optional()
 }).strict();
 
 const ChoiceStepSchema = z.object({

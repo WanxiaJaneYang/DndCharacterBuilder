@@ -2,10 +2,28 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SOURCE_ROOT = process.env.DND_DATA_ROOT ?? "D:/aiProjects/data/dndData/3.5/phb-hierarchical-json-v6-final";
-const CHAPTER_PATH = path.join(SOURCE_ROOT, "chunks", "level4plus", "n-07-chapter-five-feats.json");
+const argv = process.argv.slice(2);
+
+function getCliOption(name) {
+  const prefix = `--${name}=`;
+  for (const arg of argv) {
+    if (arg.startsWith(prefix)) {
+      return arg.slice(prefix.length);
+    }
+  }
+  return undefined;
+}
+
+const SOURCE_ROOT = getCliOption("sourceRoot") ?? process.env.DND_DATA_ROOT;
+if (!SOURCE_ROOT) {
+  throw new Error("Missing source root; set DND_DATA_ROOT or pass --sourceRoot=/path/to/dndData");
+}
+
+const CHAPTER_PATH = getCliOption("chapterPath") ?? path.join(SOURCE_ROOT, "chunks", "level4plus", "n-07-chapter-five-feats.json");
 const FEAT_SOURCE_DIR = path.join(SOURCE_ROOT, "feats");
-const OUTPUT_PATH = fileURLToPath(new URL("../../packs/srd-35e-minimal/entities/feats.json", import.meta.url));
+const OUTPUT_PATH = getCliOption("out")
+  ? path.resolve(process.cwd(), getCliOption("out"))
+  : fileURLToPath(new URL("../../packs/srd-35e-minimal/entities/feats.json", import.meta.url));
 
 const FOOTER_LINES = new Set(["CHAPTER 5:", "FEATS"]);
 const TABLE_MARKERS = [
@@ -244,7 +262,10 @@ function buildFeatEntity(record, pagesByKey) {
   const sections = parseSections(bodyText);
   const description = buildDescription(heading, sections);
   const sourceKey = SOURCE_KEY_OVERRIDES.get(id) ?? id;
-  const sourcePages = pagesByKey.get(sourceKey) ?? [89];
+  const sourcePages = pagesByKey.get(sourceKey);
+  if (!sourcePages) {
+    throw new Error(`Missing sourcePages for feat "${id}" (sourceKey "${sourceKey}")`);
+  }
 
   const feat = {
     id,
@@ -295,7 +316,10 @@ function buildFeatEntity(record, pagesByKey) {
 
 function buildWeaponFocusLongsword(pagesByKey) {
   const sourceKey = "weapon-focus";
-  const sourcePages = pagesByKey.get(sourceKey) ?? [89];
+  const sourcePages = pagesByKey.get(sourceKey);
+  if (!sourcePages) {
+    throw new Error(`Missing sourcePages for feat "weapon-focus-longsword" (sourceKey "${sourceKey}")`);
+  }
   const description = [
     "WEAPON FOCUS [GENERAL]",
     "Choose one type of weapon, such as greataxe. You can also choose unarmed strike or grapple (or ray, if you are a spellcaster) as your weapon for purposes of this feat. You are especially good at using this weapon. (If you have chosen ray, you are especially good with rays, such as the one produced by the ray of frost spell.)",
