@@ -1,7 +1,5 @@
 # Deferred Mechanics Normalization Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
-
 **Goal:** Normalize deferred mechanics metadata from legacy engine-oriented `impactPaths` plus ad hoc dependency labels to stable `impacts` concept IDs and validated capability IDs across schema, tests, docs, and SRD pack data.
 
 **Architecture:** Keep normalization centered in `@dcb/schema` so pack validation fails early and consistently for all consumers. Introduce one canonical capability registry plus shared ID validators, then migrate race/class/feat pack data and the documentation/test fixtures to the new contract without changing engine behavior or CharacterSheet output.
@@ -14,13 +12,13 @@
 
 - This plan is the deliverable for issue `#62`.
 - The implementation PR for issue `#60` should stay scoped to schema validation, pack data migration, and supporting docs/tests.
-- Do not add CharacterSheet `unresolvedRules` output in `#60`; that is the follow-on engine task for issue `#63`.
+- CharacterSheet already exposes unresolved rules via the follow-on work completed for issue `#63`; issue `#60` should only normalize and validate deferred-mechanics metadata so that output remains consistent.
 - Prefer one implementation PR for `#60` with small reviewable commits inside the branch.
 
 ## Verification Commands
 
-- Targeted schema test: `npm --workspace @dcb/schema test -- packages/schema/src/schema.test.ts`
-- Targeted datapack test: `npm --workspace @dcb/datapack test -- packages/datapack/src/datapack.test.ts`
+- Targeted schema test: `npm --workspace @dcb/schema test -- src/schema.test.ts`
+- Targeted datapack test: `npm --workspace @dcb/datapack test -- src/datapack.test.ts`
 - Full repo verification: `npm test`
 - Full lint: `npm run lint`
 - Full typecheck: `npm run typecheck`
@@ -49,7 +47,7 @@ Expected: FAIL because schema still accepts arbitrary strings for `dependsOn` an
 **Step 3: Write the minimal implementation**
 
 Create `packages/schema/src/deferredMechanics.ts` with:
-- a `DEFERRED_MECHANIC_CAPABILITIES` constant containing the initial approved IDs from `docs/data/DEFERRED_MECHANICS_VOCABULARY.md`
+- a canonical `DEFERRED_MECHANIC_CAPABILITIES` registry that is defined in schema code and mirrored by `docs/data/DEFERRED_MECHANICS_VOCABULARY.md`
 - a Zod schema for capability IDs that checks both `cap:` format and membership in the registry
 - a Zod schema for rule concept IDs using the documented colon-delimited kebab-case format
 - a shared deferred-mechanic object schema using `dependsOn` plus `impacts`
@@ -58,7 +56,7 @@ Update `packages/schema/src/index.ts` to import and reuse the shared deferred-me
 
 **Step 4: Run the targeted schema test to verify it passes**
 
-Run: `npm --workspace @dcb/schema test -- packages/schema/src/schema.test.ts`
+Run: `npm --workspace @dcb/schema test -- src/schema.test.ts`
 Expected: PASS for the new validator cases.
 
 **Step 5: Commit**
@@ -85,7 +83,7 @@ Add at least one test per entity type proving the normalized shape parses and on
 
 **Step 2: Run the targeted schema test to verify it fails**
 
-Run: `npm --workspace @dcb/schema test -- packages/schema/src/schema.test.ts`
+Run: `npm --workspace @dcb/schema test -- src/schema.test.ts`
 Expected: FAIL because current schema/examples still rely on `impactPaths`.
 
 **Step 3: Write the minimal implementation**
@@ -128,7 +126,7 @@ Use representative samples only; do not snapshot the full feat catalog.
 
 **Step 2: Run the targeted datapack test to verify it fails**
 
-Run: `npm --workspace @dcb/datapack test -- packages/datapack/src/datapack.test.ts`
+Run: `npm --workspace @dcb/datapack test -- src/datapack.test.ts`
 Expected: FAIL because pack JSON still uses legacy dependency labels and `impactPaths`.
 
 **Step 3: Write the minimal implementation**
@@ -142,7 +140,7 @@ When a numeric modifier is already modeled elsewhere, preserve that existing eff
 
 **Step 4: Run the targeted datapack test to verify it passes**
 
-Run: `npm --workspace @dcb/datapack test -- packages/datapack/src/datapack.test.ts`
+Run: `npm --workspace @dcb/datapack test -- src/datapack.test.ts`
 Expected: PASS with normalized representative assertions.
 
 **Step 5: Commit**
@@ -196,8 +194,8 @@ git commit -m "docs: align deferred mechanics normalization references"
 **Step 1: Run focused package tests**
 
 Run:
-- `npm --workspace @dcb/schema test -- packages/schema/src/schema.test.ts`
-- `npm --workspace @dcb/datapack test -- packages/datapack/src/datapack.test.ts`
+- `npm --workspace @dcb/schema test -- src/schema.test.ts`
+- `npm --workspace @dcb/datapack test -- src/datapack.test.ts`
 
 Expected: PASS for both targeted suites.
 
