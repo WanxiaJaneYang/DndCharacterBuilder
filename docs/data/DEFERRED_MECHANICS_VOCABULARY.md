@@ -17,8 +17,11 @@ Use it when a rule is intentionally preserved in source-aligned data but cannot 
 A stable identifier for the rules concept affected by a deferred mechanic.
 
 Format:
-- lower-case
+- lower-case, kebab-case segments
+- segment characters: `a`-`z`, `0`-`9`, and internal hyphens only
+- no leading, trailing, or repeated hyphens within a segment
 - colon-separated
+- no empty segments
 - domain-oriented, not engine-oriented
 
 Examples:

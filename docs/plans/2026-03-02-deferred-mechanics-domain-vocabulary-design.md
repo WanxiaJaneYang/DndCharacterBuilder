@@ -48,8 +48,11 @@ Sequential PR stack:
 Affected rule concepts must use stable IDs that describe the rules domain rather than the current data model.
 
 Format:
-- lower-case segments
+- lower-case, kebab-case segments
+- segment characters: `a`-`z`, `0`-`9`, and internal hyphens only
+- no leading, trailing, or repeated hyphens within a segment
 - colon-separated namespace
+- no empty segments
 - no engine object paths
 
 Examples:
