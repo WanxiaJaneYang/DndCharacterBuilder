@@ -20,6 +20,11 @@
     "abilityModeRollSets": "Roll Sets",
     "pointCapLabel": "Point Cap",
     "pointBuyRemainingLabel": "Points Remaining",
+    "pointBuyShowTableLabel": "Show Point Buy Table",
+    "pointBuyHideTableLabel": "Hide Point Buy Table",
+    "pointBuyTableCaption": "Point Buy Cost Table",
+    "pointBuyScoreColumn": "Score",
+    "pointBuyCostColumn": "Cost",
     "abilityExistingModifiersLabel": "Existing Modifiers",
     "roleAria": "Choose your role",
     "roleQuestion": "The tavern door opens - are you a Dungeon Master or a Player?",
@@ -126,7 +131,11 @@
       "wis": "WIS",
       "cha": "CHA"
     },
-    "reviewAttackItemColumn": "Item"
+    "reviewAttackItemColumn": "Item",
+    "abilityMethodHelpLabel": "About ability generation methods",
+    "abilityMethodHintPointBuy": "Spend points from a configurable budget to assign your six ability scores.",
+    "abilityMethodHintPhb": "Use the standard array method from the rules and assign values to abilities.",
+    "abilityMethodHintRollSets": "Roll multiple sets and pick one before assignment."
   },
   "zh": {
     "appTitle": "D&D 3.5 新手角色创建器（MVP）",
@@ -149,6 +158,11 @@
     "abilityModeRollSets": "掷骰组",
     "pointCapLabel": "点数上限",
     "pointBuyRemainingLabel": "剩余点数",
+    "pointBuyShowTableLabel": "展开点购表",
+    "pointBuyHideTableLabel": "收起点购表",
+    "pointBuyTableCaption": "点购花费表",
+    "pointBuyScoreColumn": "属性值",
+    "pointBuyCostColumn": "花费",
     "abilityExistingModifiersLabel": "现有调整",
     "roleAria": "选择你的身份",
     "roleQuestion": "酒馆之门已开启 - 你是地下城主还是玩家？",
@@ -255,6 +269,10 @@
       "wis": "感知",
       "cha": "魅力"
     },
-    "reviewAttackItemColumn": "项目"
+    "reviewAttackItemColumn": "项目",
+    "abilityMethodHelpLabel": "生成方式说明",
+    "abilityMethodHintPointBuy": "在可配置点数上限内分配六项属性值。",
+    "abilityMethodHintPhb": "使用规则标准数组，并将数值分配到各属性。",
+    "abilityMethodHintRollSets": "掷出多组属性值，先选择一组再分配。"
   }
 }

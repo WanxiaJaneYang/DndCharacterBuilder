@@ -340,6 +340,105 @@ describe("flow schema", () => {
     ).toThrow();
   });
 
+  it("rejects unknown abilityPresentation.modeUi keys", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["pointBuy"],
+              defaultMode: "pointBuy",
+              pointBuy: {
+                costTable: {
+                  "8": 0,
+                  "9": 1,
+                  "10": 2,
+                  "11": 3,
+                  "12": 4,
+                  "13": 5,
+                  "14": 6,
+                  "15": 8,
+                  "16": 10,
+                  "17": 13,
+                  "18": 16
+                },
+                defaultPointCap: 32,
+                minPointCap: 20,
+                maxPointCap: 40,
+                pointCapStep: 1,
+                minScore: 8,
+                maxScore: 18
+              }
+            },
+            abilityPresentation: {
+              showExistingModifiers: true,
+              modeUi: {
+                pointBuyy: {
+                  labelKey: "abilityModePointBuy",
+                  hintKey: "abilityMethodHelpLabel"
+                }
+              }
+            }
+          }
+        ]
+      })
+    ).toThrow();
+  });
+
+  it("rejects unknown fields inside abilityPresentation.modeUi entries", () => {
+    expect(() =>
+      FlowSchema.parse({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            abilitiesConfig: {
+              modes: ["pointBuy"],
+              defaultMode: "pointBuy",
+              pointBuy: {
+                costTable: {
+                  "8": 0,
+                  "9": 1,
+                  "10": 2,
+                  "11": 3,
+                  "12": 4,
+                  "13": 5,
+                  "14": 6,
+                  "15": 8,
+                  "16": 10,
+                  "17": 13,
+                  "18": 16
+                },
+                defaultPointCap: 32,
+                minPointCap: 20,
+                maxPointCap: 40,
+                pointCapStep: 1,
+                minScore: 8,
+                maxScore: 18
+              }
+            },
+            abilityPresentation: {
+              showExistingModifiers: true,
+              modeUi: {
+                pointBuy: {
+                  labelKey: "abilityModePointBuy",
+                  hintKey: "abilityMethodHelpLabel",
+                  lableKey: "typo"
+                }
+              }
+            }
+          }
+        ]
+      })
+    ).toThrow();
+  });
+
 
 
   it("rejects manual source for entity-selection kinds", () => {

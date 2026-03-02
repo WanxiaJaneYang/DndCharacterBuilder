@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { resolveLoadedPacks } from '@dcb/datapack';
 import { loadMinimalPack } from './loadMinimalPack';
 import { DEFAULT_STATS, applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
 import { EDITIONS, FALLBACK_EDITION, type EditionOption, defaultEditionId } from './editions';
 import { detectDefaultLanguage, uiText, type AbilityCode, type Language, type UIText } from './uiText';
+import { AbilityMethodSelector } from './components/AbilityMethodSelector';
+import { PointBuyPanel } from './components/PointBuyPanel';
 
 const embeddedPacks = [loadMinimalPack()];
 type Role = 'dm' | 'player' | null;
@@ -45,6 +47,7 @@ type AbilityPresentationConfig = {
   groupBy?: 'sourceType';
   hideZeroEffectGroups?: boolean;
   sourceTypeLabels?: Record<string, string>;
+  modeUi?: Partial<Record<AbilityMode, { labelKey?: string; hintKey?: string }>>;
 };
 
 const DEFAULT_ABILITY_MIN = 3;
@@ -71,6 +74,14 @@ function clampAbilityScore(value: number, min: number, max: number): number {
   return Math.round(clamped);
 }
 
+function derivePointBuyBaseScore(costTable: Record<string, number>, fallback: number): number {
+  const zeroCostScores = Object.entries(costTable)
+    .filter(([, cost]) => Number(cost) === 0)
+    .map(([score]) => Number(score))
+    .filter((score) => Number.isFinite(score));
+  return zeroCostScores.length > 0 ? Math.min(...zeroCostScores) : fallback;
+}
+
 export function App() {
   const [state, setState] = useState<CharacterState>(initialState);
   const [stepIndex, setStepIndex] = useState(0);
@@ -80,6 +91,10 @@ export function App() {
   const [selectedEditionId, setSelectedEditionId] = useState<string>(() => defaultEditionId(EDITIONS));
   const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<string[]>([]);
   const [rulesReady, setRulesReady] = useState(false);
+  const [abilityMethodHintOpen, setAbilityMethodHintOpen] = useState(false);
+  const [abilityMethodHintPinned, setAbilityMethodHintPinned] = useState(false);
+  const [isPointBuyTableOpen, setIsPointBuyTableOpen] = useState(false);
+  const abilityMethodHintRef = useRef<HTMLDivElement | null>(null);
 
   const selectedEdition = useMemo(
     () => EDITIONS.find((edition) => edition.id === selectedEditionId) ?? EDITIONS[0] ?? FALLBACK_EDITION,
@@ -110,6 +125,29 @@ export function App() {
       setStepIndex(0);
     }
   }, [stepIndex, wizardSteps.length]);
+
+  useEffect(() => {
+    if (currentStep?.kind !== 'abilities') {
+      setAbilityMethodHintOpen(false);
+      setAbilityMethodHintPinned(false);
+    }
+  }, [currentStep?.kind]);
+
+  useEffect(() => {
+    if (!abilityMethodHintPinned) return;
+    const closeHint = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target || abilityMethodHintRef.current?.contains(target)) return;
+      setAbilityMethodHintPinned(false);
+      setAbilityMethodHintOpen(false);
+    };
+    window.addEventListener('mousedown', closeHint);
+    window.addEventListener('touchstart', closeHint);
+    return () => {
+      window.removeEventListener('mousedown', closeHint);
+      window.removeEventListener('touchstart', closeHint);
+    };
+  }, [abilityMethodHintPinned]);
 
   const t = uiText[language];
   const localizeAbilityLabel = useCallback((ability: string): string => {
@@ -223,6 +261,8 @@ export function App() {
     rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
   } | undefined) ?? {};
   const selectedAbilityMode: AbilityMode | undefined = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0];
+  const isAbilityMode = (value: string): value is AbilityMode => abilityModes.some((mode) => mode === value);
+  const selectedAbilityModeValue = selectedAbilityMode && isAbilityMode(selectedAbilityMode) ? selectedAbilityMode : (abilityModes[0] ?? '');
   const rollSetsConfig = abilityStepConfig?.rollSets;
   const generatedRollSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
   const selectedRollSetIndexRaw = Number(abilityMeta.rollSets?.selectedSetIndex);
@@ -257,6 +297,14 @@ export function App() {
           ? Math.max(...rollScoresPool)
           : Math.max(...currentScores, DEFAULT_ABILITY_MAX);
   const pointBuyCostTable = abilityStepConfig?.pointBuy?.costTable ?? {};
+  const pointBuyBaseScore = derivePointBuyBaseScore(
+    pointBuyCostTable,
+    Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN)
+  );
+  const defaultPointBuyScores = useMemo(
+    () => Object.fromEntries(ABILITY_ORDER.map((ability) => [ability, pointBuyBaseScore])),
+    [pointBuyBaseScore]
+  );
   const pointCapMin = abilityStepConfig?.pointBuy?.minPointCap ?? 0;
   const pointCapMax = abilityStepConfig?.pointBuy?.maxPointCap ?? 0;
   const pointCapStep = abilityStepConfig?.pointBuy?.pointCapStep ?? 1;
@@ -264,6 +312,9 @@ export function App() {
   const selectedPointCap = Number.isFinite(Number(abilityMeta.pointCap)) ? Number(abilityMeta.pointCap) : pointCapDefault;
   const pointBuySpent = ABILITY_ORDER.reduce((sum, ability) => sum + Number(pointBuyCostTable[String(state.abilities[ability])] ?? 0), 0);
   const pointBuyRemaining = selectedPointCap - pointBuySpent;
+  const hasInitialAbilityScores = ABILITY_ORDER.every(
+    (ability) => Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN) === Number(initialState.abilities[ability])
+  );
 
   const applyAbilitySelection = (
     nextScores: Record<string, number>,
@@ -325,6 +376,22 @@ export function App() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  useEffect(() => {
+    if (currentStep?.kind !== 'abilities' || selectedAbilityMode !== 'pointBuy') {
+      setIsPointBuyTableOpen(false);
+      return;
+    }
+    if (abilityMeta.mode || !hasInitialAbilityScores) return;
+    applyAbilitySelection(defaultPointBuyScores, { mode: 'pointBuy', pointCap: selectedPointCap });
+  }, [
+    abilityMeta.mode,
+    currentStep?.kind,
+    defaultPointBuyScores,
+    hasInitialAbilityScores,
+    selectedAbilityMode,
+    selectedPointCap
+  ]);
 
   const renderCurrentStep = () => {
     if (!currentStep) return null;
@@ -752,55 +819,112 @@ export function App() {
       const sourceTypeLabels = abilityPresentation?.sourceTypeLabels ?? {};
       const hideZeroGroups = abilityPresentation?.hideZeroEffectGroups ?? true;
       const groupLabel = (sourceType: string) => sourceTypeLabels[sourceType] ?? sourceType;
+      const modeUi = abilityPresentation?.modeUi ?? {};
+      const textMap = t as unknown as Record<string, unknown>;
+      const defaultModeLabel = (mode: AbilityMode) =>
+        mode === 'pointBuy' ? t.abilityModePointBuy : mode === 'phb' ? t.abilityModePhb : t.abilityModeRollSets;
+      const getModeLabel = (mode: AbilityMode) => {
+        const key = modeUi[mode]?.labelKey;
+        const fromKey = key ? textMap[key] : undefined;
+        return typeof fromKey === 'string' && fromKey.length > 0 ? fromKey : defaultModeLabel(mode);
+      };
+      const getModeHint = (mode: AbilityMode) => {
+        const key = modeUi[mode]?.hintKey;
+        const fromKey = key ? textMap[key] : undefined;
+        return typeof fromKey === 'string' ? fromKey : '';
+      };
+      const hintMode = selectedAbilityMode ?? abilityModes[0];
+      const activeModeHint = hintMode ? getModeHint(hintMode) : '';
+      const hasActiveModeHint = activeModeHint.length > 0;
+      const isHintVisible = abilityMethodHintOpen && hasActiveModeHint;
+      const handleAbilityModeChange = (mode: AbilityMode) => {
+        if (mode === 'rollSets') {
+          const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
+          const generatedSets = currentSets.length > 0 ? currentSets : generateRollSets(rollSetsConfig);
+          applyAbilitySelection(
+            { ...state.abilities },
+            { mode, rollSets: { generatedSets, selectedSetIndex: selectedRollSetIndex } }
+          );
+          return;
+        }
+        applyAbilitySelection({ ...state.abilities }, { mode });
+      };
 
       return (
         <section>
           <h2>{currentStep.label}</h2>
-          <fieldset role="radiogroup" aria-label={t.abilityGenerationLabel}>
-            <legend>{t.abilityGenerationLabel}</legend>
-            {abilityModes.map((mode) => (
-              <label key={mode}>
-                <input
-                  type="radio"
-                  name="ability-generation-mode"
-                  checked={selectedAbilityMode === mode}
-                  onChange={() => {
-                    if (mode === 'rollSets') {
-                      const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
-                      const generatedSets = currentSets.length > 0 ? currentSets : generateRollSets(rollSetsConfig);
-                      applyAbilitySelection(
-                        { ...state.abilities },
-                        { mode, rollSets: { generatedSets, selectedSetIndex: selectedRollSetIndex } }
-                      );
-                      return;
-                    }
-                    applyAbilitySelection({ ...state.abilities }, { mode });
-                  }}
-                />
-                {mode === 'pointBuy' ? t.abilityModePointBuy : mode === 'phb' ? t.abilityModePhb : t.abilityModeRollSets}
-              </label>
-            ))}
-          </fieldset>
+          <AbilityMethodSelector
+            label={t.abilityGenerationLabel}
+            helpLabel={t.abilityMethodHelpLabel}
+            helpText={activeModeHint}
+            isHintVisible={isHintVisible}
+            isHintAvailable={hasActiveModeHint}
+            value={selectedAbilityModeValue}
+            options={abilityModes.map((mode) => ({ value: mode, label: getModeLabel(mode) }))}
+            onMouseEnter={() => {
+              if (!hasActiveModeHint) return;
+              setAbilityMethodHintOpen(true);
+            }}
+            onMouseLeave={() => {
+              if (abilityMethodHintPinned) return;
+              const activeElement = document.activeElement as Node | null;
+              if (activeElement && abilityMethodHintRef.current?.contains(activeElement)) return;
+              setAbilityMethodHintOpen(false);
+            }}
+            onFocus={() => {
+              if (!hasActiveModeHint) return;
+              setAbilityMethodHintOpen(true);
+            }}
+            onBlur={(event) => {
+              if (abilityMethodHintPinned) return;
+              const next = event.relatedTarget as Node | null;
+              if (next && abilityMethodHintRef.current?.contains(next)) return;
+              setAbilityMethodHintOpen(false);
+            }}
+            onClick={() => {
+              if (!hasActiveModeHint) return;
+              if (abilityMethodHintPinned) {
+                setAbilityMethodHintPinned(false);
+                setAbilityMethodHintOpen(false);
+              } else {
+                setAbilityMethodHintPinned(true);
+                setAbilityMethodHintOpen(true);
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== 'Escape') return;
+              event.preventDefault();
+              setAbilityMethodHintPinned(false);
+              setAbilityMethodHintOpen(false);
+            }}
+            onChange={(value) => {
+              if (!isAbilityMode(value)) return;
+              handleAbilityModeChange(value);
+            }}
+            helpRef={abilityMethodHintRef}
+          />
           {selectedAbilityMode === 'pointBuy' && abilityStepConfig?.pointBuy && (
-            <div>
-              <label>
-                {t.pointCapLabel}
-                <input
-                  type="number"
-                  min={pointCapMin}
-                  max={pointCapMax}
-                  step={pointCapStep}
-                  value={selectedPointCap}
-                  onChange={(event) => {
-                    const parsed = Number(event.target.value);
-                    if (!Number.isFinite(parsed)) return;
-                    const clamped = Math.min(pointCapMax, Math.max(pointCapMin, parsed));
-                    applyAbilitySelection({ ...state.abilities }, { pointCap: clamped });
-                  }}
-                />
-              </label>
-              <p>{t.pointBuyRemainingLabel}: {pointBuyRemaining}</p>
-            </div>
+            <PointBuyPanel
+              pointCapLabel={t.pointCapLabel}
+              pointCap={selectedPointCap}
+              pointCapMin={pointCapMin}
+              pointCapMax={pointCapMax}
+              pointCapStep={pointCapStep}
+              pointBuyRemainingLabel={t.pointBuyRemainingLabel}
+              pointBuyRemaining={pointBuyRemaining}
+              showTableLabel={t.pointBuyShowTableLabel}
+              hideTableLabel={t.pointBuyHideTableLabel}
+              tableCaption={t.pointBuyTableCaption}
+              scoreColumnLabel={t.pointBuyScoreColumn}
+              costColumnLabel={t.pointBuyCostColumn}
+              isTableOpen={isPointBuyTableOpen}
+              costTable={pointBuyCostTable}
+              onPointCapChange={(value) => {
+                const clamped = Math.min(pointCapMax, Math.max(pointCapMin, value));
+                applyAbilitySelection({ ...state.abilities }, { pointCap: clamped });
+              }}
+              onToggleTable={() => setIsPointBuyTableOpen((prev) => !prev)}
+            />
           )}
           {selectedAbilityMode === 'rollSets' && rollSetsConfig && (
             <section className="sheet">

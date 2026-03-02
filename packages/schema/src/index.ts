@@ -114,15 +114,15 @@ const AbilityPresentationSchema = z.object({
     pointBuy: z.object({
       labelKey: z.string().min(1),
       hintKey: z.string().min(1)
-    }).optional(),
+    }).strict().optional(),
     phb: z.object({
       labelKey: z.string().min(1),
       hintKey: z.string().min(1)
-    }).optional(),
+    }).strict().optional(),
     rollSets: z.object({
       labelKey: z.string().min(1),
       hintKey: z.string().min(1)
-    }).optional()
+    }).strict().optional()
   }).strict().optional()
 }).strict();
 
