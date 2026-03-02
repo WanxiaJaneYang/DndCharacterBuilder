@@ -41,7 +41,7 @@ Add schema tests that:
 
 **Step 2: Run the targeted schema test to verify it fails**
 
-Run: `npm --workspace @dcb/schema test -- packages/schema/src/schema.test.ts`
+Run: `npm --workspace @dcb/schema test -- src/schema.test.ts`
 Expected: FAIL because schema still accepts arbitrary strings for `dependsOn` and only knows `impactPaths`.
 
 **Step 3: Write the minimal implementation**
@@ -97,7 +97,7 @@ Keep the change narrow: no engine or UI behavior updates in this task.
 
 **Step 4: Run the targeted schema test to verify it passes**
 
-Run: `npm --workspace @dcb/schema test -- packages/schema/src/schema.test.ts`
+Run: `npm --workspace @dcb/schema test -- src/schema.test.ts`
 Expected: PASS with normalized fixture data and legacy-field rejection coverage.
 
 **Step 5: Commit**
