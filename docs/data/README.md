@@ -4,6 +4,7 @@ This section documents the JSON pack and schema contract used by the builder.
 
 - `PACK_FORMAT.md`: expected folder/file layout and pack-level requirements.
 - `ENTITY_SCHEMA.md`: shared entity fields and type-specific data models.
+- `DEFERRED_MECHANICS_VOCABULARY.md`: stable vocabulary for `deferredMechanics` concept IDs, capability IDs, and migration semantics.
 - `FLOW_SCHEMA.md`: flow step schema and constraints.
 - `EXPORT_SCHEMA.md`: export payload expectations.
 - `SRD_AUTHENTICITY_VALIDATION.md`: automatic authenticity strategy for official SRD datasets.
