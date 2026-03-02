@@ -248,7 +248,32 @@ export interface CharacterSheet {
   phase1: Phase1Sheet;
   phase2: Phase2Sheet;
   provenance: ProvenanceRecord[];
+  unresolvedRules: UnresolvedRule[];
   packSetFingerprint: string;
+}
+
+type DeferredMechanicRecord = {
+  id: string;
+  category: string;
+  description: string;
+  dependsOn: string[];
+  sourceRefs?: string[];
+  impactPaths?: string[];
+  impacts?: string[];
+};
+
+export interface UnresolvedRule {
+  id: string;
+  category: string;
+  description: string;
+  dependsOn: string[];
+  impacts?: string[];
+  source: {
+    entityType: string;
+    entityId: string;
+    packId?: string;
+    sourceRefs?: string[];
+  };
 }
 
 export const DEFAULT_STATS = {
@@ -1201,6 +1226,84 @@ function getEntityDataString(entity: ResolvedEntity | undefined, key: string): s
   return typeof value === "string" ? value.trim() : "";
 }
 
+function parseStringList(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value.map((entry) => String(entry ?? "").trim()).filter(Boolean);
+  return items.length > 0 ? items : undefined;
+}
+
+function parseDeferredMechanics(value: unknown): DeferredMechanicRecord[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+    const record = entry as Record<string, unknown>;
+    const id = String(record.id ?? "").trim();
+    const category = String(record.category ?? "").trim();
+    const description = String(record.description ?? "").trim();
+    const dependsOn = parseStringList(record.dependsOn);
+    if (!id || !category || !description || !dependsOn) return [];
+
+    return [{
+      id,
+      category,
+      description,
+      dependsOn,
+      sourceRefs: parseStringList(record.sourceRefs),
+      impactPaths: parseStringList(record.impactPaths),
+      impacts: parseStringList(record.impacts)
+    }];
+  });
+}
+
+function getSelectedEntities(state: CharacterState, context: EngineContext): ResolvedEntity[] {
+  const entityBuckets = context.resolvedData.entities;
+  const selected: ResolvedEntity[] = [];
+  const seen = new Set<string>();
+
+  function add(entity: ResolvedEntity | undefined): void {
+    if (!entity) return;
+    const key = `${entity._source.packId}:${entity.entityType}:${entity.id}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    selected.push(entity);
+  }
+
+  add(getSelectedRace(state, context));
+  add(getSelectedClass(state, context));
+
+  for (const featId of getSelectedFeatIds(state)) add(entityBuckets.feats?.[featId]);
+  for (const itemId of ((state.selections.equipment as string[] | undefined) ?? [])) add(entityBuckets.items?.[String(itemId)]);
+
+  return selected;
+}
+
+function collectUnresolvedRules(state: CharacterState, context: EngineContext): UnresolvedRule[] {
+  return getSelectedEntities(state, context)
+    .flatMap((entity) =>
+      parseDeferredMechanics(getEntityDataRecord(entity).deferredMechanics).map((mechanic) => ({
+        id: `${entity._source.packId}:${entity.entityType}:${entity.id}:${mechanic.id}`,
+        category: mechanic.category,
+        description: mechanic.description,
+        dependsOn: mechanic.dependsOn,
+        impacts: mechanic.impacts ?? mechanic.impactPaths,
+        source: mechanic.sourceRefs
+          ? {
+              entityType: entity.entityType,
+              entityId: entity.id,
+              packId: entity._source.packId,
+              sourceRefs: mechanic.sourceRefs
+            }
+          : {
+              entityType: entity.entityType,
+              entityId: entity.id,
+              packId: entity._source.packId
+            }
+      }))
+    )
+    .sort((left, right) => left.id.localeCompare(right.id));
+}
+
 function isArmorOrShieldItem(item: ResolvedEntity): boolean {
   const category = getEntityDataString(item, "category").toLowerCase();
   if (category === "armor" || category === "shield") return true;
@@ -1507,6 +1610,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
         : ["No movement penalty detected."]
     }
   };
+  const unresolvedRules = collectUnresolvedRules(state, context);
 
   return {
     metadata: { name: sheet.metadata.name },
@@ -1518,6 +1622,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     phase1,
     phase2,
     provenance,
+    unresolvedRules,
     packSetFingerprint: context.resolvedData.fingerprint
   };
 }

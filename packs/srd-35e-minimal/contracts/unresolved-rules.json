@@ -1,0 +1,53 @@
+{
+  "enabledPacks": [
+    "srd-35e-minimal"
+  ],
+  "initialState": {},
+  "actions": [
+    {
+      "choiceId": "race",
+      "selection": "dwarf"
+    },
+    {
+      "choiceId": "class",
+      "selection": "fighter"
+    },
+    {
+      "choiceId": "abilities",
+      "selection": {
+        "str": 16,
+        "dex": 12,
+        "con": 14,
+        "int": 10,
+        "wis": 10,
+        "cha": 8
+      }
+    },
+    {
+      "choiceId": "feat",
+      "selection": [
+        "acrobatic"
+      ]
+    },
+    {
+      "choiceId": "name",
+      "selection": "Durgan"
+    }
+  ],
+  "expected": {
+    "validationErrorCodes": [],
+    "finalSheetSubset": {
+      "unresolvedRules": [
+        {
+          "id": "srd-35e-minimal:classes:fighter:fighter-bonus-feat-runtime",
+          "category": "class-feature",
+          "source": {
+            "entityType": "classes",
+            "entityId": "fighter",
+            "packId": "srd-35e-minimal"
+          }
+        }
+      ]
+    }
+  }
+}
