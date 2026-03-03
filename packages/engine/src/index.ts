@@ -155,6 +155,35 @@ export interface AttackLine {
   range?: string;
 }
 
+export interface SheetViewModel {
+  combat: {
+    ac: {
+      total: number;
+      components: Array<{
+        id: string;
+        label: string;
+        value: number;
+      }>;
+      touch: number;
+      flatFooted: number;
+    };
+    attacks: Array<
+      AttackLine & {
+        category: "melee" | "ranged";
+      }
+    >;
+  };
+  skills: Array<{
+    id: string;
+    name: string;
+    ranks: number;
+    ability: number;
+    misc: number;
+    acp: number;
+    total: number;
+  }>;
+}
+
 export interface Phase1Sheet {
   identity: {
     raceId: string | null;
@@ -247,6 +276,7 @@ export interface CharacterSheet {
   decisions: DecisionSummary;
   phase1: Phase1Sheet;
   phase2: Phase2Sheet;
+  sheetViewModel: SheetViewModel;
   provenance: ProvenanceRecord[];
   unresolvedRules: UnresolvedRule[];
   packSetFingerprint: string;
@@ -1611,6 +1641,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     }
   };
   const unresolvedRules = collectUnresolvedRules(state, context);
+  const sheetViewModel = buildSheetViewModel({ phase1, phase2 });
 
   return {
     metadata: { name: sheet.metadata.name },
@@ -1621,9 +1652,54 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     decisions,
     phase1,
     phase2,
+    sheetViewModel,
     provenance,
     unresolvedRules,
     packSetFingerprint: context.resolvedData.fingerprint
+  };
+}
+
+export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1" | "phase2">): SheetViewModel {
+  const ac = characterSheet.phase1.combat.ac;
+  const attacks = [
+    ...characterSheet.phase1.combat.attacks.melee.map((attack) => ({
+      ...attack,
+      category: "melee" as const
+    })),
+    ...characterSheet.phase1.combat.attacks.ranged.map((attack) => ({
+      ...attack,
+      category: "ranged" as const
+    }))
+  ];
+
+  return {
+    combat: {
+      ac: {
+        total: ac.total,
+        components: [
+          { id: "base", label: "Base", value: 10 },
+          { id: "armor", label: "Armor", value: ac.breakdown.armor },
+          { id: "shield", label: "Shield", value: ac.breakdown.shield },
+          { id: "dex", label: "Dex", value: ac.breakdown.dex },
+          { id: "size", label: "Size", value: ac.breakdown.size },
+          { id: "natural", label: "Natural", value: ac.breakdown.natural },
+          { id: "deflection", label: "Deflection", value: ac.breakdown.deflection },
+          { id: "misc", label: "Misc", value: ac.breakdown.misc }
+        ],
+        touch: ac.touch,
+        flatFooted: ac.flatFooted
+      },
+      attacks
+    },
+    skills: characterSheet.phase2.skills.map((skill) => ({
+      id: skill.id,
+      name: skill.name,
+      ranks: skill.ranks,
+      ability: skill.ability,
+      misc: skill.misc,
+      acp: skill.acp,
+      total: skill.total
+    }))
   };
 }
 

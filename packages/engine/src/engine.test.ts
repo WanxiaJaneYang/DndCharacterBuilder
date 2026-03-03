@@ -33,6 +33,61 @@ function makePack(id: string, priority: number, dependencies: string[] = []): Lo
 }
 
 describe("engine determinism", () => {
+  it("includes a render-ready sheet view model", () => {
+    let state = applyChoice(initialState, "name", "Aric");
+    state = applyChoice(state, "abilities", {
+      str: 16,
+      dex: 12,
+      con: 14,
+      int: 10,
+      wis: 10,
+      cha: 8
+    });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { climb: 1 });
+    state = applyChoice(state, "equipment", ["longsword", "chainmail", "heavy-wooden-shield"]);
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(sheet.sheetViewModel.combat.ac).toMatchObject({
+      total: 18,
+      touch: 11,
+      flatFooted: 17
+    });
+    expect(sheet.sheetViewModel.combat.ac.components).toEqual(
+      expect.arrayContaining([
+        { id: "base", label: "Base", value: 10 },
+        { id: "armor", label: "Armor", value: 5 },
+        { id: "shield", label: "Shield", value: 2 },
+        { id: "dex", label: "Dex", value: 1 }
+      ])
+    );
+    expect(sheet.sheetViewModel.combat.attacks).toEqual([
+      expect.objectContaining({
+        category: "melee",
+        itemId: "longsword",
+        name: "Longsword",
+        attackBonus: 4,
+        damage: "1d8",
+        crit: "19-20/x2"
+      })
+    ]);
+    expect(sheet.sheetViewModel.skills).toEqual(
+      expect.arrayContaining([
+        {
+          id: "climb",
+          name: "Climb",
+          ranks: 1,
+          ability: 3,
+          misc: 0,
+          acp: -7,
+          total: -3
+        }
+      ])
+    );
+  });
+
   it("returns identical sheets for same inputs", () => {
     let state = applyChoice(initialState, "name", "Aric");
     state = applyChoice(state, "abilities", { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 });
