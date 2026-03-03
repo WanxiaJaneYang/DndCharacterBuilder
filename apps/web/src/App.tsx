@@ -776,7 +776,7 @@ export function App() {
                     </td>
                     <td>{attack.name}</td>
                     <td>{formatSigned(attack.attackBonus)}</td>
-                    <td>{attack.damage}</td>
+                    <td>{attack.damageLine}</td>
                     <td>{attack.crit}</td>
                     <td>
                       {attack.category === "ranged" ? attack.range ?? "-" : "-"}
@@ -1484,9 +1484,9 @@ export function App() {
                   const total = skillView?.total ?? detail?.total ?? 0;
                   const rankStep = classSkill ? 1 : 0.5;
                   const pointStepCost = rankStep * costPerRank;
-                  const armorCheckPenaltyApplies = Boolean(
-                    skill.data?.armorCheckPenaltyApplies,
-                  );
+                  const armorCheckPenaltyApplies =
+                    skillView?.acpApplied ??
+                    Boolean(skill.data?.armorCheckPenaltyApplies);
                   const canDecrease = ranks > 0;
                   const canIncrease =
                     ranks + rankStep <= maxRanks &&

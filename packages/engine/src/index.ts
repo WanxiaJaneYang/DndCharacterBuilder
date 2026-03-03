@@ -155,6 +155,14 @@ export interface AttackLine {
   range?: string;
 }
 
+export interface AttackBonusBreakdown {
+  total: number;
+  bab: number;
+  ability: number;
+  size: number;
+  misc: number;
+}
+
 export interface SheetViewModel {
   combat: {
     ac: {
@@ -170,6 +178,8 @@ export interface SheetViewModel {
     attacks: Array<
       AttackLine & {
         category: "melee" | "ranged";
+        attackBonusBreakdown: AttackBonusBreakdown;
+        damageLine: string;
       }
     >;
   };
@@ -180,6 +190,7 @@ export interface SheetViewModel {
     ability: number;
     misc: number;
     acp: number;
+    acpApplied: boolean;
     total: number;
   }>;
 }
@@ -252,6 +263,7 @@ export interface Phase2Sheet {
     racial: number;
     misc: number;
     acp: number;
+    acpApplied: boolean;
     total: number;
   }>;
   equipment: {
@@ -1616,6 +1628,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
         racial: skill.racialBonus,
         misc,
         acp,
+        acpApplied: skillIsAffectedByArmorCheckPenalty(skillEntity),
         total: skill.total + acp
       };
     });
@@ -1661,15 +1674,53 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
 
 export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1" | "phase2">): SheetViewModel {
   const ac = characterSheet.phase1.combat.ac;
+  const acBase =
+    ac.total
+    - ac.breakdown.armor
+    - ac.breakdown.shield
+    - ac.breakdown.dex
+    - ac.breakdown.size
+    - ac.breakdown.natural
+    - ac.breakdown.deflection
+    - ac.breakdown.misc;
+  const bab = characterSheet.phase1.combat.grapple.bab;
+  const meleeAbility = characterSheet.phase1.combat.grapple.str;
+  const rangedAbility = characterSheet.phase1.combat.initiative.dex;
+  const sizeModifier = ac.breakdown.size;
   const attacks = [
-    ...characterSheet.phase1.combat.attacks.melee.map((attack) => ({
-      ...attack,
-      category: "melee" as const
-    })),
-    ...characterSheet.phase1.combat.attacks.ranged.map((attack) => ({
-      ...attack,
-      category: "ranged" as const
-    }))
+    ...characterSheet.phase1.combat.attacks.melee.map((attack) => {
+      const misc = attack.attackBonus - bab - meleeAbility - sizeModifier;
+      const damageLine = /[+-]\d+$/.test(attack.damage)
+        ? attack.damage
+        : formatDamageWithModifier(attack.damage, meleeAbility);
+      return {
+        ...attack,
+        category: "melee" as const,
+        attackBonusBreakdown: {
+          total: attack.attackBonus,
+          bab,
+          ability: meleeAbility,
+          size: sizeModifier,
+          misc
+        },
+        damageLine
+      };
+    }),
+    ...characterSheet.phase1.combat.attacks.ranged.map((attack) => {
+      const misc = attack.attackBonus - bab - rangedAbility - sizeModifier;
+      return {
+        ...attack,
+        category: "ranged" as const,
+        attackBonusBreakdown: {
+          total: attack.attackBonus,
+          bab,
+          ability: rangedAbility,
+          size: sizeModifier,
+          misc
+        },
+        damageLine: attack.damage
+      };
+    })
   ];
 
   return {
@@ -1677,7 +1728,7 @@ export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1
       ac: {
         total: ac.total,
         components: [
-          { id: "base", label: "Base", value: 10 },
+          { id: "base", label: "Base", value: acBase },
           { id: "armor", label: "Armor", value: ac.breakdown.armor },
           { id: "shield", label: "Shield", value: ac.breakdown.shield },
           { id: "dex", label: "Dex", value: ac.breakdown.dex },
@@ -1698,6 +1749,7 @@ export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1
       ability: skill.ability,
       misc: skill.misc,
       acp: skill.acp,
+      acpApplied: skill.acpApplied,
       total: skill.total
     }))
   };
