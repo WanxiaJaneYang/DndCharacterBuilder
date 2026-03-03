@@ -447,21 +447,16 @@ function getStepSelectionLimit(step: EntityTypeFlowStep, state: CharacterState, 
   return baseLimit;
 }
 
-function getSelectedSkillRanks(state: CharacterState, context?: EngineContext): Record<string, number> {
+function getSelectedSkillRanks(state: CharacterState, _context?: EngineContext): Record<string, number> {
   const raw = state.selections.skills;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
-  const classSkills = context ? getClassSkills(state, context) : undefined;
   const normalized: Record<string, number> = {};
   for (const [skillId, value] of Object.entries(raw as Record<string, unknown>)) {
     const parsed = Number(value);
     if (!Number.isFinite(parsed) || parsed < 0) continue;
     const canonicalSkillId = normalizeSkillId(skillId);
     if (!canonicalSkillId) continue;
-    if (classSkills?.has(canonicalSkillId)) {
-      normalized[canonicalSkillId] = Math.round(parsed);
-    } else {
-      normalized[canonicalSkillId] = Math.round(parsed * 2) / 2;
-    }
+    normalized[canonicalSkillId] = parsed;
   }
   return normalized;
 }
@@ -859,14 +854,13 @@ export function applyChoice(state: CharacterState, choiceId: string, selection: 
   }
   if (choiceId === "skills") {
     const raw = selection && typeof selection === "object" && !Array.isArray(selection) ? (selection as Record<string, unknown>) : {};
-    const classSkills = context ? getClassSkills(state, context) : new Set<string>();
     const normalized: Record<string, number> = {};
     for (const [skillId, rankValue] of Object.entries(raw)) {
       const canonicalSkillId = normalizeSkillId(skillId);
       if (!canonicalSkillId) continue;
       const rank = Number(rankValue);
       if (!Number.isFinite(rank) || rank < 0) continue;
-      normalized[canonicalSkillId] = classSkills.has(canonicalSkillId) ? Math.round(rank) : (Math.round(rank * 2) / 2);
+      normalized[canonicalSkillId] = rank;
     }
     return { ...state, selections: { ...state.selections, skills: normalized } };
   }

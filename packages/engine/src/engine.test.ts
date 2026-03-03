@@ -1156,15 +1156,19 @@ describe("engine determinism", () => {
     expect(sheet.decisions.racialSaveBonuses.some((bonus) => bonus.target === "illusions")).toBe(true);
   });
 
-  it("normalizes class-skill ranks as integers when context is provided", () => {
+  it("keeps submitted skill ranks unchanged so validation can be engine-driven", () => {
     let state = applyChoice(initialState, "name", "Norm");
     state = applyChoice(state, "race", "human");
     state = applyChoice(state, "class", "fighter");
-    state = applyChoice(state, "skills", { climb: 1.5, listen: 1.5 }, context);
+    state = applyChoice(state, "skills", { climb: 1.5, listen: 1.25 }, context);
 
     const ranks = state.selections.skills as Record<string, number>;
-    expect(ranks.climb).toBe(2);
-    expect(ranks.listen).toBe(1.5);
+    expect(ranks.climb).toBe(1.5);
+    expect(ranks.listen).toBe(1.25);
+
+    const errors = validateState(state, context);
+    expect(errors.some((error) => error.code === "SKILL_RANK_CLASS_INTEGER")).toBe(true);
+    expect(errors.some((error) => error.code === "SKILL_RANK_STEP")).toBe(true);
   });
 
   it("returns UNKNOWN_SKILL when selected skill does not exist", () => {
@@ -1206,6 +1210,18 @@ describe("engine determinism", () => {
 
     const errors = validateState(state, context);
     expect(errors.some((error) => error.code === "SKILL_POINTS_EXCEEDED")).toBe(true);
+  });
+
+  it("calculates skill-point spend from submitted ranks without UI-side normalization", () => {
+    let state = applyChoice(initialState, "name", "SkillBudgetRawRanks");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { climb: 1.5, listen: 1.25 }, context);
+
+    const sheet = finalizeCharacter(state, context);
+    expect(sheet.decisions.skillPoints.spent).toBe(4);
+    expect(sheet.decisions.skillPoints.remaining).toBe(8);
   });
 
   it("builds a legal fighter skill allocation with class and cross-class costs in the breakdown", () => {
