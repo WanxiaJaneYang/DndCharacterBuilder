@@ -92,7 +92,7 @@ The UI must be able to render these structures and provide interactive provenanc
 - Design the review layout for clarity and readability.
 - Implement provenance tooltips or panels that reference the engine's provenance data.
 - Ensure that editing previous steps correctly updates the review content.
-- Keep review sections aligned with the phased export model documented in `docs/data/EXPORT_SCHEMA.md`.
+- Keep review sections aligned with the phased export model documented in `docs/sheet-spec.md`.
 - Consider implementing a basic HTML export template.
 
 ## Checklist
