@@ -1620,7 +1620,8 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     .map(([skillId, skill]) => {
       const misc = skill.miscBonus;
       const skillEntity = entityBuckets.skills?.[skillId];
-      const acp = skillIsAffectedByArmorCheckPenalty(skillEntity) ? acpPenalty : 0;
+      const acpApplied = skillIsAffectedByArmorCheckPenalty(skillEntity);
+      const acp = acpApplied ? acpPenalty : 0;
       return {
         id: skillId,
         name: skill.name,
@@ -1629,7 +1630,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
         racial: skill.racialBonus,
         misc,
         acp,
-        acpApplied: skillIsAffectedByArmorCheckPenalty(skillEntity),
+        acpApplied,
         total: skill.total + acp
       };
     });
@@ -1655,7 +1656,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     }
   };
   const unresolvedRules = collectUnresolvedRules(state, context);
-  const sheetViewModel = buildSheetViewModel({ phase1, phase2, skills });
+  const sheetViewModel = buildSheetViewModel({ phase1, phase2, skills, decisions });
 
   return {
     metadata: { name: sheet.metadata.name },
@@ -1673,7 +1674,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   };
 }
 
-export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1" | "phase2" | "skills">): SheetViewModel {
+export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1" | "phase2" | "skills" | "decisions">): SheetViewModel {
   const ac = characterSheet.phase1.combat.ac;
   const acBase =
     ac.total
@@ -1687,10 +1688,10 @@ export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1
   const bab = characterSheet.phase1.combat.grapple.bab;
   const meleeAbility = characterSheet.phase1.combat.grapple.str;
   const rangedAbility = characterSheet.phase1.combat.initiative.dex;
-  const sizeModifier = ac.breakdown.size;
+  const attackSizeModifier = characterSheet.decisions.sizeModifiers.attack;
   const attacks = [
     ...characterSheet.phase1.combat.attacks.melee.map((attack) => {
-      const misc = attack.attackBonus - bab - meleeAbility - sizeModifier;
+      const misc = attack.attackBonus - bab - meleeAbility - attackSizeModifier;
       const damageLine = /[+-]\d+$/.test(attack.damage)
         ? attack.damage
         : formatDamageWithModifier(attack.damage, meleeAbility);
@@ -1701,14 +1702,14 @@ export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1
           total: attack.attackBonus,
           bab,
           ability: meleeAbility,
-          size: sizeModifier,
+          size: attackSizeModifier,
           misc
         },
         damageLine
       };
     }),
     ...characterSheet.phase1.combat.attacks.ranged.map((attack) => {
-      const misc = attack.attackBonus - bab - rangedAbility - sizeModifier;
+      const misc = attack.attackBonus - bab - rangedAbility - attackSizeModifier;
       return {
         ...attack,
         category: "ranged" as const,
@@ -1716,7 +1717,7 @@ export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1
           total: attack.attackBonus,
           bab,
           ability: rangedAbility,
-          size: sizeModifier,
+          size: attackSizeModifier,
           misc
         },
         damageLine: attack.damage
