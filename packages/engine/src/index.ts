@@ -271,7 +271,7 @@ export interface UnresolvedRule {
   source: {
     entityType: string;
     entityId: string;
-    packId?: string;
+    packId: string;
     sourceRefs?: string[];
   };
 }
@@ -1301,7 +1301,7 @@ function collectUnresolvedRules(state: CharacterState, context: EngineContext): 
             }
       }))
     )
-    .sort((left, right) => left.id.localeCompare(right.id));
+    .sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0));
 }
 
 function isArmorOrShieldItem(item: ResolvedEntity): boolean {
