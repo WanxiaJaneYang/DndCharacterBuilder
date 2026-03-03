@@ -46,6 +46,42 @@
             "entityId": "fighter",
             "packId": "srd-35e-minimal"
           }
+        },
+        {
+          "id": "srd-35e-minimal:classes:fighter:fighter-proficiency-automation",
+          "category": "proficiency",
+          "source": {
+            "entityType": "classes",
+            "entityId": "fighter",
+            "packId": "srd-35e-minimal"
+          }
+        },
+        {
+          "id": "srd-35e-minimal:feats:acrobatic:acrobatic-benefit",
+          "category": "feat-benefit",
+          "source": {
+            "entityType": "feats",
+            "entityId": "acrobatic",
+            "packId": "srd-35e-minimal"
+          }
+        },
+        {
+          "id": "srd-35e-minimal:races:dwarf:dwarf-conditional-bonuses",
+          "category": "situational-bonus",
+          "source": {
+            "entityType": "races",
+            "entityId": "dwarf",
+            "packId": "srd-35e-minimal"
+          }
+        },
+        {
+          "id": "srd-35e-minimal:races:dwarf:dwarf-weapon-familiarity-proficiency",
+          "category": "proficiency",
+          "source": {
+            "entityType": "races",
+            "entityId": "dwarf",
+            "packId": "srd-35e-minimal"
+          }
         }
       ]
     }

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { ContractFixtureSchema } from "@dcb/schema";
 import { runAuthenticityChecks, runContracts } from "./index";
 
 describe("pack contracts", () => {
@@ -24,6 +25,74 @@ describe("pack contracts", () => {
 
     try {
       expect(() => runContracts(tempRoot)).not.toThrow();
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("preserves contract clarifications in fixture parsing", () => {
+    const fixture = ContractFixtureSchema.parse({
+      enabledPacks: ["srd-35e-minimal"],
+      initialState: {},
+      actions: [],
+      contractClarifications: {
+        stats: "initiative is part of the baseline"
+      },
+      expected: {}
+    });
+
+    expect(fixture.contractClarifications).toEqual({
+      stats: "initiative is part of the baseline"
+    });
+  });
+
+  it("fails when a contract fixture contains non-ASCII text", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-contract-ascii-"));
+    const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packSource, packDest, { recursive: true });
+
+    const fixturePath = path.join(packDest, "contracts/human-fighter-1.json");
+    const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8")) as {
+      contractClarifications?: Record<string, string>;
+    };
+    fixture.contractClarifications = {
+      ...(fixture.contractClarifications ?? {}),
+      asciiCheck: "contains café"
+    };
+    fs.writeFileSync(fixturePath, JSON.stringify(fixture, null, 2));
+
+    try {
+      expect(() => runContracts(tempRoot)).toThrow(/ASCII/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails when finalSheetSubset arrays omit actual trailing items", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-contract-array-"));
+    const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packSource, packDest, { recursive: true });
+
+    const fixturePath = path.join(packDest, "contracts/human-fighter-1.json");
+    const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8")) as {
+      expected: {
+        finalSheetSubset: {
+          phase2: {
+            skills: Array<Record<string, unknown>>;
+          };
+        };
+      };
+    };
+    fixture.expected.finalSheetSubset.phase2.skills =
+      fixture.expected.finalSheetSubset.phase2.skills.slice(0, 1);
+    fs.writeFileSync(fixturePath, JSON.stringify(fixture, null, 2));
+
+    try {
+      expect(() => runContracts(tempRoot)).toThrow(/Final sheet subset mismatch/i);
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }

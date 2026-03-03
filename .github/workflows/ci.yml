@@ -17,6 +17,7 @@ jobs:
           else
             npm install
           fi
+      - run: npm run check:contract-fixtures
       - run: npm test
       - run: npm run contracts
       - run: npm run typecheck
