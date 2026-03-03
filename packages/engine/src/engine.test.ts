@@ -32,8 +32,8 @@ function makePack(id: string, priority: number, dependencies: string[] = []): Lo
   };
 }
 
-describe("engine determinism", () => {
-  it("includes a render-ready sheet view model", () => {
+describe("sheetViewModel", () => {
+  it("includes a render-ready sheet view model with attack breakdowns and ACP flags", () => {
     let state = applyChoice(initialState, "name", "Aric");
     state = applyChoice(state, "abilities", {
       str: 16,
@@ -69,7 +69,15 @@ describe("engine determinism", () => {
         itemId: "longsword",
         name: "Longsword",
         attackBonus: 4,
+        attackBonusBreakdown: {
+          total: 4,
+          bab: 1,
+          ability: 3,
+          size: 0,
+          misc: 0
+        },
         damage: "1d8",
+        damageLine: "1d8+3",
         crit: "19-20/x2"
       })
     ]);
@@ -82,11 +90,48 @@ describe("engine determinism", () => {
           ability: 3,
           misc: 0,
           acp: -7,
+          acpApplied: true,
           total: -3
-        }
+        },
+        expect.objectContaining({
+          id: "listen",
+          name: "Listen",
+          acp: 0,
+          acpApplied: false
+        })
       ])
     );
   });
+
+  it("derives the base AC component from the actual AC total", () => {
+    const baseAcPack = makePack("base-ac-pack", 1);
+    const rules = baseAcPack.entities.rules ?? [];
+    rules[0] = {
+      ...rules[0]!,
+      effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 12 } }]
+    };
+    baseAcPack.entities.rules = rules;
+    const baseAcContext = {
+      enabledPackIds: ["base-ac-pack"],
+      resolvedData: resolveLoadedPacks([baseAcPack], ["base-ac-pack"])
+    };
+
+    let state = applyChoice(initialState, "name", "Shielded");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+
+    const sheet = finalizeCharacter(state, baseAcContext);
+
+    expect(sheet.sheetViewModel.combat.ac.components).toEqual(
+      expect.arrayContaining([
+        { id: "base", label: "Base", value: 12 }
+      ])
+    );
+  });
+});
+
+describe("engine determinism", () => {
 
   it("returns identical sheets for same inputs", () => {
     let state = applyChoice(initialState, "name", "Aric");
