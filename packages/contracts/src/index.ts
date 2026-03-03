@@ -5,12 +5,45 @@ import { resolvePackSet } from "@dcb/datapack/node";
 import { applyChoice, finalizeCharacter, initialState, listChoices, validateState, type CharacterState } from "@dcb/engine";
 export { runAuthenticityChecks } from "./authenticity";
 
-function containsSubset(target: Record<string, unknown>, subset: Record<string, unknown>): boolean {
-  return Object.entries(subset).every(([k, v]) => {
-    const tv = target[k];
-    if (typeof v === "object" && v !== null && typeof tv === "object" && tv !== null) return containsSubset(tv as Record<string, unknown>, v as Record<string, unknown>);
-    return tv === v;
-  });
+const NON_ASCII_PATTERN = /[^\x00-\x7F]/;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function containsSubset(target: unknown, subset: unknown): boolean {
+  if (Array.isArray(subset)) {
+    return Array.isArray(target) &&
+      target.length === subset.length &&
+      subset.every((value, index) => containsSubset(target[index], value));
+  }
+
+  if (isRecord(subset)) {
+    return isRecord(target) &&
+      Object.entries(subset).every(([key, value]) => containsSubset(target[key], value));
+  }
+
+  return target === subset;
+}
+
+export function assertContractFixturesUseAscii(packsRoot: string): void {
+  const packDirs = fs
+    .readdirSync(packsRoot, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => path.join(packsRoot, entry.name));
+
+  for (const packDir of packDirs) {
+    const contractsDir = path.join(packDir, "contracts");
+    if (!fs.existsSync(contractsDir)) continue;
+
+    for (const file of fs.readdirSync(contractsDir).filter((entry) => entry.endsWith(".json"))) {
+      const fixturePath = path.join(contractsDir, file);
+      const fixtureText = fs.readFileSync(fixturePath, "utf8");
+      if (NON_ASCII_PATTERN.test(fixtureText)) {
+        contractFailure(path.basename(packDir), file, "Contract fixtures must be ASCII-only", "ASCII text", "non-ASCII content detected");
+      }
+    }
+  }
 }
 
 function shortSnippet(value: unknown): string {
@@ -29,6 +62,7 @@ function contractFailure(packId: string, fixtureFile: string, message: string, e
 }
 
 export function runContracts(packsRoot: string): void {
+  assertContractFixturesUseAscii(packsRoot);
   const packDirs = fs
     .readdirSync(packsRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())

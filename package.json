@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "npm --workspace @dcb/web run dev",
     "build": "npm --workspaces run build",
+    "check:contract-fixtures": "node scripts/check-contract-fixtures-ascii.mjs",
     "typecheck": "npm --workspaces run typecheck",
     "lint": "npm --workspaces run lint",
     "test": "npm --workspaces run test",

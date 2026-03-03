@@ -680,6 +680,7 @@ export const ContractFixtureSchema = z.object({
   enabledPacks: z.array(z.string()),
   initialState: z.record(z.any()),
   actions: z.array(z.object({ choiceId: z.string(), selection: z.any() })),
+  contractClarifications: z.record(z.string()).optional(),
   expected: z.object({
     availableChoicesContains: z.array(z.string()).optional(),
     validationErrorCodes: z.array(z.string()).optional(),
