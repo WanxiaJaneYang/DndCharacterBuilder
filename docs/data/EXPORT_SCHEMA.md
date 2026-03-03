@@ -1,10 +1,14 @@
 # Export Schema (Character Sheet JSON)
 
-This document defines the target JSON model for final character-sheet export.
+This document is deprecated for MVP structure and superseded by [`../sheet-spec.md`](../sheet-spec.md).
 
-> **Note:** For the normalized 3.5 SRD MVP sheet contract, see [`../sheet-spec.md`](../sheet-spec.md). This document should stay aligned with that spec.
+> **Status:** `docs/sheet-spec.md` is the canonical MVP export contract in this PR. Do not introduce new MVP schema changes here.
+>
+> **Transition note:** This document still shows older phased target examples, including the pre-MVP placement of `level` and `xp` under `metadata`. For the current MVP contract, `level` and `xp` live under `identity` in [`../sheet-spec.md`](../sheet-spec.md).
 
 ## Current Status
+
+Historical only for MVP. Keep it as background/reference while downstream docs and consumers migrate to the canonical spec.
 
 The engine currently exports a deterministic sheet with:
 - metadata/name
