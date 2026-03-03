@@ -82,8 +82,8 @@ describe("engine determinism", () => {
         id: "srd-35e-minimal:feats:acrobatic:acrobatic-benefit",
         category: "feat-benefit",
         description: "GENERAL feat benefit is preserved from source text but not yet enforced by the current engine. You get a +2 bonus on all Jump checks and Tumble checks.",
-        dependsOn: ["feat-effect-engine", "character-sheet-derived-feat-benefits"],
-        impacts: ["selections.feat", "derived.featBenefits"],
+        dependsOn: ["cap:feat-effect-runtime", "cap:character-sheet-feat-benefits"],
+        impacts: ["skills:jump", "skills:tumble"],
         source: {
           entityType: "feats",
           entityId: "acrobatic",
@@ -94,8 +94,8 @@ describe("engine determinism", () => {
         id: "srd-35e-minimal:races:dwarf:dwarf-weapon-familiarity-proficiency",
         category: "proficiency",
         description: "Dwarven weapon familiarity is documented but not enforced by current equipment/proficiency mechanics.",
-        dependsOn: ["equipment-proficiency-model", "equipment-validation-engine"],
-        impacts: ["selections.equipment", "validation.race.proficiency"],
+        dependsOn: ["cap:equipment-proficiency", "cap:equipment-validation"],
+        impacts: ["proficiency:weapon:dwarven-waraxe", "proficiency:weapon:dwarven-urgrosh"],
         source: {
           entityType: "races",
           entityId: "dwarf",
