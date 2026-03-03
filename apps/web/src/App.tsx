@@ -1,21 +1,39 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { resolveLoadedPacks } from '@dcb/datapack';
-import { loadMinimalPack } from './loadMinimalPack';
-import { DEFAULT_STATS, applyChoice, finalizeCharacter, initialState, listChoices, type CharacterState } from '@dcb/engine';
-import { EDITIONS, FALLBACK_EDITION, type EditionOption, defaultEditionId } from './editions';
-import { detectDefaultLanguage, uiText, type AbilityCode, type Language, type UIText } from './uiText';
-import { AbilityMethodSelector } from './components/AbilityMethodSelector';
-import { PointBuyPanel } from './components/PointBuyPanel';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { resolveLoadedPacks } from "@dcb/datapack";
+import { loadMinimalPack } from "./loadMinimalPack";
+import {
+  DEFAULT_STATS,
+  applyChoice,
+  finalizeCharacter,
+  initialState,
+  listChoices,
+  type CharacterState,
+} from "@dcb/engine";
+import {
+  EDITIONS,
+  FALLBACK_EDITION,
+  type EditionOption,
+  defaultEditionId,
+} from "./editions";
+import {
+  detectDefaultLanguage,
+  uiText,
+  type AbilityCode,
+  type Language,
+  type UIText,
+} from "./uiText";
+import { AbilityMethodSelector } from "./components/AbilityMethodSelector";
+import { PointBuyPanel } from "./components/PointBuyPanel";
 
 const embeddedPacks = [loadMinimalPack()];
-type Role = 'dm' | 'player' | null;
+type Role = "dm" | "player" | null;
 
-const STEP_ID_FEAT = 'feat';
-const STEP_ID_SKILLS = 'skills';
-const STEP_ID_ABILITIES = 'abilities';
-const DEFAULT_EXPORT_NAME = 'character';
-const ABILITY_ORDER = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
-type AbilityMode = 'pointBuy' | 'phb' | 'rollSets';
+const STEP_ID_FEAT = "feat";
+const STEP_ID_SKILLS = "skills";
+const STEP_ID_ABILITIES = "abilities";
+const DEFAULT_EXPORT_NAME = "character";
+const ABILITY_ORDER = ["str", "dex", "con", "int", "wis", "cha"] as const;
+type AbilityMode = "pointBuy" | "phb" | "rollSets";
 
 type AbilityStepConfig = {
   modes?: AbilityMode[];
@@ -30,7 +48,7 @@ type AbilityStepConfig = {
     maxScore?: number;
   };
   phb?: {
-    methodType?: 'standardArray' | 'manualRange';
+    methodType?: "standardArray" | "manualRange";
     standardArray?: number[];
     manualRange?: { minScore?: number; maxScore?: number };
   };
@@ -38,33 +56,41 @@ type AbilityStepConfig = {
     setsCount?: number;
     rollFormula?: string;
     scoresPerSet?: number;
-    assignmentPolicy?: 'assign_after_pick';
+    assignmentPolicy?: "assign_after_pick";
   };
 };
 
 type AbilityPresentationConfig = {
   showExistingModifiers?: boolean;
-  groupBy?: 'sourceType';
+  groupBy?: "sourceType";
   hideZeroEffectGroups?: boolean;
   sourceTypeLabels?: Record<string, string>;
-  modeUi?: Partial<Record<AbilityMode, { labelKey?: string; hintKey?: string }>>;
+  modeUi?: Partial<
+    Record<AbilityMode, { labelKey?: string; hintKey?: string }>
+  >;
 };
 
 const DEFAULT_ABILITY_MIN = 3;
 const DEFAULT_ABILITY_MAX = 18;
 
 function rollScoreByFormula(formula: string): number {
-  if (formula !== '4d6_drop_lowest') return 10;
-  const rolls = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1).sort((a, b) => a - b);
+  if (formula !== "4d6_drop_lowest") return 10;
+  const rolls = Array.from(
+    { length: 4 },
+    () => Math.floor(Math.random() * 6) + 1,
+  ).sort((a, b) => a - b);
   return rolls.slice(1).reduce((sum, value) => sum + value, 0);
 }
 
-function generateRollSets(config: AbilityStepConfig['rollSets']): number[][] {
+function generateRollSets(config: AbilityStepConfig["rollSets"]): number[][] {
   const setsCount = Math.max(1, Number(config?.setsCount ?? 1));
-  const scoresPerSet = Math.max(1, Number(config?.scoresPerSet ?? ABILITY_ORDER.length));
-  const formula = String(config?.rollFormula ?? '4d6_drop_lowest');
+  const scoresPerSet = Math.max(
+    1,
+    Number(config?.scoresPerSet ?? ABILITY_ORDER.length),
+  );
+  const formula = String(config?.rollFormula ?? "4d6_drop_lowest");
   return Array.from({ length: setsCount }, () =>
-    Array.from({ length: scoresPerSet }, () => rollScoreByFormula(formula))
+    Array.from({ length: scoresPerSet }, () => rollScoreByFormula(formula)),
   );
 }
 
@@ -74,7 +100,10 @@ function clampAbilityScore(value: number, min: number, max: number): number {
   return Math.round(clamped);
 }
 
-function derivePointBuyBaseScore(costTable: Record<string, number>, fallback: number): number {
+function derivePointBuyBaseScore(
+  costTable: Record<string, number>,
+  fallback: number,
+): number {
   const zeroCostScores = Object.entries(costTable)
     .filter(([, cost]) => Number(cost) === 0)
     .map(([score]) => Number(score))
@@ -88,8 +117,12 @@ export function App() {
   const [showProv, setShowProv] = useState(false);
   const [role, setRole] = useState<Role>(null);
   const [language, setLanguage] = useState<Language>(detectDefaultLanguage);
-  const [selectedEditionId, setSelectedEditionId] = useState<string>(() => defaultEditionId(EDITIONS));
-  const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<string[]>([]);
+  const [selectedEditionId, setSelectedEditionId] = useState<string>(() =>
+    defaultEditionId(EDITIONS),
+  );
+  const [selectedOptionalPackIds, setSelectedOptionalPackIds] = useState<
+    string[]
+  >([]);
   const [rulesReady, setRulesReady] = useState(false);
   const [abilityMethodHintOpen, setAbilityMethodHintOpen] = useState(false);
   const [abilityMethodHintPinned, setAbilityMethodHintPinned] = useState(false);
@@ -97,26 +130,42 @@ export function App() {
   const abilityMethodHintRef = useRef<HTMLDivElement | null>(null);
 
   const selectedEdition = useMemo(
-    () => EDITIONS.find((edition) => edition.id === selectedEditionId) ?? EDITIONS[0] ?? FALLBACK_EDITION,
-    [selectedEditionId]
+    () =>
+      EDITIONS.find((edition) => edition.id === selectedEditionId) ??
+      EDITIONS[0] ??
+      FALLBACK_EDITION,
+    [selectedEditionId],
   );
   const enabledPackIds = useMemo(
     () =>
-      [selectedEdition.basePackId, ...selectedOptionalPackIds.filter((packId) => selectedEdition.optionalPackIds.includes(packId))]
-        .filter((packId) => packId.trim().length > 0),
-    [selectedEdition, selectedOptionalPackIds]
+      [
+        selectedEdition.basePackId,
+        ...selectedOptionalPackIds.filter((packId) =>
+          selectedEdition.optionalPackIds.includes(packId),
+        ),
+      ].filter((packId) => packId.trim().length > 0),
+    [selectedEdition, selectedOptionalPackIds],
   );
-  const resolvedData = useMemo(() => resolveLoadedPacks(embeddedPacks, enabledPackIds), [enabledPackIds]);
-  const context = useMemo(() => ({ enabledPackIds, resolvedData }), [enabledPackIds, resolvedData]);
-  const activeLocale = useMemo(() => context.resolvedData.locales[language], [context.resolvedData.locales, language]);
+  const resolvedData = useMemo(
+    () => resolveLoadedPacks(embeddedPacks, enabledPackIds),
+    [enabledPackIds],
+  );
+  const context = useMemo(
+    () => ({ enabledPackIds, resolvedData }),
+    [enabledPackIds, resolvedData],
+  );
+  const activeLocale = useMemo(
+    () => context.resolvedData.locales[language],
+    [context.resolvedData.locales, language],
+  );
 
   const wizardSteps = useMemo(
     () =>
       context.resolvedData.flow.steps.map((step) => ({
         ...step,
-        label: activeLocale?.flowStepLabels?.[step.id] ?? step.label
+        label: activeLocale?.flowStepLabels?.[step.id] ?? step.label,
       })),
-    [activeLocale?.flowStepLabels, context.resolvedData.flow.steps]
+    [activeLocale?.flowStepLabels, context.resolvedData.flow.steps],
   );
   const currentStep = wizardSteps[stepIndex];
 
@@ -127,7 +176,7 @@ export function App() {
   }, [stepIndex, wizardSteps.length]);
 
   useEffect(() => {
-    if (currentStep?.kind !== 'abilities') {
+    if (currentStep?.kind !== "abilities") {
       setAbilityMethodHintOpen(false);
       setAbilityMethodHintPinned(false);
     }
@@ -141,34 +190,49 @@ export function App() {
       setAbilityMethodHintPinned(false);
       setAbilityMethodHintOpen(false);
     };
-    window.addEventListener('mousedown', closeHint);
-    window.addEventListener('touchstart', closeHint);
+    window.addEventListener("mousedown", closeHint);
+    window.addEventListener("touchstart", closeHint);
     return () => {
-      window.removeEventListener('mousedown', closeHint);
-      window.removeEventListener('touchstart', closeHint);
+      window.removeEventListener("mousedown", closeHint);
+      window.removeEventListener("touchstart", closeHint);
     };
   }, [abilityMethodHintPinned]);
 
   const t = uiText[language];
-  const localizeAbilityLabel = useCallback((ability: string): string => {
-    return t.abilityLabels[ability as AbilityCode] ?? ability.toUpperCase();
-  }, [t.abilityLabels]);
-  const localizeEntityText = useCallback((entityType: string, entityId: string, path: string, fallback: string): string => {
-    const text = activeLocale?.entityText?.[entityType]?.[entityId]?.[path];
-    if (typeof text === 'string' && text.length > 0) return text;
-    if (path === 'name') {
-      const name = activeLocale?.entityNames?.[entityType]?.[entityId];
-      if (typeof name === 'string' && name.length > 0) return name;
-    }
-    return fallback;
-  }, [activeLocale]);
+  const localizeAbilityLabel = useCallback(
+    (ability: string): string => {
+      return t.abilityLabels[ability as AbilityCode] ?? ability.toUpperCase();
+    },
+    [t.abilityLabels],
+  );
+  const localizeEntityText = useCallback(
+    (
+      entityType: string,
+      entityId: string,
+      path: string,
+      fallback: string,
+    ): string => {
+      const text = activeLocale?.entityText?.[entityType]?.[entityId]?.[path];
+      if (typeof text === "string" && text.length > 0) return text;
+      if (path === "name") {
+        const name = activeLocale?.entityNames?.[entityType]?.[entityId];
+        if (typeof name === "string" && name.length > 0) return name;
+      }
+      return fallback;
+    },
+    [activeLocale],
+  );
   const choices = useMemo(() => listChoices(state, context), [context, state]);
   const localizedChoices = useMemo(
     () =>
       choices.map((choice) => {
         const flowStep = wizardSteps.find((step) => step.id === choice.stepId);
-        if (!flowStep || !('entityType' in flowStep.source)) {
-          return { ...choice, label: activeLocale?.flowStepLabels?.[choice.stepId] ?? choice.label };
+        if (!flowStep || !("entityType" in flowStep.source)) {
+          return {
+            ...choice,
+            label:
+              activeLocale?.flowStepLabels?.[choice.stepId] ?? choice.label,
+          };
         }
         const entityType = flowStep.source.entityType;
         return {
@@ -176,36 +240,50 @@ export function App() {
           label: activeLocale?.flowStepLabels?.[choice.stepId] ?? choice.label,
           options: choice.options.map((option) => ({
             ...option,
-            label: localizeEntityText(entityType, option.id, 'name', option.label)
-          }))
+            label: localizeEntityText(
+              entityType,
+              option.id,
+              "name",
+              option.label,
+            ),
+          })),
         };
       }),
-    [activeLocale?.flowStepLabels, choices, localizeEntityText, wizardSteps]
+    [activeLocale?.flowStepLabels, choices, localizeEntityText, wizardSteps],
   );
   const choiceMap = new Map(localizedChoices.map((c) => [c.stepId, c]));
-  const sheet = useMemo(() => finalizeCharacter(state, context), [context, state]);
+  const sheet = useMemo(
+    () => finalizeCharacter(state, context),
+    [context, state],
+  );
   const skillEntities = useMemo(() => {
     return Object.values(context.resolvedData.entities.skills ?? {})
       .map((skill) => ({
         ...skill,
-        displayName: localizeEntityText('skills', skill.id, 'name', skill.name)
+        displayName: localizeEntityText("skills", skill.id, "name", skill.name),
       }))
       .sort((a, b) => a.displayName.localeCompare(b.displayName));
-  }, [context.resolvedData.entities.skills, localizeEntityText]
-  );
-  const selectedFeats = ((state.selections.feats as string[] | undefined) ?? []);
+  }, [context.resolvedData.entities.skills, localizeEntityText]);
+  const selectedFeats = (state.selections.feats as string[] | undefined) ?? [];
   const sourceNameByEntityId = useMemo(() => {
     const map = new Map<string, string>();
-    for (const [entityType, bucket] of Object.entries(context.resolvedData.entities)) {
+    for (const [entityType, bucket] of Object.entries(
+      context.resolvedData.entities,
+    )) {
       for (const entity of Object.values(bucket)) {
-        const localized = activeLocale?.entityText?.[entityType]?.[entity.id]?.name
-          ?? activeLocale?.entityNames?.[entityType]?.[entity.id]
-          ?? entity.name;
+        const localized =
+          activeLocale?.entityText?.[entityType]?.[entity.id]?.name ??
+          activeLocale?.entityNames?.[entityType]?.[entity.id] ??
+          entity.name;
         map.set(`${entity._source.packId}:${entity.id}`, localized);
       }
     }
     return map;
-  }, [activeLocale?.entityNames, activeLocale?.entityText, context.resolvedData.entities]);
+  }, [
+    activeLocale?.entityNames,
+    activeLocale?.entityText,
+    context.resolvedData.entities,
+  ]);
   const packVersionById = useMemo(() => {
     const map = new Map<string, string>();
     for (const manifest of context.resolvedData.manifests) {
@@ -227,109 +305,178 @@ export function App() {
   }, [sheet.provenance]);
   const sourceMetaByEntityKey = useMemo(() => {
     const map = new Map<string, { sourceType: string; sourceLabel: string }>();
-    for (const [entityType, bucket] of Object.entries(context.resolvedData.entities)) {
+    for (const [entityType, bucket] of Object.entries(
+      context.resolvedData.entities,
+    )) {
       for (const entity of Object.values(bucket)) {
-        const sourceLabel = activeLocale?.entityText?.[entityType]?.[entity.id]?.name
-          ?? activeLocale?.entityNames?.[entityType]?.[entity.id]
-          ?? entity.name;
-        map.set(`${entity._source.packId}:${entity.id}`, { sourceType: entityType, sourceLabel });
+        const sourceLabel =
+          activeLocale?.entityText?.[entityType]?.[entity.id]?.name ??
+          activeLocale?.entityNames?.[entityType]?.[entity.id] ??
+          entity.name;
+        map.set(`${entity._source.packId}:${entity.id}`, {
+          sourceType: entityType,
+          sourceLabel,
+        });
       }
     }
     return map;
-  }, [activeLocale?.entityNames, activeLocale?.entityText, context.resolvedData.entities]);
+  }, [
+    activeLocale?.entityNames,
+    activeLocale?.entityText,
+    context.resolvedData.entities,
+  ]);
 
   const selectedStepValues = (stepId: string): string[] => {
     if (stepId === STEP_ID_FEAT) return selectedFeats;
     const value = state.selections[stepId];
     if (Array.isArray(value)) return value.map(String);
-    if (value === undefined || value === null || value === '') return [];
+    if (value === undefined || value === null || value === "") return [];
     return [String(value)];
   };
 
   const abilityStepConfig = useMemo(() => {
-    const abilityStep = wizardSteps.find((step) => step.id === STEP_ID_ABILITIES) as ({ abilitiesConfig?: AbilityStepConfig } | undefined);
+    const abilityStep = wizardSteps.find(
+      (step) => step.id === STEP_ID_ABILITIES,
+    ) as { abilitiesConfig?: AbilityStepConfig } | undefined;
     return abilityStep?.abilitiesConfig;
   }, [wizardSteps]);
   const abilityPresentation = useMemo(() => {
-    const abilityStep = wizardSteps.find((step) => step.id === STEP_ID_ABILITIES) as ({ abilityPresentation?: AbilityPresentationConfig } | undefined);
+    const abilityStep = wizardSteps.find(
+      (step) => step.id === STEP_ID_ABILITIES,
+    ) as { abilityPresentation?: AbilityPresentationConfig } | undefined;
     return abilityStep?.abilityPresentation;
   }, [wizardSteps]);
-  const abilityModes: AbilityMode[] = abilityStepConfig?.modes?.length ? abilityStepConfig.modes : [];
-  const abilityMeta = (state.selections.abilitiesMeta as {
-    mode?: AbilityMode;
-    pointCap?: number;
-    rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
-  } | undefined) ?? {};
-  const selectedAbilityMode: AbilityMode | undefined = abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0];
-  const isAbilityMode = (value: string): value is AbilityMode => abilityModes.some((mode) => mode === value);
-  const selectedAbilityModeValue = selectedAbilityMode && isAbilityMode(selectedAbilityMode) ? selectedAbilityMode : (abilityModes[0] ?? '');
+  const abilityModes: AbilityMode[] = abilityStepConfig?.modes?.length
+    ? abilityStepConfig.modes
+    : [];
+  const abilityMeta =
+    (state.selections.abilitiesMeta as
+      | {
+          mode?: AbilityMode;
+          pointCap?: number;
+          rollSets?: { generatedSets?: number[][]; selectedSetIndex?: number };
+        }
+      | undefined) ?? {};
+  const selectedAbilityMode: AbilityMode | undefined =
+    abilityMeta.mode ?? abilityStepConfig?.defaultMode ?? abilityModes[0];
+  const isAbilityMode = (value: string): value is AbilityMode =>
+    abilityModes.some((mode) => mode === value);
+  const selectedAbilityModeValue =
+    selectedAbilityMode && isAbilityMode(selectedAbilityMode)
+      ? selectedAbilityMode
+      : (abilityModes[0] ?? "");
   const rollSetsConfig = abilityStepConfig?.rollSets;
-  const generatedRollSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
-  const selectedRollSetIndexRaw = Number(abilityMeta.rollSets?.selectedSetIndex);
-  const selectedRollSetIndex = Number.isInteger(selectedRollSetIndexRaw) ? selectedRollSetIndexRaw : -1;
-  const selectedRollSet = selectedRollSetIndex >= 0 && selectedRollSetIndex < generatedRollSets.length
-    ? generatedRollSets[selectedRollSetIndex]
-    : undefined;
-  const rollSetNeedsSelection = selectedAbilityMode === 'rollSets' && generatedRollSets.length > 0 && !selectedRollSet;
-  const rollScoresPool = selectedRollSet && selectedRollSet.length > 0
-    ? selectedRollSet
+  const generatedRollSets = Array.isArray(abilityMeta.rollSets?.generatedSets)
+    ? abilityMeta.rollSets.generatedSets
     : [];
-  const currentScores = ABILITY_ORDER.map((ability) => Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN));
-  const phbStandardArray = abilityStepConfig?.phb?.methodType === 'standardArray'
-    ? (abilityStepConfig.phb.standardArray ?? [])
-    : [];
-  const abilityMinScore = selectedAbilityMode === 'pointBuy'
-    ? Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN)
-    : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
-      ? Number(abilityStepConfig.phb.manualRange?.minScore ?? DEFAULT_ABILITY_MIN)
-      : selectedAbilityMode === 'phb' && phbStandardArray.length
-        ? Math.min(...phbStandardArray)
-        : selectedAbilityMode === 'rollSets' && rollScoresPool.length
-          ? Math.min(...rollScoresPool)
-          : Math.min(...currentScores, DEFAULT_ABILITY_MIN);
-  const abilityMaxScore = selectedAbilityMode === 'pointBuy'
-    ? Number(abilityStepConfig?.pointBuy?.maxScore ?? DEFAULT_ABILITY_MAX)
-    : selectedAbilityMode === 'phb' && abilityStepConfig?.phb?.methodType === 'manualRange'
-      ? Number(abilityStepConfig.phb.manualRange?.maxScore ?? DEFAULT_ABILITY_MAX)
-      : selectedAbilityMode === 'phb' && phbStandardArray.length
-        ? Math.max(...phbStandardArray)
-        : selectedAbilityMode === 'rollSets' && rollScoresPool.length
-          ? Math.max(...rollScoresPool)
-          : Math.max(...currentScores, DEFAULT_ABILITY_MAX);
+  const selectedRollSetIndexRaw = Number(
+    abilityMeta.rollSets?.selectedSetIndex,
+  );
+  const selectedRollSetIndex = Number.isInteger(selectedRollSetIndexRaw)
+    ? selectedRollSetIndexRaw
+    : -1;
+  const selectedRollSet =
+    selectedRollSetIndex >= 0 && selectedRollSetIndex < generatedRollSets.length
+      ? generatedRollSets[selectedRollSetIndex]
+      : undefined;
+  const rollSetNeedsSelection =
+    selectedAbilityMode === "rollSets" &&
+    generatedRollSets.length > 0 &&
+    !selectedRollSet;
+  const rollScoresPool =
+    selectedRollSet && selectedRollSet.length > 0 ? selectedRollSet : [];
+  const currentScores = ABILITY_ORDER.map((ability) =>
+    Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN),
+  );
+  const phbStandardArray =
+    abilityStepConfig?.phb?.methodType === "standardArray"
+      ? (abilityStepConfig.phb.standardArray ?? [])
+      : [];
+  const abilityMinScore =
+    selectedAbilityMode === "pointBuy"
+      ? Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN)
+      : selectedAbilityMode === "phb" &&
+          abilityStepConfig?.phb?.methodType === "manualRange"
+        ? Number(
+            abilityStepConfig.phb.manualRange?.minScore ?? DEFAULT_ABILITY_MIN,
+          )
+        : selectedAbilityMode === "phb" && phbStandardArray.length
+          ? Math.min(...phbStandardArray)
+          : selectedAbilityMode === "rollSets" && rollScoresPool.length
+            ? Math.min(...rollScoresPool)
+            : Math.min(...currentScores, DEFAULT_ABILITY_MIN);
+  const abilityMaxScore =
+    selectedAbilityMode === "pointBuy"
+      ? Number(abilityStepConfig?.pointBuy?.maxScore ?? DEFAULT_ABILITY_MAX)
+      : selectedAbilityMode === "phb" &&
+          abilityStepConfig?.phb?.methodType === "manualRange"
+        ? Number(
+            abilityStepConfig.phb.manualRange?.maxScore ?? DEFAULT_ABILITY_MAX,
+          )
+        : selectedAbilityMode === "phb" && phbStandardArray.length
+          ? Math.max(...phbStandardArray)
+          : selectedAbilityMode === "rollSets" && rollScoresPool.length
+            ? Math.max(...rollScoresPool)
+            : Math.max(...currentScores, DEFAULT_ABILITY_MAX);
   const pointBuyCostTable = abilityStepConfig?.pointBuy?.costTable ?? {};
   const pointBuyBaseScore = derivePointBuyBaseScore(
     pointBuyCostTable,
-    Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN)
+    Number(abilityStepConfig?.pointBuy?.minScore ?? DEFAULT_ABILITY_MIN),
   );
   const defaultPointBuyScores = useMemo(
-    () => Object.fromEntries(ABILITY_ORDER.map((ability) => [ability, pointBuyBaseScore])),
-    [pointBuyBaseScore]
+    () =>
+      Object.fromEntries(
+        ABILITY_ORDER.map((ability) => [ability, pointBuyBaseScore]),
+      ),
+    [pointBuyBaseScore],
   );
   const pointCapMin = abilityStepConfig?.pointBuy?.minPointCap ?? 0;
   const pointCapMax = abilityStepConfig?.pointBuy?.maxPointCap ?? 0;
   const pointCapStep = abilityStepConfig?.pointBuy?.pointCapStep ?? 1;
   const pointCapDefault = abilityStepConfig?.pointBuy?.defaultPointCap ?? 0;
-  const selectedPointCap = Number.isFinite(Number(abilityMeta.pointCap)) ? Number(abilityMeta.pointCap) : pointCapDefault;
-  const pointBuySpent = ABILITY_ORDER.reduce((sum, ability) => sum + Number(pointBuyCostTable[String(state.abilities[ability])] ?? 0), 0);
+  const selectedPointCap = Number.isFinite(Number(abilityMeta.pointCap))
+    ? Number(abilityMeta.pointCap)
+    : pointCapDefault;
+  const pointBuySpent = ABILITY_ORDER.reduce(
+    (sum, ability) =>
+      sum + Number(pointBuyCostTable[String(state.abilities[ability])] ?? 0),
+    0,
+  );
   const pointBuyRemaining = selectedPointCap - pointBuySpent;
   const hasInitialAbilityScores = ABILITY_ORDER.every(
-    (ability) => Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN) === Number(initialState.abilities[ability])
+    (ability) =>
+      Number(state.abilities[ability] ?? DEFAULT_ABILITY_MIN) ===
+      Number(initialState.abilities[ability]),
   );
 
   const applyAbilitySelection = (
     nextScores: Record<string, number>,
-    metaPatch?: Partial<{ mode: AbilityMode; pointCap: number; rollSets: { generatedSets?: number[][]; selectedSetIndex?: number } }>
+    metaPatch?: Partial<{
+      mode: AbilityMode;
+      pointCap: number;
+      rollSets: { generatedSets?: number[][]; selectedSetIndex?: number };
+    }>,
   ) => {
     setState((prev) => {
-      const prevMeta = (prev.selections.abilitiesMeta as Record<string, unknown> | undefined) ?? {};
-      const nextMode = metaPatch?.mode ?? selectedAbilityMode ?? abilityModes[0];
-      if (!nextMode) return applyChoice(prev, STEP_ID_ABILITIES, nextScores, context);
+      const prevMeta =
+        (prev.selections.abilitiesMeta as
+          | Record<string, unknown>
+          | undefined) ?? {};
+      const nextMode =
+        metaPatch?.mode ?? selectedAbilityMode ?? abilityModes[0];
+      if (!nextMode)
+        return applyChoice(prev, STEP_ID_ABILITIES, nextScores, context);
       const nextMeta = { ...prevMeta, ...metaPatch, mode: nextMode };
       return applyChoice(
         prev,
         STEP_ID_ABILITIES,
-        { mode: nextMeta.mode, pointCap: nextMeta.pointCap, rollSets: nextMeta.rollSets, scores: nextScores },
-        context
+        {
+          mode: nextMeta.mode,
+          pointCap: nextMeta.pointCap,
+          rollSets: nextMeta.rollSets,
+          scores: nextScores,
+        },
+        context,
       );
     });
   };
@@ -340,37 +487,56 @@ export function App() {
   };
 
   const applySelectedRollSet = (set: number[], index: number) => {
-    const nextScores = Object.fromEntries(ABILITY_ORDER.map((ability, abilityIndex) => [
-      ability,
-      Number(set[abilityIndex] ?? state.abilities[ability] ?? DEFAULT_ABILITY_MIN)
-    ]));
-    applyAbilitySelection(nextScores, { rollSets: { generatedSets: generatedRollSets, selectedSetIndex: index } });
+    const nextScores = Object.fromEntries(
+      ABILITY_ORDER.map((ability, abilityIndex) => [
+        ability,
+        Number(
+          set[abilityIndex] ?? state.abilities[ability] ?? DEFAULT_ABILITY_MIN,
+        ),
+      ]),
+    );
+    applyAbilitySelection(nextScores, {
+      rollSets: { generatedSets: generatedRollSets, selectedSetIndex: index },
+    });
   };
 
   const regenerateRollSetOptions = () => {
     if (!rollSetsConfig) return;
     const generatedSets = generateRollSets(rollSetsConfig);
-    applyAbilitySelection({ ...state.abilities }, { rollSets: { generatedSets, selectedSetIndex: -1 } });
+    applyAbilitySelection(
+      { ...state.abilities },
+      { rollSets: { generatedSets, selectedSetIndex: -1 } },
+    );
   };
 
   const stepAbility = (key: string, delta: number) => {
     const current = Number(state.abilities[key] ?? 0);
-    const next = clampAbilityScore(current + delta, abilityMinScore, abilityMaxScore);
+    const next = clampAbilityScore(
+      current + delta,
+      abilityMinScore,
+      abilityMaxScore,
+    );
     if (next === current) return;
     applyAbilitySelection({ ...state.abilities, [key]: next });
   };
 
   const clampAbilityOnBlur = (key: string) => {
     const current = Number(state.abilities[key]);
-    const clamped = clampAbilityScore(current, abilityMinScore, abilityMaxScore);
+    const clamped = clampAbilityScore(
+      current,
+      abilityMinScore,
+      abilityMaxScore,
+    );
     if (current === clamped) return;
     applyAbilitySelection({ ...state.abilities, [key]: clamped });
   };
 
   const exportJson = () => {
-    const blob = new Blob([JSON.stringify(sheet, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(sheet, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${sheet.metadata.name || DEFAULT_EXPORT_NAME}.json`;
     a.click();
@@ -378,29 +544,44 @@ export function App() {
   };
 
   useEffect(() => {
-    if (currentStep?.kind !== 'abilities' || selectedAbilityMode !== 'pointBuy') {
+    if (
+      currentStep?.kind !== "abilities" ||
+      selectedAbilityMode !== "pointBuy"
+    ) {
       setIsPointBuyTableOpen(false);
       return;
     }
     if (abilityMeta.mode || !hasInitialAbilityScores) return;
-    applyAbilitySelection(defaultPointBuyScores, { mode: 'pointBuy', pointCap: selectedPointCap });
+    applyAbilitySelection(defaultPointBuyScores, {
+      mode: "pointBuy",
+      pointCap: selectedPointCap,
+    });
   }, [
     abilityMeta.mode,
     currentStep?.kind,
     defaultPointBuyScores,
     hasInitialAbilityScores,
     selectedAbilityMode,
-    selectedPointCap
+    selectedPointCap,
   ]);
 
   const renderCurrentStep = () => {
     if (!currentStep) return null;
 
-    if (currentStep.kind === 'review') {
+    if (currentStep.kind === "review") {
       const phase1 = sheet.phase1;
       const phase2 = sheet.phase2;
-      const abilityOrder = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
-      const statOrder = ['hp', 'ac', 'initiative', 'speed', 'bab', 'fort', 'ref', 'will'] as const;
+      const abilityOrder = ["str", "dex", "con", "int", "wis", "cha"] as const;
+      const statOrder = [
+        "hp",
+        "ac",
+        "initiative",
+        "speed",
+        "bab",
+        "fort",
+        "ref",
+        "will",
+      ] as const;
       const statLabels: Record<(typeof statOrder)[number], string> = {
         hp: t.reviewHpLabel,
         ac: t.reviewAcLabel,
@@ -421,25 +602,40 @@ export function App() {
         ref: DEFAULT_STATS.ref,
         will: DEFAULT_STATS.will,
       };
-      const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
+      const formatSigned = (value: number) =>
+        `${value >= 0 ? "+" : ""}${value}`;
       const formatSourceLabel = (packId: string, entityId: string) =>
         sourceNameByEntityId.get(`${packId}:${entityId}`) ?? entityId;
-      const selectedRaceId = String(state.selections.race ?? '');
-      const selectedClassId = String(state.selections.class ?? '');
+      const selectedRaceId = String(state.selections.race ?? "");
+      const selectedClassId = String(state.selections.class ?? "");
       const selectedRaceName = selectedRaceId
-        ? localizeEntityText('races', selectedRaceId, 'name', context.resolvedData.entities.races?.[selectedRaceId]?.name ?? selectedRaceId)
-        : '-';
+        ? localizeEntityText(
+            "races",
+            selectedRaceId,
+            "name",
+            context.resolvedData.entities.races?.[selectedRaceId]?.name ??
+              selectedRaceId,
+          )
+        : "-";
       const selectedClassName = selectedClassId
-        ? localizeEntityText('classes', selectedClassId, 'name', context.resolvedData.entities.classes?.[selectedClassId]?.name ?? selectedClassId)
-        : '-';
+        ? localizeEntityText(
+            "classes",
+            selectedClassId,
+            "name",
+            context.resolvedData.entities.classes?.[selectedClassId]?.name ??
+              selectedClassId,
+          )
+        : "-";
       const reviewSkills = Object.entries(sheet.skills)
         .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
         .sort((a, b) => {
-          const left = localizeEntityText('skills', a[0], 'name', a[1].name);
-          const right = localizeEntityText('skills', b[0], 'name', b[1].name);
+          const left = localizeEntityText("skills", a[0], "name", a[1].name);
+          const right = localizeEntityText("skills", b[0], "name", b[1].name);
           return b[1].total - a[1].total || left.localeCompare(right);
         });
-      const phase2SkillMap = new Map(phase2.skills.map((skill) => [skill.id, skill]));
+      const phase2SkillMap = new Map(
+        phase2.skills.map((skill) => [skill.id, skill]),
+      );
       const enabledPackDetails = enabledPackIds.map((packId) => ({
         packId,
         version: packVersionById.get(packId) ?? t.reviewUnknownVersion,
@@ -449,24 +645,39 @@ export function App() {
           <h2>{t.review}</h2>
           <header className="review-hero">
             <div>
-              <h3 className="review-character-name">{sheet.metadata.name || t.unnamedCharacter}</h3>
+              <h3 className="review-character-name">
+                {sheet.metadata.name || t.unnamedCharacter}
+              </h3>
               <p className="review-character-meta">
-                {t.raceLabel}: <strong>{selectedRaceName}</strong> | {t.classLabel}: <strong>{selectedClassName}</strong>
+                {t.raceLabel}: <strong>{selectedRaceName}</strong> |{" "}
+                {t.classLabel}: <strong>{selectedClassName}</strong>
               </p>
             </div>
             <div className="review-actions">
               <button onClick={exportJson}>{t.exportJson}</button>
-              <button onClick={() => setShowProv((s) => !s)}>{t.toggleProvenance}</button>
+              <button onClick={() => setShowProv((s) => !s)}>
+                {t.toggleProvenance}
+              </button>
             </div>
           </header>
 
           <article className="sheet review-decisions">
             <h3>{t.reviewIdentityProgression}</h3>
-            <p>{t.reviewLevelLabel}: {phase1.identity.level}</p>
-            <p>{t.reviewXpLabel}: {phase1.identity.xp}</p>
-            <p>{t.reviewSizeLabel}: {phase1.identity.size}</p>
-            <p>{t.reviewSpeedBaseLabel}: {phase1.identity.speed.base}</p>
-            <p>{t.reviewSpeedAdjustedLabel}: {phase1.identity.speed.adjusted}</p>
+            <p>
+              {t.reviewLevelLabel}: {phase1.identity.level}
+            </p>
+            <p>
+              {t.reviewXpLabel}: {phase1.identity.xp}
+            </p>
+            <p>
+              {t.reviewSizeLabel}: {phase1.identity.size}
+            </p>
+            <p>
+              {t.reviewSpeedBaseLabel}: {phase1.identity.speed.base}
+            </p>
+            <p>
+              {t.reviewSpeedAdjustedLabel}: {phase1.identity.speed.adjusted}
+            </p>
           </article>
 
           <div className="review-stat-cards">
@@ -557,7 +768,9 @@ export function App() {
               <tbody>
                 {phase1.combat.attacks.melee.map((attack) => (
                   <tr key={`melee-${attack.itemId}`}>
-                    <td className="review-cell-key">{t.reviewAttackMeleeLabel}</td>
+                    <td className="review-cell-key">
+                      {t.reviewAttackMeleeLabel}
+                    </td>
                     <td>{attack.name}</td>
                     <td>{formatSigned(attack.attackBonus)}</td>
                     <td>{attack.damage}</td>
@@ -567,12 +780,14 @@ export function App() {
                 ))}
                 {phase1.combat.attacks.ranged.map((attack) => (
                   <tr key={`ranged-${attack.itemId}`}>
-                    <td className="review-cell-key">{t.reviewAttackRangedLabel}</td>
+                    <td className="review-cell-key">
+                      {t.reviewAttackRangedLabel}
+                    </td>
                     <td>{attack.name}</td>
                     <td>{formatSigned(attack.attackBonus)}</td>
                     <td>{attack.damage}</td>
                     <td>{attack.crit}</td>
-                    <td>{attack.range ?? '-'}</td>
+                    <td>{attack.range ?? "-"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -612,7 +827,9 @@ export function App() {
           <article className="sheet">
             <h3>{t.reviewAbilityBreakdown}</h3>
             <table className="review-table">
-              <caption className="sr-only">{t.reviewAbilityTableCaption}</caption>
+              <caption className="sr-only">
+                {t.reviewAbilityTableCaption}
+              </caption>
               <thead>
                 <tr>
                   <th>{t.reviewAbilityColumn}</th>
@@ -628,7 +845,8 @@ export function App() {
                   const baseScore = Number(state.abilities[ability] ?? 10);
                   const targetPath = `abilities.${ability}.score`;
                   const records = provenanceByTargetPath.get(targetPath) ?? [];
-                  const finalScore = sheet.abilities[ability]?.score ?? baseScore;
+                  const finalScore =
+                    sheet.abilities[ability]?.score ?? baseScore;
                   const finalMod = sheet.abilities[ability]?.mod ?? 0;
 
                   return (
@@ -642,9 +860,15 @@ export function App() {
                           <ul className="calc-list">
                             {records.map((record, index) => (
                               <li key={`${targetPath}-${index}`}>
-                                <code>{record.delta !== undefined ? formatSigned(record.delta) : `= ${record.setValue ?? 0}`}</code>
-                                {' '}
-                                {formatSourceLabel(record.source.packId, record.source.entityId)}
+                                <code>
+                                  {record.delta !== undefined
+                                    ? formatSigned(record.delta)
+                                    : `= ${record.setValue ?? 0}`}
+                                </code>{" "}
+                                {formatSourceLabel(
+                                  record.source.packId,
+                                  record.source.entityId,
+                                )}
                               </li>
                             ))}
                           </ul>
@@ -662,7 +886,9 @@ export function App() {
           <article className="sheet">
             <h3>{t.reviewCombatBreakdown}</h3>
             <table className="review-table">
-              <caption className="sr-only">{t.reviewCombatTableCaption}</caption>
+              <caption className="sr-only">
+                {t.reviewCombatTableCaption}
+              </caption>
               <thead>
                 <tr>
                   <th>{t.reviewStatColumn}</th>
@@ -675,11 +901,19 @@ export function App() {
                 {statOrder.map((statKey) => {
                   const targetPath = `stats.${statKey}`;
                   const records = provenanceByTargetPath.get(targetPath) ?? [];
-                  const firstSetIndex = records.findIndex((record) => record.setValue !== undefined);
-                  const baseValue = firstSetIndex >= 0
-                    ? Number(records[firstSetIndex]?.setValue ?? statBaseDefaults[statKey])
-                    : statBaseDefaults[statKey];
-                  const adjustmentRecords = records.filter((_, index) => index !== firstSetIndex);
+                  const firstSetIndex = records.findIndex(
+                    (record) => record.setValue !== undefined,
+                  );
+                  const baseValue =
+                    firstSetIndex >= 0
+                      ? Number(
+                          records[firstSetIndex]?.setValue ??
+                            statBaseDefaults[statKey],
+                        )
+                      : statBaseDefaults[statKey];
+                  const adjustmentRecords = records.filter(
+                    (_, index) => index !== firstSetIndex,
+                  );
 
                   return (
                     <tr key={statKey}>
@@ -692,9 +926,15 @@ export function App() {
                           <ul className="calc-list">
                             {adjustmentRecords.map((record, index) => (
                               <li key={`${targetPath}-${index}`}>
-                                <code>{record.delta !== undefined ? formatSigned(record.delta) : `= ${record.setValue ?? 0}`}</code>
-                                {' '}
-                                {formatSourceLabel(record.source.packId, record.source.entityId)}
+                                <code>
+                                  {record.delta !== undefined
+                                    ? formatSigned(record.delta)
+                                    : `= ${record.setValue ?? 0}`}
+                                </code>{" "}
+                                {formatSourceLabel(
+                                  record.source.packId,
+                                  record.source.entityId,
+                                )}
                               </li>
                             ))}
                           </ul>
@@ -711,11 +951,14 @@ export function App() {
           <article className="sheet">
             <h3>{t.reviewSkillsBreakdown}</h3>
             <p>
-              {t.reviewPointsSpentLabel} {sheet.decisions.skillPoints.spent} / {sheet.decisions.skillPoints.total}
-              {' '}({sheet.decisions.skillPoints.remaining} {t.reviewRemainingLabel})
+              {t.reviewPointsSpentLabel} {sheet.decisions.skillPoints.spent} /{" "}
+              {sheet.decisions.skillPoints.total} (
+              {sheet.decisions.skillPoints.remaining} {t.reviewRemainingLabel})
             </p>
             <table className="review-table">
-              <caption className="sr-only">{t.reviewSkillsTableCaption}</caption>
+              <caption className="sr-only">
+                {t.reviewSkillsTableCaption}
+              </caption>
               <thead>
                 <tr>
                   <th>{t.reviewSkillColumn}</th>
@@ -733,14 +976,27 @@ export function App() {
                   const phase2Skill = phase2SkillMap.get(skillId);
                   return (
                     <tr key={skillId}>
-                      <td className="review-cell-key">{localizeEntityText('skills', skillId, 'name', skill.name)}</td>
+                      <td className="review-cell-key">
+                        {localizeEntityText(
+                          "skills",
+                          skillId,
+                          "name",
+                          skill.name,
+                        )}
+                      </td>
                       <td>{skill.ranks}</td>
-                      <td>{formatSigned(skill.abilityMod)} ({localizeAbilityLabel(skill.ability)})</td>
+                      <td>
+                        {formatSigned(skill.abilityMod)} (
+                        {localizeAbilityLabel(skill.ability)})
+                      </td>
                       <td>{formatSigned(skill.racialBonus)}</td>
                       <td>{formatSigned(phase2Skill?.misc ?? 0)}</td>
                       <td>{formatSigned(phase2Skill?.acp ?? 0)}</td>
                       <td>{phase2Skill?.total ?? skill.total}</td>
-                      <td>{skill.costSpent} ({skill.costPerRank}{t.reviewPerRankUnit})</td>
+                      <td>
+                        {skill.costSpent} ({skill.costPerRank}
+                        {t.reviewPerRankUnit})
+                      </td>
                     </tr>
                   );
                 })}
@@ -751,40 +1007,71 @@ export function App() {
           <article className="sheet review-decisions">
             <h3>{t.reviewEquipmentLoad}</h3>
             <p>
-              {t.reviewSelectedItemsLabel}:{' '}
+              {t.reviewSelectedItemsLabel}:{" "}
               {phase2.equipment.selectedItems
-                .map((itemId) => localizeEntityText('items', itemId, 'name', itemId))
-                .join(', ') || '-'}
+                .map((itemId) =>
+                  localizeEntityText("items", itemId, "name", itemId),
+                )
+                .join(", ") || "-"}
             </p>
-            <p>{t.reviewTotalWeightLabel}: {phase2.equipment.totalWeight}</p>
-            <p>{t.reviewLoadCategoryLabel}: {phase2.equipment.loadCategory}</p>
-            <p>{t.reviewSpeedImpactLabel}: {phase2.equipment.speedImpact}</p>
+            <p>
+              {t.reviewTotalWeightLabel}: {phase2.equipment.totalWeight}
+            </p>
+            <p>
+              {t.reviewLoadCategoryLabel}: {phase2.equipment.loadCategory}
+            </p>
+            <p>
+              {t.reviewSpeedImpactLabel}: {phase2.equipment.speedImpact}
+            </p>
           </article>
 
           <article className="sheet review-decisions">
             <h3>{t.reviewMovementDetail}</h3>
-            <p>{t.reviewSpeedBaseLabel}: {phase2.movement.base}</p>
-            <p>{t.reviewSpeedAdjustedLabel}: {phase2.movement.adjusted}</p>
-            <p>{t.reviewMovementNotesLabel}: {phase2.movement.notes.join(' | ')}</p>
+            <p>
+              {t.reviewSpeedBaseLabel}: {phase2.movement.base}
+            </p>
+            <p>
+              {t.reviewSpeedAdjustedLabel}: {phase2.movement.adjusted}
+            </p>
+            <p>
+              {t.reviewMovementNotesLabel}: {phase2.movement.notes.join(" | ")}
+            </p>
           </article>
 
           <article className="sheet review-decisions">
             <h3>{t.reviewRulesDecisions}</h3>
-            <p>{t.reviewFavoredClassLabel}: {sheet.decisions.favoredClass ?? '-'}</p>
-            <p>{t.reviewMulticlassXpIgnoredLabel}: {sheet.decisions.ignoresMulticlassXpPenalty ? t.reviewYes : t.reviewNo}</p>
-            <p>{t.reviewFeatSlotsLabel}: {sheet.decisions.featSelectionLimit}</p>
+            <p>
+              {t.reviewFavoredClassLabel}: {sheet.decisions.favoredClass ?? "-"}
+            </p>
+            <p>
+              {t.reviewMulticlassXpIgnoredLabel}:{" "}
+              {sheet.decisions.ignoresMulticlassXpPenalty
+                ? t.reviewYes
+                : t.reviewNo}
+            </p>
+            <p>
+              {t.reviewFeatSlotsLabel}: {sheet.decisions.featSelectionLimit}
+            </p>
           </article>
 
           <article className="sheet review-decisions">
             <h3>{t.reviewPackInfo}</h3>
-            <p>{t.reviewSelectedEditionLabel}: {selectedEdition.label || selectedEdition.id || '-'}</p>
+            <p>
+              {t.reviewSelectedEditionLabel}:{" "}
+              {selectedEdition.label || selectedEdition.id || "-"}
+            </p>
             <p>{t.reviewEnabledPacksLabel}:</p>
             <ul>
               {enabledPackDetails.map((pack) => (
-                <li key={pack.packId}>{pack.packId} ({pack.version})</li>
+                <li key={pack.packId}>
+                  {pack.packId} ({pack.version})
+                </li>
               ))}
             </ul>
-            <p>{t.reviewFingerprintLabel}: <code>{context.resolvedData.fingerprint}</code></p>
+            <p>
+              {t.reviewFingerprintLabel}:{" "}
+              <code>{context.resolvedData.fingerprint}</code>
+            </p>
           </article>
 
           {showProv && (
@@ -797,15 +1084,19 @@ export function App() {
       );
     }
 
-    if (currentStep.kind === 'metadata') {
+    if (currentStep.kind === "metadata") {
       return (
         <section>
           <h2>{currentStep.label}</h2>
           <label htmlFor="character-name-input">{t.nameLabel}</label>
           <input
             id="character-name-input"
-            value={state.metadata.name ?? ''}
-            onChange={(e) => setState((s) => applyChoice(s, currentStep.id, e.target.value, context))}
+            value={state.metadata.name ?? ""}
+            onChange={(e) =>
+              setState((s) =>
+                applyChoice(s, currentStep.id, e.target.value, context),
+              )
+            }
             placeholder={t.metadataPlaceholder}
             aria-label={t.nameLabel}
           />
@@ -813,37 +1104,57 @@ export function App() {
       );
     }
 
-    if (currentStep.kind === 'abilities') {
-      const formatSigned = (value: number) => `${value >= 0 ? '+' : ''}${value}`;
-      const showModifierTable = abilityPresentation?.showExistingModifiers ?? true;
+    if (currentStep.kind === "abilities") {
+      const formatSigned = (value: number) =>
+        `${value >= 0 ? "+" : ""}${value}`;
+      const showModifierTable =
+        abilityPresentation?.showExistingModifiers ?? true;
       const sourceTypeLabels = abilityPresentation?.sourceTypeLabels ?? {};
       const hideZeroGroups = abilityPresentation?.hideZeroEffectGroups ?? true;
-      const groupLabel = (sourceType: string) => sourceTypeLabels[sourceType] ?? sourceType;
+      const groupLabel = (sourceType: string) =>
+        sourceTypeLabels[sourceType] ?? sourceType;
       const modeUi = abilityPresentation?.modeUi ?? {};
       const textMap = t as unknown as Record<string, unknown>;
       const defaultModeLabel = (mode: AbilityMode) =>
-        mode === 'pointBuy' ? t.abilityModePointBuy : mode === 'phb' ? t.abilityModePhb : t.abilityModeRollSets;
+        mode === "pointBuy"
+          ? t.abilityModePointBuy
+          : mode === "phb"
+            ? t.abilityModePhb
+            : t.abilityModeRollSets;
       const getModeLabel = (mode: AbilityMode) => {
         const key = modeUi[mode]?.labelKey;
         const fromKey = key ? textMap[key] : undefined;
-        return typeof fromKey === 'string' && fromKey.length > 0 ? fromKey : defaultModeLabel(mode);
+        return typeof fromKey === "string" && fromKey.length > 0
+          ? fromKey
+          : defaultModeLabel(mode);
       };
       const getModeHint = (mode: AbilityMode) => {
         const key = modeUi[mode]?.hintKey;
         const fromKey = key ? textMap[key] : undefined;
-        return typeof fromKey === 'string' ? fromKey : '';
+        return typeof fromKey === "string" ? fromKey : "";
       };
       const hintMode = selectedAbilityMode ?? abilityModes[0];
-      const activeModeHint = hintMode ? getModeHint(hintMode) : '';
+      const activeModeHint = hintMode ? getModeHint(hintMode) : "";
       const hasActiveModeHint = activeModeHint.length > 0;
       const isHintVisible = abilityMethodHintOpen && hasActiveModeHint;
       const handleAbilityModeChange = (mode: AbilityMode) => {
-        if (mode === 'rollSets') {
-          const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets) ? abilityMeta.rollSets.generatedSets : [];
-          const generatedSets = currentSets.length > 0 ? currentSets : generateRollSets(rollSetsConfig);
+        if (mode === "rollSets") {
+          const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets)
+            ? abilityMeta.rollSets.generatedSets
+            : [];
+          const generatedSets =
+            currentSets.length > 0
+              ? currentSets
+              : generateRollSets(rollSetsConfig);
           applyAbilitySelection(
             { ...state.abilities },
-            { mode, rollSets: { generatedSets, selectedSetIndex: selectedRollSetIndex } }
+            {
+              mode,
+              rollSets: {
+                generatedSets,
+                selectedSetIndex: selectedRollSetIndex,
+              },
+            },
           );
           return;
         }
@@ -860,7 +1171,10 @@ export function App() {
             isHintVisible={isHintVisible}
             isHintAvailable={hasActiveModeHint}
             value={selectedAbilityModeValue}
-            options={abilityModes.map((mode) => ({ value: mode, label: getModeLabel(mode) }))}
+            options={abilityModes.map((mode) => ({
+              value: mode,
+              label: getModeLabel(mode),
+            }))}
             onMouseEnter={() => {
               if (!hasActiveModeHint) return;
               setAbilityMethodHintOpen(true);
@@ -868,7 +1182,11 @@ export function App() {
             onMouseLeave={() => {
               if (abilityMethodHintPinned) return;
               const activeElement = document.activeElement as Node | null;
-              if (activeElement && abilityMethodHintRef.current?.contains(activeElement)) return;
+              if (
+                activeElement &&
+                abilityMethodHintRef.current?.contains(activeElement)
+              )
+                return;
               setAbilityMethodHintOpen(false);
             }}
             onFocus={() => {
@@ -892,7 +1210,7 @@ export function App() {
               }
             }}
             onKeyDown={(event) => {
-              if (event.key !== 'Escape') return;
+              if (event.key !== "Escape") return;
               event.preventDefault();
               setAbilityMethodHintPinned(false);
               setAbilityMethodHintOpen(false);
@@ -903,39 +1221,57 @@ export function App() {
             }}
             helpRef={abilityMethodHintRef}
           />
-          {selectedAbilityMode === 'pointBuy' && abilityStepConfig?.pointBuy && (
-            <PointBuyPanel
-              pointCapLabel={t.pointCapLabel}
-              pointCap={selectedPointCap}
-              pointCapMin={pointCapMin}
-              pointCapMax={pointCapMax}
-              pointCapStep={pointCapStep}
-              pointBuyRemainingLabel={t.pointBuyRemainingLabel}
-              pointBuyRemaining={pointBuyRemaining}
-              showTableLabel={t.pointBuyShowTableLabel}
-              hideTableLabel={t.pointBuyHideTableLabel}
-              tableCaption={t.pointBuyTableCaption}
-              scoreColumnLabel={t.pointBuyScoreColumn}
-              costColumnLabel={t.pointBuyCostColumn}
-              isTableOpen={isPointBuyTableOpen}
-              costTable={pointBuyCostTable}
-              onPointCapChange={(value) => {
-                const clamped = Math.min(pointCapMax, Math.max(pointCapMin, value));
-                applyAbilitySelection({ ...state.abilities }, { pointCap: clamped });
-              }}
-              onToggleTable={() => setIsPointBuyTableOpen((prev) => !prev)}
-            />
-          )}
-          {selectedAbilityMode === 'rollSets' && rollSetsConfig && (
+          {selectedAbilityMode === "pointBuy" &&
+            abilityStepConfig?.pointBuy && (
+              <PointBuyPanel
+                pointCapLabel={t.pointCapLabel}
+                pointCap={selectedPointCap}
+                pointCapMin={pointCapMin}
+                pointCapMax={pointCapMax}
+                pointCapStep={pointCapStep}
+                pointBuyRemainingLabel={t.pointBuyRemainingLabel}
+                pointBuyRemaining={pointBuyRemaining}
+                showTableLabel={t.pointBuyShowTableLabel}
+                hideTableLabel={t.pointBuyHideTableLabel}
+                tableCaption={t.pointBuyTableCaption}
+                scoreColumnLabel={t.pointBuyScoreColumn}
+                costColumnLabel={t.pointBuyCostColumn}
+                isTableOpen={isPointBuyTableOpen}
+                costTable={pointBuyCostTable}
+                onPointCapChange={(value) => {
+                  const clamped = Math.min(
+                    pointCapMax,
+                    Math.max(pointCapMin, value),
+                  );
+                  applyAbilitySelection(
+                    { ...state.abilities },
+                    { pointCap: clamped },
+                  );
+                }}
+                onToggleTable={() => setIsPointBuyTableOpen((prev) => !prev)}
+              />
+            )}
+          {selectedAbilityMode === "rollSets" && rollSetsConfig && (
             <section className="sheet">
               <div className="rollsets-header">
-                <h3>{language === 'zh' ? '掷骰组选取' : 'Roll-Set Selection'}</h3>
+                <h3>
+                  {language === "zh" ? "掷骰组选取" : "Roll-Set Selection"}
+                </h3>
                 <button type="button" onClick={regenerateRollSetOptions}>
-                  {language === 'zh' ? '重新掷骰' : 'Reroll Sets'}
+                  {language === "zh" ? "重新掷骰" : "Reroll Sets"}
                 </button>
               </div>
-              <p>{language === 'zh' ? '掷出多个属性组，选择一组并按你的意愿分配。' : 'Roll multiple sets, pick one, then assign scores as you wish.'}</p>
-              <fieldset role="radiogroup" aria-label={language === 'zh' ? '掷骰组列表' : 'Roll-Set Options'}>
+              <p>
+                {language === "zh"
+                  ? "掷出多个属性组，选择一组并按你的意愿分配。"
+                  : "Roll multiple sets, pick one, then assign scores as you wish."}
+              </p>
+              <fieldset
+                role="radiogroup"
+                aria-label={
+                  language === "zh" ? "掷骰组列表" : "Roll-Set Options"
+                }
+              >
                 {generatedRollSets.map((set, index) => (
                   <label key={`roll-set-${index}`} className="rollset-option">
                     <input
@@ -944,8 +1280,12 @@ export function App() {
                       checked={selectedRollSetIndex === index}
                       onChange={() => applySelectedRollSet(set, index)}
                     />
-                    <span>{language === 'zh' ? `第 ${index + 1} 组` : `Set ${index + 1}`}</span>
-                    <code>{set.join(', ')}</code>
+                    <span>
+                      {language === "zh"
+                        ? `第 ${index + 1} 组`
+                        : `Set ${index + 1}`}
+                    </span>
+                    <code>{set.join(", ")}</code>
                   </label>
                 ))}
               </fieldset>
@@ -965,7 +1305,11 @@ export function App() {
                     <button
                       type="button"
                       className="ability-step-btn"
-                      aria-label={language === 'zh' ? `降低 ${label}` : `Decrease ${label}`}
+                      aria-label={
+                        language === "zh"
+                          ? `降低 ${label}`
+                          : `Decrease ${label}`
+                      }
                       disabled={!canDecrease}
                       onClick={() => stepAbility(key, -1)}
                     >
@@ -985,7 +1329,11 @@ export function App() {
                     <button
                       type="button"
                       className="ability-step-btn"
-                      aria-label={language === 'zh' ? `提高 ${label}` : `Increase ${label}`}
+                      aria-label={
+                        language === "zh"
+                          ? `提高 ${label}`
+                          : `Increase ${label}`
+                      }
                       disabled={!canIncrease}
                       onClick={() => stepAbility(key, 1)}
                     >
@@ -996,105 +1344,136 @@ export function App() {
               );
             })}
           </div>
-          {showModifierTable && <article className="sheet">
-            <h3>{t.abilityExistingModifiersLabel}</h3>
-            <table className="review-table">
-              <thead>
-                <tr>
-                  <th>{t.reviewAbilityColumn}</th>
-                  <th>{t.reviewBaseColumn}</th>
-                  <th>{t.abilityExistingModifiersLabel}</th>
-                  <th>{t.reviewFinalColumn}</th>
-                  <th>{t.reviewModifierColumn}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ABILITY_ORDER.map((ability) => {
-                  const targetPath = `abilities.${ability}.score`;
-                  const records = provenanceByTargetPath.get(targetPath) ?? [];
-                  const baseScore = Number(state.abilities[ability] ?? 10);
-                  const adjustment = records.reduce((sum, record) => sum + Number(record.delta ?? 0), 0);
-                  const grouped = new Map<string, Array<{ sourceLabel: string; delta: number }>>();
-                  for (const record of records) {
-                    const delta = Number(record.delta ?? 0);
-                    if (!Number.isFinite(delta)) continue;
-                    const meta = sourceMetaByEntityKey.get(`${record.source.packId}:${record.source.entityId}`);
-                    const sourceType = meta?.sourceType ?? 'unknown';
-                    const sourceLabel = meta?.sourceLabel ?? record.source.entityId;
-                    const list = grouped.get(sourceType) ?? [];
-                    list.push({ sourceLabel, delta });
-                    grouped.set(sourceType, list);
-                  }
-                  const groupsToRender = Array.from(grouped.entries())
-                    .map(([sourceType, items]) => ({
-                      sourceType,
-                      items,
-                      total: items.reduce((sum, item) => sum + item.delta, 0)
-                    }))
-                    .filter((group) => !hideZeroGroups || group.total !== 0);
-                  const finalScore = Number(sheet.abilities[ability]?.score ?? baseScore);
-                  const finalMod = Number(sheet.abilities[ability]?.mod ?? 0);
-                  return (
-                    <tr key={ability}>
-                      <td>{localizeAbilityLabel(ability)}</td>
-                      <td>{baseScore}</td>
-                      <td>
-                        <div>{formatSigned(adjustment)}</div>
-                        {groupsToRender.length > 0 && (
-                          <ul className="calc-list">
-                            {groupsToRender.map((group) => (
-                              <li key={`${ability}-${group.sourceType}`}>
-                                <strong>{groupLabel(group.sourceType)}</strong>: {formatSigned(group.total)}
-                                <ul className="calc-list">
-                                  {group.items.map((item, index) => (
-                                    <li key={`${ability}-${group.sourceType}-${index}`}>
-                                      <code>{formatSigned(item.delta)}</code> {item.sourceLabel}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </td>
-                      <td>{finalScore}</td>
-                      <td>{formatSigned(finalMod)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </article>}
+          {showModifierTable && (
+            <article className="sheet">
+              <h3>{t.abilityExistingModifiersLabel}</h3>
+              <table className="review-table">
+                <thead>
+                  <tr>
+                    <th>{t.reviewAbilityColumn}</th>
+                    <th>{t.reviewBaseColumn}</th>
+                    <th>{t.abilityExistingModifiersLabel}</th>
+                    <th>{t.reviewFinalColumn}</th>
+                    <th>{t.reviewModifierColumn}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ABILITY_ORDER.map((ability) => {
+                    const targetPath = `abilities.${ability}.score`;
+                    const records =
+                      provenanceByTargetPath.get(targetPath) ?? [];
+                    const baseScore = Number(state.abilities[ability] ?? 10);
+                    const adjustment = records.reduce(
+                      (sum, record) => sum + Number(record.delta ?? 0),
+                      0,
+                    );
+                    const grouped = new Map<
+                      string,
+                      Array<{ sourceLabel: string; delta: number }>
+                    >();
+                    for (const record of records) {
+                      const delta = Number(record.delta ?? 0);
+                      if (!Number.isFinite(delta)) continue;
+                      const meta = sourceMetaByEntityKey.get(
+                        `${record.source.packId}:${record.source.entityId}`,
+                      );
+                      const sourceType = meta?.sourceType ?? "unknown";
+                      const sourceLabel =
+                        meta?.sourceLabel ?? record.source.entityId;
+                      const list = grouped.get(sourceType) ?? [];
+                      list.push({ sourceLabel, delta });
+                      grouped.set(sourceType, list);
+                    }
+                    const groupsToRender = Array.from(grouped.entries())
+                      .map(([sourceType, items]) => ({
+                        sourceType,
+                        items,
+                        total: items.reduce((sum, item) => sum + item.delta, 0),
+                      }))
+                      .filter((group) => !hideZeroGroups || group.total !== 0);
+                    const finalScore = Number(
+                      sheet.abilities[ability]?.score ?? baseScore,
+                    );
+                    const finalMod = Number(sheet.abilities[ability]?.mod ?? 0);
+                    return (
+                      <tr key={ability}>
+                        <td>{localizeAbilityLabel(ability)}</td>
+                        <td>{baseScore}</td>
+                        <td>
+                          <div>{formatSigned(adjustment)}</div>
+                          {groupsToRender.length > 0 && (
+                            <ul className="calc-list">
+                              {groupsToRender.map((group) => (
+                                <li key={`${ability}-${group.sourceType}`}>
+                                  <strong>
+                                    {groupLabel(group.sourceType)}
+                                  </strong>
+                                  : {formatSigned(group.total)}
+                                  <ul className="calc-list">
+                                    {group.items.map((item, index) => (
+                                      <li
+                                        key={`${ability}-${group.sourceType}-${index}`}
+                                      >
+                                        <code>{formatSigned(item.delta)}</code>{" "}
+                                        {item.sourceLabel}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </td>
+                        <td>{finalScore}</td>
+                        <td>{formatSigned(finalMod)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </article>
+          )}
         </section>
       );
     }
 
-    if (currentStep.kind === 'skills') {
-      const selectedRanks = (state.selections[STEP_ID_SKILLS] as Record<string, number> | undefined) ?? {};
-      const phase2SkillMap = new Map(sheet.phase2.skills.map((skill) => [skill.id, skill]));
-      const formatSkillValue = (value: number) => `${Number.isInteger(value) ? value : value.toFixed(1)}`;
-      const skillControlLabel = (action: 'increase' | 'decrease', skillName: string) =>
-        language === 'zh'
-          ? `${action === 'increase' ? '提高' : '降低'} ${skillName}`
-          : `${action === 'increase' ? 'Increase' : 'Decrease'} ${skillName}`;
+    if (currentStep.kind === "skills") {
+      const selectedRanks =
+        (state.selections[STEP_ID_SKILLS] as
+          | Record<string, number>
+          | undefined) ?? {};
+      const phase2SkillMap = new Map(
+        sheet.phase2.skills.map((skill) => [skill.id, skill]),
+      );
+      const formatSkillValue = (value: number) =>
+        `${Number.isInteger(value) ? value : value.toFixed(1)}`;
+      const skillControlLabel = (
+        action: "increase" | "decrease",
+        skillName: string,
+      ) =>
+        language === "zh"
+          ? `${action === "increase" ? "提高" : "降低"} ${skillName}`
+          : `${action === "increase" ? "Increase" : "Decrease"} ${skillName}`;
 
       return (
         <section>
           <h2>{currentStep.label}</h2>
           <p className="skill-points-summary">
-            {t.skillsBudgetLabel}: {sheet.decisions.skillPoints.total} | {t.skillsSpentLabel}: {sheet.decisions.skillPoints.spent} | {t.skillsRemainingLabel}: {sheet.decisions.skillPoints.remaining}
+            {t.skillsBudgetLabel}: {sheet.decisions.skillPoints.total} |{" "}
+            {t.skillsSpentLabel}: {sheet.decisions.skillPoints.spent} |{" "}
+            {t.skillsRemainingLabel}: {sheet.decisions.skillPoints.remaining}
           </p>
           <div className="skills-table-wrap">
             <table className="review-table skills-table">
               <thead>
                 <tr>
                   <th>{t.reviewSkillColumn}</th>
-                  <th>{language === 'zh' ? '类型' : 'Type'}</th>
-                  <th>{language === 'zh' ? '点数' : 'Points'}</th>
-                  <th>{language === 'zh' ? '等级' : 'Ranks'}</th>
-                  <th>{language === 'zh' ? '明细' : 'Breakdown'}</th>
+                  <th>{language === "zh" ? "类型" : "Type"}</th>
+                  <th>{language === "zh" ? "点数" : "Points"}</th>
+                  <th>{language === "zh" ? "等级" : "Ranks"}</th>
+                  <th>{language === "zh" ? "明细" : "Breakdown"}</th>
                   <th>{t.reviewTotalColumn}</th>
-                  <th>{language === 'zh' ? '备注' : 'Notes'}</th>
+                  <th>{language === "zh" ? "备注" : "Notes"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1106,45 +1485,66 @@ export function App() {
                   const classSkill = detail?.classSkill ?? false;
                   const costPerRank = detail?.costPerRank ?? 2;
                   const racialBonus = detail?.racialBonus ?? 0;
-                  const miscBonus = phase2Detail?.misc ?? detail?.miscBonus ?? 0;
+                  const miscBonus =
+                    phase2Detail?.misc ?? detail?.miscBonus ?? 0;
                   const acpPenalty = phase2Detail?.acp ?? 0;
                   const abilityMod = detail?.abilityMod ?? 0;
                   const total = phase2Detail?.total ?? detail?.total ?? 0;
                   const rankStep = classSkill ? 1 : 0.5;
                   const pointStepCost = rankStep * costPerRank;
-                  const armorCheckPenaltyApplies = Boolean(skill.data?.armorCheckPenaltyApplies);
+                  const armorCheckPenaltyApplies = Boolean(
+                    skill.data?.armorCheckPenaltyApplies,
+                  );
                   const canDecrease = ranks > 0;
-                  const canIncrease = (ranks + rankStep) <= maxRanks && sheet.decisions.skillPoints.remaining >= pointStepCost;
+                  const canIncrease =
+                    ranks + rankStep <= maxRanks &&
+                    sheet.decisions.skillPoints.remaining >= pointStepCost;
 
                   const updateRanks = (nextValue: number) => {
                     const bounded = Math.min(maxRanks, Math.max(0, nextValue));
                     const nextRanks = { ...selectedRanks, [skill.id]: bounded };
-                    setState((s) => applyChoice(s, STEP_ID_SKILLS, nextRanks, context));
+                    setState((s) =>
+                      applyChoice(s, STEP_ID_SKILLS, nextRanks, context),
+                    );
                   };
 
                   return (
                     <tr key={skill.id}>
                       <td className="review-cell-key">{skill.displayName}</td>
-                      <td>{classSkill ? t.skillsClassLabel : t.skillsCrossLabel}</td>
-                      <td>{costPerRank}{t.skillsPerRankUnit}</td>
+                      <td>
+                        {classSkill ? t.skillsClassLabel : t.skillsCrossLabel}
+                      </td>
+                      <td>
+                        {costPerRank}
+                        {t.skillsPerRankUnit}
+                      </td>
                       <td>
                         <div className="skill-rank-stepper">
                           <button
                             type="button"
                             className="ability-step-btn"
-                            aria-label={skillControlLabel('decrease', skill.displayName)}
+                            aria-label={skillControlLabel(
+                              "decrease",
+                              skill.displayName,
+                            )}
                             disabled={!canDecrease}
                             onClick={() => updateRanks(ranks - rankStep)}
                           >
                             -
                           </button>
-                          <output aria-label={`${skill.displayName} ranks`} className="skill-rank-value">
+                          <output
+                            aria-label={`${skill.displayName} ranks`}
+                            className="skill-rank-value"
+                          >
                             {formatSkillValue(ranks)}
                           </output>
                           <button
                             type="button"
                             className="ability-step-btn"
-                            aria-label={skillControlLabel('increase', skill.displayName)}
+                            aria-label={skillControlLabel(
+                              "increase",
+                              skill.displayName,
+                            )}
                             disabled={!canIncrease}
                             onClick={() => updateRanks(ranks + rankStep)}
                           >
@@ -1153,13 +1553,30 @@ export function App() {
                         </div>
                       </td>
                       <td>
-                        {formatSkillValue(ranks)} + {formatSkillValue(abilityMod)} + {formatSkillValue(miscBonus)} - {formatSkillValue(Math.abs(acpPenalty))} = {formatSkillValue(total)}
+                        {formatSkillValue(ranks)} +{" "}
+                        {formatSkillValue(abilityMod)} +{" "}
+                        {formatSkillValue(miscBonus)} -{" "}
+                        {formatSkillValue(Math.abs(acpPenalty))} ={" "}
+                        {formatSkillValue(total)}
                       </td>
                       <td>{formatSkillValue(total)}</td>
                       <td>
-                        <div>{t.skillsMaxLabel} {formatSkillValue(maxRanks)}</div>
-                        <div>{t.skillsRacialLabel} {racialBonus >= 0 ? '+' : ''}{formatSkillValue(racialBonus)}</div>
-                        <div>{armorCheckPenaltyApplies ? (language === 'zh' ? '受护甲检定惩罚影响' : 'ACP applies') : (language === 'zh' ? '不受护甲检定惩罚影响' : 'ACP n/a')}</div>
+                        <div>
+                          {t.skillsMaxLabel} {formatSkillValue(maxRanks)}
+                        </div>
+                        <div>
+                          {t.skillsRacialLabel} {racialBonus >= 0 ? "+" : ""}
+                          {formatSkillValue(racialBonus)}
+                        </div>
+                        <div>
+                          {armorCheckPenaltyApplies
+                            ? language === "zh"
+                              ? "受护甲检定惩罚影响"
+                              : "ACP applies"
+                            : language === "zh"
+                              ? "不受护甲检定惩罚影响"
+                              : "ACP n/a"}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -1171,15 +1588,16 @@ export function App() {
       );
     }
 
-    if (currentStep.source.type === 'entityType') {
+    if (currentStep.source.type === "entityType") {
       const stepChoice = choiceMap.get(currentStep.id);
       const options = stepChoice?.options ?? [];
       const limit = stepChoice?.limit ?? currentStep.source.limit ?? 1;
 
       if (limit <= 1) {
-        const currentValue = currentStep.id === STEP_ID_FEAT
-          ? String(selectedFeats[0] ?? '')
-          : String(state.selections[currentStep.id] ?? '');
+        const currentValue =
+          currentStep.id === STEP_ID_FEAT
+            ? String(selectedFeats[0] ?? "")
+            : String(state.selections[currentStep.id] ?? "");
 
         return (
           <Picker
@@ -1208,12 +1626,18 @@ export function App() {
                 <input
                   type="checkbox"
                   checked={selected.includes(o.id)}
-                  disabled={!selected.includes(o.id) && selected.length >= limit}
+                  disabled={
+                    !selected.includes(o.id) && selected.length >= limit
+                  }
                   onChange={(e) => {
-                    const next = e.target.checked ? [...selected, o.id] : selected.filter((item) => item !== o.id);
-                  setState((s) => applyChoice(s, currentStep.id, next, context));
-                }}
-              />
+                    const next = e.target.checked
+                      ? [...selected, o.id]
+                      : selected.filter((item) => item !== o.id);
+                    setState((s) =>
+                      applyChoice(s, currentStep.id, next, context),
+                    );
+                  }}
+                />
                 {o.label}
               </label>
             ))}
@@ -1225,7 +1649,7 @@ export function App() {
     throw new Error(`Unknown flow step kind: ${currentStep.kind}`);
   };
 
-  if (role !== 'player') {
+  if (role !== "player") {
     return (
       <RoleSelectionGate
         role={role}
@@ -1253,7 +1677,11 @@ export function App() {
         }}
         selectedOptionalPackIds={selectedOptionalPackIds}
         onOptionalPackToggle={(packId) => {
-          setSelectedOptionalPackIds((current) => (current.includes(packId) ? current.filter((id) => id !== packId) : [...current, packId]));
+          setSelectedOptionalPackIds((current) =>
+            current.includes(packId)
+              ? current.filter((id) => id !== packId)
+              : [...current, packId],
+          );
           setState(initialState);
           setStepIndex(0);
         }}
@@ -1272,11 +1700,20 @@ export function App() {
   }
 
   return (
-    <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
-      <LanguageSwitch language={language} onLanguageChange={setLanguage} text={t} />
+    <main
+      className={`container ${language === "zh" ? "lang-zh" : ""}`}
+      lang={language}
+    >
+      <LanguageSwitch
+        language={language}
+        onLanguageChange={setLanguage}
+        text={t}
+      />
       <h1>{t.appTitle}</h1>
       <p className="subtitle">{t.appSubtitle}</p>
-      <p>{t.stepCounter} {stepIndex + 1} / {wizardSteps.length}</p>
+      <p>
+        {t.stepCounter} {stepIndex + 1} / {wizardSteps.length}
+      </p>
       {renderCurrentStep()}
       <footer className="actions">
         <button
@@ -1290,7 +1727,12 @@ export function App() {
         >
           {t.back}
         </button>
-        <button disabled={stepIndex === wizardSteps.length - 1} onClick={() => setStepIndex((s) => s + 1)}>{t.next}</button>
+        <button
+          disabled={stepIndex === wizardSteps.length - 1}
+          onClick={() => setStepIndex((s) => s + 1)}
+        >
+          {t.next}
+        </button>
       </footer>
     </main>
   );
@@ -1319,15 +1761,29 @@ function RulesSetupGate({
   onBack: () => void;
   onStart: () => void;
 }) {
-  const selectedEdition = editions.find((edition) => edition.id === selectedEditionId) ?? editions[0] ?? FALLBACK_EDITION;
+  const selectedEdition =
+    editions.find((edition) => edition.id === selectedEditionId) ??
+    editions[0] ??
+    FALLBACK_EDITION;
 
   return (
-    <main className={`container ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
-      <LanguageSwitch language={language} onLanguageChange={onLanguageChange} text={text} />
+    <main
+      className={`container ${language === "zh" ? "lang-zh" : ""}`}
+      lang={language}
+    >
+      <LanguageSwitch
+        language={language}
+        onLanguageChange={onLanguageChange}
+        text={text}
+      />
       <h1>{text.rulesSetupTitle}</h1>
       <section>
         <label htmlFor="edition-select">{text.editionLabel}</label>
-        <select id="edition-select" value={selectedEditionId} onChange={(event) => onEditionChange(event.target.value)}>
+        <select
+          id="edition-select"
+          value={selectedEditionId}
+          onChange={(event) => onEditionChange(event.target.value)}
+        >
           {editions.map((edition) => (
             <option key={edition.id} value={edition.id}>
               {edition.label}
@@ -1381,24 +1837,31 @@ function RoleSelectionGate({
   text: UIText;
 }) {
   return (
-    <main className={`role-gate ${language === 'zh' ? 'lang-zh' : ''}`} lang={language}>
+    <main
+      className={`role-gate ${language === "zh" ? "lang-zh" : ""}`}
+      lang={language}
+    >
       <section className="role-tabs-root">
-        <LanguageSwitch language={language} onLanguageChange={onLanguageChange} text={text} />
+        <LanguageSwitch
+          language={language}
+          onLanguageChange={onLanguageChange}
+          text={text}
+        />
         <div className="role-tabs-grid" role="group" aria-label={text.roleAria}>
           <button
             type="button"
-            aria-pressed={role === 'dm'}
-            className={`role-tab role-tab-left ${role === 'dm' ? 'active' : ''}`}
-            onClick={() => onChange('dm')}
+            aria-pressed={role === "dm"}
+            className={`role-tab role-tab-left ${role === "dm" ? "active" : ""}`}
+            onClick={() => onChange("dm")}
           >
             <span className="role-tab-title">{text.dmTitle}</span>
             <span className="role-tab-subtitle">{text.dmSubtitle}</span>
           </button>
           <button
             type="button"
-            aria-pressed={role === 'player'}
-            className={`role-tab role-tab-right ${role === 'player' ? 'active' : ''}`}
-            onClick={() => onChange('player')}
+            aria-pressed={role === "player"}
+            className={`role-tab role-tab-right ${role === "player" ? "active" : ""}`}
+            onClick={() => onChange("player")}
           >
             <span className="role-tab-title">{text.playerTitle}</span>
             <span className="role-tab-subtitle">{text.playerSubtitle}</span>
@@ -1408,7 +1871,11 @@ function RoleSelectionGate({
           <h1 className="role-question tabs-overlay">{text.roleQuestion}</h1>
           <p className="role-intro tabs-intro">{text.roleIntro}</p>
         </div>
-        {role === 'dm' && <p className="role-message" aria-live="polite">{text.dmUnsupported}</p>}
+        {role === "dm" && (
+          <p className="role-message" aria-live="polite">
+            {text.dmUnsupported}
+          </p>
+        )}
       </section>
     </main>
   );
@@ -1424,26 +1891,30 @@ function LanguageSwitch({
   text: UIText;
 }) {
   return (
-    <div className="language-switch" role="radiogroup" aria-label={text.languageLabel}>
-      <label className={`lang-btn ${language === 'en' ? 'active' : ''}`}>
+    <div
+      className="language-switch"
+      role="radiogroup"
+      aria-label={text.languageLabel}
+    >
+      <label className={`lang-btn ${language === "en" ? "active" : ""}`}>
         <input
           className="lang-radio"
           type="radio"
           name="language-switch"
           value="en"
-          checked={language === 'en'}
-          onChange={() => onLanguageChange('en')}
+          checked={language === "en"}
+          onChange={() => onLanguageChange("en")}
         />
         <span>{text.english}</span>
       </label>
-      <label className={`lang-btn ${language === 'zh' ? 'active' : ''}`}>
+      <label className={`lang-btn ${language === "zh" ? "active" : ""}`}>
         <input
           className="lang-radio"
           type="radio"
           name="language-switch"
           value="zh"
-          checked={language === 'zh'}
-          onChange={() => onLanguageChange('zh')}
+          checked={language === "zh"}
+          onChange={() => onLanguageChange("zh")}
         />
         <span>{text.chinese}</span>
       </label>
@@ -1451,13 +1922,28 @@ function LanguageSwitch({
   );
 }
 
-function Picker({ title, options, value, onSelect }: { title: string; options: Array<{ id: string; label: string }>; value: string; onSelect: (id: string) => void; }) {
+function Picker({
+  title,
+  options,
+  value,
+  onSelect,
+}: {
+  title: string;
+  options: Array<{ id: string; label: string }>;
+  value: string;
+  onSelect: (id: string) => void;
+}) {
   return (
     <section>
       <h2>{title}</h2>
       {options.map((o) => (
         <label key={o.id}>
-          <input type="radio" name={title} checked={value === o.id} onChange={() => onSelect(o.id)} />
+          <input
+            type="radio"
+            name={title}
+            checked={value === o.id}
+            onChange={() => onSelect(o.id)}
+          />
           {o.label}
         </label>
       ))}
