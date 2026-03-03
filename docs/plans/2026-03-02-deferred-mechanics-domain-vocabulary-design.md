@@ -23,7 +23,7 @@ That coupling is brittle. Internal engine or sheet-model refactors can invalidat
 - Introduce a stable rules-domain vocabulary for affected concepts.
 - Treat `dependsOn` as capability identifiers, not ad hoc dependency prose.
 - Replace engine-oriented `impactPaths` semantics with domain-oriented `impacts`.
-- Document when concept-keyed modifier targets such as `bonuses.skill:jump` are appropriate.
+- Document when concept-keyed modifier targets such as `bonuses.skills:jump` are appropriate.
 - Keep this phase documentation-only. No schema, pack-data, or test changes are part of this PR.
 
 ## 4. Deliverable Split
@@ -56,8 +56,8 @@ Format:
 - no engine object paths
 
 Examples:
-- `skill:jump`
-- `skill:tumble`
+- `skills:jump`
+- `skills:tumble`
 - `combat:ranged`
 - `action:standard`
 - `proficiency:armor:light`
@@ -119,12 +119,12 @@ New data must not introduce `impactPaths`.
 When a deferred rule is already representable as a numeric modifier in the effect system, prefer stable concept-keyed targets instead of ad hoc engine fields.
 
 Preferred examples:
-- `bonuses.skill:jump`
-- `bonuses.skill:tumble`
+- `bonuses.skills:jump`
+- `bonuses.skills:tumble`
 
 Separation rule:
-- `impacts` names rule concepts such as `skill:jump`
-- effect targets use modifier or engine channels such as `bonuses.skill:jump`
+- `impacts` names rule concepts such as `skills:jump`
+- effect targets use modifier or engine channels such as `bonuses.skills:jump`
 - those two namespaces serve different purposes and should not be mixed
 
 Do not use concept-keyed bonus targets when the rule still depends on unmodeled conditional flow, actor choice, timing, or sequencing behavior. In those cases, keep the rule deferred and describe the affected concepts in `impacts`.
@@ -153,7 +153,7 @@ Examples derived from current backlog patterns:
 | `impactPaths: [stats.attackBonus, combat.ranged.fullAttack]` | `impacts: [combat:ranged, attack:multi-projectile]` |
 | `impactPaths: [selections.equipment, validation.race.proficiency]` | `impacts: [proficiency:armor:light, proficiency:weapon:martial]` |
 | `impactPaths: [metadata.alignment, validation.class.alignment]` | `impacts: [alignment:restriction]` |
-| `impactPaths: [skills.jump, skills.tumble]` | `impacts: [skill:jump, skill:tumble]` |
+| `impactPaths: [skills.jump, skills.tumble]` | `impacts: [skills:jump, skills:tumble]` |
 
 Capability examples:
 - `dependsOn: [cap:combat-attack-sequence, cap:ammo-consumption]`

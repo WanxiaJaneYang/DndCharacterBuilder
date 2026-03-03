@@ -77,6 +77,11 @@ Do not use it for:
 Use it to answer:
 - which stable rules concepts this deferred mechanic affects
 
+Current validation note:
+- the schema currently validates `impacts` by pattern only
+- typos such as `skills:jmp` still pass until a concept registry exists
+- a future concept registry should start with the highest-value domains such as `skills:*`, `combat:*`, and `spells:*`
+
 Do not use it for:
 - engine object paths
 - current sheet model fields
@@ -119,12 +124,12 @@ The second example leaks current implementation structure instead of describing 
 If a rule is already representable in the effect system as a numeric modifier, prefer a stable concept-keyed target.
 
 Examples:
-- `bonuses.skill:jump`
-- `bonuses.skill:tumble`
+- `bonuses.skills:jump`
+- `bonuses.skills:tumble`
 
 Separation rule:
 - `impacts` always names rule concepts such as `skills:jump`
-- effect targets always use modifier or engine channels such as `bonuses.skill:jump`
+- effect targets always use modifier or engine channels such as `bonuses.skills:jump`
 - do not use `bonuses.*` values inside `impacts`
 - do not replace effect targets with raw rule concepts where the effect system needs a target channel
 
@@ -183,6 +188,17 @@ This list is now validated in `packages/schema/src/deferredMechanics.ts`.
 - `cap:typed-combat-context`
 - `cap:typed-condition-evaluation`
 - `cap:uses-per-day-tracking`
+
+## How To Add A New `cap:*`
+
+Add a new capability ID only when an existing `cap:*` cannot describe the missing implementation boundary without becoming misleadingly broad.
+
+Required steps:
+- choose a stable, capability-oriented name in `cap:kebab-case`
+- add it to `DEFERRED_MECHANIC_CAPABILITIES` in `packages/schema/src/deferredMechanics.ts`
+- add or update schema tests that prove the new ID is accepted and an adjacent invalid ID is still rejected
+- update this document if the new capability changes contributor-facing examples or naming guidance
+- mention the new capability in the PR description or review summary so its scope is reviewed deliberately instead of cargo-culted into more deferred rules
 
 ## Example Translations
 
