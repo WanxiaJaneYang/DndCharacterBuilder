@@ -2,6 +2,8 @@
 
 This document defines the stable metadata contract for `deferredMechanics`.
 
+The canonical schema implementation lives in `packages/schema/src/deferredMechanics.ts`.
+
 Use it when a rule is intentionally preserved in source-aligned data but cannot yet be enforced by the current engine.
 
 ## Goals
@@ -25,8 +27,8 @@ Format:
 - domain-oriented, not engine-oriented
 
 Examples:
-- `skill:jump`
-- `skill:tumble`
+- `skills:jump`
+- `skills:tumble`
 - `combat:ranged`
 - `action:standard`
 - `attack:multi-projectile`
@@ -75,6 +77,11 @@ Do not use it for:
 Use it to answer:
 - which stable rules concepts this deferred mechanic affects
 
+Current validation note:
+- the schema currently validates `impacts` by pattern only
+- typos such as `skills:jmp` still pass until a concept registry exists
+- a future concept registry should start with the highest-value domains such as `skills:*`, `combat:*`, and `spells:*`
+
 Do not use it for:
 - engine object paths
 - current sheet model fields
@@ -83,9 +90,7 @@ Do not use it for:
 
 ### `impactPaths`
 
-`impactPaths` is legacy terminology. Existing datasets may still use it until the implementation phase lands, but new conventions should be written against `impacts` and rule concept IDs.
-
-New data MUST NOT introduce `impactPaths`.
+`impactPaths` is retired legacy terminology. The schema and migrated SRD pack data no longer accept it.
 
 ## Writing Rules
 
@@ -119,12 +124,12 @@ The second example leaks current implementation structure instead of describing 
 If a rule is already representable in the effect system as a numeric modifier, prefer a stable concept-keyed target.
 
 Examples:
-- `bonuses.skill:jump`
-- `bonuses.skill:tumble`
+- `bonuses.skills:jump`
+- `bonuses.skills:tumble`
 
 Separation rule:
-- `impacts` always names rule concepts such as `skill:jump`
-- effect targets always use modifier or engine channels such as `bonuses.skill:jump`
+- `impacts` always names rule concepts such as `skills:jump`
+- effect targets always use modifier or engine channels such as `bonuses.skills:jump`
 - do not use `bonuses.*` values inside `impacts`
 - do not replace effect targets with raw rule concepts where the effect system needs a target channel
 
@@ -142,39 +147,68 @@ Keep the rule deferred when it still depends on:
 
 ## Initial Capability Examples
 
-This list is illustrative for planning and naming consistency. The implementation phase should convert it into a validated registry.
+This list is now validated in `packages/schema/src/deferredMechanics.ts`.
 
-- `cap:skills-core`
 - `cap:alignment-selection`
 - `cap:alignment-validation`
-- `cap:proficiency-armor`
-- `cap:proficiency-weapon`
-- `cap:armor-check-penalty`
-- `cap:combat-attack-sequence`
 - `cap:ammo-consumption`
-- `cap:metamagic`
+- `cap:attack-roll-proficiency-validation`
+- `cap:character-sheet-feat-benefits`
+- `cap:class-rule-runtime`
+- `cap:combat-attack-sequence`
+- `cap:combat-context`
+- `cap:combat-resolution`
+- `cap:combat-state`
+- `cap:combat-target-typing`
+- `cap:companion-runtime`
+- `cap:condition-runtime`
+- `cap:conditional-armor-class-modifiers`
+- `cap:conditional-attack-modifiers`
+- `cap:conditional-save-modifiers`
+- `cap:contextual-check-triggers`
+- `cap:domain-selection`
+- `cap:equipment-proficiency`
+- `cap:equipment-rules`
+- `cap:equipment-validation`
+- `cap:feat-effect-runtime`
+- `cap:feat-slot-progression`
+- `cap:feature-selection`
+- `cap:form-runtime`
+- `cap:level-progression`
+- `cap:proficiency-runtime`
+- `cap:race-tagging`
+- `cap:resource-tracking`
+- `cap:situational-modifiers`
+- `cap:spell-like-abilities`
+- `cap:spell-school-tagging`
+- `cap:spell-slot-progression`
+- `cap:spellbook-management`
+- `cap:spellcasting-runtime`
+- `cap:type-aware-constraints`
+- `cap:typed-combat-context`
+- `cap:typed-condition-evaluation`
+- `cap:uses-per-day-tracking`
 
-Planning requirements for the registry:
-- choose and document the registry location
-- define the validation strategy for `dependsOn`
-- define how new capability IDs are added and reviewed
+## How To Add A New `cap:*`
+
+Add a new capability ID only when an existing `cap:*` cannot describe the missing implementation boundary without becoming misleadingly broad.
+
+Required steps:
+- choose a stable, capability-oriented name in `cap:kebab-case`
+- add it to `DEFERRED_MECHANIC_CAPABILITIES` in `packages/schema/src/deferredMechanics.ts`
+- add or update schema tests that prove the new ID is accepted and an adjacent invalid ID is still rejected
+- update this document if the new capability changes contributor-facing examples or naming guidance
+- mention the new capability in the PR description or review summary so its scope is reviewed deliberately instead of cargo-culted into more deferred rules
 
 ## Example Translations
 
 | Legacy metadata pattern | Preferred concept-oriented form |
 |-------------------------|---------------------------------|
-| `impactPaths: [skills.jump, skills.tumble]` | `impacts: [skill:jump, skill:tumble]` |
+| `impactPaths: [skills.jump, skills.tumble]` | `impacts: [skills:jump, skills:tumble]` |
 | `impactPaths: [validation.class.alignment]` | `impacts: [alignment:restriction]` |
 | `impactPaths: [selections.equipment, validation.race.proficiency]` | `impacts: [proficiency:armor:light, proficiency:weapon:martial]` |
 | `impactPaths: [combat.ranged.fullAttack]` | `impacts: [combat:ranged, attack:multi-projectile]` |
 
 ## Phase Boundary
 
-This document defines the target contract only.
-
-The planning and implementation phases are responsible for:
-- final schema shape
-- capability-registry location
-- validation rules
-- migration of existing race/class/feat data
-- test updates
+This document defines the enforced contract used by the schema, tests, and migrated SRD pack data.

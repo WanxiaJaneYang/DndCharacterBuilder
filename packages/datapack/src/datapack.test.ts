@@ -77,6 +77,24 @@ describe("resolvePackSet", () => {
     expect(resolved.entities.feats?.["brew-potion"]?.description).not.toContain("Table 5");
   });
 
+  it("loads normalized deferred mechanics metadata from the SRD pack", () => {
+    const root = path.resolve(process.cwd(), "../../packs");
+    const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
+
+    expect(resolved.entities.races?.dwarf?.data?.deferredMechanics?.[0]).toMatchObject({
+      dependsOn: ["cap:equipment-proficiency", "cap:equipment-validation"],
+      impacts: ["proficiency:weapon:dwarven-waraxe", "proficiency:weapon:dwarven-urgrosh"]
+    });
+    expect(resolved.entities.classes?.barbarian?.data?.deferredMechanics?.[1]).toMatchObject({
+      dependsOn: ["cap:alignment-validation", "cap:class-rule-runtime"],
+      impacts: ["alignment:restriction"]
+    });
+    expect(resolved.entities.feats?.manyshot?.data?.deferredMechanics?.[0]).toMatchObject({
+      dependsOn: ["cap:combat-attack-sequence", "cap:ammo-consumption"],
+      impacts: ["combat:ranged-attack-roll", "attack:multi-projectile"]
+    });
+  });
+
   it("ensures all entities expose required UI metadata", () => {
     const root = path.resolve(process.cwd(), "../../packs");
     const resolved = resolvePackSet(root, ["srd-35e-minimal"]);

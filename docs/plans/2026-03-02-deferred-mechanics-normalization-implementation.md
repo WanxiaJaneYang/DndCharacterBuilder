@@ -65,7 +65,7 @@ Normalized metadata keeps dependency IDs in the capability registry and records 
 - Concept IDs should default to `domain:concept`.
 - Use `domain:subdomain:concept` only when a single domain needs an extra namespace to avoid collisions or keep a family of concepts coherent.
 - Each segment after the colon must be kebab-case ASCII.
-- No synonyms: once a concept ID is chosen, reuse it everywhere instead of introducing alternates such as `skill:jump`, `skills:jumping`, or `movement:jump-check`.
+- No synonyms: once a concept ID is chosen, reuse it everywhere instead of introducing alternates such as `skills:jumping` or `movement:jump-check`.
 
 Canonical near-term examples:
 - `alignment:restriction`

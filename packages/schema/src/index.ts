@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+  DEFERRED_MECHANIC_CAPABILITIES,
+  DeferredMechanicCapabilityIdSchema,
+  DeferredMechanicImpactIdSchema,
+  DeferredMechanicSchema
+} from "./deferredMechanics";
 
 export const AbilityIdSchema = z.enum(["str", "dex", "con", "int", "wis", "cha"]);
 export type AbilityId = z.infer<typeof AbilityIdSchema>;
@@ -358,15 +364,6 @@ const SpellDcBonusSchema = z.object({
   type: z.string().optional(),
   when: z.string().optional()
 }).strict();
-const DeferredMechanicBaseSchema = z.object({
-  id: z.string().min(1),
-  category: z.string().min(1),
-  description: z.string().min(1),
-  dependsOn: z.array(z.string().min(1)).min(1),
-  sourceRefs: z.array(z.string().min(1)).optional(),
-  impactPaths: z.array(z.string().min(1)).optional()
-}).strict();
-
 const RaceDataSchema = z.object({
   size: z.enum(["small", "medium", "large"]),
   baseSpeed: z.number().int().positive(),
@@ -388,7 +385,7 @@ const RaceDataSchema = z.object({
   ancestryTags: z.array(RaceAncestryTagSchema).optional(),
   sizeModifiers: RaceSizeModifierSchema.optional(),
   movementOverrides: RaceMovementOverrideSchema.optional(),
-  deferredMechanics: z.array(DeferredMechanicBaseSchema).optional()
+  deferredMechanics: z.array(DeferredMechanicSchema).optional()
 }).strict();
 
 const ClassSaveProgressSchema = z.enum(["good", "poor"]);
@@ -405,7 +402,7 @@ const ClassLevelRowSchema = z.object({
   spellSlots: z.record(z.union([z.string().min(1), z.null()])).optional()
 }).strict();
 
-const DeferredClassMechanicSchema = DeferredMechanicBaseSchema;
+const DeferredClassMechanicSchema = DeferredMechanicSchema;
 
 const ClassProgressionGrantSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -611,7 +608,7 @@ const FeatDataSchema = z.object({
   normal: z.string().min(1).optional(),
   special: z.string().min(1).optional(),
   sourceKey: z.string().min(1).optional(),
-  deferredMechanics: z.array(DeferredMechanicBaseSchema).optional()
+  deferredMechanics: z.array(DeferredMechanicSchema).optional()
 }).strict();
 
 export const EntitySchema = z.object({
@@ -711,6 +708,9 @@ export const AuthenticityLockSchema = z.object({
 
 export type ChoiceStepId = z.infer<typeof ChoiceStepIdSchema>;
 export type ChoiceStepKind = z.infer<typeof ChoiceStepKindSchema>;
+export type DeferredMechanicCapabilityId = z.infer<typeof DeferredMechanicCapabilityIdSchema>;
+export type DeferredMechanicImpactId = z.infer<typeof DeferredMechanicImpactIdSchema>;
+export type DeferredMechanic = z.infer<typeof DeferredMechanicSchema>;
 export type Expr = z.infer<typeof ExprSchema>;
 export type Effect = z.infer<typeof EffectSchema>;
 export type Constraint = z.infer<typeof ConstraintSchema>;
@@ -721,3 +721,9 @@ export type Pack = z.infer<typeof PackSchema>;
 export type PackLocale = z.infer<typeof PackLocaleSchema>;
 export type ContractFixture = z.infer<typeof ContractFixtureSchema>;
 export type AuthenticityLock = z.infer<typeof AuthenticityLockSchema>;
+export {
+  DEFERRED_MECHANIC_CAPABILITIES,
+  DeferredMechanicCapabilityIdSchema,
+  DeferredMechanicImpactIdSchema,
+  DeferredMechanicSchema
+};
