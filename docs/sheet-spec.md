@@ -411,7 +411,9 @@ Baseline formulas:
 MVP notes:
 
 - Situational modifiers such as range increment penalties are not encoded in the base exported number.
-- If no equipped weapon produces an attack line, export MUST still include a fallback unarmed strike line.
+- If no equipped weapon produces an attack line, export MUST still include a minimal fallback unarmed strike line.
+- The fallback unarmed strike line MUST include `itemId`, `damage`, and `crit` fields.
+- Canonical MVP fallback values are `damage: "1d3"` and `crit: "20/x2"`.
 
 #### Saves
 
