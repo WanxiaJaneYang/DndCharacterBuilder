@@ -31,7 +31,8 @@ Goal:
 - Empty arrays/objects are preferred over omitted keys.
 - Unknown, deferred, or not-yet-implemented mechanics MUST be represented in `unresolved`.
 - Generic carryover fields from the current engine (`stats`, `selections`, `phase1`, `phase2`) may continue to exist for compatibility, but the normalized MVP sheet contract is the structure below.
-- During the transition, `rules.decisions`, `rules.provenance`, and `rules.packSetFingerprint` are authoritative. Temporary top-level mirrors named `decisions`, `provenance`, and `packSetFingerprint` may still appear for compatibility, but they MUST match `rules.*`. If they diverge, consumers MUST trust `rules.*`.
+- During the transition, `rules.decisions`, `rules.provenance`, and `rules.packSetFingerprint` are authoritative.
+- Legacy top-level fields (`decisions`, `provenance`, `packSetFingerprint`) must either mirror `rules.*` exactly, or be omitted entirely. They must not diverge.
 
 ## Required Top-Level Sections
 
