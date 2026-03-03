@@ -50,11 +50,6 @@
       "selection": "Contract Hero"
     }
   ],
-  "contractClarifications": {
-    "encoding": "ASCII only. This fixture must not contain hidden or bidirectional Unicode characters.",
-    "stats": "Top-level stats.fort/ref/will assert base class save progression before ability and misc modifiers. Final displayed saves live under phase1.combat.saves where total = base + ability + misc.",
-    "damage": "AttackLine.damage asserts the weapon damage string exported by the selected item. For the longsword fixture this remains dice-only as 1d8, not 1d8 plus STR."
-  },
   "expected": {
     "validationErrorCodes": [],
     "finalSheetSubset": {
