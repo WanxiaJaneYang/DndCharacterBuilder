@@ -571,6 +571,7 @@ export function App() {
     if (currentStep.kind === "review") {
       const phase1 = sheet.phase1;
       const phase2 = sheet.phase2;
+      const reviewCombat = sheet.sheetViewModel.combat;
       const abilityOrder = ["str", "dex", "con", "int", "wis", "cha"] as const;
       const statOrder = [
         "hp",
@@ -626,16 +627,16 @@ export function App() {
               selectedClassId,
           )
         : "-";
-      const reviewSkills = Object.entries(sheet.skills)
-        .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
+      const reviewSkills = sheet.sheetViewModel.skills
+        .filter((skill) => {
+          const detail = sheet.skills[skill.id];
+          return skill.ranks > 0 || (detail?.racialBonus ?? 0) !== 0;
+        })
         .sort((a, b) => {
-          const left = localizeEntityText("skills", a[0], "name", a[1].name);
-          const right = localizeEntityText("skills", b[0], "name", b[1].name);
-          return b[1].total - a[1].total || left.localeCompare(right);
+          const left = localizeEntityText("skills", a.id, "name", a.name);
+          const right = localizeEntityText("skills", b.id, "name", b.name);
+          return b.total - a.total || left.localeCompare(right);
         });
-      const phase2SkillMap = new Map(
-        phase2.skills.map((skill) => [skill.id, skill]),
-      );
       const enabledPackDetails = enabledPackIds.map((packId) => ({
         packId,
         version: packVersionById.get(packId) ?? t.reviewUnknownVersion,
@@ -683,15 +684,15 @@ export function App() {
           <div className="review-stat-cards">
             <article className="review-card">
               <h3>{t.reviewAcLabel}</h3>
-              <p>{String(phase1.combat.ac.total)}</p>
+              <p>{String(reviewCombat.ac.total)}</p>
             </article>
             <article className="review-card">
               <h3>{t.reviewAcTouchLabel}</h3>
-              <p>{String(phase1.combat.ac.touch)}</p>
+              <p>{String(reviewCombat.ac.touch)}</p>
             </article>
             <article className="review-card">
               <h3>{t.reviewAcFlatFootedLabel}</h3>
-              <p>{String(phase1.combat.ac.flatFooted)}</p>
+              <p>{String(reviewCombat.ac.flatFooted)}</p>
             </article>
             <article className="review-card">
               <h3>{t.reviewHpLabel}</h3>
@@ -766,28 +767,20 @@ export function App() {
                 </tr>
               </thead>
               <tbody>
-                {phase1.combat.attacks.melee.map((attack) => (
-                  <tr key={`melee-${attack.itemId}`}>
+                {reviewCombat.attacks.map((attack) => (
+                  <tr key={`${attack.category}-${attack.itemId}`}>
                     <td className="review-cell-key">
-                      {t.reviewAttackMeleeLabel}
+                      {attack.category === "melee"
+                        ? t.reviewAttackMeleeLabel
+                        : t.reviewAttackRangedLabel}
                     </td>
                     <td>{attack.name}</td>
                     <td>{formatSigned(attack.attackBonus)}</td>
                     <td>{attack.damage}</td>
                     <td>{attack.crit}</td>
-                    <td>-</td>
-                  </tr>
-                ))}
-                {phase1.combat.attacks.ranged.map((attack) => (
-                  <tr key={`ranged-${attack.itemId}`}>
-                    <td className="review-cell-key">
-                      {t.reviewAttackRangedLabel}
+                    <td>
+                      {attack.category === "ranged" ? attack.range ?? "-" : "-"}
                     </td>
-                    <td>{attack.name}</td>
-                    <td>{formatSigned(attack.attackBonus)}</td>
-                    <td>{attack.damage}</td>
-                    <td>{attack.crit}</td>
-                    <td>{attack.range ?? "-"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -972,29 +965,29 @@ export function App() {
                 </tr>
               </thead>
               <tbody>
-                {reviewSkills.map(([skillId, skill]) => {
-                  const phase2Skill = phase2SkillMap.get(skillId);
+                {reviewSkills.map((skill) => {
+                  const detail = sheet.skills[skill.id];
                   return (
-                    <tr key={skillId}>
+                    <tr key={skill.id}>
                       <td className="review-cell-key">
                         {localizeEntityText(
                           "skills",
-                          skillId,
+                          skill.id,
                           "name",
                           skill.name,
                         )}
                       </td>
                       <td>{skill.ranks}</td>
                       <td>
-                        {formatSigned(skill.abilityMod)} (
-                        {localizeAbilityLabel(skill.ability)})
+                        {formatSigned(skill.ability)} (
+                        {localizeAbilityLabel(detail?.ability ?? "str")}
                       </td>
-                      <td>{formatSigned(skill.racialBonus)}</td>
-                      <td>{formatSigned(phase2Skill?.misc ?? 0)}</td>
-                      <td>{formatSigned(phase2Skill?.acp ?? 0)}</td>
-                      <td>{phase2Skill?.total ?? skill.total}</td>
+                      <td>{formatSigned(detail?.racialBonus ?? 0)}</td>
+                      <td>{formatSigned(skill.misc)}</td>
+                      <td>{formatSigned(skill.acp)}</td>
+                      <td>{skill.total}</td>
                       <td>
-                        {skill.costSpent} ({skill.costPerRank}
+                        {detail?.costSpent ?? 0} ({detail?.costPerRank ?? 0}
                         {t.reviewPerRankUnit})
                       </td>
                     </tr>
@@ -1442,8 +1435,8 @@ export function App() {
         (state.selections[STEP_ID_SKILLS] as
           | Record<string, number>
           | undefined) ?? {};
-      const phase2SkillMap = new Map(
-        sheet.phase2.skills.map((skill) => [skill.id, skill]),
+      const skillViewModelById = new Map(
+        sheet.sheetViewModel.skills.map((skill) => [skill.id, skill]),
       );
       const formatSkillValue = (value: number) =>
         `${Number.isInteger(value) ? value : value.toFixed(1)}`;
@@ -1479,17 +1472,16 @@ export function App() {
               <tbody>
                 {skillEntities.map((skill) => {
                   const detail = sheet.skills[skill.id];
-                  const phase2Detail = phase2SkillMap.get(skill.id);
+                  const skillView = skillViewModelById.get(skill.id);
                   const ranks = selectedRanks[skill.id] ?? 0;
                   const maxRanks = detail?.maxRanks ?? 2;
                   const classSkill = detail?.classSkill ?? false;
                   const costPerRank = detail?.costPerRank ?? 2;
                   const racialBonus = detail?.racialBonus ?? 0;
-                  const miscBonus =
-                    phase2Detail?.misc ?? detail?.miscBonus ?? 0;
-                  const acpPenalty = phase2Detail?.acp ?? 0;
-                  const abilityMod = detail?.abilityMod ?? 0;
-                  const total = phase2Detail?.total ?? detail?.total ?? 0;
+                  const miscBonus = skillView?.misc ?? detail?.miscBonus ?? 0;
+                  const acpPenalty = skillView?.acp ?? 0;
+                  const abilityMod = skillView?.ability ?? detail?.abilityMod ?? 0;
+                  const total = skillView?.total ?? detail?.total ?? 0;
                   const rankStep = classSkill ? 1 : 0.5;
                   const pointStepCost = rankStep * costPerRank;
                   const armorCheckPenaltyApplies = Boolean(
