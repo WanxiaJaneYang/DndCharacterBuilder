@@ -1,8 +1,8 @@
 {
   "packId": "srd-35e-minimal",
   "officialRuleset": true,
-  "generatedAt": "2026-03-01T23:45:00.000Z",
-  "generatedBy": "phb feat catalog import from finalized phb-hierarchical-json-v6-final",
+  "generatedAt": "2026-03-03T00:00:00.000Z",
+  "generatedBy": "deferred mechanics normalization migration",
   "sourceAuthorities": [
     {
       "title": "D&D 3.5 System Reference Document",
@@ -12,15 +12,15 @@
   "artifacts": [
     {
       "path": "entities/races.json",
-      "sha256": "1484ba60454606a3eee5d4d7934e1264dc1af4b2b3f26a9eccc6162030e89518"
+      "sha256": "9d1a228f975f3d15e22ad585ebf499b9fcf16621003f23761e24d8d857820eec"
     },
     {
       "path": "entities/classes.json",
-      "sha256": "69594f9b345b2f067e670acec19dcc68d89d323809afeee0093cbd093648bd78"
+      "sha256": "e858144d33e28004caf2f22c4fdc1c9b348a0ed3f7c794f1acdd314e536c289d"
     },
     {
       "path": "entities/feats.json",
-      "sha256": "784b53685681c9023d03bd91700da7cb7abfdaf62e7cae4a98fb81e367afa452"
+      "sha256": "c1723984e21be6a4f75e159a9f7dea28f63ba2d3d6979b3f504e4ccb7e58c5ee"
     },
     {
       "path": "entities/skills.json",

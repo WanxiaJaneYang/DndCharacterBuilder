@@ -659,8 +659,8 @@ describe("race entity schema", () => {
             id: "dwarf-weapon-familiarity-proficiency",
             category: "proficiency",
             description: "Dwarven weapon familiarity requires equipment proficiency mechanics.",
-            dependsOn: ["equipment-proficiency-model", "equipment-validation-engine"],
-            impactPaths: ["selections.equipment", "validation.race.proficiency"]
+            dependsOn: ["cap:equipment-proficiency", "cap:equipment-validation"],
+            impacts: ["proficiency:weapon:dwarven-waraxe", "proficiency:weapon:dwarven-urgrosh"]
           }
         ]
       }
@@ -694,6 +694,72 @@ describe("race entity schema", () => {
               category: "alignment",
               description: "Broken deferred metadata.",
               dependsOn: []
+            }
+          ]
+        }
+      })
+    ).toThrow(/invalid races\.data/i);
+  });
+
+  it("rejects legacy race deferred mechanics dependency labels and impactPaths", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "legacy-race-deferred",
+        name: "Legacy Race Deferred",
+        entityType: "races",
+        summary: "Legacy",
+        description: "Legacy",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          size: "medium",
+          baseSpeed: 30,
+          abilityModifiers: {},
+          vision: { lowLight: false, darkvisionFeet: 0 },
+          automaticLanguages: ["Common"],
+          bonusLanguages: ["Any"],
+          favoredClass: "any",
+          racialTraits: [],
+          deferredMechanics: [
+            {
+              id: "legacy-race-mechanic",
+              category: "proficiency",
+              description: "Legacy shape should be rejected.",
+              dependsOn: ["equipment-validation-engine"],
+              impactPaths: ["validation.race.proficiency"]
+            }
+          ]
+        }
+      })
+    ).toThrow(/invalid races\.data/i);
+  });
+
+  it("rejects unknown capability ids and malformed impact ids for race deferred mechanics", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "invalid-race-capability",
+        name: "Invalid Race Capability",
+        entityType: "races",
+        summary: "Invalid",
+        description: "Invalid",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          size: "medium",
+          baseSpeed: 30,
+          abilityModifiers: {},
+          vision: { lowLight: false, darkvisionFeet: 0 },
+          automaticLanguages: ["Common"],
+          bonusLanguages: ["Any"],
+          favoredClass: "any",
+          racialTraits: [],
+          deferredMechanics: [
+            {
+              id: "invalid-race-mechanic",
+              category: "proficiency",
+              description: "Invalid identifiers should fail.",
+              dependsOn: ["cap:not-in-registry"],
+              impacts: ["Combat:ArmorClass"]
             }
           ]
         }
@@ -862,8 +928,8 @@ describe("class entity schema", () => {
             id: "alignment-restriction-non-lawful",
             category: "alignment",
             description: "Barbarians cannot be lawful until alignment system is implemented.",
-            dependsOn: ["alignment-selection-flow", "alignment-validation-engine"],
-            impactPaths: ["metadata.alignment", "validation.class.alignment"],
+            dependsOn: ["cap:alignment-selection", "cap:alignment-validation"],
+            impacts: ["alignment:restriction"],
             sourceRefs: ["https://www.d20srd.org/srd/classes/barbarian.htm"]
           }
         ]
@@ -1055,6 +1121,44 @@ describe("class entity schema", () => {
       })
     ).toThrow(/invalid classes\.data/i);
   });
+
+  it("rejects legacy class deferred mechanics impactPaths", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "legacy-class-deferred",
+        name: "Legacy Class Deferred",
+        entityType: "classes",
+        summary: "Legacy",
+        description: "Legacy",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["climb"],
+          hitDie: 10,
+          baseAttackProgression: "full",
+          baseSaveProgression: { fort: "good", ref: "poor", will: "poor" },
+          progression: {
+            levelGains: [
+              {
+                level: 1,
+                effects: [{ kind: "set", targetPath: "stats.bab", value: { const: 1 } }]
+              }
+            ]
+          },
+          deferredMechanics: [
+            {
+              id: "legacy-class-mechanic",
+              category: "alignment",
+              description: "Legacy field should be rejected.",
+              dependsOn: ["cap:alignment-validation"],
+              impactPaths: ["validation.class.alignment"]
+            }
+          ]
+        }
+      })
+    ).toThrow(/invalid classes\.data/i);
+  });
 });
 
 describe("feat entity schema", () => {
@@ -1143,8 +1247,8 @@ describe("feat entity schema", () => {
             id: "manyshot-multi-arrow-resolution",
             category: "attack-routine",
             description: "Manyshot requires attack-sequence modeling beyond the current engine.",
-            dependsOn: ["iterative-ranged-attack-engine", "ammo-consumption-engine"],
-            impactPaths: ["stats.attackBonus", "combat.ranged.fullAttack"]
+            dependsOn: ["cap:combat-attack-sequence", "cap:ammo-consumption"],
+            impacts: ["combat:ranged-attack-roll", "attack:multi-projectile"]
           }
         ]
       }
@@ -1170,6 +1274,33 @@ describe("feat entity schema", () => {
             {
               id: "broken-deferred-mechanic",
               category: "combat"
+            }
+          ]
+        }
+      })
+    ).toThrow(/invalid feats\.data/i);
+  });
+
+  it("rejects legacy feat deferred mechanics impactPaths", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "legacy-feat-deferred",
+        name: "Legacy Feat Deferred",
+        entityType: "feats",
+        summary: "Legacy",
+        description: "Legacy",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          sourcePages: [96],
+          text: "LEGACY [GENERAL] ...",
+          deferredMechanics: [
+            {
+              id: "legacy-feat-mechanic",
+              category: "attack-routine",
+              description: "Legacy field should be rejected.",
+              dependsOn: ["cap:combat-attack-sequence"],
+              impactPaths: ["combat.ranged.fullAttack"]
             }
           ]
         }

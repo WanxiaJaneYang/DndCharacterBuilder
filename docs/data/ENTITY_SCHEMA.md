@@ -42,8 +42,7 @@ For `entityType = "races"`, `data` is validated with a strict race schema:
   - `description`: what is not implemented yet
   - `dependsOn`: required implementation capability IDs before implementing this rule
   - `sourceRefs` (optional): authenticity/source references
-  - `impactPaths` (optional, legacy): older engine/model path hints retained in existing data until the normalization implementation lands
-  - `impacts` (planned): stable rule concept IDs describing the affected rules domain
+  - `impacts`: stable rule concept IDs describing the affected rules domain
 
 ## Notes
 
@@ -51,7 +50,8 @@ For `entityType = "races"`, `data` is validated with a strict race schema:
 - Race entries can still express engine-ready mechanics in `effects`.
 - Rich metadata in `data` is intended for details modal + rules expansion.
 - `deferredMechanics` is a lookup index for unfinished race mechanics so follow-up implementation can be done quickly and traceably.
-- See `docs/data/DEFERRED_MECHANICS_VOCABULARY.md` for the target concept-ID and capability-ID contract that will replace engine-oriented `impactPaths` semantics.
+- `impactPaths` is no longer a valid schema field; migrated data must use `impacts`.
+- See `docs/data/DEFERRED_MECHANICS_VOCABULARY.md` and `packages/schema/src/deferredMechanics.ts` for the enforced capability and concept ID contract.
 
 ## Class `data` model
 
@@ -85,8 +85,7 @@ For `entityType = "classes"`, `data` is validated with a strict class schema:
   - `description`: clear rule statement and current limitation
   - `dependsOn`: one or more implementation capability IDs required before implementation
   - `sourceRefs` (optional): source links/ids for authenticity traceability
-  - `impactPaths` (optional, legacy): older engine/model path hints still present in current data
-  - `impacts` (planned): stable rule concept IDs that describe what the deferred rule affects
+  - `impacts`: stable rule concept IDs that describe what the deferred rule affects
 - `levelTable` (optional, descriptive metadata): list of
   - `{ level, bab, fort, ref, will, features?, specialLabel?, babDisplay?, spellSlots? }`
 - `progression` (optional, engine-facing dynamic model):
@@ -121,14 +120,13 @@ For `entityType = "feats"`, `data` captures imported source-fidelity metadata:
   - `description`: clear statement of the source-preserved mechanic that is not implemented yet
   - `dependsOn`: one or more implementation capability IDs required before implementation
   - `sourceRefs` (optional): source links/ids for authenticity traceability
-  - `impactPaths` (optional, legacy): older engine/model path hints still present in current data
-  - `impacts` (planned): stable rule concept IDs for the affected rules domain
+  - `impacts`: stable rule concept IDs for the affected rules domain
 
 Engine note:
 - Keep source-faithful feat prose in `data`.
 - Keep engine-ready feat mechanics in the entity-level `effects` field so feats stay consistent with other entity buckets.
 - Use `data.deferredMechanics` when a feat should be present in the catalog but its benefit is not yet computable on the final character sheet.
-- The target contract for future deferred feat metadata is defined in `docs/data/DEFERRED_MECHANICS_VOCABULARY.md`.
+- The enforced deferred feat metadata contract is defined in `docs/data/DEFERRED_MECHANICS_VOCABULARY.md`.
 
 ## Planned Extensions For Sheet Parity
 

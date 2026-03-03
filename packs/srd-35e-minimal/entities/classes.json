@@ -544,18 +544,15 @@
           "category": "resource",
           "description": "Rage round tracking, fatigue timing, and per-day scaling are not fully automated yet.",
           "dependsOn": [
-            "resource-engine",
-            "combat-state"
+            "cap:resource-tracking",
+            "cap:combat-state"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#barbarian",
             "basic-rules-and-legal/character-classes-i.html#ex-barbarians"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "class:rage"
           ]
         },
         {
@@ -563,18 +560,15 @@
           "category": "alignment",
           "description": "Barbarian nonlawful restriction and ex-barbarian advancement lock are recorded but not enforced in flow validation.",
           "dependsOn": [
-            "alignment-engine",
-            "class-rule-engine"
+            "cap:alignment-validation",
+            "cap:class-rule-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#barbarian",
             "basic-rules-and-legal/character-classes-i.html#ex-barbarians"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "alignment:restriction"
           ]
         },
         {
@@ -582,18 +576,16 @@
           "category": "proficiency",
           "description": "Weapon and armor proficiencies are data-complete but not yet wired to equipment proficiency checks.",
           "dependsOn": [
-            "equipment-engine",
-            "proficiency-engine"
+            "cap:equipment-rules",
+            "cap:proficiency-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#barbarian",
             "basic-rules-and-legal/character-classes-i.html#ex-barbarians"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "proficiency:armor",
+            "proficiency:weapon"
           ]
         }
       ]
@@ -1253,18 +1245,15 @@
           "category": "class-feature",
           "description": "Bardic music countersong/fascinate/inspire effects are not fully executable in runtime yet.",
           "dependsOn": [
-            "class-rule-engine",
-            "condition-engine"
+            "cap:class-rule-runtime",
+            "cap:condition-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#bard",
             "basic-rules-and-legal/character-classes-i.html#ex-bards"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "class:bardic-music"
           ]
         },
         {
@@ -1272,18 +1261,15 @@
           "category": "spellcasting",
           "description": "Bard spells known and spells per day are recorded but not yet enforced by spell selection runtime.",
           "dependsOn": [
-            "spell-engine",
-            "spell-slot-engine"
+            "cap:spellcasting-runtime",
+            "cap:spell-slot-progression"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#bard",
             "basic-rules-and-legal/character-classes-i.html#ex-bards"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "spells:spellcasting"
           ]
         },
         {
@@ -1291,18 +1277,16 @@
           "category": "proficiency",
           "description": "Bard weapon/armor proficiencies are recorded but not yet consumed by equipment validation.",
           "dependsOn": [
-            "equipment-engine",
-            "proficiency-engine"
+            "cap:equipment-rules",
+            "cap:proficiency-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#bard",
             "basic-rules-and-legal/character-classes-i.html#ex-bards"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "proficiency:armor",
+            "proficiency:weapon"
           ]
         }
       ],
@@ -2107,18 +2091,16 @@
           "category": "spellcasting",
           "description": "Domain selection and domain spell slot mechanics are not fully automated yet.",
           "dependsOn": [
-            "spell-engine",
-            "domain-engine"
+            "cap:spellcasting-runtime",
+            "cap:domain-selection"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#cleric",
             "basic-rules-and-legal/character-classes-i.html#ex-clerics"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "spells:domain-slot",
+            "spells:spellcasting"
           ]
         },
         {
@@ -2126,18 +2108,15 @@
           "category": "class-feature",
           "description": "Turn/Rebuke Undead uses and scaling are recorded but not yet runtime-executed.",
           "dependsOn": [
-            "class-rule-engine",
-            "resource-engine"
+            "cap:class-rule-runtime",
+            "cap:resource-tracking"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#cleric",
             "basic-rules-and-legal/character-classes-i.html#ex-clerics"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "class:turn-undead"
           ]
         },
         {
@@ -2145,18 +2124,16 @@
           "category": "proficiency",
           "description": "Cleric proficiencies are data-complete but not yet enforced by equipment/weapon checks.",
           "dependsOn": [
-            "equipment-engine",
-            "proficiency-engine"
+            "cap:equipment-rules",
+            "cap:proficiency-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#cleric",
             "basic-rules-and-legal/character-classes-i.html#ex-clerics"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "proficiency:armor",
+            "proficiency:weapon"
           ]
         }
       ],
@@ -3276,18 +3253,15 @@
           "category": "class-feature",
           "description": "Wild shape form options and usage progression are recorded but not yet runtime-enforced.",
           "dependsOn": [
-            "class-rule-engine",
-            "form-engine"
+            "cap:class-rule-runtime",
+            "cap:form-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#druid",
             "basic-rules-and-legal/character-classes-i.html#ex-druids"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "class:wild-shape"
           ]
         },
         {
@@ -3295,18 +3269,15 @@
           "category": "alignment",
           "description": "Druid alignment requirement and ex-druid loss conditions are tracked but not yet enforced.",
           "dependsOn": [
-            "alignment-engine",
-            "class-rule-engine"
+            "cap:alignment-validation",
+            "cap:class-rule-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#druid",
             "basic-rules-and-legal/character-classes-i.html#ex-druids"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "alignment:restriction"
           ]
         },
         {
@@ -3314,18 +3285,15 @@
           "category": "spellcasting",
           "description": "Druid spell preparation/spell slots are recorded but not yet enforced in spell flow.",
           "dependsOn": [
-            "spell-engine",
-            "spell-slot-engine"
+            "cap:spellcasting-runtime",
+            "cap:spell-slot-progression"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#druid",
             "basic-rules-and-legal/character-classes-i.html#ex-druids"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "spells:spellcasting"
           ]
         }
       ],
@@ -4089,18 +4057,15 @@
           "category": "class-feature",
           "description": "Recurring fighter bonus feat slots at higher levels are recorded but not auto-issued yet.",
           "dependsOn": [
-            "leveling-engine",
-            "feat-slot-engine"
+            "cap:level-progression",
+            "cap:feat-slot-progression"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#fighter",
             "basic-rules-and-legal/character-classes-i.html#fighter--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "feat:bonus-selection"
           ]
         },
         {
@@ -4108,18 +4073,16 @@
           "category": "proficiency",
           "description": "Fighter proficiencies are recorded but not yet consumed by weapon/armor validation.",
           "dependsOn": [
-            "equipment-engine",
-            "proficiency-engine"
+            "cap:equipment-rules",
+            "cap:proficiency-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#fighter",
             "basic-rules-and-legal/character-classes-i.html#fighter--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "proficiency:armor",
+            "proficiency:weapon"
           ]
         }
       ]
@@ -4874,18 +4837,16 @@
           "category": "class-feature",
           "description": "Flurry attack sequence, unarmed scaling, and AC bonus interactions are not fully automated yet.",
           "dependsOn": [
-            "combat-engine",
-            "class-rule-engine"
+            "cap:combat-resolution",
+            "cap:class-rule-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#monk",
             "basic-rules-and-legal/character-classes-i.html#ex-monks"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "combat:attack-sequence",
+            "combat:unarmed-attack"
           ]
         },
         {
@@ -4893,18 +4854,15 @@
           "category": "alignment",
           "description": "Monk lawful restriction and multiclass return restriction are tracked but not enforced.",
           "dependsOn": [
-            "alignment-engine",
-            "class-rule-engine"
+            "cap:alignment-validation",
+            "cap:class-rule-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#monk",
             "basic-rules-and-legal/character-classes-i.html#ex-monks"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "alignment:restriction"
           ]
         },
         {
@@ -4912,18 +4870,16 @@
           "category": "proficiency",
           "description": "Monk proficiency and special monk weapon interactions are not fully wired.",
           "dependsOn": [
-            "equipment-engine",
-            "proficiency-engine"
+            "cap:equipment-rules",
+            "cap:proficiency-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-i.html#monk",
             "basic-rules-and-legal/character-classes-i.html#ex-monks"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "proficiency:armor",
+            "proficiency:weapon"
           ]
         }
       ]
@@ -5539,18 +5495,15 @@
           "category": "alignment",
           "description": "Paladin lawful good requirement, code of conduct, and ex-paladin consequences are tracked but not enforced.",
           "dependsOn": [
-            "alignment-engine",
-            "class-rule-engine"
+            "cap:alignment-validation",
+            "cap:class-rule-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#paladin",
             "basic-rules-and-legal/character-classes-ii.html#ex-paladins"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "class:feature"
           ]
         },
         {
@@ -5558,18 +5511,15 @@
           "category": "spellcasting",
           "description": "Paladin 4th-level spellcasting progression is recorded but not yet enforced in spell flow.",
           "dependsOn": [
-            "spell-engine",
-            "spell-slot-engine"
+            "cap:spellcasting-runtime",
+            "cap:spell-slot-progression"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#paladin",
             "basic-rules-and-legal/character-classes-ii.html#ex-paladins"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "spells:spellcasting"
           ]
         },
         {
@@ -5577,18 +5527,15 @@
           "category": "resource",
           "description": "Smite evil uses/day and scaling are not yet runtime tracked.",
           "dependsOn": [
-            "resource-engine",
-            "combat-state"
+            "cap:resource-tracking",
+            "cap:combat-state"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#paladin",
             "basic-rules-and-legal/character-classes-ii.html#ex-paladins"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "combat:smite"
           ]
         }
       ],
@@ -6424,18 +6371,15 @@
           "category": "class-feature",
           "description": "Favored enemy progression and target matching are recorded but not fully executable.",
           "dependsOn": [
-            "class-rule-engine",
-            "combat-engine"
+            "cap:class-rule-runtime",
+            "cap:combat-resolution"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#ranger",
             "basic-rules-and-legal/character-classes-ii.html#ranger--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "combat:favored-enemy"
           ]
         },
         {
@@ -6443,18 +6387,15 @@
           "category": "spellcasting",
           "description": "Ranger 4th-level spell progression is recorded but not yet enforced in spell flow.",
           "dependsOn": [
-            "spell-engine",
-            "spell-slot-engine"
+            "cap:spellcasting-runtime",
+            "cap:spell-slot-progression"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#ranger",
             "basic-rules-and-legal/character-classes-ii.html#ranger--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "spells:spellcasting"
           ]
         },
         {
@@ -6462,18 +6403,15 @@
           "category": "class-feature",
           "description": "Combat style feat chains are tracked but not yet auto-granted by level.",
           "dependsOn": [
-            "leveling-engine",
-            "feat-slot-engine"
+            "cap:level-progression",
+            "cap:feat-slot-progression"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#ranger",
             "basic-rules-and-legal/character-classes-ii.html#ranger--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "feat:bonus-selection"
           ]
         }
       ],
@@ -7262,18 +7200,15 @@
           "category": "class-feature",
           "description": "Sneak attack dice scaling and precision immunity checks are not fully automated.",
           "dependsOn": [
-            "combat-engine",
-            "class-rule-engine"
+            "cap:combat-resolution",
+            "cap:class-rule-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#rogue",
             "basic-rules-and-legal/character-classes-ii.html#rogue--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "combat:sneak-attack"
           ]
         },
         {
@@ -7281,18 +7216,15 @@
           "category": "class-feature",
           "description": "Special abilities gained at higher levels are tracked but not yet selectable in flow.",
           "dependsOn": [
-            "leveling-engine",
-            "feature-selection-ui"
+            "cap:level-progression",
+            "cap:feature-selection"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#rogue",
             "basic-rules-and-legal/character-classes-ii.html#rogue--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "class:special-ability"
           ]
         },
         {
@@ -7300,18 +7232,16 @@
           "category": "proficiency",
           "description": "Rogue proficiency data is present but not fully used by equipment validation.",
           "dependsOn": [
-            "equipment-engine",
-            "proficiency-engine"
+            "cap:equipment-rules",
+            "cap:proficiency-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#rogue",
             "basic-rules-and-legal/character-classes-ii.html#rogue--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "proficiency:armor",
+            "proficiency:weapon"
           ]
         }
       ]
@@ -7876,18 +7806,15 @@
           "category": "spellcasting",
           "description": "Spells known and spells/day progression are recorded but not yet fully enforced.",
           "dependsOn": [
-            "spell-engine",
-            "spell-slot-engine"
+            "cap:spellcasting-runtime",
+            "cap:spell-slot-progression"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#sorcerer",
             "basic-rules-and-legal/character-classes-ii.html#sorcerer--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "spells:spellcasting"
           ]
         },
         {
@@ -7895,18 +7822,15 @@
           "category": "class-feature",
           "description": "Summon familiar and familiar progression are recorded but not yet executable.",
           "dependsOn": [
-            "class-rule-engine",
-            "companion-engine"
+            "cap:class-rule-runtime",
+            "cap:companion-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#sorcerer",
             "basic-rules-and-legal/character-classes-ii.html#sorcerer--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "class:familiar"
           ]
         },
         {
@@ -7914,18 +7838,16 @@
           "category": "proficiency",
           "description": "Sorcerer weapon/armor proficiency restrictions are not yet validated by equipment flow.",
           "dependsOn": [
-            "equipment-engine",
-            "proficiency-engine"
+            "cap:equipment-rules",
+            "cap:proficiency-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#sorcerer",
             "basic-rules-and-legal/character-classes-ii.html#sorcerer--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "proficiency:armor",
+            "proficiency:weapon"
           ]
         }
       ],
@@ -8855,18 +8777,15 @@
           "category": "spellcasting",
           "description": "Spellbook preparation workflow and school specialization hooks are not fully automated.",
           "dependsOn": [
-            "spell-engine",
-            "spellbook-engine"
+            "cap:spellcasting-runtime",
+            "cap:spellbook-management"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#wizard",
             "basic-rules-and-legal/character-classes-ii.html#wizard--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "spells:spellbook"
           ]
         },
         {
@@ -8874,18 +8793,15 @@
           "category": "class-feature",
           "description": "Wizard bonus feat milestones are tracked but not auto-granted at levels 5/10/15/20.",
           "dependsOn": [
-            "leveling-engine",
-            "feat-slot-engine"
+            "cap:level-progression",
+            "cap:feat-slot-progression"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#wizard",
             "basic-rules-and-legal/character-classes-ii.html#wizard--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "feat:bonus-selection"
           ]
         },
         {
@@ -8893,18 +8809,15 @@
           "category": "class-feature",
           "description": "Familiar mechanics are tracked but not yet executable in runtime.",
           "dependsOn": [
-            "class-rule-engine",
-            "companion-engine"
+            "cap:class-rule-runtime",
+            "cap:companion-runtime"
           ],
           "sourceRefs": [
             "basic-rules-and-legal/character-classes-ii.html#wizard",
             "basic-rules-and-legal/character-classes-ii.html#wizard--class-skills"
           ],
-          "impactPaths": [
-            "selections.class",
-            "validation.class",
-            "stats",
-            "decisions"
+          "impacts": [
+            "class:familiar"
           ]
         }
       ],
