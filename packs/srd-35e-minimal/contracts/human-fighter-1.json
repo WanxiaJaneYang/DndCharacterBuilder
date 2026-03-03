@@ -1,0 +1,330 @@
+{
+  "enabledPacks": [
+    "srd-35e-minimal"
+  ],
+  "initialState": {},
+  "actions": [
+    {
+      "choiceId": "race",
+      "selection": "human"
+    },
+    {
+      "choiceId": "class",
+      "selection": "fighter"
+    },
+    {
+      "choiceId": "abilities",
+      "selection": {
+        "str": 14,
+        "dex": 12,
+        "con": 10,
+        "int": 10,
+        "wis": 10,
+        "cha": 8
+      }
+    },
+    {
+      "choiceId": "feat",
+      "selection": [
+        "power-attack"
+      ]
+    },
+    {
+      "choiceId": "skills",
+      "selection": {
+        "climb": 4,
+        "jump": 4,
+        "ride": 4
+      }
+    },
+    {
+      "choiceId": "equipment",
+      "selection": [
+        "longsword",
+        "chainmail",
+        "heavy-wooden-shield"
+      ]
+    },
+    {
+      "choiceId": "name",
+      "selection": "Contract Hero"
+    }
+  ],
+  "expected": {
+    "validationErrorCodes": [],
+    "finalSheetSubset": {
+      "abilities": {
+        "str": {
+          "score": 14,
+          "mod": 2
+        },
+        "dex": {
+          "score": 12,
+          "mod": 1
+        },
+        "con": {
+          "score": 10,
+          "mod": 0
+        },
+        "int": {
+          "score": 10,
+          "mod": 0
+        },
+        "wis": {
+          "score": 10,
+          "mod": 0
+        },
+        "cha": {
+          "score": 8,
+          "mod": -1
+        }
+      },
+      "stats": {
+        "ac": 18,
+        "attackBonus": 3,
+        "fort": 2,
+        "ref": 0,
+        "will": 0
+      },
+      "phase1": {
+        "combat": {
+          "ac": {
+            "total": 18,
+            "touch": 11,
+            "flatFooted": 17,
+            "breakdown": {
+              "armor": 5,
+              "shield": 2,
+              "dex": 1,
+              "size": 0,
+              "natural": 0,
+              "deflection": 0,
+              "misc": 0
+            }
+          },
+          "attacks": {
+            "melee": [
+              {
+                "itemId": "longsword",
+                "name": "Longsword",
+                "attackBonus": 3,
+                "damage": "1d8",
+                "crit": "19-20/x2"
+              }
+            ],
+            "ranged": []
+          },
+          "saves": {
+            "fort": {
+              "total": 2,
+              "base": 2,
+              "ability": 0,
+              "misc": 0
+            },
+            "ref": {
+              "total": 1,
+              "base": 0,
+              "ability": 1,
+              "misc": 0
+            },
+            "will": {
+              "total": 0,
+              "base": 0,
+              "ability": 0,
+              "misc": 0
+            }
+          }
+        }
+      },
+      "phase2": {
+        "skills": [
+          {
+            "id": "balance",
+            "name": "Balance",
+            "ranks": 0,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -6
+          },
+          {
+            "id": "climb",
+            "name": "Climb",
+            "ranks": 4,
+            "ability": 2,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -1
+          },
+          {
+            "id": "diplomacy",
+            "name": "Diplomacy",
+            "ranks": 0,
+            "ability": -1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": -1
+          },
+          {
+            "id": "escape-artist",
+            "name": "Escape Artist",
+            "ranks": 0,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -6
+          },
+          {
+            "id": "jump",
+            "name": "Jump",
+            "ranks": 4,
+            "ability": 2,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -1
+          },
+          {
+            "id": "listen",
+            "name": "Listen",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "ride",
+            "name": "Ride",
+            "ranks": 4,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -2
+          },
+          {
+            "id": "spot",
+            "name": "Spot",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "tumble",
+            "name": "Tumble",
+            "ranks": 0,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -6
+          }
+        ]
+      },
+      "provenance": [
+        {
+          "targetPath": "stats.ac",
+          "setValue": 11,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "base-ac"
+          }
+        },
+        {
+          "targetPath": "stats.initiative",
+          "setValue": 1,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "initiative"
+          }
+        },
+        {
+          "targetPath": "stats.speed",
+          "setValue": 30,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "human"
+          }
+        },
+        {
+          "targetPath": "stats.hp",
+          "setValue": 10,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "fighter",
+            "choiceStepId": "class-level-1"
+          }
+        },
+        {
+          "targetPath": "stats.bab",
+          "setValue": 1,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "fighter",
+            "choiceStepId": "class-level-1"
+          }
+        },
+        {
+          "targetPath": "stats.fort",
+          "setValue": 2,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "fighter",
+            "choiceStepId": "class-level-1"
+          }
+        },
+        {
+          "targetPath": "stats.ref",
+          "setValue": 0,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "fighter",
+            "choiceStepId": "class-level-1"
+          }
+        },
+        {
+          "targetPath": "stats.will",
+          "setValue": 0,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "fighter",
+            "choiceStepId": "class-level-1"
+          }
+        },
+        {
+          "targetPath": "stats.ac",
+          "delta": 5,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "chainmail"
+          }
+        },
+        {
+          "targetPath": "stats.speed",
+          "setValue": 20,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "chainmail"
+          }
+        },
+        {
+          "targetPath": "stats.ac",
+          "delta": 2,
+          "source": {
+            "packId": "srd-35e-minimal",
+            "entityId": "heavy-wooden-shield"
+          }
+        }
+      ]
+    }
+  }
+}
