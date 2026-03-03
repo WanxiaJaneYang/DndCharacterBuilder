@@ -52,7 +52,7 @@ async function reachSkillsStep(user: ReturnType<typeof userEvent.setup>) {
   await user.clear(dexInput);
   await user.type(dexInput, '12');
 
-  const intInput = screen.getByRole('spinbutton', { name: /INT|智力/i });
+  const intInput = screen.getByLabelText(/INT|智力/i, { selector: '#ability-input-int' });
   await user.clear(intInput);
   await user.type(intInput, '10');
 
@@ -113,6 +113,23 @@ describe('wizard e2e-ish happy path', () => {
     expect(screen.getAllByText(/Chainmail/i).length).toBeGreaterThan(0);
     expect(screen.getByText(new RegExp(en.reviewFingerprintLabel, 'i'))).toBeTruthy();
     expect(document.body.textContent).toMatch(/[a-f0-9]{64}/);
+  });
+
+  it('renders review skill rows with a closed ability label parenthesis', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await reachSkillsStep(user);
+
+    const climbRow = screen.getByRole('row', { name: climbSkillPattern });
+    await user.click(within(climbRow).getByRole('button', { name: /Increase|鎻愰珮/i }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(/Longsword|闀垮墤/i));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), 'Aric');
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    expect(screen.getByText(/\(\s*(?:STR|鍔涢噺)\s*\)/i)).toBeTruthy();
   });
 });
 

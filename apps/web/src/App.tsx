@@ -980,7 +980,7 @@ export function App() {
                       <td>{skill.ranks}</td>
                       <td>
                         {formatSigned(skill.abilityMod)} (
-                        {localizeAbilityLabel(skill.abilityKey)}
+                        {localizeAbilityLabel(skill.abilityKey)})
                       </td>
                       <td>{formatSigned(detail?.racialBonus ?? 0)}</td>
                       <td>{formatSigned(skill.misc)}</td>
