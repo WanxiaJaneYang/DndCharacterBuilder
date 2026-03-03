@@ -27,6 +27,7 @@ Creating a character in D&D can be intimidating. New players are overwhelmed by 
 - Each step must render options using data packs and include short descriptions and optional details.
 - Validation and gating for each step.
 - Export of the character sheet with pack fingerprint and provenance.
+  - The normalized MVP export/review contract is defined in [`docs/sheet-spec.md`](../sheet-spec.md).
 
 ### Ability Score Product Requirement (2026-02)
 

@@ -2,6 +2,8 @@
 
 This document defines the target JSON model for final character-sheet export.
 
+> **Note:** For the normalized 3.5 SRD MVP sheet contract, see [`../sheet-spec.md`](../sheet-spec.md). This document should stay aligned with that spec.
+
 ## Current Status
 
 The engine currently exports a deterministic sheet with:
@@ -151,3 +153,4 @@ Add:
 - Export must remain deterministic for identical input state + enabled packs.
 - Every derived number should be explainable by provenance records.
 - Keys must be stable to avoid downstream parser breakage.
+- Cross-check MVP shape changes against [`../sheet-spec.md`](../sheet-spec.md).
