@@ -1007,6 +1007,49 @@ describe("engine determinism", () => {
     expect(errors.some((error) => error.code === "SKILL_POINTS_EXCEEDED")).toBe(true);
   });
 
+  it("builds a legal fighter skill allocation with class and cross-class costs in the breakdown", () => {
+    let state = applyChoice(initialState, "name", "SkillMath");
+    state = applyChoice(state, "abilities", { str: 14, dex: 12, con: 10, int: 10, wis: 10, cha: 8 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "equipment", ["chainmail"], context);
+    state = applyChoice(state, "skills", { climb: 4, jump: 3, diplomacy: 0.5 }, context);
+
+    const errors = validateState(state, context);
+    const sheet = finalizeCharacter(state, context);
+    const climb = sheet.skills.climb;
+    const diplomacy = sheet.skills.diplomacy;
+    const phase2Climb = sheet.phase2.skills.find((skill) => skill.id === "climb");
+
+    expect(errors).toEqual([]);
+    expect(sheet.decisions.skillPoints.total).toBe(12);
+    expect(sheet.decisions.skillPoints.spent).toBe(8);
+    expect(sheet.decisions.skillPoints.remaining).toBe(4);
+    expect(climb).toMatchObject({
+      classSkill: true,
+      ranks: 4,
+      costPerRank: 1,
+      costSpent: 4,
+      abilityMod: 2,
+      total: 6
+    });
+    expect(diplomacy).toMatchObject({
+      classSkill: false,
+      ranks: 0.5,
+      costPerRank: 2,
+      costSpent: 1,
+      abilityMod: -1,
+      total: -0.5
+    });
+    expect(phase2Climb).toMatchObject({
+      ranks: 4,
+      ability: 2,
+      misc: 0,
+      acp: -5,
+      total: 1
+    });
+  });
+
   it("returns STEP_LIMIT_EXCEEDED when selections exceed dynamic feat limit", () => {
     let state = applyChoice(initialState, "name", "FeatLimit");
     state = applyChoice(state, "abilities", { str: 16, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
