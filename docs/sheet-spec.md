@@ -2,7 +2,9 @@
 
 Issue: `#80`
 
-This document defines the minimum final character-sheet export for the 3.5 SRD MVP.
+This document is the canonical specification for the 3.5 SRD MVP character-sheet export.
+
+`docs/data/EXPORT_SCHEMA.md` is superseded for MVP structure and remains only as a deprecated historical/roadmap reference until downstream readers are migrated.
 
 Goal:
 - match the structure players expect from a typical D&D 3.5 character sheet
@@ -16,9 +18,10 @@ Goal:
 - Contract fixtures: `packs/srd-35e-minimal/contracts/happy-path.json`, `packs/srd-35e-minimal/contracts/unresolved-rules.json`
 - Existing export docs: `docs/data/EXPORT_SCHEMA.md`, `docs/ux/steps/08_review_export.md`
 - 3.5 SRD references:
-  - Combat statistics: <https://www.d20srd.org/srd/combat/combatStatistics>
-  - Skills summary: <https://www.d20srd.org/srd/skills/skillsSummary.htm>
-  - Skills usage: <https://www.d20srd.org/srd/skills/usingSkills.htm>
+  - Initiative checks and flat-footed rules: <https://www.d20srd.org/srd/combat/initiative.htm>
+  - Grapple special attack and special size modifiers: <https://www.d20srd.org/srd/combat/specialAttacks.htm>
+  - Skills summary and rank caps: <https://www.d20srd.org/srd/skills/skillsSummary.htm>
+  - Multiclass skill-rank caveat: <https://www.d20srd.org/srd/classes/multiclass.htm>
   - Armor: <https://www.d20srd.org/srd/equipment/armor.htm>
 
 ## Design Principles
@@ -28,6 +31,7 @@ Goal:
 - Empty arrays/objects are preferred over omitted keys.
 - Unknown, deferred, or not-yet-implemented mechanics MUST be represented in `unresolved`.
 - Generic carryover fields from the current engine (`stats`, `selections`, `phase1`, `phase2`) may continue to exist for compatibility, but the normalized MVP sheet contract is the structure below.
+- During the transition, `rules.decisions`, `rules.provenance`, and `rules.packSetFingerprint` are authoritative. Temporary top-level mirrors named `decisions`, `provenance`, and `packSetFingerprint` may still appear for compatibility, but they MUST match `rules.*`. If they diverge, consumers MUST trust `rules.*`.
 
 ## Required Top-Level Sections
 
@@ -64,7 +68,16 @@ type CharacterSheetMvp = {
     classId: string | null;
     level: number;
     xp: number;
-    size: string;
+    size:
+      | "fine"
+      | "diminutive"
+      | "tiny"
+      | "small"
+      | "medium"
+      | "large"
+      | "huge"
+      | "gargantuan"
+      | "colossal";
     speed: {
       base: number;
       adjusted: number;
@@ -261,7 +274,7 @@ type UnresolvedEntry = {
 - `classId: string | null`
 - `level: number`
 - `xp: number`
-- `size: string`
+- `size: "fine" | "diminutive" | "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan" | "colossal"`
 - `speed.base: number`
 - `speed.adjusted: number`
 
@@ -269,6 +282,7 @@ Notes:
 - `level` is currently derived from the selected class ID / class progression in the engine.
 - `xp` is explicit even when fixed to `0` in MVP.
 - `speed.adjusted` reflects armor/load effects if applied.
+- `size` uses the standard 3.5 size categories listed above and no other free-form values.
 
 ### `abilities`
 
@@ -334,6 +348,10 @@ Formula:
 
 - `initiative.total = dex + misc`
 
+3.5 SRD citation:
+
+- Initiative checks are Dexterity checks, and flat-footed creatures lose their Dexterity bonus to AC until they act: <https://www.d20srd.org/srd/combat/initiative.htm>
+
 #### Grapple
 
 Fields:
@@ -360,6 +378,10 @@ Use the 3.5 grapple size modifier scale:
 - `gargantuan +12`
 - `colossal +16`
 
+3.5 SRD citation:
+
+- Grapple special size modifier table: <https://www.d20srd.org/srd/combat/specialAttacks.htm>
+
 #### Attacks
 
 Required fields:
@@ -375,6 +397,11 @@ Each `AttackLine` includes:
 - `damage: string`
 - `crit: string`
 - `range?: string`
+
+Canonical string formatting:
+
+- `damage` uses dice notation plus an optional signed flat modifier, for example `1d8+3`, `1d4-1`, or `1d3`.
+- `crit` uses `threat-range/xmult`, for example `20/x2`, `19-20/x2`, or `20/x3`.
 
 Baseline formulas:
 
@@ -454,12 +481,18 @@ Formula:
 - cross-class ranks cost `2` points per rank
 - max class skill ranks at level 1: `level + 3 = 4`
 - max cross-class ranks at level 1: half of class-skill maximum
+- if a skill is a class skill for any class a multiclass character has, max ranks still use total character level + 3; otherwise the cap is half that amount
 
 MVP note:
 
 - Current engine stores a generic `skills` record and a `phase2.skills[]` list.
 - This spec standardizes on a list with an explicit breakdown, because export consumers need stable ordering and visible channels.
 - `acp` should be `0` for unaffected skills, not omitted.
+
+3.5 SRD citations:
+
+- Skill rank costs and base rank caps: <https://www.d20srd.org/srd/skills/skillsSummary.htm>
+- Multiclass class-skill max-rank caveat: <https://www.d20srd.org/srd/classes/multiclass.htm>
 
 ### `feats`
 
@@ -525,6 +558,12 @@ This is the authoritative audit trail for derived stats.
 
 This allows exported sheets to be reproduced against the exact enabled pack set.
 
+Transition rule:
+
+- top-level `decisions`, `provenance`, and `packSetFingerprint` may remain temporarily as compatibility mirrors
+- `rules.decisions`, `rules.provenance`, and `rules.packSetFingerprint` are authoritative for all new producers and consumers
+- mirror fields SHOULD be removed once downstream consumers no longer depend on them
+
 ### `unresolved`
 
 `unresolved` MUST always be present.
@@ -561,7 +600,7 @@ Use `unresolved` for:
 
 The exporter MUST prefer explicit empty sections over missing keys.
 
-Examples:
+Excerpt:
 
 ```json
 {
@@ -628,6 +667,7 @@ Compatibility notes:
 
 - `stats` remains useful as a legacy flat summary but is not sufficient as the normative export contract.
 - `selections` remains useful for replay/debugging but is not a substitute for resolved sheet sections.
+- top-level `decisions`, `provenance`, and `packSetFingerprint` are temporary compatibility mirrors only; `rules.*` is the normative source of truth.
 - `phase2.traits`, `phase2.equipment`, and `phase2.movement` are still useful and SHOULD either stay as compatibility fields or be folded into future spec revisions. They are not listed as required top-level sections for this issue because the acceptance criteria explicitly names `abilities`, `combat`, `skills`, `feats`, `rules`, and `unresolved`.
 
 ## Minimum Acceptance Checklist
