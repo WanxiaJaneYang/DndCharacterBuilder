@@ -121,6 +121,7 @@ export type UIText = {
   reviewEnabledPacksLabel: string;
   reviewFingerprintLabel: string;
   reviewUnknownVersion: string;
+  reviewUnresolvedLabel: string;
   reviewAbilityTableCaption: string;
   reviewCombatTableCaption: string;
   reviewSkillsTableCaption: string;
@@ -254,6 +255,7 @@ const uiTextStringKeys: Array<Exclude<keyof UIText, 'abilityLabels'>> = [
   'reviewEnabledPacksLabel',
   'reviewFingerprintLabel',
   'reviewUnknownVersion',
+  'reviewUnresolvedLabel',
   'reviewAbilityTableCaption',
   'reviewCombatTableCaption',
   'reviewSkillsTableCaption',
