@@ -187,7 +187,8 @@ export interface SheetViewModel {
     id: string;
     name: string;
     ranks: number;
-    ability: number;
+    abilityKey: AbilityKey;
+    abilityMod: number;
     misc: number;
     acp: number;
     acpApplied: boolean;
@@ -1654,7 +1655,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     }
   };
   const unresolvedRules = collectUnresolvedRules(state, context);
-  const sheetViewModel = buildSheetViewModel({ phase1, phase2 });
+  const sheetViewModel = buildSheetViewModel({ phase1, phase2, skills });
 
   return {
     metadata: { name: sheet.metadata.name },
@@ -1672,7 +1673,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   };
 }
 
-export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1" | "phase2">): SheetViewModel {
+export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1" | "phase2" | "skills">): SheetViewModel {
   const ac = characterSheet.phase1.combat.ac;
   const acBase =
     ac.total
@@ -1742,16 +1743,20 @@ export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1
       },
       attacks
     },
-    skills: characterSheet.phase2.skills.map((skill) => ({
-      id: skill.id,
-      name: skill.name,
-      ranks: skill.ranks,
-      ability: skill.ability,
-      misc: skill.misc,
-      acp: skill.acp,
-      acpApplied: skill.acpApplied,
-      total: skill.total
-    }))
+    skills: characterSheet.phase2.skills.map((skill) => {
+      const detail = characterSheet.skills[skill.id];
+      return {
+        id: skill.id,
+        name: skill.name,
+        ranks: skill.ranks,
+        abilityKey: detail?.ability ?? "str",
+        abilityMod: skill.ability,
+        misc: skill.misc,
+        acp: skill.acp,
+        acpApplied: skill.acpApplied,
+        total: skill.total
+      };
+    })
   };
 }
 
