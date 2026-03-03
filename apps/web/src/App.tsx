@@ -979,8 +979,8 @@ export function App() {
                       </td>
                       <td>{skill.ranks}</td>
                       <td>
-                        {formatSigned(skill.ability)} (
-                        {localizeAbilityLabel(detail?.ability ?? "str")}
+                        {formatSigned(skill.abilityMod)} (
+                        {localizeAbilityLabel(skill.abilityKey)}
                       </td>
                       <td>{formatSigned(detail?.racialBonus ?? 0)}</td>
                       <td>{formatSigned(skill.misc)}</td>
@@ -1480,7 +1480,8 @@ export function App() {
                   const racialBonus = detail?.racialBonus ?? 0;
                   const miscBonus = skillView?.misc ?? detail?.miscBonus ?? 0;
                   const acpPenalty = skillView?.acp ?? 0;
-                  const abilityMod = skillView?.ability ?? detail?.abilityMod ?? 0;
+                  const abilityMod =
+                    skillView?.abilityMod ?? detail?.abilityMod ?? 0;
                   const total = skillView?.total ?? detail?.total ?? 0;
                   const rankStep = classSkill ? 1 : 0.5;
                   const pointStepCost = rankStep * costPerRank;

@@ -87,7 +87,8 @@ describe("sheetViewModel", () => {
           id: "climb",
           name: "Climb",
           ranks: 1,
-          ability: 3,
+          abilityKey: "str",
+          abilityMod: 3,
           misc: 0,
           acp: -7,
           acpApplied: true,
@@ -96,6 +97,8 @@ describe("sheetViewModel", () => {
         expect.objectContaining({
           id: "listen",
           name: "Listen",
+          abilityKey: "wis",
+          abilityMod: 0,
           acp: 0,
           acpApplied: false
         })
