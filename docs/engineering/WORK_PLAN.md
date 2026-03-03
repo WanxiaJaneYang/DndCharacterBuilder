@@ -14,7 +14,7 @@ This living document tracks the engineering tasks required to implement the DnDC
 
 2. **Wizard UI and flow**
    - [x] Build the Rules Setup page with version and source selection.
-   - [x] Implement race, class, ability, feat, skill, and equipment steps using card and allocator components.
+   - [x] Implement race, class, ability, feat, skill, and equipment steps using the current picker and allocator UI.
    - [x] Implement review and export step with provenance display.
    - [x] Wire validation and gating for each step.
    - [x] Implement approved ability-step UI improvements from the 2026-02-23 design update.
@@ -31,7 +31,7 @@ This living document tracks the engineering tasks required to implement the DnDC
    - [x] Add unit tests for pack loader (datapack package).
    - [x] Add unit tests for engine (engine package).
    - [x] Add contract tests for the minimal SRD pack.
-   - [x] Add wizard integration coverage (Vitest RTL) and visual regression coverage (Playwright).
+   - [x] Add wizard integration coverage (Vitest RTL) and initial visual regression coverage (Playwright).
    - [ ] Add deeper E2E coverage for critical abilities and skills regressions.
 
 ### Future Phases (Beyond MVP)
@@ -71,7 +71,7 @@ This living document tracks the engineering tasks required to implement the DnDC
 - Added data-driven ability generation modes, extracted ability-step UI components, and covered them with web tests.
 - Added review/export surfaces backed by `sheetViewModel`, including attack breakdowns, skill breakdowns, provenance display, and JSON export.
 - Added pack contract fixtures for the minimal SRD pack, wired `npm run check:contract-fixtures` and `npm run contracts` into CI, and enforced ASCII/bidi safety for contract JSON.
-- Added Playwright visual regression coverage alongside the existing Vitest wizard-flow integration tests.
+- Added initial Playwright visual regression coverage alongside the existing Vitest wizard-flow integration tests.
 - Added race-level `deferredMechanics` tracking in schema and `races.json` so PHB-linked but not-yet-implemented race rules are indexed for fast follow-up when dependent systems land.
 - Recorded the approved deferred-mechanics normalization direction in docs so backlog metadata can migrate from engine-oriented path hints to stable concept IDs and capability IDs in a later implementation phase.
 - Implemented deferred-mechanics normalization across schema validation, tests, docs, and SRD race/class/feat pack data.
