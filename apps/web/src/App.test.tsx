@@ -18,6 +18,9 @@ const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?)
 const humanLabelPattern = /^(?:Human|人类)$/;
 const elfLabelPattern = /^(?:Elf|精灵)$/;
 const raceHeadingPattern = /^(?:Race|种族)$/;
+const climbSkillPattern = /(?:Climb|攀爬)/i;
+const jumpSkillPattern = /(?:Jump|跳跃)/i;
+const diplomacySkillPattern = /(?:Diplomacy|交涉)/i;
 
 afterEach(() => {
   cleanup();
@@ -31,6 +34,35 @@ function withNavigatorLanguage(language: string, fn: () => Promise<void>) {
       Object.defineProperty(window.navigator, 'language', descriptor);
     }
   });
+}
+
+async function reachSkillsStep(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: playerNamePattern }));
+  await user.click(screen.getByRole('button', { name: startWizardPattern }));
+  await user.click(screen.getByLabelText(humanLabelPattern));
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+  await user.click(screen.getByLabelText(fighterLabelPattern));
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+
+  const strInput = screen.getByRole('spinbutton', { name: /STR|力量/i });
+  await user.clear(strInput);
+  await user.type(strInput, '14');
+
+  const dexInput = screen.getByRole('spinbutton', { name: /DEX|敏捷/i });
+  await user.clear(dexInput);
+  await user.type(dexInput, '12');
+
+  const intInput = screen.getByRole('spinbutton', { name: /INT|智力/i });
+  await user.clear(intInput);
+  await user.type(intInput, '10');
+
+  const chaInput = screen.getByRole('spinbutton', { name: /CHA|魅力/i });
+  await user.clear(chaInput);
+  await user.type(chaInput, '8');
+
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+  await user.click(screen.getByLabelText(/Power Attack|强力攻击/i));
+  await user.click(screen.getByRole('button', { name: nextPattern }));
 }
 
 describe('wizard e2e-ish happy path', () => {
@@ -307,6 +339,39 @@ describe('role and language behavior', () => {
 
     await user.click(screen.getByRole('button', { name: /Decrease STR|降低 力量/i }));
     expect(Number((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value)).toBe(before);
+  });
+
+  it('shows a legal fighter skill allocation with remaining points and per-skill breakdowns', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await reachSkillsStep(user);
+
+    expect(screen.getByText(/(?:Budget|总点数):\s*12/i)).toBeTruthy();
+    expect(screen.getByText(/(?:Remaining|剩余):\s*12/i)).toBeTruthy();
+
+    const climbRow = screen.getByRole('row', { name: climbSkillPattern });
+    const jumpRow = screen.getByRole('row', { name: jumpSkillPattern });
+    const diplomacyRow = screen.getByRole('row', { name: diplomacySkillPattern });
+
+    await user.click(within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i }));
+    await user.click(within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i }));
+    await user.click(within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i }));
+    await user.click(within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i }));
+    await user.click(within(jumpRow).getByRole('button', { name: /(?:Increase|提高) (?:Jump|跳跃)/i }));
+    await user.click(within(jumpRow).getByRole('button', { name: /(?:Increase|提高) (?:Jump|跳跃)/i }));
+    await user.click(within(jumpRow).getByRole('button', { name: /(?:Increase|提高) (?:Jump|跳跃)/i }));
+    await user.click(within(diplomacyRow).getByRole('button', { name: /(?:Increase|提高) (?:Diplomacy|交涉)/i }));
+
+    expect(screen.getByText(/(?:Spent|已花费):\s*8/i)).toBeTruthy();
+    expect(screen.getByText(/(?:Remaining|剩余):\s*4/i)).toBeTruthy();
+    expect(within(climbRow).getByText(/^4$/)).toBeTruthy();
+    expect(within(climbRow).getByText(/4 \+ 2 \+ 0 - 0 = 6/i)).toBeTruthy();
+    expect(within(diplomacyRow).getByText(/^0\.5$/)).toBeTruthy();
+    expect(within(diplomacyRow).getByText(/0\.5 \+ -1 \+ 0 - 0 = -0\.5/i)).toBeTruthy();
+    expect(within(diplomacyRow).getByText(/2\/(?:rank|级)/i)).toBeTruthy();
+    expect(within(diplomacyRow).getByText(/(?:max|上限) 2/i)).toBeTruthy();
+    expect(within(climbRow).getByText(/(?:ACP applies|受护甲检定惩罚影响)/i)).toBeTruthy();
   });
 
   it('supports roll-sets mode by generating 5 sets and applying the selected set', async () => {
