@@ -84,6 +84,7 @@ export interface SkillBreakdown {
   name: string;
   ability: AbilityKey;
   classSkill: boolean;
+  isClassSkill: boolean;
   ranks: number;
   maxRanks: number;
   costPerRank: number;
@@ -486,6 +487,15 @@ function getRaceSkillBonusPerLevel(state: CharacterState, context: EngineContext
   return getRaceTraitCount(state, context, "extra-skill-points") > 0 ? 1 : 0;
 }
 
+function getCharacterLevel(state: CharacterState): number {
+  return classIdLevel(String(state.selections.class ?? ""));
+}
+
+function getSkillMaxRanksForLevel(level: number, classSkill: boolean): number {
+  const safeLevel = Math.max(1, Math.floor(level));
+  return classSkill ? safeLevel + 3 : (safeLevel + 3) / 2;
+}
+
 function getSelectedFeatIds(state: CharacterState): string[] {
   return ((state.selections.feats as string[] | undefined) ?? []).map((id) => String(id));
 }
@@ -733,7 +743,14 @@ function buildDecisionSummary(state: CharacterState, context: EngineContext, abi
   const racialBonusAtLevel1 = getRaceSkillBonusAtLevel1(state, context);
   const racialBonusPerLevel = getRaceSkillBonusPerLevel(state, context);
   const baseSkillPointsPerLevelWithInt = Math.max(1, classSkillPointsPerLevel + intModifier);
-  const totalSkillPoints = Math.max(0, (baseSkillPointsPerLevelWithInt * FIRST_LEVEL_SKILL_MULTIPLIER) + racialBonusAtLevel1);
+  const characterLevel = getCharacterLevel(state);
+  const totalSkillPoints = Array.from({ length: characterLevel }).reduce<number>((total, _, index) => {
+    const level = index + 1;
+    const levelPoints = level === 1
+      ? (baseSkillPointsPerLevelWithInt * FIRST_LEVEL_SKILL_MULTIPLIER) + racialBonusAtLevel1
+      : baseSkillPointsPerLevelWithInt + racialBonusPerLevel;
+    return total + Math.max(0, levelPoints);
+  }, 0);
 
   let spentSkillPoints = 0;
   for (const [skillId, ranks] of Object.entries(selectedSkillRanks)) {
@@ -792,13 +809,14 @@ function buildSkillBreakdown(
   const racialBonuses = buildRacialSkillBonusMap(state, context);
   const skills = Object.values(context.resolvedData.entities.skills ?? {}).sort((a, b) => a.name.localeCompare(b.name));
   const output: Record<string, SkillBreakdown> = {};
+  const characterLevel = getCharacterLevel(state);
 
   for (const skillEntity of skills) {
     const rawAbility = String(skillEntity.data?.ability ?? "int").toLowerCase() as AbilityKey;
     const ability: AbilityKey = ABILITY_KEYS.includes(rawAbility) ? rawAbility : "int";
     const classSkill = decisions.classSkills.includes(normalizeSkillId(skillEntity.id));
     const ranks = selectedRanks[normalizeSkillId(skillEntity.id)] ?? 0;
-    const maxRanks = classSkill ? 4 : 2;
+    const maxRanks = getSkillMaxRanksForLevel(characterLevel, classSkill);
     const costPerRank = classSkill ? 1 : 2;
     const costSpent = ranks * costPerRank;
     const racialBonus = racialBonuses[normalizeSkillId(skillEntity.id)] ?? 0;
@@ -809,6 +827,7 @@ function buildSkillBreakdown(
       name: skillEntity.name,
       ability,
       classSkill,
+      isClassSkill: classSkill,
       ranks,
       maxRanks,
       costPerRank,
@@ -1073,13 +1092,14 @@ export function validateState(state: CharacterState, context: EngineContext): Va
     }
   }
 
+  const characterLevel = getCharacterLevel(state);
   for (const [skillId, rank] of Object.entries(selectedRanks)) {
     if (!knownSkills.has(skillId)) {
       errors.push({ code: "UNKNOWN_SKILL", message: `Unknown skill selected: ${skillId}.`, stepId: "skills" });
       continue;
     }
     const isClassSkill = decisions.classSkills.includes(skillId);
-    const maxRanks = isClassSkill ? 4 : 2;
+    const maxRanks = getSkillMaxRanksForLevel(characterLevel, isClassSkill);
     if (rank > maxRanks) {
       errors.push({ code: "SKILL_RANK_MAX", message: `${skillId} exceeds max rank ${maxRanks}.`, stepId: "skills" });
     }
