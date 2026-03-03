@@ -61,6 +61,167 @@ describe("engine determinism", () => {
     expect(one.phase2.movement.adjusted).toBe(20);
   });
 
+  it("surfaces deferred mechanics from selected entities as deterministic unresolved rules", () => {
+    let state = applyChoice(initialState, "name", "Durgan");
+    state = applyChoice(state, "abilities", { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 });
+    state = applyChoice(state, "race", "dwarf");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "feat", ["acrobatic"]);
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(sheet.unresolvedRules.map((rule) => rule.id)).toEqual([
+      "srd-35e-minimal:classes:fighter:fighter-bonus-feat-runtime",
+      "srd-35e-minimal:classes:fighter:fighter-proficiency-automation",
+      "srd-35e-minimal:feats:acrobatic:acrobatic-benefit",
+      "srd-35e-minimal:races:dwarf:dwarf-conditional-bonuses",
+      "srd-35e-minimal:races:dwarf:dwarf-weapon-familiarity-proficiency"
+    ]);
+    expect(sheet.unresolvedRules).toEqual(expect.arrayContaining([
+      {
+        id: "srd-35e-minimal:feats:acrobatic:acrobatic-benefit",
+        category: "feat-benefit",
+        description: "GENERAL feat benefit is preserved from source text but not yet enforced by the current engine. You get a +2 bonus on all Jump checks and Tumble checks.",
+        dependsOn: ["cap:feat-effect-runtime", "cap:character-sheet-feat-benefits"],
+        impacts: ["skills:jump", "skills:tumble"],
+        source: {
+          entityType: "feats",
+          entityId: "acrobatic",
+          packId: "srd-35e-minimal"
+        }
+      },
+      {
+        id: "srd-35e-minimal:races:dwarf:dwarf-weapon-familiarity-proficiency",
+        category: "proficiency",
+        description: "Dwarven weapon familiarity is documented but not enforced by current equipment/proficiency mechanics.",
+        dependsOn: ["cap:equipment-proficiency", "cap:equipment-validation"],
+        impacts: ["proficiency:weapon:dwarven-waraxe", "proficiency:weapon:dwarven-urgrosh"],
+        source: {
+          entityType: "races",
+          entityId: "dwarf",
+          packId: "srd-35e-minimal"
+        }
+      }
+    ]));
+  });
+
+  it("uses ordinal id ordering and preserves legacy impact path fallbacks", () => {
+    const customPack: LoadedPack = {
+      manifest: { id: "issue-pack", name: "IssuePack", version: "1.0.0", priority: 10, dependencies: [] },
+      entities: {
+        races: [{
+          id: "human",
+          name: "Human",
+          entityType: "races",
+          summary: "Human",
+          description: "Human race",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            size: "medium",
+            baseSpeed: 30,
+            abilityModifiers: {},
+            vision: { lowLight: false, darkvisionFeet: 0 },
+            automaticLanguages: ["Common"],
+            bonusLanguages: ["Any"],
+            favoredClass: "any",
+            racialTraits: [],
+            deferredMechanics: [
+              {
+                id: "alpha",
+                category: "legacy",
+                description: "Legacy fallback unresolved rule.",
+                dependsOn: ["cap:legacy-support"],
+                impactPaths: ["legacy:path"]
+              },
+              {
+                id: "Beta",
+                category: "modern",
+                description: "Explicit impacts take precedence.",
+                dependsOn: ["cap:modern-support"],
+                impactPaths: ["legacy:ignored"],
+                impacts: ["modern:kept"]
+              }
+            ]
+          }
+        }],
+        classes: [{
+          id: "fighter",
+          name: "Fighter",
+          entityType: "classes",
+          summary: "Fighter",
+          description: "Fighter class",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: []
+        }],
+        feats: [],
+        items: [],
+        skills: [],
+        rules: [{
+          id: "base-ac",
+          name: "Base AC",
+          entityType: "rules",
+          summary: "Base AC",
+          description: "Base AC rule",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }]
+        }]
+      },
+      flow: {
+        steps: [
+          { id: "name", kind: "metadata", label: "Name", source: { type: "manual" } },
+          { id: "abilities", kind: "abilities", label: "Ability Scores", source: { type: "manual" } },
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType", entityType: "races", limit: 1 } },
+          { id: "class", kind: "class", label: "Class", source: { type: "entityType", entityType: "classes", limit: 1 } }
+        ]
+      },
+      patches: [],
+      packPath: "issue-pack"
+    };
+
+    const customContext = {
+      enabledPackIds: ["issue-pack"],
+      resolvedData: resolveLoadedPacks([customPack], ["issue-pack"])
+    };
+
+    let state = applyChoice(initialState, "name", "Casey");
+    state = applyChoice(state, "abilities", { str: 12, dex: 12, con: 12, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+
+    const sheet = finalizeCharacter(state, customContext);
+
+    expect(sheet.unresolvedRules).toEqual([
+      {
+        id: "issue-pack:races:human:Beta",
+        category: "modern",
+        description: "Explicit impacts take precedence.",
+        dependsOn: ["cap:modern-support"],
+        impacts: ["modern:kept"],
+        source: {
+          entityType: "races",
+          entityId: "human",
+          packId: "issue-pack"
+        }
+      },
+      {
+        id: "issue-pack:races:human:alpha",
+        category: "legacy",
+        description: "Legacy fallback unresolved rule.",
+        dependsOn: ["cap:legacy-support"],
+        impacts: ["legacy:path"],
+        source: {
+          entityType: "races",
+          entityId: "human",
+          packId: "issue-pack"
+        }
+      }
+    ]);
+  });
+
   it("derives equipment load, ACP, and attack classification from entity data", () => {
     const dataDrivenPack: LoadedPack = {
       manifest: { id: "data-driven-pack", name: "DataDrivenPack", version: "1.0.0", priority: 5, dependencies: [] },
