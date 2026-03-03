@@ -246,6 +246,33 @@ label { display: block; margin-bottom: 0.5rem; }
 .review-cell-key {
   font-weight: 700;
 }
+.skill-points-summary {
+  margin-bottom: 0.75rem;
+}
+.skills-table-wrap {
+  overflow-x: auto;
+}
+.skills-table {
+  min-width: 760px;
+}
+.skill-rank-stepper {
+  display: grid;
+  grid-template-columns: 42px minmax(3.5rem, auto) 42px;
+  gap: 0.35rem;
+  align-items: center;
+}
+.skill-rank-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 0.5rem;
+  border: 1px solid #ccb082;
+  border-radius: 8px;
+  background: #fff6df;
+  font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+  font-weight: 700;
+}
 .calc-list {
   margin: 0;
   padding-left: 1rem;

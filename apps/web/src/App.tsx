@@ -1071,42 +1071,101 @@ export function App() {
 
     if (currentStep.kind === 'skills') {
       const selectedRanks = (state.selections[STEP_ID_SKILLS] as Record<string, number> | undefined) ?? {};
+      const phase2SkillMap = new Map(sheet.phase2.skills.map((skill) => [skill.id, skill]));
+      const formatSkillValue = (value: number) => `${Number.isInteger(value) ? value : value.toFixed(1)}`;
+      const skillControlLabel = (action: 'increase' | 'decrease', skillName: string) =>
+        language === 'zh'
+          ? `${action === 'increase' ? '提高' : '降低'} ${skillName}`
+          : `${action === 'increase' ? 'Increase' : 'Decrease'} ${skillName}`;
 
       return (
         <section>
           <h2>{currentStep.label}</h2>
-          <p>
+          <p className="skill-points-summary">
             {t.skillsBudgetLabel}: {sheet.decisions.skillPoints.total} | {t.skillsSpentLabel}: {sheet.decisions.skillPoints.spent} | {t.skillsRemainingLabel}: {sheet.decisions.skillPoints.remaining}
           </p>
-          <div className="grid">
-            {skillEntities.map((skill) => {
-              const detail = sheet.skills[skill.id];
-              const ranks = selectedRanks[skill.id] ?? 0;
-              const maxRanks = detail?.maxRanks ?? 2;
-              const classSkill = detail?.classSkill ?? false;
-              const costPerRank = detail?.costPerRank ?? 2;
-              const racialBonus = detail?.racialBonus ?? 0;
-              const inputStep = classSkill ? 1 : 0.5;
+          <div className="skills-table-wrap">
+            <table className="review-table skills-table">
+              <thead>
+                <tr>
+                  <th>{t.reviewSkillColumn}</th>
+                  <th>{language === 'zh' ? '类型' : 'Type'}</th>
+                  <th>{language === 'zh' ? '点数' : 'Points'}</th>
+                  <th>{language === 'zh' ? '等级' : 'Ranks'}</th>
+                  <th>{language === 'zh' ? '明细' : 'Breakdown'}</th>
+                  <th>{t.reviewTotalColumn}</th>
+                  <th>{language === 'zh' ? '备注' : 'Notes'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {skillEntities.map((skill) => {
+                  const detail = sheet.skills[skill.id];
+                  const phase2Detail = phase2SkillMap.get(skill.id);
+                  const ranks = selectedRanks[skill.id] ?? 0;
+                  const maxRanks = detail?.maxRanks ?? 2;
+                  const classSkill = detail?.classSkill ?? false;
+                  const costPerRank = detail?.costPerRank ?? 2;
+                  const racialBonus = detail?.racialBonus ?? 0;
+                  const miscBonus = phase2Detail?.misc ?? detail?.miscBonus ?? 0;
+                  const acpPenalty = phase2Detail?.acp ?? 0;
+                  const abilityMod = detail?.abilityMod ?? 0;
+                  const total = phase2Detail?.total ?? detail?.total ?? 0;
+                  const rankStep = classSkill ? 1 : 0.5;
+                  const pointStepCost = rankStep * costPerRank;
+                  const armorCheckPenaltyApplies = Boolean(skill.data?.armorCheckPenaltyApplies);
+                  const canDecrease = ranks > 0;
+                  const canIncrease = (ranks + rankStep) <= maxRanks && sheet.decisions.skillPoints.remaining >= pointStepCost;
 
-              return (
-                <label key={skill.id}>
-                  {skill.displayName} ({classSkill ? t.skillsClassLabel : t.skillsCrossLabel} | {t.skillsCostLabel} {costPerRank}{t.skillsPerRankUnit} | {t.skillsMaxLabel} {maxRanks} | {t.skillsRacialLabel} {racialBonus >= 0 ? '+' : ''}{racialBonus})
-                  <input
-                    type="number"
-                    min={0}
-                    max={maxRanks}
-                    step={inputStep}
-                    value={ranks}
-                    onChange={(e) => {
-                      const parsed = Number(e.target.value);
-                      const value = Number.isFinite(parsed) ? Math.min(maxRanks, Math.max(0, parsed)) : 0;
-                      const nextRanks = { ...selectedRanks, [skill.id]: value };
-                      setState((s) => applyChoice(s, STEP_ID_SKILLS, nextRanks, context));
-                    }}
-                  />
-                </label>
-              );
-            })}
+                  const updateRanks = (nextValue: number) => {
+                    const bounded = Math.min(maxRanks, Math.max(0, nextValue));
+                    const nextRanks = { ...selectedRanks, [skill.id]: bounded };
+                    setState((s) => applyChoice(s, STEP_ID_SKILLS, nextRanks, context));
+                  };
+
+                  return (
+                    <tr key={skill.id}>
+                      <td className="review-cell-key">{skill.displayName}</td>
+                      <td>{classSkill ? t.skillsClassLabel : t.skillsCrossLabel}</td>
+                      <td>{costPerRank}{t.skillsPerRankUnit}</td>
+                      <td>
+                        <div className="skill-rank-stepper">
+                          <button
+                            type="button"
+                            className="ability-step-btn"
+                            aria-label={skillControlLabel('decrease', skill.displayName)}
+                            disabled={!canDecrease}
+                            onClick={() => updateRanks(ranks - rankStep)}
+                          >
+                            -
+                          </button>
+                          <output aria-label={`${skill.displayName} ranks`} className="skill-rank-value">
+                            {formatSkillValue(ranks)}
+                          </output>
+                          <button
+                            type="button"
+                            className="ability-step-btn"
+                            aria-label={skillControlLabel('increase', skill.displayName)}
+                            disabled={!canIncrease}
+                            onClick={() => updateRanks(ranks + rankStep)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        {formatSkillValue(ranks)} + {formatSkillValue(abilityMod)} + {formatSkillValue(miscBonus)} - {formatSkillValue(Math.abs(acpPenalty))} = {formatSkillValue(total)}
+                      </td>
+                      <td>{formatSkillValue(total)}</td>
+                      <td>
+                        <div>{t.skillsMaxLabel} {formatSkillValue(maxRanks)}</div>
+                        <div>{t.skillsRacialLabel} {racialBonus >= 0 ? '+' : ''}{formatSkillValue(racialBonus)}</div>
+                        <div>{armorCheckPenaltyApplies ? (language === 'zh' ? '受护甲检定惩罚影响' : 'ACP applies') : (language === 'zh' ? '不受护甲检定惩罚影响' : 'ACP n/a')}</div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </section>
       );
