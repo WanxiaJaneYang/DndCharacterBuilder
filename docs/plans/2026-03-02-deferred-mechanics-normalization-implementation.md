@@ -23,6 +23,62 @@
 - Full lint: `npm run lint`
 - Full typecheck: `npm run typecheck`
 
+## Deferred-Mechanics Shape Example
+
+Legacy metadata mixes engine/model hints with ad hoc dependency names:
+
+```json
+{
+  "id": "feat:monk-ac-bonus",
+  "label": "Monk AC bonus while unarmored",
+  "dependsOn": [
+    "armor-state-engine",
+    "wisdom-modifier-derived-stat"
+  ],
+  "impactPaths": [
+    "derived.armorClass",
+    "derived.acModifiers"
+  ]
+}
+```
+
+Normalized metadata keeps dependency IDs in the capability registry and records affected rule concepts instead of engine paths:
+
+```json
+{
+  "id": "feat:monk-ac-bonus",
+  "label": "Monk AC bonus while unarmored",
+  "dependsOn": [
+    "cap:armor-unarmored-state",
+    "cap:ability-wisdom-modifier"
+  ],
+  "impacts": [
+    "combat:armor-class",
+    "combat:unarmored-bonus"
+  ]
+}
+```
+
+## ID Conventions
+
+- Capability IDs must use `cap:<kebab-case>` and must exist in the canonical schema registry.
+- Concept IDs should default to `domain:concept`.
+- Use `domain:subdomain:concept` only when a single domain needs an extra namespace to avoid collisions or keep a family of concepts coherent.
+- Each segment after the colon must be kebab-case ASCII.
+- No synonyms: once a concept ID is chosen, reuse it everywhere instead of introducing alternates such as `skill:jump`, `skills:jumping`, or `movement:jump-check`.
+
+Canonical near-term examples:
+- `alignment:restriction`
+- `combat:armor-class`
+- `combat:unarmored-bonus`
+- `combat:ranged-attack-roll`
+- `defense:saving-throw-reflex`
+- `movement:base-speed`
+- `senses:low-light-vision`
+- `skills:hide`
+- `skills:listen`
+- `spells:bonus-slot`
+
 ## Task 1: Add Canonical Deferred-Mechanics Validation Helpers
 
 **Files:**
