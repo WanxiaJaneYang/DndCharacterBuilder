@@ -50,6 +50,12 @@
       "selection": "Contract Hero"
     }
   ],
+  "contractClarifications": {
+    "asciiCheck": "Run: LC_ALL=C grep -P '[\\x{200E}-\\x{200F}\\x{202A}-\\x{202E}\\x{FEFF}]' packs/srd-35e-minimal/contracts/human-fighter-1.json || echo 'Clean'",
+    "stats": "Human Fighter 1: hp=10 (1d10 con), bab=1, speed=20 (chainmail), initiative=1 (Dex), ac=18, attackBonus=3 (STR), saves are base progression.",
+    "damage": "AttackLine.damage is dice-only (1d8 longsword), not with STR bonus.",
+    "goldenPath": "Human Fighter 1 with chainmail+shield+longsword for core combat assertions."
+  },
   "expected": {
     "validationErrorCodes": [],
     "finalSheetSubset": {
@@ -80,6 +86,10 @@
         }
       },
       "stats": {
+        "hp": 10,
+        "bab": 1,
+        "speed": 20,
+        "initiative": 1,
         "ac": 18,
         "attackBonus": 3,
         "fort": 2,
