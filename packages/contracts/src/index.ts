@@ -6,9 +6,33 @@ import { applyChoice, finalizeCharacter, initialState, listChoices, validateStat
 export { runAuthenticityChecks } from "./authenticity";
 
 const NON_ASCII_PATTERN = /[^\x00-\x7F]/;
+const BIDI_CONTROL_PATTERN = /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function findBidiControlPath(value: unknown, currentPath = "$"): string | null {
+  if (typeof value === "string") {
+    return BIDI_CONTROL_PATTERN.test(value) ? currentPath : null;
+  }
+
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const nestedPath = findBidiControlPath(value[index], `${currentPath}[${index}]`);
+      if (nestedPath) return nestedPath;
+    }
+    return null;
+  }
+
+  if (isRecord(value)) {
+    for (const [key, nestedValue] of Object.entries(value)) {
+      const nestedPath = findBidiControlPath(nestedValue, `${currentPath}.${key}`);
+      if (nestedPath) return nestedPath;
+    }
+  }
+
+  return null;
 }
 
 function containsSubset(target: unknown, subset: unknown): boolean {
@@ -42,6 +66,17 @@ export function assertContractFixturesUseAscii(packsRoot: string): void {
       if (NON_ASCII_PATTERN.test(fixtureText)) {
         contractFailure(path.basename(packDir), file, "Contract fixtures must be ASCII-only", "ASCII text", "non-ASCII content detected");
       }
+
+      const bidiPath = findBidiControlPath(JSON.parse(fixtureText));
+      if (bidiPath) {
+        contractFailure(
+          path.basename(packDir),
+          file,
+          "Contract fixtures must not contain bidirectional control characters",
+          "No bidi control characters",
+          `bidi control character detected at ${bidiPath}`
+        );
+      }
     }
   }
 }
@@ -49,6 +84,10 @@ export function assertContractFixturesUseAscii(packsRoot: string): void {
 function shortSnippet(value: unknown): string {
   const text = JSON.stringify(value, null, 2);
   return text.length > 360 ? `${text.slice(0, 360)}…` : text;
+}
+
+function arraysEqual<T>(left: T[], right: T[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 function contractFailure(packId: string, fixtureFile: string, message: string, expected: unknown, actual: unknown): never {
@@ -90,10 +129,9 @@ export function runContracts(packsRoot: string): void {
 
       const errors = validateState(state, context);
       const errorCodes = errors.map((e) => e.code);
-      for (const expectedCode of fixture.expected.validationErrorCodes ?? []) {
-        if (!errorCodes.includes(expectedCode)) {
-          contractFailure(packId, file, "Expected validation code was not produced", expectedCode, errorCodes);
-        }
+      const expectedErrorCodes = fixture.expected.validationErrorCodes;
+      if (expectedErrorCodes && !arraysEqual(errorCodes, expectedErrorCodes)) {
+        contractFailure(packId, file, "Validation error codes mismatch", expectedErrorCodes, errorCodes);
       }
 
       const final = finalizeCharacter(state, context) as unknown as Record<string, unknown>;

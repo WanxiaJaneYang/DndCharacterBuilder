@@ -70,6 +70,28 @@ describe("pack contracts", () => {
     }
   });
 
+  it("fails when a contract fixture contains escaped bidi control characters", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-contract-bidi-"));
+    const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packSource, packDest, { recursive: true });
+
+    const fixturePath = path.join(packDest, "contracts/human-fighter-1.json");
+    const fixtureText = fs.readFileSync(fixturePath, "utf8");
+    const updatedFixtureText = fixtureText.replace(
+      "\"goldenPath\": \"Human Fighter 1 with chainmail+shield+longsword for core combat assertions.\"",
+      "\"goldenPath\": \"Human Fighter 1 with chainmail+shield+longsword for core combat assertions. \\u202E\""
+    );
+    fs.writeFileSync(fixturePath, updatedFixtureText);
+
+    try {
+      expect(() => runContracts(tempRoot)).toThrow(/bidirectional|bidi/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("fails when finalSheetSubset arrays omit actual trailing items", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-contract-array-"));
     const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
@@ -93,6 +115,29 @@ describe("pack contracts", () => {
 
     try {
       expect(() => runContracts(tempRoot)).toThrow(/Final sheet subset mismatch/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails when actual validation errors exceed the expected list", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-contract-errors-"));
+    const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packSource, packDest, { recursive: true });
+
+    const fixturePath = path.join(packDest, "contracts/human-fighter-1.json");
+    const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8")) as {
+      actions: Array<{ choiceId: string; selection: unknown }>;
+      expected: { validationErrorCodes: string[] };
+    };
+    fixture.actions = fixture.actions.filter((action) => action.choiceId !== "name");
+    fixture.expected.validationErrorCodes = [];
+    fs.writeFileSync(fixturePath, JSON.stringify(fixture, null, 2));
+
+    try {
+      expect(() => runContracts(tempRoot)).toThrow(/validation/i);
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
