@@ -13,16 +13,16 @@ This document records the recommended execution order for currently open GitHub 
 ## Recommended Order
 
 1. `#69` Pack validation: enforce referential integrity across entities
-2. `#72` Stabilize item schema for Phase-1 sheet output
-3. Skill-system follow-up slice:
+2. Skill-system follow-up slice:
    - `#95` remaining engine/export skill-budget gaps
    - `#102` engine-driven skill allocation validation
    - `#103` remove UI defaults for missing metadata
    - `#104` expose skill budget breakdown
-4. Regression coverage for the same slice:
+3. Regression coverage for the same slice:
    - `#96` contract tests for skill-budget invariants
    - `#94` E2E regression for the skills step
    - `#93` E2E regression for the abilities step
+4. `#72` Stabilize item schema for Phase-1 sheet output
 5. `#70` minimal SRD 3.5 skill list completion
 6. `#77` feat legality and fighter bonus-feat handling
 7. Unresolved-rules slice:
@@ -44,6 +44,12 @@ This document records the recommended execution order for currently open GitHub 
    - `#74` engine modularization
    - `#78` pack tooling
 13. `#79` export/import UX
+
+## Ordering Rationale
+
+- `#69` stays first because bad pack references make every other issue noisier and can invalidate later triage.
+- The skill-system engine and regression slice comes before `#72` because the current repo already has partial skill-budget behavior, and locking those invariants down will de-risk the most active area faster.
+- `#72` remains early, but after the skill slice, because item-schema stabilization matters most once the current skill/export contract is trustworthy.
 
 ## Duplicate and Umbrella Mapping
 
