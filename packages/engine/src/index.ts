@@ -238,6 +238,58 @@ export interface Phase2Sheet {
   };
 }
 
+export interface SheetViewModel {
+  combat: {
+    ac: {
+      total: number;
+      touch: number;
+      flatFooted: number;
+      components: Array<{
+        type: "base" | "armor" | "shield" | "dex" | "size" | "natural" | "deflection" | "misc";
+        value: number;
+      }>;
+    };
+    attacks: Array<{
+      kind: "melee" | "ranged";
+      weapon: {
+        itemId: string;
+        name: string;
+        crit: string;
+        range?: string;
+      };
+      attackBonusBreakdown: {
+        total: number;
+        bab: number;
+        ability: {
+          ability: AbilityKey;
+          modifier: number;
+        };
+        size: number;
+        misc: number;
+      };
+      damageLine: string;
+    }>;
+  };
+  skills: Array<{
+    id: string;
+    name: string;
+    total: number;
+    ranks: number;
+    ability: {
+      ability: AbilityKey;
+      modifier: number;
+    };
+    racial: number;
+    misc: number;
+    acp: number;
+    acpApplied: boolean;
+    classSkill: boolean;
+    costPerRank: number;
+    costSpent: number;
+    maxRanks: number;
+  }>;
+}
+
 export interface CharacterSheet {
   metadata: { name: string };
   abilities: Record<string, { score: number; mod: number }>;
@@ -247,6 +299,7 @@ export interface CharacterSheet {
   decisions: DecisionSummary;
   phase1: Phase1Sheet;
   phase2: Phase2Sheet;
+  sheetViewModel: SheetViewModel;
   provenance: ProvenanceRecord[];
   unresolvedRules: UnresolvedRule[];
   packSetFingerprint: string;
@@ -1338,6 +1391,111 @@ function formatDamageWithModifier(baseDamage: string, modifier: number): string 
   return `${baseDamage}${modifier > 0 ? "+" : ""}${modifier}`;
 }
 
+export function buildSheetViewModel(
+  phase1: Phase1Sheet,
+  phase2: Phase2Sheet,
+  skills: Record<string, SkillBreakdown>,
+  skillAcpAppliedById: Record<string, boolean>
+): SheetViewModel {
+  const acBreakdown = phase1.combat.ac.breakdown;
+  const acBase = phase1.combat.ac.total
+    - acBreakdown.armor
+    - acBreakdown.shield
+    - acBreakdown.dex
+    - acBreakdown.size
+    - acBreakdown.natural
+    - acBreakdown.deflection
+    - acBreakdown.misc;
+
+  return {
+    combat: {
+      ac: {
+        total: phase1.combat.ac.total,
+        touch: phase1.combat.ac.touch,
+        flatFooted: phase1.combat.ac.flatFooted,
+        components: [
+          { type: "base", value: acBase },
+          { type: "armor", value: acBreakdown.armor },
+          { type: "shield", value: acBreakdown.shield },
+          { type: "dex", value: acBreakdown.dex },
+          { type: "size", value: acBreakdown.size },
+          { type: "natural", value: acBreakdown.natural },
+          { type: "deflection", value: acBreakdown.deflection },
+          { type: "misc", value: acBreakdown.misc }
+        ]
+      },
+      attacks: [
+        ...phase1.combat.attacks.melee.map((attack) => {
+          const abilityModifier = phase1.combat.grapple.str;
+          return {
+            kind: "melee" as const,
+            weapon: {
+              itemId: attack.itemId,
+              name: attack.name,
+              crit: attack.crit
+            },
+            attackBonusBreakdown: {
+              total: attack.attackBonus,
+              bab: phase1.combat.grapple.bab,
+              ability: {
+                ability: "str" as AbilityKey,
+                modifier: abilityModifier
+              },
+              size: acBreakdown.size,
+              misc: attack.attackBonus - phase1.combat.grapple.bab - abilityModifier - acBreakdown.size
+            },
+            damageLine: attack.damage
+          };
+        }),
+        ...phase1.combat.attacks.ranged.map((attack) => {
+          const abilityModifier = phase1.combat.saves.ref.ability;
+          return {
+            kind: "ranged" as const,
+            weapon: {
+              itemId: attack.itemId,
+              name: attack.name,
+              crit: attack.crit,
+              range: attack.range
+            },
+            attackBonusBreakdown: {
+              total: attack.attackBonus,
+              bab: phase1.combat.grapple.bab,
+              ability: {
+                ability: "dex" as AbilityKey,
+                modifier: abilityModifier
+              },
+              size: acBreakdown.size,
+              misc: attack.attackBonus - phase1.combat.grapple.bab - abilityModifier - acBreakdown.size
+            },
+            damageLine: attack.damage
+          };
+        })
+      ]
+    },
+    skills: phase2.skills.map((skill) => {
+      const breakdown = skills[skill.id];
+      return {
+        id: skill.id,
+        name: skill.name,
+        total: skill.total,
+        ranks: skill.ranks,
+        ability: {
+          ability: breakdown?.ability ?? "str",
+          modifier: skill.ability
+        },
+        racial: skill.racial,
+        misc: skill.misc,
+        acp: skill.acp,
+        acpApplied: skillAcpAppliedById[skill.id] ?? false,
+        classSkill: breakdown?.classSkill ?? false,
+        costPerRank: breakdown?.costPerRank ?? 2,
+        costSpent: breakdown?.costSpent ?? 0,
+        maxRanks: breakdown?.maxRanks ?? 0
+      };
+    })
+  };
+}
+
 export function finalizeCharacter(state: CharacterState, context: EngineContext): CharacterSheet {
   const abilities = Object.fromEntries(
     Object.entries(state.abilities).map(([k, score]) => [k, { score, mod: abilityMod(score) }])
@@ -1589,6 +1747,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
         total: skill.total + acp
       };
     });
+  const skillAcpAppliedById = Object.fromEntries(
+    phase2Skills.map((skill) => [skill.id, skillIsAffectedByArmorCheckPenalty(entityBuckets.skills?.[skill.id])])
+  );
   const adjustedSpeed = Number(sheet.stats.speed ?? DEFAULT_STATS.speed);
   const phase2: Phase2Sheet = {
     feats: phase2Feats,
@@ -1610,6 +1771,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
         : ["No movement penalty detected."]
     }
   };
+  const sheetViewModel = buildSheetViewModel(phase1, phase2, skills, skillAcpAppliedById);
   const unresolvedRules = collectUnresolvedRules(state, context);
 
   return {
@@ -1621,6 +1783,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     decisions,
     phase1,
     phase2,
+    sheetViewModel,
     provenance,
     unresolvedRules,
     packSetFingerprint: context.resolvedData.fingerprint

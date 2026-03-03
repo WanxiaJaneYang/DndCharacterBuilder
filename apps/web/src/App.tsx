@@ -184,14 +184,15 @@ export function App() {
   );
   const choiceMap = new Map(localizedChoices.map((c) => [c.stepId, c]));
   const sheet = useMemo(() => finalizeCharacter(state, context), [context, state]);
-  const skillEntities = useMemo(() => {
-    return Object.values(context.resolvedData.entities.skills ?? {})
-      .map((skill) => ({
-        ...skill,
-        displayName: localizeEntityText('skills', skill.id, 'name', skill.name)
-      }))
-      .sort((a, b) => a.displayName.localeCompare(b.displayName));
-  }, [context.resolvedData.entities.skills, localizeEntityText]
+  const localizedSheetSkills = useMemo(
+    () =>
+      sheet.sheetViewModel.skills
+        .map((skill) => ({
+          ...skill,
+          displayName: localizeEntityText('skills', skill.id, 'name', skill.name)
+        }))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+    [localizeEntityText, sheet.sheetViewModel.skills]
   );
   const selectedFeats = ((state.selections.feats as string[] | undefined) ?? []);
   const sourceNameByEntityId = useMemo(() => {
@@ -399,6 +400,7 @@ export function App() {
     if (currentStep.kind === 'review') {
       const phase1 = sheet.phase1;
       const phase2 = sheet.phase2;
+      const combatView = sheet.sheetViewModel.combat;
       const abilityOrder = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
       const statOrder = ['hp', 'ac', 'initiative', 'speed', 'bab', 'fort', 'ref', 'will'] as const;
       const statLabels: Record<(typeof statOrder)[number], string> = {
@@ -432,14 +434,9 @@ export function App() {
       const selectedClassName = selectedClassId
         ? localizeEntityText('classes', selectedClassId, 'name', context.resolvedData.entities.classes?.[selectedClassId]?.name ?? selectedClassId)
         : '-';
-      const reviewSkills = Object.entries(sheet.skills)
-        .filter(([, skill]) => skill.ranks > 0 || skill.racialBonus !== 0)
-        .sort((a, b) => {
-          const left = localizeEntityText('skills', a[0], 'name', a[1].name);
-          const right = localizeEntityText('skills', b[0], 'name', b[1].name);
-          return b[1].total - a[1].total || left.localeCompare(right);
-        });
-      const phase2SkillMap = new Map(phase2.skills.map((skill) => [skill.id, skill]));
+      const reviewSkills = localizedSheetSkills
+        .filter((skill) => skill.ranks > 0 || skill.racial !== 0)
+        .sort((a, b) => b.total - a.total || a.displayName.localeCompare(b.displayName));
       const enabledPackDetails = enabledPackIds.map((packId) => ({
         packId,
         version: packVersionById.get(packId) ?? t.reviewUnknownVersion,
@@ -472,15 +469,15 @@ export function App() {
           <div className="review-stat-cards">
             <article className="review-card">
               <h3>{t.reviewAcLabel}</h3>
-              <p>{String(phase1.combat.ac.total)}</p>
+              <p>{String(combatView.ac.total)}</p>
             </article>
             <article className="review-card">
               <h3>{t.reviewAcTouchLabel}</h3>
-              <p>{String(phase1.combat.ac.touch)}</p>
+              <p>{String(combatView.ac.touch)}</p>
             </article>
             <article className="review-card">
               <h3>{t.reviewAcFlatFootedLabel}</h3>
-              <p>{String(phase1.combat.ac.flatFooted)}</p>
+              <p>{String(combatView.ac.flatFooted)}</p>
             </article>
             <article className="review-card">
               <h3>{t.reviewHpLabel}</h3>
@@ -555,24 +552,14 @@ export function App() {
                 </tr>
               </thead>
               <tbody>
-                {phase1.combat.attacks.melee.map((attack) => (
-                  <tr key={`melee-${attack.itemId}`}>
-                    <td className="review-cell-key">{t.reviewAttackMeleeLabel}</td>
-                    <td>{attack.name}</td>
-                    <td>{formatSigned(attack.attackBonus)}</td>
-                    <td>{attack.damage}</td>
-                    <td>{attack.crit}</td>
-                    <td>-</td>
-                  </tr>
-                ))}
-                {phase1.combat.attacks.ranged.map((attack) => (
-                  <tr key={`ranged-${attack.itemId}`}>
-                    <td className="review-cell-key">{t.reviewAttackRangedLabel}</td>
-                    <td>{attack.name}</td>
-                    <td>{formatSigned(attack.attackBonus)}</td>
-                    <td>{attack.damage}</td>
-                    <td>{attack.crit}</td>
-                    <td>{attack.range ?? '-'}</td>
+                {combatView.attacks.map((attack) => (
+                  <tr key={`${attack.kind}-${attack.weapon.itemId}`}>
+                    <td className="review-cell-key">{attack.kind === 'melee' ? t.reviewAttackMeleeLabel : t.reviewAttackRangedLabel}</td>
+                    <td>{attack.weapon.name}</td>
+                    <td>{formatSigned(attack.attackBonusBreakdown.total)}</td>
+                    <td>{attack.damageLine}</td>
+                    <td>{attack.weapon.crit}</td>
+                    <td>{attack.weapon.range ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -729,17 +716,16 @@ export function App() {
                 </tr>
               </thead>
               <tbody>
-                {reviewSkills.map(([skillId, skill]) => {
-                  const phase2Skill = phase2SkillMap.get(skillId);
+                {reviewSkills.map((skill) => {
                   return (
-                    <tr key={skillId}>
-                      <td className="review-cell-key">{localizeEntityText('skills', skillId, 'name', skill.name)}</td>
+                    <tr key={skill.id}>
+                      <td className="review-cell-key">{skill.displayName}</td>
                       <td>{skill.ranks}</td>
-                      <td>{formatSigned(skill.abilityMod)} ({localizeAbilityLabel(skill.ability)})</td>
-                      <td>{formatSigned(skill.racialBonus)}</td>
-                      <td>{formatSigned(phase2Skill?.misc ?? 0)}</td>
-                      <td>{formatSigned(phase2Skill?.acp ?? 0)}</td>
-                      <td>{phase2Skill?.total ?? skill.total}</td>
+                      <td>{formatSigned(skill.ability.modifier)} ({localizeAbilityLabel(skill.ability.ability)})</td>
+                      <td>{formatSigned(skill.racial)}</td>
+                      <td>{formatSigned(skill.misc)}</td>
+                      <td>{formatSigned(skill.acp)}</td>
+                      <td>{skill.total}</td>
                       <td>{skill.costSpent} ({skill.costPerRank}{t.reviewPerRankUnit})</td>
                     </tr>
                   );
@@ -1079,27 +1065,22 @@ export function App() {
             {t.skillsBudgetLabel}: {sheet.decisions.skillPoints.total} | {t.skillsSpentLabel}: {sheet.decisions.skillPoints.spent} | {t.skillsRemainingLabel}: {sheet.decisions.skillPoints.remaining}
           </p>
           <div className="grid">
-            {skillEntities.map((skill) => {
-              const detail = sheet.skills[skill.id];
+            {localizedSheetSkills.map((skill) => {
               const ranks = selectedRanks[skill.id] ?? 0;
-              const maxRanks = detail?.maxRanks ?? 2;
-              const classSkill = detail?.classSkill ?? false;
-              const costPerRank = detail?.costPerRank ?? 2;
-              const racialBonus = detail?.racialBonus ?? 0;
-              const inputStep = classSkill ? 1 : 0.5;
+              const inputStep = skill.classSkill ? 1 : 0.5;
 
               return (
                 <label key={skill.id}>
-                  {skill.displayName} ({classSkill ? t.skillsClassLabel : t.skillsCrossLabel} | {t.skillsCostLabel} {costPerRank}{t.skillsPerRankUnit} | {t.skillsMaxLabel} {maxRanks} | {t.skillsRacialLabel} {racialBonus >= 0 ? '+' : ''}{racialBonus})
+                  {skill.displayName} ({skill.classSkill ? t.skillsClassLabel : t.skillsCrossLabel} | {t.skillsCostLabel} {skill.costPerRank}{t.skillsPerRankUnit} | {t.skillsMaxLabel} {skill.maxRanks} | {t.skillsRacialLabel} {skill.racial >= 0 ? '+' : ''}{skill.racial})
                   <input
                     type="number"
                     min={0}
-                    max={maxRanks}
+                    max={skill.maxRanks}
                     step={inputStep}
                     value={ranks}
                     onChange={(e) => {
                       const parsed = Number(e.target.value);
-                      const value = Number.isFinite(parsed) ? Math.min(maxRanks, Math.max(0, parsed)) : 0;
+                      const value = Number.isFinite(parsed) ? Math.min(skill.maxRanks, Math.max(0, parsed)) : 0;
                       const nextRanks = { ...selectedRanks, [skill.id]: value };
                       setState((s) => applyChoice(s, STEP_ID_SKILLS, nextRanks, context));
                     }}

@@ -785,6 +785,83 @@ describe("engine determinism", () => {
     expect(sheet.phase2.skills.find((skill) => skill.id === "spot")?.misc).toBe(2);
   });
 
+  it("returns a sheetViewModel with UI-ready combat and skill rows", () => {
+    let state = applyChoice(initialState, "name", "ViewModel");
+    state = applyChoice(state, "abilities", { str: 14, dex: 12, con: 10, int: 10, wis: 10, cha: 8 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { climb: 4, jump: 4, ride: 4 });
+    state = applyChoice(state, "equipment", ["longsword", "chainmail", "heavy-wooden-shield"]);
+
+    const sheet = finalizeCharacter(state, context);
+    const climb = sheet.sheetViewModel.skills.find((skill) => skill.id === "climb");
+    const listen = sheet.sheetViewModel.skills.find((skill) => skill.id === "listen");
+
+    expect(sheet.sheetViewModel.combat.ac).toEqual({
+      total: 18,
+      touch: 11,
+      flatFooted: 17,
+      components: [
+        { type: "base", value: 10 },
+        { type: "armor", value: 5 },
+        { type: "shield", value: 2 },
+        { type: "dex", value: 1 },
+        { type: "size", value: 0 },
+        { type: "natural", value: 0 },
+        { type: "deflection", value: 0 },
+        { type: "misc", value: 0 }
+      ]
+    });
+    expect(sheet.sheetViewModel.combat.attacks).toEqual([
+      {
+        kind: "melee",
+        weapon: {
+          itemId: "longsword",
+          name: "Longsword",
+          crit: "19-20/x2"
+        },
+        attackBonusBreakdown: {
+          total: 3,
+          bab: 1,
+          ability: { ability: "str", modifier: 2 },
+          size: 0,
+          misc: 0
+        },
+        damageLine: "1d8"
+      }
+    ]);
+    expect(climb).toEqual({
+      id: "climb",
+      name: "Climb",
+      total: -1,
+      ranks: 4,
+      ability: { ability: "str", modifier: 2 },
+      racial: 0,
+      misc: 0,
+      acp: -7,
+      acpApplied: true,
+      classSkill: true,
+      costPerRank: 1,
+      costSpent: 4,
+      maxRanks: 4
+    });
+    expect(listen).toEqual({
+      id: "listen",
+      name: "Listen",
+      total: 0,
+      ranks: 0,
+      ability: { ability: "wis", modifier: 0 },
+      racial: 0,
+      misc: 0,
+      acp: 0,
+      acpApplied: false,
+      classSkill: false,
+      costPerRank: 2,
+      costSpent: 0,
+      maxRanks: 2
+    });
+  });
+
   it("applies minimum level-1 skill budget floor before multiplier", () => {
     let state = applyChoice(initialState, "name", "LowInt");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 3, wis: 10, cha: 10 });
