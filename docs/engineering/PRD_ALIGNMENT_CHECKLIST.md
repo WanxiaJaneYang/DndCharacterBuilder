@@ -10,13 +10,13 @@ This checklist maps high-level requirements from the Product Requirements Docume
 
 ## Race Selection
 
-- [x] Render races as cards with summary and image (see `/ux/steps/02_race_selection.md`).
+- [ ] Render races as cards with summary and image (see `/ux/steps/02_race_selection.md`).
 - [x] Load race data from packs; no hardcoded values.
 - [ ] Enforce selection of exactly one race and show details modal.
 
 ## Class Selection
 
-- [x] Render class selection as pack-driven cards (see `/ux/steps/03_class_selection.md`).
+- [ ] Render class selection as pack-driven cards (see `/ux/steps/03_class_selection.md`).
 - [ ] Enforce exactly one class selection and handle class prerequisites.
 
 ## Ability Scores
@@ -28,7 +28,7 @@ This checklist maps high-level requirements from the Product Requirements Docume
 
 ## Feats
 
-- [x] Display feats with summary and details (see `/ux/steps/05_feats.md`).
+- [ ] Display feats with summary and details (see `/ux/steps/05_feats.md`).
 - [ ] Enforce prerequisites and final legality rules.
 - [x] Update engine state and provenance.
 
