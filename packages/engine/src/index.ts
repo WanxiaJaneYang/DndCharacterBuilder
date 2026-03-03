@@ -238,6 +238,62 @@ export interface Phase2Sheet {
   };
 }
 
+export interface SheetViewModel {
+  combat: {
+    ac: {
+      total: number;
+      touch: number;
+      flatFooted: number;
+      components: Array<{
+        label: string;
+        value: number;
+      }>;
+    };
+    attacks: Array<{
+      kind: "melee" | "ranged";
+      weapon: {
+        itemId: string;
+        name: string;
+        crit: string;
+        range?: string;
+      };
+      attackBonus: number;
+      attackBonusBreakdown: {
+        total: number;
+        bab: number;
+        ability: {
+          key: AbilityKey;
+          value: number;
+        };
+        size: number;
+        misc: number;
+        components: Array<{
+          label: string;
+          value: number;
+        }>;
+      };
+      damageLine: string;
+    }>;
+  };
+  skills: Array<{
+    id: string;
+    name: string;
+    ranks: number;
+    ability: {
+      key: AbilityKey;
+      value: number;
+    };
+    racial: number;
+    misc: number;
+    acp: number;
+    acpApplied: boolean;
+    total: number;
+    classSkill: boolean;
+    costPerRank: number;
+    maxRanks: number;
+  }>;
+}
+
 export interface CharacterSheet {
   metadata: { name: string };
   abilities: Record<string, { score: number; mod: number }>;
@@ -247,6 +303,7 @@ export interface CharacterSheet {
   decisions: DecisionSummary;
   phase1: Phase1Sheet;
   phase2: Phase2Sheet;
+  sheetViewModel: SheetViewModel;
   provenance: ProvenanceRecord[];
   unresolvedRules: UnresolvedRule[];
   packSetFingerprint: string;
@@ -1338,6 +1395,131 @@ function formatDamageWithModifier(baseDamage: string, modifier: number): string 
   return `${baseDamage}${modifier > 0 ? "+" : ""}${modifier}`;
 }
 
+function buildAcComponents(ac: Phase1Sheet["combat"]["ac"]): SheetViewModel["combat"]["ac"]["components"] {
+  return [
+    { label: "Base", value: 10 },
+    { label: "Armor", value: ac.breakdown.armor },
+    { label: "Shield", value: ac.breakdown.shield },
+    { label: "Dex", value: ac.breakdown.dex },
+    { label: "Size", value: ac.breakdown.size },
+    { label: "Natural", value: ac.breakdown.natural },
+    { label: "Deflection", value: ac.breakdown.deflection },
+    { label: "Misc", value: ac.breakdown.misc }
+  ];
+}
+
+function buildAcViewModel(ac: Phase1Sheet["combat"]["ac"]): SheetViewModel["combat"]["ac"] {
+  const components = buildAcComponents(ac);
+  const total = components.reduce((sum, component) => sum + component.value, 0);
+  const touch = total - ac.breakdown.armor - ac.breakdown.shield - ac.breakdown.natural;
+  const flatFooted = total - Math.max(ac.breakdown.dex, 0);
+
+  return {
+    total,
+    touch,
+    flatFooted,
+    components
+  };
+}
+
+function buildAttackBonusBreakdown(
+  kind: "melee" | "ranged",
+  bab: number,
+  abilities: Record<string, { score: number; mod: number }>,
+  sizeModifier: number,
+  misc = 0
+): SheetViewModel["combat"]["attacks"][number]["attackBonusBreakdown"] {
+  const abilityKey: AbilityKey = kind === "ranged" ? "dex" : "str";
+  const abilityValue = abilities[abilityKey]?.mod ?? 0;
+  const total = bab + abilityValue + sizeModifier + misc;
+
+  return {
+    total,
+    bab,
+    ability: {
+      key: abilityKey,
+      value: abilityValue
+    },
+    size: sizeModifier,
+    misc,
+    components: [
+      { label: "BAB", value: bab },
+      { label: abilityKey.toUpperCase(), value: abilityValue },
+      { label: "Size", value: sizeModifier },
+      { label: "Misc", value: misc }
+    ]
+  };
+}
+
+function buildSheetViewModel(
+  phase1: Phase1Sheet,
+  skills: Record<string, SkillBreakdown>,
+  entityBuckets: ResolvedPackSet["entities"],
+  acpPenalty: number,
+  abilities: Record<string, { score: number; mod: number }>,
+  decisions: DecisionSummary,
+  bab: number
+): SheetViewModel {
+  const attacks: SheetViewModel["combat"]["attacks"] = [
+    ...phase1.combat.attacks.melee.map((attack) => ({
+      kind: "melee" as const,
+      weapon: {
+        itemId: attack.itemId,
+        name: attack.name,
+        crit: attack.crit
+      },
+      attackBonus: attack.attackBonus,
+      attackBonusBreakdown: buildAttackBonusBreakdown("melee", bab, abilities, decisions.sizeModifiers.attack),
+      damageLine: attack.damage
+    })),
+    ...phase1.combat.attacks.ranged.map((attack) => ({
+      kind: "ranged" as const,
+      weapon: {
+        itemId: attack.itemId,
+        name: attack.name,
+        crit: attack.crit,
+        range: attack.range
+      },
+      attackBonus: attack.attackBonus,
+      attackBonusBreakdown: buildAttackBonusBreakdown("ranged", bab, abilities, decisions.sizeModifiers.attack),
+      damageLine: attack.damage
+    }))
+  ];
+
+  const skillRows = Object.entries(skills)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([skillId, skill]) => {
+      const skillEntity = entityBuckets.skills?.[skillId];
+      const acpApplied = skillIsAffectedByArmorCheckPenalty(skillEntity);
+      const acp = acpApplied ? acpPenalty : 0;
+      return {
+        id: skillId,
+        name: skill.name,
+        ranks: skill.ranks,
+        ability: {
+          key: skill.ability,
+          value: skill.abilityMod
+        },
+        racial: skill.racialBonus,
+        misc: skill.miscBonus,
+        acp,
+        acpApplied,
+        total: skill.total + acp,
+        classSkill: skill.classSkill,
+        costPerRank: skill.costPerRank,
+        maxRanks: skill.maxRanks
+      };
+    });
+
+  return {
+    combat: {
+      ac: buildAcViewModel(phase1.combat.ac),
+      attacks
+    },
+    skills: skillRows
+  };
+}
+
 export function finalizeCharacter(state: CharacterState, context: EngineContext): CharacterSheet {
   const abilities = Object.fromEntries(
     Object.entries(state.abilities).map(([k, score]) => [k, { score, mod: abilityMod(score) }])
@@ -1611,6 +1793,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     }
   };
   const unresolvedRules = collectUnresolvedRules(state, context);
+  const sheetViewModel = buildSheetViewModel(phase1, skills, entityBuckets, acpPenalty, finalAbilities, decisions, bab);
 
   return {
     metadata: { name: sheet.metadata.name },
@@ -1621,6 +1804,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     decisions,
     phase1,
     phase2,
+    sheetViewModel,
     provenance,
     unresolvedRules,
     packSetFingerprint: context.resolvedData.fingerprint

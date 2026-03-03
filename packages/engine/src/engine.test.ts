@@ -508,6 +508,178 @@ describe("engine determinism", () => {
     expect(sheet.phase1.combat.attacks.melee[0]?.damage).toBe("1d8");
   });
 
+  it("builds a UI-ready sheetViewModel combat block with AC components and attack breakdowns", () => {
+    const acPack: LoadedPack = {
+      manifest: { id: "viewmodel-pack", name: "ViewModelPack", version: "1.0.0", priority: 5, dependencies: [] },
+      entities: {
+        races: [{
+          id: "human",
+          name: "Human",
+          entityType: "races",
+          summary: "Human",
+          description: "Human race",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            size: "medium",
+            baseSpeed: 30,
+            abilityModifiers: {},
+            vision: { lowLight: false, darkvisionFeet: 0 },
+            automaticLanguages: ["Common"],
+            bonusLanguages: [],
+            favoredClass: "any",
+            racialTraits: []
+          }
+        }],
+        classes: [{
+          id: "fighter",
+          name: "Fighter",
+          entityType: "classes",
+          summary: "Fighter",
+          description: "Fighter class",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [{ kind: "set", targetPath: "stats.bab", value: { const: 1 } }],
+          data: { hitDie: 10, skillPointsPerLevel: 2, classSkills: [] }
+        }],
+        feats: [],
+        items: [
+          {
+            id: "club",
+            name: "Club",
+            entityType: "items",
+            summary: "Simple weapon",
+            description: "Simple weapon",
+            portraitUrl: null,
+            iconUrl: null,
+            effects: [],
+            data: { category: "weapon", weaponType: "melee" }
+          },
+          {
+            id: "shortbow",
+            name: "Shortbow",
+            entityType: "items",
+            summary: "Simple ranged weapon",
+            description: "Simple ranged weapon",
+            portraitUrl: null,
+            iconUrl: null,
+            effects: [],
+            data: { category: "weapon", weaponType: "ranged", damage: "1d6", crit: "x3", range: "60 ft." }
+          },
+          {
+            id: "buckler",
+            name: "Buckler",
+            entityType: "items",
+            summary: "Shield",
+            description: "Shield",
+            portraitUrl: null,
+            iconUrl: null,
+            effects: [{ kind: "add", targetPath: "stats.ac", value: { const: 1 } }],
+            data: { category: "shield", weight: 5 }
+          },
+          {
+            id: "chain-shirt",
+            name: "Chain Shirt",
+            entityType: "items",
+            summary: "Armor",
+            description: "Armor",
+            portraitUrl: null,
+            iconUrl: null,
+            effects: [{ kind: "add", targetPath: "stats.ac", value: { const: 4 } }],
+            data: { category: "armor", weight: 25, armorCheckPenalty: -2 }
+          }
+        ],
+        skills: [],
+        rules: [
+          {
+            id: "base-ac",
+            name: "Base AC",
+            entityType: "rules",
+            summary: "Base AC",
+            description: "Base AC",
+            portraitUrl: null,
+            iconUrl: null,
+            effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }]
+          },
+          {
+            id: "shield-of-faith",
+            name: "Shield of Faith",
+            entityType: "rules",
+            summary: "Magic AC bonus",
+            description: "Magic AC bonus",
+            portraitUrl: null,
+            iconUrl: null,
+            effects: [{ kind: "add", targetPath: "stats.ac", value: { const: 2 } }]
+          }
+        ]
+      },
+      flow: {
+        steps: [
+          { id: "name", kind: "metadata", label: "Name", source: { type: "manual" } },
+          { id: "abilities", kind: "abilities", label: "Ability Scores", source: { type: "manual" } },
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType", entityType: "races", limit: 1 } },
+          { id: "class", kind: "class", label: "Class", source: { type: "entityType", entityType: "classes", limit: 1 } }
+        ]
+      },
+      patches: [],
+      packPath: "viewmodel-pack"
+    };
+    const localContext = {
+      enabledPackIds: ["viewmodel-pack"],
+      resolvedData: resolveLoadedPacks([makePack("base", 1), acPack], ["viewmodel-pack"])
+    };
+
+    let state = applyChoice(initialState, "name", "View");
+    state = applyChoice(state, "abilities", { str: 14, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "equipment", ["club", "shortbow", "buckler", "chain-shirt"]);
+
+    const sheet = finalizeCharacter(state, localContext);
+    const ac = sheet.sheetViewModel.combat.ac;
+    const meleeAttack = sheet.sheetViewModel.combat.attacks.find((attack) => attack.kind === "melee");
+    const rangedAttack = sheet.sheetViewModel.combat.attacks.find((attack) => attack.kind === "ranged");
+
+    expect(ac.total).toBe(18);
+    expect(ac.touch).toBe(13);
+    expect(ac.flatFooted).toBe(17);
+    expect(ac.components).toEqual([
+      { label: "Base", value: 10 },
+      { label: "Armor", value: 4 },
+      { label: "Shield", value: 1 },
+      { label: "Dex", value: 1 },
+      { label: "Size", value: 0 },
+      { label: "Natural", value: 0 },
+      { label: "Deflection", value: 0 },
+      { label: "Misc", value: 2 }
+    ]);
+    expect(meleeAttack).toMatchObject({
+      weapon: { itemId: "club", name: "Club", crit: "x2" },
+      attackBonus: 3,
+      attackBonusBreakdown: {
+        total: 3,
+        ability: { key: "str", value: 2 },
+        bab: 1,
+        size: 0,
+        misc: 0
+      },
+      damageLine: "1d8+2"
+    });
+    expect(rangedAttack).toMatchObject({
+      weapon: { itemId: "shortbow", name: "Shortbow", crit: "x3", range: "60 ft." },
+      attackBonus: 2,
+      attackBonusBreakdown: {
+        total: 2,
+        ability: { key: "dex", value: 1 },
+        bab: 1,
+        size: 0,
+        misc: 0
+      },
+      damageLine: "1d6"
+    });
+  });
+
   it("omits +0 in unarmed fallback damage", () => {
     let state = applyChoice(initialState, "name", "Unarmed");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
@@ -1005,6 +1177,93 @@ describe("engine determinism", () => {
 
     const errors = validateState(state, context);
     expect(errors.some((error) => error.code === "SKILL_POINTS_EXCEEDED")).toBe(true);
+  });
+
+  it("builds a legal fighter skill allocation with class and cross-class costs in the breakdown", () => {
+    let state = applyChoice(initialState, "name", "SkillMath");
+    state = applyChoice(state, "abilities", { str: 14, dex: 12, con: 10, int: 10, wis: 10, cha: 8 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "equipment", ["chainmail"], context);
+    state = applyChoice(state, "skills", { climb: 4, jump: 3, diplomacy: 0.5 }, context);
+
+    const errors = validateState(state, context);
+    const sheet = finalizeCharacter(state, context);
+    const climb = sheet.skills.climb;
+    const diplomacy = sheet.skills.diplomacy;
+    const phase2Climb = sheet.phase2.skills.find((skill) => skill.id === "climb");
+
+    expect(errors).toEqual([]);
+    expect(sheet.decisions.skillPoints.total).toBe(12);
+    expect(sheet.decisions.skillPoints.spent).toBe(8);
+    expect(sheet.decisions.skillPoints.remaining).toBe(4);
+    expect(climb).toMatchObject({
+      classSkill: true,
+      ranks: 4,
+      costPerRank: 1,
+      costSpent: 4,
+      abilityMod: 2,
+      total: 6
+    });
+    expect(diplomacy).toMatchObject({
+      classSkill: false,
+      ranks: 0.5,
+      costPerRank: 2,
+      costSpent: 1,
+      abilityMod: -1,
+      total: -0.5
+    });
+    expect(phase2Climb).toMatchObject({
+      ranks: 4,
+      ability: 2,
+      misc: 0,
+      acp: -5,
+      total: 1
+    });
+  });
+
+  it("builds a UI-ready sheetViewModel skills list with ability, misc, and ACP applicability", () => {
+    let state = applyChoice(initialState, "name", "SkillView");
+    state = applyChoice(state, "abilities", { str: 14, dex: 12, con: 10, int: 10, wis: 10, cha: 8 });
+    state = applyChoice(state, "race", "half-elf");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "feat", ["acrobatic"]);
+    state = applyChoice(state, "equipment", ["chainmail"], context);
+    state = applyChoice(state, "skills", { climb: 4, diplomacy: 0.5, jump: 1 }, context);
+
+    const sheet = finalizeCharacter(state, context);
+    const climb = sheet.sheetViewModel.skills.find((skill) => skill.id === "climb");
+    const diplomacy = sheet.sheetViewModel.skills.find((skill) => skill.id === "diplomacy");
+    const jump = sheet.sheetViewModel.skills.find((skill) => skill.id === "jump");
+
+    expect(climb).toMatchObject({
+      id: "climb",
+      ranks: 4,
+      ability: { key: "str", value: 2 },
+      misc: 0,
+      acp: -5,
+      acpApplied: true,
+      total: 1
+    });
+    expect(diplomacy).toMatchObject({
+      id: "diplomacy",
+      ranks: 0.5,
+      ability: { key: "cha", value: -1 },
+      misc: 0,
+      racial: 2,
+      acp: 0,
+      acpApplied: false,
+      total: 1.5
+    });
+    expect(jump).toMatchObject({
+      id: "jump",
+      ranks: 1,
+      ability: { key: "str", value: 2 },
+      misc: 2,
+      acp: -5,
+      acpApplied: true,
+      total: 0
+    });
   });
 
   it("returns STEP_LIMIT_EXCEEDED when selections exceed dynamic feat limit", () => {
