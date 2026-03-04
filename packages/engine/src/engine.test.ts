@@ -1312,6 +1312,18 @@ describe("engine determinism", () => {
     expect(errors.some((error) => error.code === "SKILL_RANK_MAX" && error.message.includes("6"))).toBe(true);
   });
 
+  it("reports zero max ranks when no class level is selected", () => {
+    let state = applyChoice(initialState, "name", "NoClassLevel");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(sheet.decisions.skillPoints.total).toBe(0);
+    expect(sheet.skills.climb?.maxRanks).toBe(0);
+    expect(sheet.skills.listen?.maxRanks).toBe(0);
+  });
+
   it("rejects non-integer skill point spending increments", () => {
     let state = applyChoice(initialState, "name", "SkillFraction");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
