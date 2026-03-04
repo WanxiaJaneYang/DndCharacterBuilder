@@ -447,17 +447,38 @@ function getStepSelectionLimit(step: EntityTypeFlowStep, state: CharacterState, 
   return baseLimit;
 }
 
+function parseFiniteSkillRank(value: unknown): number | undefined {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return undefined;
+  // Prevent overflow in downstream derived math while still treating the input as invalid later if needed.
+  return Math.min(parsed, Number.MAX_SAFE_INTEGER);
+}
+
 function getSelectedSkillRanks(state: CharacterState, _context?: EngineContext): Record<string, number> {
   const raw = state.selections.skills;
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   const normalized: Record<string, number> = {};
   for (const [skillId, value] of Object.entries(raw as Record<string, unknown>)) {
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed) || parsed < 0) continue;
+    const parsed = parseFiniteSkillRank(value);
+    if (parsed === undefined) continue;
     const canonicalSkillId = normalizeSkillId(skillId);
     if (!canonicalSkillId) continue;
     normalized[canonicalSkillId] = parsed;
   }
+  return normalized;
+}
+
+function getDerivedSkillRanks(state: CharacterState, context: EngineContext): Record<string, number> {
+  const rawRanks = getSelectedSkillRanks(state);
+  const classSkills = getClassSkills(state, context);
+  const normalized: Record<string, number> = {};
+
+  for (const [skillId, rank] of Object.entries(rawRanks)) {
+    normalized[skillId] = classSkills.has(skillId)
+      ? Math.floor(rank)
+      : Math.floor(rank * 2) / 2;
+  }
+
   return normalized;
 }
 
@@ -722,7 +743,7 @@ function buildDecisionSummary(state: CharacterState, context: EngineContext, abi
   const featStep = featStepCandidate && isEntityTypeFlowStep(featStepCandidate) ? featStepCandidate : undefined;
   const featSelectionLimit = featStep ? (getStepSelectionLimit(featStep, state, context) ?? 0) : 0;
   const classSkills = getClassSkills(state, context);
-  const selectedSkillRanks = getSelectedSkillRanks(state, context);
+  const selectedSkillRanks = getDerivedSkillRanks(state, context);
   const classSkillPointsPerLevel = getClassSkillPointsPerLevel(state, context);
   const intModifier = abilities.int?.mod ?? 0;
   const racialBonusAtLevel1 = getRaceSkillBonusAtLevel1(state, context);
@@ -783,7 +804,7 @@ function buildSkillBreakdown(
   decisions: DecisionSummary,
   effectBonuses: Record<string, number>
 ): Record<string, SkillBreakdown> {
-  const selectedRanks = getSelectedSkillRanks(state, context);
+  const selectedRanks = getDerivedSkillRanks(state, context);
   const racialBonuses = buildRacialSkillBonusMap(state, context);
   const skills = Object.values(context.resolvedData.entities.skills ?? {}).sort((a, b) => a.name.localeCompare(b.name));
   const output: Record<string, SkillBreakdown> = {};
@@ -858,8 +879,8 @@ export function applyChoice(state: CharacterState, choiceId: string, selection: 
     for (const [skillId, rankValue] of Object.entries(raw)) {
       const canonicalSkillId = normalizeSkillId(skillId);
       if (!canonicalSkillId) continue;
-      const rank = Number(rankValue);
-      if (!Number.isFinite(rank) || rank < 0) continue;
+      const rank = parseFiniteSkillRank(rankValue);
+      if (rank === undefined) continue;
       normalized[canonicalSkillId] = rank;
     }
     return { ...state, selections: { ...state.selections, skills: normalized } };

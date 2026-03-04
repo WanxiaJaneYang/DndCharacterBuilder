@@ -1212,7 +1212,7 @@ describe("engine determinism", () => {
     expect(errors.some((error) => error.code === "SKILL_POINTS_EXCEEDED")).toBe(true);
   });
 
-  it("calculates skill-point spend from submitted ranks without UI-side normalization", () => {
+  it("calculates skill-point spend from sanitized derived ranks", () => {
     let state = applyChoice(initialState, "name", "SkillBudgetRawRanks");
     state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
     state = applyChoice(state, "race", "human");
@@ -1220,8 +1220,45 @@ describe("engine determinism", () => {
     state = applyChoice(state, "skills", { climb: 1.5, listen: 1.25 }, context);
 
     const sheet = finalizeCharacter(state, context);
-    expect(sheet.decisions.skillPoints.spent).toBe(4);
-    expect(sheet.decisions.skillPoints.remaining).toBe(8);
+    expect(sheet.decisions.skillPoints.spent).toBe(3);
+    expect(sheet.decisions.skillPoints.remaining).toBe(9);
+  });
+
+  it("sanitizes derived skill math while preserving raw invalid ranks for validation", () => {
+    let state = applyChoice(initialState, "name", "SkillBudgetDerivedClamp");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { climb: 1.5, listen: 1.25 }, context);
+
+    const rawRanks = state.selections.skills as Record<string, number>;
+    expect(rawRanks.climb).toBe(1.5);
+    expect(rawRanks.listen).toBe(1.25);
+
+    const errors = validateState(state, context);
+    const sheet = finalizeCharacter(state, context);
+
+    expect(errors.some((error) => error.code === "SKILL_RANK_CLASS_INTEGER")).toBe(true);
+    expect(errors.some((error) => error.code === "SKILL_RANK_STEP")).toBe(true);
+    expect(sheet.decisions.skillPoints.spent).toBe(3);
+    expect(sheet.decisions.skillPoints.remaining).toBe(9);
+    expect(sheet.skills.climb?.ranks).toBe(1);
+    expect(sheet.skills.listen?.ranks).toBe(1);
+  });
+
+  it("keeps derived skill totals finite for pathological submitted ranks", () => {
+    let state = applyChoice(initialState, "name", "HugeSkillRanks");
+    state = applyChoice(state, "abilities", { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { listen: 1e308 }, context);
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(Number.isFinite(sheet.decisions.skillPoints.spent)).toBe(true);
+    expect(Number.isFinite(sheet.decisions.skillPoints.remaining)).toBe(true);
+    expect(Number.isFinite(sheet.skills.listen?.costSpent ?? NaN)).toBe(true);
+    expect(Number.isFinite(sheet.skills.listen?.total ?? NaN)).toBe(true);
   });
 
   it("builds a legal fighter skill allocation with class and cross-class costs in the breakdown", () => {
