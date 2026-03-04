@@ -84,7 +84,7 @@ export interface SkillBreakdown {
   name: string;
   ability: AbilityKey;
   classSkill: boolean;
-  isClassSkill: boolean;
+  isClassSkill?: boolean;
   ranks: number;
   maxRanks: number;
   costPerRank: number;
@@ -492,7 +492,8 @@ function getCharacterLevel(state: CharacterState): number {
 }
 
 function getSkillMaxRanksForLevel(level: number, classSkill: boolean): number {
-  const safeLevel = Math.max(1, Math.floor(level));
+  const safeLevel = Math.floor(level);
+  if (!Number.isFinite(safeLevel) || safeLevel <= 0) return 0;
   return classSkill ? safeLevel + 3 : (safeLevel + 3) / 2;
 }
 
