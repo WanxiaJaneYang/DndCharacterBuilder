@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 
 type Locale = "en" | "zh";
@@ -18,6 +19,7 @@ const labels = {
   reviewAbilityBreakdown:
     /Ability Score Breakdown|\u5c5e\u6027\u503c\u660e\u7ec6/i,
   reviewFingerprintLabel: /Fingerprint|\u6307\u7eb9/i,
+  exportJson: /Export JSON|\u5bfc\u51fa JSON/i,
   human: /Human|\u4eba\u7c7b/i,
   fighter:
     /^(?:Fighter(?: \(Level 1\))?|\u6218\u58eb(?:\uff081\u7ea7\uff09)?)$/i,
@@ -39,6 +41,7 @@ async function chooseLanguage(page: Page, locale: Locale) {
   const radioName = locale === "zh" ? labels.chinese : labels.english;
   const radio = page.getByRole("radio", { name: radioName });
   await radio.click();
+  await expect(radio).toBeChecked();
   await expect(page.locator(`main[lang="${locale}"]`)).toBeVisible();
 }
 
@@ -76,7 +79,9 @@ async function goToAbilitiesStep(page: Page, locale: Locale) {
   await expect(
     page.getByRole("heading", { name: labels.rulesSetupHeading }),
   ).toBeVisible();
-  await page.getByRole("button", { name: labels.startWizard }).click();
+  await page.getByRole("button", { name: labels.startWizard }).click({
+    force: true,
+  });
 
   await expect(
     page.getByRole("heading", { name: labels.raceHeading }),
@@ -219,6 +224,33 @@ test.describe("abilities step e2e regression", () => {
         .filter({ hasText: labels.str })
         .first();
       await expect(strRow).toContainText("9");
+      await expect(strRow).toContainText("-1");
+
+      const downloadPromise = page.waitForEvent("download");
+      await page.getByRole("button", { name: labels.exportJson }).click();
+      const download = await downloadPromise;
+      const filePath = await download.path();
+      expect(filePath).toBeTruthy();
+      const exported = JSON.parse(
+        await readFile(filePath as string, "utf-8"),
+      ) as {
+        abilities?: { str?: { score?: number } };
+        provenance?: Array<{
+          targetPath?: string;
+          source?: { packId?: string; entityId?: string };
+        }>;
+      };
+      expect(exported.abilities?.str?.score).toBe(9);
+      expect(Array.isArray(exported.provenance)).toBe(true);
+      expect((exported.provenance ?? []).length).toBeGreaterThan(0);
+      expect(
+        (exported.provenance ?? []).some(
+          (record) =>
+            Boolean(record.targetPath) &&
+            Boolean(record.source?.packId) &&
+            Boolean(record.source?.entityId),
+        ),
+      ).toBe(true);
     });
   }
 });
