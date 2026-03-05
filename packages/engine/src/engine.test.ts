@@ -1694,6 +1694,31 @@ describe("engine determinism", () => {
     });
   });
 
+  it("applies multiple PHB synergy mappings from pack data without engine code changes", () => {
+    let state = applyChoice(initialState, "name", "SynergyMatrix");
+    state = applyChoice(state, "abilities", { str: 10, dex: 12, con: 10, int: 10, wis: 10, cha: 12 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", {
+      bluff: 5,
+      "sense-motive": 5,
+      jump: 5,
+      tumble: 5
+    }, context);
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(sheet.skills.diplomacy?.miscBonus).toBe(4);
+    expect(sheet.skills.intimidate?.miscBonus).toBe(2);
+    expect(sheet.skills["sleight-of-hand"]?.miscBonus).toBe(2);
+    expect(sheet.skills.tumble?.miscBonus).toBe(2);
+    expect(sheet.skills.jump?.miscBonus).toBe(2);
+    expect(sheet.skills.balance?.miscBonus).toBe(2);
+    expect(sheet.phase2.skills.find((skill) => skill.id === "diplomacy")?.misc).toBe(4);
+    expect(sheet.phase2.skills.find((skill) => skill.id === "tumble")?.misc).toBe(2);
+    expect(sheet.phase2.skills.find((skill) => skill.id === "jump")?.misc).toBe(2);
+  });
+
   it("returns STEP_LIMIT_EXCEEDED when selections exceed dynamic feat limit", () => {
     let state = applyChoice(initialState, "name", "FeatLimit");
     state = applyChoice(state, "abilities", { str: 16, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
