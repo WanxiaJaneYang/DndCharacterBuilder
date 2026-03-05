@@ -155,6 +155,10 @@ Engine note:
 
 - Crit shorthand values like `x2` are accepted in data and normalized to canonical output form (`20/x2`) in final attack lines.
 
+## Future Extensions For Sheet Parity
+
+The item schema above is enforced in the current phase. The fields below remain future-phase additions.
+
 ### Skill `data` (planned additions)
 
 - `armorCheckPenaltyApplies`: boolean

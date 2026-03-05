@@ -1395,6 +1395,20 @@ describe("item entity schema", () => {
     ).toThrow(/invalid items\.data/i);
   });
 
+  it("rejects items missing data with explicit message", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "missing-item-data",
+        name: "Missing Item Data",
+        entityType: "items",
+        summary: "Missing data.",
+        description: "Missing data.",
+        portraitUrl: null,
+        iconUrl: null
+      })
+    ).toThrow(/items\.data is required/i);
+  });
+
   it("rejects weapon items without required combat profile", () => {
     expect(() =>
       EntitySchema.parse({

@@ -693,6 +693,14 @@ export const EntitySchema = z.object({
   }
 
   if (entity.entityType === "items") {
+    if (entity.data === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid items.data: items.data is required",
+        path: ["data"]
+      });
+      return;
+    }
     const result = ItemDataSchema.safeParse(entity.data);
     if (!result.success) {
       result.error.issues.forEach((issue) => {
