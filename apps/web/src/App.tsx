@@ -202,9 +202,9 @@ export function App() {
   const t = uiText[language];
   const localizeAbilityLabel = useCallback(
     (ability: string): string => {
-      return t.abilityLabels[ability as AbilityCode] ?? ability.toUpperCase();
+      return t.ABILITY_LABELS[ability.toUpperCase() as Uppercase<AbilityCode>] ?? ability.toUpperCase();
     },
-    [t.abilityLabels],
+    [t.ABILITY_LABELS],
   );
   const localizeEntityText = useCallback(
     (
@@ -296,10 +296,10 @@ export function App() {
   const packVersionById = useMemo(() => {
     const map = new Map<string, string>();
     for (const manifest of context.resolvedData.manifests) {
-      map.set(manifest.id, manifest.version || t.reviewUnknownVersion);
+      map.set(manifest.id, manifest.version || t.REVIEW_UNKNOWN_VERSION);
     }
     return map;
-  }, [context.resolvedData.manifests, t.reviewUnknownVersion]);
+  }, [context.resolvedData.manifests, t.REVIEW_UNKNOWN_VERSION]);
   const provenanceByTargetPath = useMemo(() => {
     const map = new Map<string, typeof sheet.provenance>();
     for (const record of sheet.provenance) {
@@ -593,14 +593,14 @@ export function App() {
         "will",
       ] as const;
       const statLabels: Record<(typeof statOrder)[number], string> = {
-        hp: t.reviewHpLabel,
-        ac: t.reviewAcLabel,
-        initiative: t.reviewInitiativeLabel,
-        speed: t.reviewSpeedLabel,
-        bab: t.reviewBabLabel,
-        fort: t.reviewFortLabel,
-        ref: t.reviewRefLabel,
-        will: t.reviewWillLabel,
+        hp: t.REVIEW_HP_LABEL,
+        ac: t.REVIEW_AC_LABEL,
+        initiative: t.REVIEW_INITIATIVE_LABEL,
+        speed: t.REVIEW_SPEED_LABEL,
+        bab: t.REVIEW_BAB_LABEL,
+        fort: t.REVIEW_FORT_LABEL,
+        ref: t.REVIEW_REF_LABEL,
+        will: t.REVIEW_WILL_LABEL,
       };
       const statBaseDefaults: Record<(typeof statOrder)[number], number> = {
         hp: DEFAULT_STATS.hp,
@@ -615,7 +615,7 @@ export function App() {
       const formatSigned = (value: number) =>
         `${value >= 0 ? "+" : ""}${value}`;
       const formatSourceLabel = (packId: string, entityId: string) =>
-        sourceNameByEntityId.get(`${packId}:${entityId}`) ?? t.reviewUnresolvedLabel;
+        sourceNameByEntityId.get(`${packId}:${entityId}`) ?? t.REVIEW_UNRESOLVED_LABEL;
       const selectedRaceId = String(state.selections.race ?? "");
       const selectedClassId = String(state.selections.class ?? "");
       const selectedRaceName = selectedRaceId
@@ -624,18 +624,18 @@ export function App() {
             selectedRaceId,
             "name",
             context.resolvedData.entities.races?.[selectedRaceId]?.name ??
-              t.reviewUnresolvedLabel,
+              t.REVIEW_UNRESOLVED_LABEL,
           )
-        : t.reviewUnresolvedLabel;
+        : t.REVIEW_UNRESOLVED_LABEL;
       const selectedClassName = selectedClassId
         ? localizeEntityText(
             "classes",
             selectedClassId,
             "name",
             context.resolvedData.entities.classes?.[selectedClassId]?.name ??
-              t.reviewUnresolvedLabel,
+              t.REVIEW_UNRESOLVED_LABEL,
           )
-        : t.reviewUnresolvedLabel;
+        : t.REVIEW_UNRESOLVED_LABEL;
       const reviewSkills = sheet.sheetViewModel.skills
         .filter((skill) => {
           const detail = sheet.skills[skill.id];
@@ -648,111 +648,111 @@ export function App() {
         });
       const enabledPackDetails = enabledPackIds.map((packId) => ({
         packId,
-        version: packVersionById.get(packId) ?? t.reviewUnknownVersion,
+        version: packVersionById.get(packId) ?? t.REVIEW_UNKNOWN_VERSION,
       }));
       return (
         <section className="review-page">
-          <h2>{t.review}</h2>
+          <h2>{t.REVIEW}</h2>
           <header className="review-hero">
             <div>
               <h3 className="review-character-name">
-                {sheet.metadata.name || t.unnamedCharacter}
+                {sheet.metadata.name || t.UNNAMED_CHARACTER}
               </h3>
               <p className="review-character-meta">
-                {t.raceLabel}: <strong>{selectedRaceName}</strong> |{" "}
-                {t.classLabel}: <strong>{selectedClassName}</strong>
+                {t.RACE_LABEL}: <strong>{selectedRaceName}</strong> |{" "}
+                {t.CLASS_LABEL}: <strong>{selectedClassName}</strong>
               </p>
             </div>
             <div className="review-actions">
-              <button onClick={exportJson}>{t.exportJson}</button>
+              <button onClick={exportJson}>{t.EXPORT_JSON}</button>
               <button onClick={() => setShowProv((s) => !s)}>
-                {t.toggleProvenance}
+                {t.TOGGLE_PROVENANCE}
               </button>
             </div>
           </header>
 
           <article className="sheet review-decisions">
-            <h3>{t.reviewIdentityProgression}</h3>
+            <h3>{t.REVIEW_IDENTITY_PROGRESSION}</h3>
             <p>
-              {t.reviewLevelLabel}: {phase1.identity.level}
+              {t.REVIEW_LEVEL_LABEL}: {phase1.identity.level}
             </p>
             <p>
-              {t.reviewXpLabel}: {phase1.identity.xp}
+              {t.REVIEW_XP_LABEL}: {phase1.identity.xp}
             </p>
             <p>
-              {t.reviewSizeLabel}: {phase1.identity.size}
+              {t.REVIEW_SIZE_LABEL}: {phase1.identity.size}
             </p>
             <p>
-              {t.reviewSpeedBaseLabel}: {phase1.identity.speed.base}
+              {t.REVIEW_SPEED_BASE_LABEL}: {phase1.identity.speed.base}
             </p>
             <p>
-              {t.reviewSpeedAdjustedLabel}: {phase1.identity.speed.adjusted}
+              {t.REVIEW_SPEED_ADJUSTED_LABEL}: {phase1.identity.speed.adjusted}
             </p>
           </article>
 
           <div className="review-stat-cards">
             <article className="review-card">
-              <h3>{t.reviewAcLabel}</h3>
+              <h3>{t.REVIEW_AC_LABEL}</h3>
               <p>{String(reviewCombat.ac.total)}</p>
             </article>
             <article className="review-card">
-              <h3>{t.reviewAcTouchLabel}</h3>
+              <h3>{t.REVIEW_AC_TOUCH_LABEL}</h3>
               <p>{String(reviewCombat.ac.touch)}</p>
             </article>
             <article className="review-card">
-              <h3>{t.reviewAcFlatFootedLabel}</h3>
+              <h3>{t.REVIEW_AC_FLAT_FOOTED_LABEL}</h3>
               <p>{String(reviewCombat.ac.flatFooted)}</p>
             </article>
             <article className="review-card">
-              <h3>{t.reviewHpLabel}</h3>
+              <h3>{t.REVIEW_HP_LABEL}</h3>
               <p>{String(phase1.combat.hp.total)}</p>
             </article>
             <article className="review-card">
-              <h3>{t.reviewInitiativeLabel}</h3>
+              <h3>{t.REVIEW_INITIATIVE_LABEL}</h3>
               <p>{String(phase1.combat.initiative.total)}</p>
             </article>
             <article className="review-card">
-              <h3>{t.reviewGrappleLabel}</h3>
+              <h3>{t.REVIEW_GRAPPLE_LABEL}</h3>
               <p>{String(phase1.combat.grapple.total)}</p>
             </article>
           </div>
 
           <article className="sheet">
-            <h3>{t.reviewSaveHpBreakdown}</h3>
+            <h3>{t.REVIEW_SAVE_HP_BREAKDOWN}</h3>
             <table className="review-table">
               <thead>
                 <tr>
-                  <th>{t.reviewStatColumn}</th>
-                  <th>{t.reviewBaseColumn}</th>
-                  <th>{t.reviewAbilityColumn}</th>
-                  <th>{t.reviewAdjustmentsColumn}</th>
-                  <th>{t.reviewFinalColumn}</th>
+                  <th>{t.REVIEW_STAT_COLUMN}</th>
+                  <th>{t.REVIEW_BASE_COLUMN}</th>
+                  <th>{t.REVIEW_ABILITY_COLUMN}</th>
+                  <th>{t.REVIEW_ADJUSTMENTS_COLUMN}</th>
+                  <th>{t.REVIEW_FINAL_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="review-cell-key">{t.reviewFortLabel}</td>
+                  <td className="review-cell-key">{t.REVIEW_FORT_LABEL}</td>
                   <td>{phase1.combat.saves.fort.base}</td>
                   <td>{phase1.combat.saves.fort.ability}</td>
                   <td>{phase1.combat.saves.fort.misc}</td>
                   <td>{phase1.combat.saves.fort.total}</td>
                 </tr>
                 <tr>
-                  <td className="review-cell-key">{t.reviewRefLabel}</td>
+                  <td className="review-cell-key">{t.REVIEW_REF_LABEL}</td>
                   <td>{phase1.combat.saves.ref.base}</td>
                   <td>{phase1.combat.saves.ref.ability}</td>
                   <td>{phase1.combat.saves.ref.misc}</td>
                   <td>{phase1.combat.saves.ref.total}</td>
                 </tr>
                 <tr>
-                  <td className="review-cell-key">{t.reviewWillLabel}</td>
+                  <td className="review-cell-key">{t.REVIEW_WILL_LABEL}</td>
                   <td>{phase1.combat.saves.will.base}</td>
                   <td>{phase1.combat.saves.will.ability}</td>
                   <td>{phase1.combat.saves.will.misc}</td>
                   <td>{phase1.combat.saves.will.total}</td>
                 </tr>
                 <tr>
-                  <td className="review-cell-key">{t.reviewHpLabel}</td>
+                  <td className="review-cell-key">{t.REVIEW_HP_LABEL}</td>
                   <td>{phase1.combat.hp.breakdown.hitDie}</td>
                   <td>{phase1.combat.hp.breakdown.con}</td>
                   <td>{phase1.combat.hp.breakdown.misc}</td>
@@ -763,16 +763,16 @@ export function App() {
           </article>
 
           <article className="sheet">
-            <h3>{t.reviewAttackLines}</h3>
+            <h3>{t.REVIEW_ATTACK_LINES}</h3>
             <table className="review-table">
               <thead>
                 <tr>
-                  <th>{t.reviewAttackTypeColumn}</th>
-                  <th>{t.reviewAttackItemColumn}</th>
-                  <th>{t.reviewAttackBonusColumn}</th>
-                  <th>{t.reviewDamageColumn}</th>
-                  <th>{t.reviewCritColumn}</th>
-                  <th>{t.reviewRangeColumn}</th>
+                  <th>{t.REVIEW_ATTACK_TYPE_COLUMN}</th>
+                  <th>{t.REVIEW_ATTACK_ITEM_COLUMN}</th>
+                  <th>{t.REVIEW_ATTACK_BONUS_COLUMN}</th>
+                  <th>{t.REVIEW_DAMAGE_COLUMN}</th>
+                  <th>{t.REVIEW_CRIT_COLUMN}</th>
+                  <th>{t.REVIEW_RANGE_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
@@ -780,8 +780,8 @@ export function App() {
                   <tr key={`${attack.category}-${attack.itemId}`}>
                     <td className="review-cell-key">
                       {attack.category === "melee"
-                        ? t.reviewAttackMeleeLabel
-                        : t.reviewAttackRangedLabel}
+                        ? t.REVIEW_ATTACK_MELEE_LABEL
+                        : t.REVIEW_ATTACK_RANGED_LABEL}
                     </td>
                     <td>{attack.name}</td>
                     <td>{formatSigned(attack.attackBonus)}</td>
@@ -797,7 +797,7 @@ export function App() {
           </article>
 
           <article className="sheet">
-            <h3>{t.reviewFeatSummary}</h3>
+            <h3>{t.REVIEW_FEAT_SUMMARY}</h3>
             {phase2.feats.length === 0 ? (
               <p className="review-muted">-</p>
             ) : (
@@ -812,7 +812,7 @@ export function App() {
           </article>
 
           <article className="sheet">
-            <h3>{t.reviewTraitSummary}</h3>
+            <h3>{t.REVIEW_TRAIT_SUMMARY}</h3>
             {phase2.traits.length === 0 ? (
               <p className="review-muted">-</p>
             ) : (
@@ -827,18 +827,18 @@ export function App() {
           </article>
 
           <article className="sheet">
-            <h3>{t.reviewAbilityBreakdown}</h3>
+            <h3>{t.REVIEW_ABILITY_BREAKDOWN}</h3>
             <table className="review-table">
               <caption className="sr-only">
-                {t.reviewAbilityTableCaption}
+                {t.REVIEW_ABILITY_TABLE_CAPTION}
               </caption>
               <thead>
                 <tr>
-                  <th>{t.reviewAbilityColumn}</th>
-                  <th>{t.reviewBaseColumn}</th>
-                  <th>{t.reviewAdjustmentsColumn}</th>
-                  <th>{t.reviewFinalColumn}</th>
-                  <th>{t.reviewModifierColumn}</th>
+                  <th>{t.REVIEW_ABILITY_COLUMN}</th>
+                  <th>{t.REVIEW_BASE_COLUMN}</th>
+                  <th>{t.REVIEW_ADJUSTMENTS_COLUMN}</th>
+                  <th>{t.REVIEW_FINAL_COLUMN}</th>
+                  <th>{t.REVIEW_MODIFIER_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
@@ -886,17 +886,17 @@ export function App() {
           </article>
 
           <article className="sheet">
-            <h3>{t.reviewCombatBreakdown}</h3>
+            <h3>{t.REVIEW_COMBAT_BREAKDOWN}</h3>
             <table className="review-table">
               <caption className="sr-only">
-                {t.reviewCombatTableCaption}
+                {t.REVIEW_COMBAT_TABLE_CAPTION}
               </caption>
               <thead>
                 <tr>
-                  <th>{t.reviewStatColumn}</th>
-                  <th>{t.reviewBaseColumn}</th>
-                  <th>{t.reviewAdjustmentsColumn}</th>
-                  <th>{t.reviewFinalColumn}</th>
+                  <th>{t.REVIEW_STAT_COLUMN}</th>
+                  <th>{t.REVIEW_BASE_COLUMN}</th>
+                  <th>{t.REVIEW_ADJUSTMENTS_COLUMN}</th>
+                  <th>{t.REVIEW_FINAL_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
@@ -951,26 +951,26 @@ export function App() {
           </article>
 
           <article className="sheet">
-            <h3>{t.reviewSkillsBreakdown}</h3>
+            <h3>{t.REVIEW_SKILLS_BREAKDOWN}</h3>
             <p>
-              {t.reviewPointsSpentLabel} {sheet.decisions.skillPoints.spent} /{" "}
+              {t.REVIEW_POINTS_SPENT_LABEL} {sheet.decisions.skillPoints.spent} /{" "}
               {sheet.decisions.skillPoints.total} (
-              {sheet.decisions.skillPoints.remaining} {t.reviewRemainingLabel})
+              {sheet.decisions.skillPoints.remaining} {t.REVIEW_REMAINING_LABEL})
             </p>
             <table className="review-table">
               <caption className="sr-only">
-                {t.reviewSkillsTableCaption}
+                {t.REVIEW_SKILLS_TABLE_CAPTION}
               </caption>
               <thead>
                 <tr>
-                  <th>{t.reviewSkillColumn}</th>
-                  <th>{t.reviewRanksColumn}</th>
-                  <th>{t.reviewAbilityColumn}</th>
-                  <th>{t.reviewRacialColumn}</th>
-                  <th>{t.reviewMiscColumn}</th>
-                  <th>{t.reviewAcpColumn}</th>
-                  <th>{t.reviewTotalColumn}</th>
-                  <th>{t.reviewPointCostColumn}</th>
+                  <th>{t.REVIEW_SKILL_COLUMN}</th>
+                  <th>{t.REVIEW_RANKS_COLUMN}</th>
+                  <th>{t.REVIEW_ABILITY_COLUMN}</th>
+                  <th>{t.REVIEW_RACIAL_COLUMN}</th>
+                  <th>{t.REVIEW_MISC_COLUMN}</th>
+                  <th>{t.REVIEW_ACP_COLUMN}</th>
+                  <th>{t.REVIEW_TOTAL_COLUMN}</th>
+                  <th>{t.REVIEW_POINT_COST_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
@@ -997,7 +997,7 @@ export function App() {
                       <td>{skill.total}</td>
                       <td>
                         {detail?.costSpent ?? 0} ({detail?.costPerRank ?? 0}
-                        {t.reviewPerRankUnit})
+                        {t.REVIEW_PER_RANK_UNIT})
                       </td>
                     </tr>
                   );
@@ -1007,9 +1007,9 @@ export function App() {
           </article>
 
           <article className="sheet review-decisions">
-            <h3>{t.reviewEquipmentLoad}</h3>
+            <h3>{t.REVIEW_EQUIPMENT_LOAD}</h3>
             <p>
-              {t.reviewSelectedItemsLabel}:{" "}
+              {t.REVIEW_SELECTED_ITEMS_LABEL}:{" "}
               {phase2.equipment.selectedItems
                 .map((itemId) =>
                   localizeEntityText("items", itemId, "name", itemId),
@@ -1017,52 +1017,52 @@ export function App() {
                 .join(", ") || "-"}
             </p>
             <p>
-              {t.reviewTotalWeightLabel}: {phase2.equipment.totalWeight}
+              {t.REVIEW_TOTAL_WEIGHT_LABEL}: {phase2.equipment.totalWeight}
             </p>
             <p>
-              {t.reviewLoadCategoryLabel}: {phase2.equipment.loadCategory}
+              {t.REVIEW_LOAD_CATEGORY_LABEL}: {phase2.equipment.loadCategory}
             </p>
             <p>
-              {t.reviewSpeedImpactLabel}: {phase2.equipment.speedImpact}
-            </p>
-          </article>
-
-          <article className="sheet review-decisions">
-            <h3>{t.reviewMovementDetail}</h3>
-            <p>
-              {t.reviewSpeedBaseLabel}: {phase2.movement.base}
-            </p>
-            <p>
-              {t.reviewSpeedAdjustedLabel}: {phase2.movement.adjusted}
-            </p>
-            <p>
-              {t.reviewMovementNotesLabel}: {phase2.movement.notes.join(" | ")}
+              {t.REVIEW_SPEED_IMPACT_LABEL}: {phase2.equipment.speedImpact}
             </p>
           </article>
 
           <article className="sheet review-decisions">
-            <h3>{t.reviewRulesDecisions}</h3>
+            <h3>{t.REVIEW_MOVEMENT_DETAIL}</h3>
             <p>
-              {t.reviewFavoredClassLabel}: {sheet.decisions.favoredClass ?? "-"}
+              {t.REVIEW_SPEED_BASE_LABEL}: {phase2.movement.base}
             </p>
             <p>
-              {t.reviewMulticlassXpIgnoredLabel}:{" "}
+              {t.REVIEW_SPEED_ADJUSTED_LABEL}: {phase2.movement.adjusted}
+            </p>
+            <p>
+              {t.REVIEW_MOVEMENT_NOTES_LABEL}: {phase2.movement.notes.join(" | ")}
+            </p>
+          </article>
+
+          <article className="sheet review-decisions">
+            <h3>{t.REVIEW_RULES_DECISIONS}</h3>
+            <p>
+              {t.REVIEW_FAVORED_CLASS_LABEL}: {sheet.decisions.favoredClass ?? "-"}
+            </p>
+            <p>
+              {t.REVIEW_MULTICLASS_XP_IGNORED_LABEL}:{" "}
               {sheet.decisions.ignoresMulticlassXpPenalty
-                ? t.reviewYes
-                : t.reviewNo}
+                ? t.REVIEW_YES
+                : t.REVIEW_NO}
             </p>
             <p>
-              {t.reviewFeatSlotsLabel}: {sheet.decisions.featSelectionLimit}
+              {t.REVIEW_FEAT_SLOTS_LABEL}: {sheet.decisions.featSelectionLimit}
             </p>
           </article>
 
           <article className="sheet review-decisions">
-            <h3>{t.reviewPackInfo}</h3>
+            <h3>{t.REVIEW_PACK_INFO}</h3>
             <p>
-              {t.reviewSelectedEditionLabel}:{" "}
+              {t.REVIEW_SELECTED_EDITION_LABEL}:{" "}
               {selectedEdition.label || selectedEdition.id || "-"}
             </p>
-            <p>{t.reviewEnabledPacksLabel}:</p>
+            <p>{t.REVIEW_ENABLED_PACKS_LABEL}:</p>
             <ul>
               {enabledPackDetails.map((pack) => (
                 <li key={pack.packId}>
@@ -1071,14 +1071,14 @@ export function App() {
               ))}
             </ul>
             <p>
-              {t.reviewFingerprintLabel}:{" "}
+              {t.REVIEW_FINGERPRINT_LABEL}:{" "}
               <code>{context.resolvedData.fingerprint}</code>
             </p>
           </article>
 
           {showProv && (
             <article className="sheet">
-              <h3>{t.reviewRawProvenance}</h3>
+              <h3>{t.REVIEW_RAW_PROVENANCE}</h3>
               <pre>{JSON.stringify(sheet.provenance, null, 2)}</pre>
             </article>
           )}
@@ -1090,7 +1090,7 @@ export function App() {
       return (
         <section>
           <h2>{currentStep.label}</h2>
-          <label htmlFor="character-name-input">{t.nameLabel}</label>
+          <label htmlFor="character-name-input">{t.NAME_LABEL}</label>
           <input
             id="character-name-input"
             value={state.metadata.name ?? ""}
@@ -1099,8 +1099,8 @@ export function App() {
                 applyChoice(s, currentStep.id, e.target.value, context),
               )
             }
-            placeholder={t.metadataPlaceholder}
-            aria-label={t.nameLabel}
+            placeholder={t.METADATA_PLACEHOLDER}
+            aria-label={t.NAME_LABEL}
           />
         </section>
       );
@@ -1115,26 +1115,36 @@ export function App() {
       const hideZeroGroups = abilityPresentation?.hideZeroEffectGroups ?? true;
       const groupLabel = (sourceType: string) =>
         sourceTypeLabels[sourceType] ??
-        (sourceType === "unknown" ? t.reviewUnresolvedLabel : sourceType);
+        (sourceType === "unknown" ? t.REVIEW_UNRESOLVED_LABEL : sourceType);
       const modeUi = abilityPresentation?.modeUi ?? {};
       const textMap = t as unknown as Record<string, unknown>;
       const defaultModeLabel = (mode: AbilityMode) =>
         mode === "pointBuy"
-          ? t.abilityModePointBuy
+          ? t.ABILITY_MODE_POINT_BUY
           : mode === "phb"
-            ? t.abilityModePhb
-            : t.abilityModeRollSets;
+            ? t.ABILITY_MODE_PHB
+            : t.ABILITY_MODE_ROLL_SETS;
+      const normalizeUITextKey = (key?: string) => {
+        if (!key) return undefined;
+        return key.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase();
+      };
       const getModeLabel = (mode: AbilityMode) => {
         const key = modeUi[mode]?.labelKey;
         const fromKey = key ? textMap[key] : undefined;
-        return typeof fromKey === "string" && fromKey.length > 0
-          ? fromKey
+        const normalized = normalizeUITextKey(key);
+        const fromNormalized = normalized ? textMap[normalized] : undefined;
+        const value = fromKey ?? fromNormalized;
+        return typeof value === "string" && value.length > 0
+          ? value
           : defaultModeLabel(mode);
       };
       const getModeHint = (mode: AbilityMode) => {
         const key = modeUi[mode]?.hintKey;
         const fromKey = key ? textMap[key] : undefined;
-        return typeof fromKey === "string" ? fromKey : "";
+        const normalized = normalizeUITextKey(key);
+        const fromNormalized = normalized ? textMap[normalized] : undefined;
+        const value = fromKey ?? fromNormalized;
+        return typeof value === "string" ? value : "";
       };
       const hintMode = selectedAbilityMode ?? abilityModes[0];
       const activeModeHint = hintMode ? getModeHint(hintMode) : "";
@@ -1168,8 +1178,8 @@ export function App() {
         <section>
           <h2>{currentStep.label}</h2>
           <AbilityMethodSelector
-            label={t.abilityGenerationLabel}
-            helpLabel={t.abilityMethodHelpLabel}
+            label={t.ABILITY_GENERATION_LABEL}
+            helpLabel={t.ABILITY_METHOD_HELP_LABEL}
             helpText={activeModeHint}
             isHintVisible={isHintVisible}
             isHintAvailable={hasActiveModeHint}
@@ -1227,18 +1237,18 @@ export function App() {
           {selectedAbilityMode === "pointBuy" &&
             abilityStepConfig?.pointBuy && (
               <PointBuyPanel
-                pointCapLabel={t.pointCapLabel}
+                pointCapLabel={t.POINT_CAP_LABEL}
                 pointCap={selectedPointCap}
                 pointCapMin={pointCapMin}
                 pointCapMax={pointCapMax}
                 pointCapStep={pointCapStep}
-                pointBuyRemainingLabel={t.pointBuyRemainingLabel}
+                pointBuyRemainingLabel={t.POINT_BUY_REMAINING_LABEL}
                 pointBuyRemaining={pointBuyRemaining}
-                showTableLabel={t.pointBuyShowTableLabel}
-                hideTableLabel={t.pointBuyHideTableLabel}
-                tableCaption={t.pointBuyTableCaption}
-                scoreColumnLabel={t.pointBuyScoreColumn}
-                costColumnLabel={t.pointBuyCostColumn}
+                showTableLabel={t.POINT_BUY_SHOW_TABLE_LABEL}
+                hideTableLabel={t.POINT_BUY_HIDE_TABLE_LABEL}
+                tableCaption={t.POINT_BUY_TABLE_CAPTION}
+                scoreColumnLabel={t.POINT_BUY_SCORE_COLUMN}
+                costColumnLabel={t.POINT_BUY_COST_COLUMN}
                 isTableOpen={isPointBuyTableOpen}
                 costTable={pointBuyCostTable}
                 onPointCapChange={(value) => {
@@ -1257,23 +1267,15 @@ export function App() {
           {selectedAbilityMode === "rollSets" && rollSetsConfig && (
             <section className="sheet">
               <div className="rollsets-header">
-                <h3>
-                  {language === "zh" ? "掷骰组选取" : "Roll-Set Selection"}
-                </h3>
+                <h3>{t.ROLL_SET_SELECTION_TITLE}</h3>
                 <button type="button" onClick={regenerateRollSetOptions}>
-                  {language === "zh" ? "重新掷骰" : "Reroll Sets"}
+                  {t.ROLL_SET_REROLL_BUTTON}
                 </button>
               </div>
-              <p>
-                {language === "zh"
-                  ? "掷出多个属性组，选择一组并按你的意愿分配。"
-                  : "Roll multiple sets, pick one, then assign scores as you wish."}
-              </p>
+              <p>{t.ROLL_SET_SELECTION_DESCRIPTION}</p>
               <fieldset
                 role="radiogroup"
-                aria-label={
-                  language === "zh" ? "掷骰组列表" : "Roll-Set Options"
-                }
+                aria-label={t.ROLL_SET_OPTIONS_ARIA_LABEL}
               >
                 {generatedRollSets.map((set, index) => (
                   <label key={`roll-set-${index}`} className="rollset-option">
@@ -1284,9 +1286,9 @@ export function App() {
                       onChange={() => applySelectedRollSet(set, index)}
                     />
                     <span>
-                      {language === "zh"
-                        ? `第 ${index + 1} 组`
-                        : `Set ${index + 1}`}
+                      {[t.ROLL_SET_OPTION_PREFIX, String(index + 1), t.ROLL_SET_OPTION_SUFFIX]
+                        .filter((part) => part.length > 0)
+                        .join(" ")}
                     </span>
                     <code>{set.join(", ")}</code>
                   </label>
@@ -1308,11 +1310,7 @@ export function App() {
                     <button
                       type="button"
                       className="ability-step-btn"
-                      aria-label={
-                        language === "zh"
-                          ? `降低 ${label}`
-                          : `Decrease ${label}`
-                      }
+                      aria-label={`${t.DECREASE_LABEL} ${label}`}
                       disabled={!canDecrease}
                       onClick={() => stepAbility(key, -1)}
                     >
@@ -1332,11 +1330,7 @@ export function App() {
                     <button
                       type="button"
                       className="ability-step-btn"
-                      aria-label={
-                        language === "zh"
-                          ? `提高 ${label}`
-                          : `Increase ${label}`
-                      }
+                      aria-label={`${t.INCREASE_LABEL} ${label}`}
                       disabled={!canIncrease}
                       onClick={() => stepAbility(key, 1)}
                     >
@@ -1349,15 +1343,15 @@ export function App() {
           </div>
           {showModifierTable && (
             <article className="sheet">
-              <h3>{t.abilityExistingModifiersLabel}</h3>
+              <h3>{t.ABILITY_EXISTING_MODIFIERS_LABEL}</h3>
               <table className="review-table">
                 <thead>
                   <tr>
-                    <th>{t.reviewAbilityColumn}</th>
-                    <th>{t.reviewBaseColumn}</th>
-                    <th>{t.abilityExistingModifiersLabel}</th>
-                    <th>{t.reviewFinalColumn}</th>
-                    <th>{t.reviewModifierColumn}</th>
+                    <th>{t.REVIEW_ABILITY_COLUMN}</th>
+                    <th>{t.REVIEW_BASE_COLUMN}</th>
+                    <th>{t.ABILITY_EXISTING_MODIFIERS_LABEL}</th>
+                    <th>{t.REVIEW_FINAL_COLUMN}</th>
+                    <th>{t.REVIEW_MODIFIER_COLUMN}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1382,7 +1376,7 @@ export function App() {
                       );
                       const sourceType = meta?.sourceType ?? "unknown";
                       const sourceLabel =
-                        meta?.sourceLabel ?? t.reviewUnresolvedLabel;
+                        meta?.sourceLabel ?? t.REVIEW_UNRESOLVED_LABEL;
                       const list = grouped.get(sourceType) ?? [];
                       list.push({ sourceLabel, delta });
                       grouped.set(sourceType, list);
@@ -1454,29 +1448,27 @@ export function App() {
         action: "increase" | "decrease",
         skillName: string,
       ) =>
-        language === "zh"
-          ? `${action === "increase" ? "提高" : "降低"} ${skillName}`
-          : `${action === "increase" ? "Increase" : "Decrease"} ${skillName}`;
+        `${action === "increase" ? t.INCREASE_LABEL : t.DECREASE_LABEL} ${skillName}`;
 
       return (
         <section>
           <h2>{currentStep.label}</h2>
           <p className="skill-points-summary">
-            {t.skillsBudgetLabel}: {sheet.decisions.skillPoints.total} |{" "}
-            {t.skillsSpentLabel}: {sheet.decisions.skillPoints.spent} |{" "}
-            {t.skillsRemainingLabel}: {sheet.decisions.skillPoints.remaining}
+            {t.SKILLS_BUDGET_LABEL}: {sheet.decisions.skillPoints.total} |{" "}
+            {t.SKILLS_SPENT_LABEL}: {sheet.decisions.skillPoints.spent} |{" "}
+            {t.SKILLS_REMAINING_LABEL}: {sheet.decisions.skillPoints.remaining}
           </p>
           <div className="skills-table-wrap">
             <table className="review-table skills-table">
               <thead>
                 <tr>
-                  <th>{t.reviewSkillColumn}</th>
-                  <th>{language === "zh" ? "类型" : "Type"}</th>
-                  <th>{language === "zh" ? "点数" : "Points"}</th>
-                  <th>{language === "zh" ? "等级" : "Ranks"}</th>
-                  <th>{language === "zh" ? "明细" : "Breakdown"}</th>
-                  <th>{t.reviewTotalColumn}</th>
-                  <th>{language === "zh" ? "备注" : "Notes"}</th>
+                  <th>{t.REVIEW_SKILL_COLUMN}</th>
+                  <th>{t.SKILLS_TYPE_COLUMN}</th>
+                  <th>{t.SKILLS_POINTS_COLUMN}</th>
+                  <th>{t.SKILLS_RANKS_COLUMN}</th>
+                  <th>{t.SKILLS_BREAKDOWN_COLUMN}</th>
+                  <th>{t.REVIEW_TOTAL_COLUMN}</th>
+                  <th>{t.SKILLS_NOTES_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1515,11 +1507,11 @@ export function App() {
                     <tr key={skill.id}>
                       <td className="review-cell-key">{skill.displayName}</td>
                       <td>
-                        {classSkill ? t.skillsClassLabel : t.skillsCrossLabel}
+                        {classSkill ? t.SKILLS_CLASS_LABEL : t.SKILLS_CROSS_LABEL}
                       </td>
                       <td>
                         {costPerRank}
-                        {t.skillsPerRankUnit}
+                        {t.SKILLS_PER_RANK_UNIT}
                       </td>
                       <td>
                         <div className="skill-rank-stepper">
@@ -1565,20 +1557,16 @@ export function App() {
                       <td>{formatSkillValue(total)}</td>
                       <td>
                         <div>
-                          {t.skillsMaxLabel} {formatSkillValue(maxRanks)}
+                          {t.SKILLS_MAX_LABEL} {formatSkillValue(maxRanks)}
                         </div>
                         <div>
-                          {t.skillsRacialLabel} {racialBonus >= 0 ? "+" : ""}
+                          {t.SKILLS_RACIAL_LABEL} {racialBonus >= 0 ? "+" : ""}
                           {formatSkillValue(racialBonus)}
                         </div>
                         <div>
                           {armorCheckPenaltyApplies
-                            ? language === "zh"
-                              ? "受护甲检定惩罚影响"
-                              : "ACP applies"
-                            : language === "zh"
-                              ? "不受护甲检定惩罚影响"
-                              : "ACP n/a"}
+                            ? t.SKILLS_ACP_APPLIES_LABEL
+                            : t.SKILLS_ACP_NOT_APPLICABLE_LABEL}
                         </div>
                       </td>
                     </tr>
@@ -1712,10 +1700,10 @@ export function App() {
         onLanguageChange={setLanguage}
         text={t}
       />
-      <h1>{t.appTitle}</h1>
-      <p className="subtitle">{t.appSubtitle}</p>
+      <h1>{t.APP_TITLE}</h1>
+      <p className="subtitle">{t.APP_SUBTITLE}</p>
       <p>
-        {t.stepCounter} {stepIndex + 1} / {wizardSteps.length}
+        {t.STEP_COUNTER} {stepIndex + 1} / {wizardSteps.length}
       </p>
       {renderCurrentStep()}
       <footer className="actions">
@@ -1728,13 +1716,13 @@ export function App() {
             setStepIndex((s) => s - 1);
           }}
         >
-          {t.back}
+          {t.BACK}
         </button>
         <button
           disabled={stepIndex === wizardSteps.length - 1}
           onClick={() => setStepIndex((s) => s + 1)}
         >
-          {t.next}
+          {t.NEXT}
         </button>
       </footer>
     </main>
@@ -1779,9 +1767,9 @@ function RulesSetupGate({
         onLanguageChange={onLanguageChange}
         text={text}
       />
-      <h1>{text.rulesSetupTitle}</h1>
+      <h1>{text.RULES_SETUP_TITLE}</h1>
       <section>
-        <label htmlFor="edition-select">{text.editionLabel}</label>
+        <label htmlFor="edition-select">{text.EDITION_LABEL}</label>
         <select
           id="edition-select"
           value={selectedEditionId}
@@ -1795,16 +1783,16 @@ function RulesSetupGate({
         </select>
       </section>
       <section>
-        <h2>{text.sourcesLabel}</h2>
+        <h2>{text.SOURCES_LABEL}</h2>
         <input
           id="base-pack-checkbox"
           type="checkbox"
           checked
           disabled
-          aria-label={`${selectedEdition.basePackId} (${text.baseSourceLockedLabel})`}
+          aria-label={`${selectedEdition.basePackId} (${text.BASE_SOURCE_LOCKED_LABEL})`}
         />
         <label htmlFor="base-pack-checkbox">
-          {selectedEdition.basePackId} ({text.baseSourceLockedLabel})
+          {selectedEdition.basePackId} ({text.BASE_SOURCE_LOCKED_LABEL})
         </label>
         {selectedEdition.optionalPackIds.length === 0 && <p>-</p>}
         {selectedEdition.optionalPackIds.map((packId) => (
@@ -1819,8 +1807,8 @@ function RulesSetupGate({
         ))}
       </section>
       <footer className="actions">
-        <button onClick={onBack}>{text.back}</button>
-        <button onClick={onStart}>{text.startWizard}</button>
+        <button onClick={onBack}>{text.BACK}</button>
+        <button onClick={onStart}>{text.START_WIZARD}</button>
       </footer>
     </main>
   );
@@ -1850,15 +1838,15 @@ function RoleSelectionGate({
           onLanguageChange={onLanguageChange}
           text={text}
         />
-        <div className="role-tabs-grid" role="group" aria-label={text.roleAria}>
+        <div className="role-tabs-grid" role="group" aria-label={text.ROLE_ARIA}>
           <button
             type="button"
             aria-pressed={role === "dm"}
             className={`role-tab role-tab-left ${role === "dm" ? "active" : ""}`}
             onClick={() => onChange("dm")}
           >
-            <span className="role-tab-title">{text.dmTitle}</span>
-            <span className="role-tab-subtitle">{text.dmSubtitle}</span>
+            <span className="role-tab-title">{text.DM_TITLE}</span>
+            <span className="role-tab-subtitle">{text.DM_SUBTITLE}</span>
           </button>
           <button
             type="button"
@@ -1866,17 +1854,17 @@ function RoleSelectionGate({
             className={`role-tab role-tab-right ${role === "player" ? "active" : ""}`}
             onClick={() => onChange("player")}
           >
-            <span className="role-tab-title">{text.playerTitle}</span>
-            <span className="role-tab-subtitle">{text.playerSubtitle}</span>
+            <span className="role-tab-title">{text.PLAYER_TITLE}</span>
+            <span className="role-tab-subtitle">{text.PLAYER_SUBTITLE}</span>
           </button>
         </div>
         <div className="role-copy-overlay">
-          <h1 className="role-question tabs-overlay">{text.roleQuestion}</h1>
-          <p className="role-intro tabs-intro">{text.roleIntro}</p>
+          <h1 className="role-question tabs-overlay">{text.ROLE_QUESTION}</h1>
+          <p className="role-intro tabs-intro">{text.ROLE_INTRO}</p>
         </div>
         {role === "dm" && (
           <p className="role-message" aria-live="polite">
-            {text.dmUnsupported}
+            {text.DM_UNSUPPORTED}
           </p>
         )}
       </section>
@@ -1897,7 +1885,7 @@ function LanguageSwitch({
     <div
       className="language-switch"
       role="radiogroup"
-      aria-label={text.languageLabel}
+      aria-label={text.LANGUAGE_LABEL}
     >
       <label className={`lang-btn ${language === "en" ? "active" : ""}`}>
         <input
@@ -1908,7 +1896,7 @@ function LanguageSwitch({
           checked={language === "en"}
           onChange={() => onLanguageChange("en")}
         />
-        <span>{text.english}</span>
+        <span>{text.ENGLISH}</span>
       </label>
       <label className={`lang-btn ${language === "zh" ? "active" : ""}`}>
         <input
@@ -1919,7 +1907,7 @@ function LanguageSwitch({
           checked={language === "zh"}
           onChange={() => onLanguageChange("zh")}
         />
-        <span>{text.chinese}</span>
+        <span>{text.CHINESE}</span>
       </label>
     </div>
   );

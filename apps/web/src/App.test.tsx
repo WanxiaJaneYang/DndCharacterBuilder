@@ -8,13 +8,13 @@ const uiText = uiTextJson;
 const en = uiText.en;
 const zh = uiText.zh;
 
-const playerNamePattern = new RegExp(`${en.playerTitle}|${zh.playerTitle}`, 'i');
-const dmNamePattern = new RegExp(`${en.dmTitle}|${zh.dmTitle}`, 'i');
-const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
-const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
-const unresolvedPattern = new RegExp(`${en.reviewUnresolvedLabel}|${zh.reviewUnresolvedLabel}`, 'i');
-const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
-const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
+const playerNamePattern = new RegExp(`${en.PLAYER_TITLE}|${zh.PLAYER_TITLE}`, 'i');
+const dmNamePattern = new RegExp(`${en.DM_TITLE}|${zh.DM_TITLE}`, 'i');
+const nextPattern = new RegExp(`${en.NEXT}|${zh.NEXT}`, 'i');
+const reviewPattern = new RegExp(`${en.REVIEW}|${zh.REVIEW}`, 'i');
+const unresolvedPattern = new RegExp(`${en.REVIEW_UNRESOLVED_LABEL}|${zh.REVIEW_UNRESOLVED_LABEL}`, 'i');
+const startWizardPattern = new RegExp(`${en.START_WIZARD}|${zh.START_WIZARD}`, 'i');
+const rulesSetupTitlePattern = new RegExp(`${en.RULES_SETUP_TITLE}|${zh.RULES_SETUP_TITLE}`, 'i');
 const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?)$/i;
 const humanLabelPattern = /^(?:Human|人类)$/;
 const elfLabelPattern = /^(?:Elf|精灵)$/;
@@ -89,30 +89,30 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByLabelText('Chainmail'));
     await user.click(screen.getByLabelText('Heavy Wooden Shield'));
     await user.click(screen.getByRole('button', { name: nextPattern }));
-    await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), 'Aric');
+    await user.type(screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i')), 'Aric');
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'AC' })).toBeTruthy();
     expect(screen.getByText(fighterLabelPattern, { selector: 'strong' })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewAbilityBreakdown })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewCombatBreakdown })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewSaveHpBreakdown })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewAttackLines })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewFeatSummary })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewTraitSummary })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewEquipmentLoad })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewMovementDetail })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewAcTouchLabel })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewAcFlatFootedLabel })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.reviewPackInfo })).toBeTruthy();
-    expect(screen.getAllByRole('columnheader', { name: en.reviewBaseColumn }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('columnheader', { name: en.reviewAdjustmentsColumn }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('columnheader', { name: en.reviewFinalColumn }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('columnheader', { name: en.reviewMiscColumn }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('columnheader', { name: en.reviewAcpColumn }).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: en.REVIEW_ABILITY_BREAKDOWN })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_COMBAT_BREAKDOWN })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_SAVE_HP_BREAKDOWN })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_ATTACK_LINES })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_FEAT_SUMMARY })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_TRAIT_SUMMARY })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_EQUIPMENT_LOAD })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_MOVEMENT_DETAIL })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_AC_TOUCH_LABEL })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_AC_FLAT_FOOTED_LABEL })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: en.REVIEW_PACK_INFO })).toBeTruthy();
+    expect(screen.getAllByRole('columnheader', { name: en.REVIEW_BASE_COLUMN }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('columnheader', { name: en.REVIEW_ADJUSTMENTS_COLUMN }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('columnheader', { name: en.REVIEW_FINAL_COLUMN }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('columnheader', { name: en.REVIEW_MISC_COLUMN }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('columnheader', { name: en.REVIEW_ACP_COLUMN }).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Chainmail/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(new RegExp(en.reviewFingerprintLabel, 'i'))).toBeTruthy();
+    expect(screen.getByText(new RegExp(en.REVIEW_FINGERPRINT_LABEL, 'i'))).toBeTruthy();
     expect(document.body.textContent).toMatch(/[a-f0-9]{64}/);
   });
 
@@ -127,7 +127,7 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
     await user.click(screen.getByLabelText(/Longsword|闀垮墤/i));
     await user.click(screen.getByRole('button', { name: nextPattern }));
-    await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), 'Aric');
+    await user.type(screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i')), 'Aric');
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     expect(screen.getByText(/\(\s*(?:STR|鍔涢噺)\s*\)/i)).toBeTruthy();
@@ -140,7 +140,7 @@ describe('role and language behavior', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: dmNamePattern }));
-    const dmMessage = screen.getByText(new RegExp(`${en.dmUnsupported}|${zh.dmUnsupported}`));
+    const dmMessage = screen.getByText(new RegExp(`${en.DM_UNSUPPORTED}|${zh.DM_UNSUPPORTED}`));
     expect(dmMessage.getAttribute('aria-live')).toBe('polite');
 
     expect(screen.queryByLabelText('STR')).toBeNull();
@@ -154,14 +154,14 @@ describe('role and language behavior', () => {
       const user = userEvent.setup();
       render(<App />);
 
-      expect(screen.getByText(zh.roleQuestion)).toBeTruthy();
+      expect(screen.getByText(zh.ROLE_QUESTION)).toBeTruthy();
 
-      const languageRadioGroup = screen.getByRole('radiogroup', { name: new RegExp(`${en.languageLabel}|${zh.languageLabel}`, 'i') });
-      const englishRadio = within(languageRadioGroup).getByRole('radio', { name: en.english });
+      const languageRadioGroup = screen.getByRole('radiogroup', { name: new RegExp(`${en.LANGUAGE_LABEL}|${zh.LANGUAGE_LABEL}`, 'i') });
+      const englishRadio = within(languageRadioGroup).getByRole('radio', { name: en.ENGLISH });
       englishRadio.focus();
       await user.keyboard(' ');
 
-      expect(screen.getByText(en.roleQuestion)).toBeTruthy();
+      expect(screen.getByText(en.ROLE_QUESTION)).toBeTruthy();
     });
   });
 
@@ -170,13 +170,13 @@ describe('role and language behavior', () => {
       const user = userEvent.setup();
       render(<App />);
 
-      await user.click(screen.getByRole('button', { name: new RegExp(zh.playerTitle) }));
-      await user.click(screen.getByRole('button', { name: zh.startWizard }));
+      await user.click(screen.getByRole('button', { name: new RegExp(zh.PLAYER_TITLE) }));
+      await user.click(screen.getByRole('button', { name: zh.START_WIZARD }));
       expect(screen.getByRole('heading', { name: raceHeadingPattern })).toBeTruthy();
       expect(screen.getByLabelText(humanLabelPattern)).toBeTruthy();
 
       await user.click(screen.getByLabelText(humanLabelPattern));
-      await user.click(screen.getByRole('button', { name: zh.next }));
+      await user.click(screen.getByRole('button', { name: zh.NEXT }));
       expect(screen.getByRole('heading', { name: /^(?:Class|职业)$/i })).toBeTruthy();
       expect(screen.getByLabelText(fighterLabelPattern)).toBeTruthy();
     });
@@ -187,21 +187,21 @@ describe('role and language behavior', () => {
       const user = userEvent.setup();
       render(<App />);
 
-      await user.click(screen.getByRole('button', { name: new RegExp(zh.playerTitle) }));
-      await user.click(screen.getByRole('button', { name: zh.startWizard }));
+      await user.click(screen.getByRole('button', { name: new RegExp(zh.PLAYER_TITLE) }));
+      await user.click(screen.getByRole('button', { name: zh.START_WIZARD }));
 
       await user.click(screen.getByLabelText(humanLabelPattern));
-      await user.click(screen.getByRole('button', { name: zh.next }));
+      await user.click(screen.getByRole('button', { name: zh.NEXT }));
 
       await user.click(screen.getByLabelText(fighterLabelPattern));
-      await user.click(screen.getByRole('button', { name: zh.next }));
+      await user.click(screen.getByRole('button', { name: zh.NEXT }));
 
-      expect(screen.getByLabelText(zh.abilityLabels.str)).toBeTruthy();
-      expect(screen.getByLabelText(zh.abilityLabels.dex)).toBeTruthy();
-      expect(screen.getByLabelText(zh.abilityLabels.con)).toBeTruthy();
-      expect(screen.getByLabelText(zh.abilityLabels.int)).toBeTruthy();
-      expect(screen.getByLabelText(zh.abilityLabels.wis)).toBeTruthy();
-      expect(screen.getByLabelText(zh.abilityLabels.cha)).toBeTruthy();
+      expect(screen.getByLabelText(zh.ABILITY_LABELS.STR)).toBeTruthy();
+      expect(screen.getByLabelText(zh.ABILITY_LABELS.DEX)).toBeTruthy();
+      expect(screen.getByLabelText(zh.ABILITY_LABELS.CON)).toBeTruthy();
+      expect(screen.getByLabelText(zh.ABILITY_LABELS.INT)).toBeTruthy();
+      expect(screen.getByLabelText(zh.ABILITY_LABELS.WIS)).toBeTruthy();
+      expect(screen.getByLabelText(zh.ABILITY_LABELS.CHA)).toBeTruthy();
     });
   });
 
@@ -485,13 +485,13 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
     expect(screen.getByLabelText(fighterLabelPattern)).toBeTruthy();
 
-    await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
+    await user.click(screen.getByRole('button', { name: new RegExp(`${en.BACK}|${zh.BACK}`, 'i') }));
     expect(screen.getByLabelText(humanLabelPattern)).toBeTruthy();
 
-    await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
+    await user.click(screen.getByRole('button', { name: new RegExp(`${en.BACK}|${zh.BACK}`, 'i') }));
     expect(screen.getByText(rulesSetupTitlePattern)).toBeTruthy();
 
-    await user.click(screen.getByRole('button', { name: new RegExp(`${en.back}|${zh.back}`, 'i') }));
+    await user.click(screen.getByRole('button', { name: new RegExp(`${en.BACK}|${zh.BACK}`, 'i') }));
     expect(screen.getByRole('button', { name: playerNamePattern })).toBeTruthy();
   });
 
@@ -515,21 +515,21 @@ describe('role and language behavior', () => {
       await user.click(screen.getByRole('button', { name: nextPattern }));
       await user.click(screen.getByLabelText(/Chainmail|\u94FE\u7532/));
       await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.type(screen.getByLabelText(new RegExp(`${en.nameLabel}|${zh.nameLabel}`, 'i')), '\u8D75\u4E91');
+      await user.type(screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i')), '\u8D75\u4E91');
       await user.click(screen.getByRole('button', { name: nextPattern }));
 
-      expect(screen.getAllByRole('heading', { name: zh.reviewAbilityBreakdown }).length).toBeGreaterThan(0);
-      expect(screen.getAllByRole('heading', { name: zh.reviewCombatBreakdown }).length).toBeGreaterThan(0);
-      expect(screen.getAllByRole('heading', { name: zh.reviewPackInfo }).length).toBeGreaterThan(0);
-      expect(screen.getAllByRole('columnheader', { name: zh.reviewBaseColumn }).length).toBeGreaterThan(0);
-      expect(screen.getAllByRole('columnheader', { name: zh.reviewAdjustmentsColumn }).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(zh.reviewFingerprintLabel, { exact: false }).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(zh.abilityLabels.str).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(zh.abilityLabels.dex).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(zh.abilityLabels.con).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(zh.abilityLabels.int).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(zh.abilityLabels.wis).length).toBeGreaterThan(0);
-      expect(screen.getAllByText(zh.abilityLabels.cha).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('heading', { name: zh.REVIEW_ABILITY_BREAKDOWN }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('heading', { name: zh.REVIEW_COMBAT_BREAKDOWN }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('heading', { name: zh.REVIEW_PACK_INFO }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('columnheader', { name: zh.REVIEW_BASE_COLUMN }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole('columnheader', { name: zh.REVIEW_ADJUSTMENTS_COLUMN }).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.REVIEW_FINGERPRINT_LABEL, { exact: false }).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.ABILITY_LABELS.STR).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.ABILITY_LABELS.DEX).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.ABILITY_LABELS.CON).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.ABILITY_LABELS.INT).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.ABILITY_LABELS.WIS).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(zh.ABILITY_LABELS.CHA).length).toBeGreaterThan(0);
     });
   });
 });

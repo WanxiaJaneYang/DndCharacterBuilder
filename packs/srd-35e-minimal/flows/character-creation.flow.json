@@ -85,16 +85,16 @@
         },
         "modeUi": {
           "pointBuy": {
-            "labelKey": "abilityModePointBuy",
-            "hintKey": "abilityMethodHintPointBuy"
+            "labelKey": "ABILITY_MODE_POINT_BUY",
+            "hintKey": "ABILITY_METHOD_HINT_POINT_BUY"
           },
           "phb": {
-            "labelKey": "abilityModePhb",
-            "hintKey": "abilityMethodHintPhb"
+            "labelKey": "ABILITY_MODE_PHB",
+            "hintKey": "ABILITY_METHOD_HINT_PHB"
           },
           "rollSets": {
-            "labelKey": "abilityModeRollSets",
-            "hintKey": "abilityMethodHintRollSets"
+            "labelKey": "ABILITY_MODE_ROLL_SETS",
+            "hintKey": "ABILITY_METHOD_HINT_ROLL_SETS"
           }
         }
       }
