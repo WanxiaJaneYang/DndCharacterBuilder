@@ -149,6 +149,16 @@
       "phase2": {
         "skills": [
           {
+            "id": "appraise",
+            "name": "Appraise",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
             "id": "balance",
             "name": "Balance",
             "ranks": 0,
@@ -157,6 +167,16 @@
             "misc": 0,
             "acp": -7,
             "total": -6
+          },
+          {
+            "id": "bluff",
+            "name": "Bluff",
+            "ranks": 0,
+            "ability": -1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": -1
           },
           {
             "id": "climb",
@@ -169,8 +189,58 @@
             "total": -1
           },
           {
+            "id": "concentration",
+            "name": "Concentration",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "craft",
+            "name": "Craft",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "decipher-script",
+            "name": "Decipher Script",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
             "id": "diplomacy",
             "name": "Diplomacy",
+            "ranks": 0,
+            "ability": -1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": -1
+          },
+          {
+            "id": "disable-device",
+            "name": "Disable Device",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "disguise",
+            "name": "Disguise",
             "ranks": 0,
             "ability": -1,
             "racial": 0,
@@ -189,6 +259,66 @@
             "total": -6
           },
           {
+            "id": "forgery",
+            "name": "Forgery",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "gather-information",
+            "name": "Gather Information",
+            "ranks": 0,
+            "ability": -1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": -1
+          },
+          {
+            "id": "handle-animal",
+            "name": "Handle Animal",
+            "ranks": 0,
+            "ability": -1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": -1
+          },
+          {
+            "id": "heal",
+            "name": "Heal",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "hide",
+            "name": "Hide",
+            "ranks": 0,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -6
+          },
+          {
+            "id": "intimidate",
+            "name": "Intimidate",
+            "ranks": 0,
+            "ability": -1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": -1
+          },
+          {
             "id": "jump",
             "name": "Jump",
             "ranks": 4,
@@ -199,8 +329,58 @@
             "total": -1
           },
           {
+            "id": "knowledge",
+            "name": "Knowledge",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
             "id": "listen",
             "name": "Listen",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "move-silently",
+            "name": "Move Silently",
+            "ranks": 0,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -6
+          },
+          {
+            "id": "open-lock",
+            "name": "Open Lock",
+            "ranks": 0,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 1
+          },
+          {
+            "id": "perform",
+            "name": "Perform",
+            "ranks": 0,
+            "ability": -1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": -1
+          },
+          {
+            "id": "profession",
+            "name": "Profession",
             "ranks": 0,
             "ability": 0,
             "racial": 0,
@@ -215,8 +395,58 @@
             "ability": 1,
             "racial": 0,
             "misc": 0,
+            "acp": 0,
+            "total": 5
+          },
+          {
+            "id": "search",
+            "name": "Search",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "sense-motive",
+            "name": "Sense Motive",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "sleight-of-hand",
+            "name": "Sleight Of Hand",
+            "ranks": 0,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
             "acp": -7,
-            "total": -2
+            "total": -6
+          },
+          {
+            "id": "speak-language",
+            "name": "Speak Language",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "spellcraft",
+            "name": "Spellcraft",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
           },
           {
             "id": "spot",
@@ -229,6 +459,26 @@
             "total": 0
           },
           {
+            "id": "survival",
+            "name": "Survival",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "swim",
+            "name": "Swim",
+            "ranks": 0,
+            "ability": 2,
+            "racial": 0,
+            "misc": 0,
+            "acp": -7,
+            "total": -5
+          },
+          {
             "id": "tumble",
             "name": "Tumble",
             "ranks": 0,
@@ -237,6 +487,26 @@
             "misc": 0,
             "acp": -7,
             "total": -6
+          },
+          {
+            "id": "use-magic-device",
+            "name": "Use Magic Device",
+            "ranks": 0,
+            "ability": -1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": -1
+          },
+          {
+            "id": "use-rope",
+            "name": "Use Rope",
+            "ranks": 0,
+            "ability": 1,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 1
           }
         ]
       },

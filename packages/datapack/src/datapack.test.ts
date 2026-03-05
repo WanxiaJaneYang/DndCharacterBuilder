@@ -77,6 +77,51 @@ describe("resolvePackSet", () => {
     expect(resolved.entities.feats?.["brew-potion"]?.description).not.toContain("Table 5");
   });
 
+  it("loads the full SRD core skill list for the minimal pack", () => {
+    const root = path.resolve(process.cwd(), "../../packs");
+    const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
+    const skillIds = Object.keys(resolved.entities.skills ?? {}).sort();
+
+    expect(skillIds).toEqual([
+      "appraise",
+      "balance",
+      "bluff",
+      "climb",
+      "concentration",
+      "craft",
+      "decipher-script",
+      "diplomacy",
+      "disable-device",
+      "disguise",
+      "escape-artist",
+      "forgery",
+      "gather-information",
+      "handle-animal",
+      "heal",
+      "hide",
+      "intimidate",
+      "jump",
+      "knowledge",
+      "listen",
+      "move-silently",
+      "open-lock",
+      "perform",
+      "profession",
+      "ride",
+      "search",
+      "sense-motive",
+      "sleight-of-hand",
+      "speak-language",
+      "spellcraft",
+      "spot",
+      "survival",
+      "swim",
+      "tumble",
+      "use-magic-device",
+      "use-rope"
+    ]);
+  });
+
   it("loads normalized deferred mechanics metadata from the SRD pack", () => {
     const root = path.resolve(process.cwd(), "../../packs");
     const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
