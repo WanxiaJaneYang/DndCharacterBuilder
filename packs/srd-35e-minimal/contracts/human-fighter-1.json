@@ -329,8 +329,98 @@
             "total": -1
           },
           {
-            "id": "knowledge",
-            "name": "Knowledge",
+            "id": "knowledge-arcana",
+            "name": "Knowledge (Arcana)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-architecture-and-engineering",
+            "name": "Knowledge (Architecture and Engineering)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-dungeoneering",
+            "name": "Knowledge (Dungeoneering)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-geography",
+            "name": "Knowledge (Geography)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-history",
+            "name": "Knowledge (History)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-local",
+            "name": "Knowledge (Local)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-nature",
+            "name": "Knowledge (Nature)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-nobility-and-royalty",
+            "name": "Knowledge (Nobility and Royalty)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-religion",
+            "name": "Knowledge (Religion)",
+            "ranks": 0,
+            "ability": 0,
+            "racial": 0,
+            "misc": 0,
+            "acp": 0,
+            "total": 0
+          },
+          {
+            "id": "knowledge-the-planes",
+            "name": "Knowledge (The Planes)",
             "ranks": 0,
             "ability": 0,
             "racial": 0,

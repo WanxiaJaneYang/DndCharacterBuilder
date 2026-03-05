@@ -16,7 +16,7 @@
     },
     {
       "path": "entities/classes.json",
-      "sha256": "e858144d33e28004caf2f22c4fdc1c9b348a0ed3f7c794f1acdd314e536c289d"
+      "sha256": "08a0523a4f1ace5be4ca5eafc612e95ef4b44c668150cdc04fd96ceada18ae34"
     },
     {
       "path": "entities/feats.json",
@@ -24,7 +24,7 @@
     },
     {
       "path": "entities/skills.json",
-      "sha256": "5b63a822d5cdfc9f8d0a9a47ad29dafb021dd5423c07740bdd88964ab45d045f"
+      "sha256": "9c12d683ab5e4d4acb4aac22976aee675642d9bbd3dd9f3947d047ecb30b55fd"
     },
     {
       "path": "entities/items.json",

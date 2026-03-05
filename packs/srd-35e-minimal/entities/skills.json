@@ -234,15 +234,132 @@
     "iconUrl": null
   },
   {
-    "id": "knowledge",
-    "name": "Knowledge",
+    "id": "knowledge-arcana",
+    "name": "Knowledge (Arcana)",
     "entityType": "skills",
     "data": {
       "ability": "int",
       "armorCheckPenaltyApplies": false
     },
-    "summary": "Knowledge (skill) option.",
-    "description": "Detailed reference entry for Knowledge in the skills dataset.",
+    "summary": "Knowledge (Arcana) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Arcana) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-architecture-and-engineering",
+    "name": "Knowledge (Architecture and Engineering)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Architecture and Engineering) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Architecture and Engineering) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-dungeoneering",
+    "name": "Knowledge (Dungeoneering)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Dungeoneering) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Dungeoneering) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-geography",
+    "name": "Knowledge (Geography)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Geography) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Geography) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-history",
+    "name": "Knowledge (History)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (History) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (History) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-local",
+    "name": "Knowledge (Local)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Local) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Local) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-nature",
+    "name": "Knowledge (Nature)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Nature) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Nature) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-nobility-and-royalty",
+    "name": "Knowledge (Nobility and Royalty)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Nobility and Royalty) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Nobility and Royalty) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-religion",
+    "name": "Knowledge (Religion)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Religion) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Religion) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-the-planes",
+    "name": "Knowledge (The Planes)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (The Planes) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (The Planes) in the skills dataset.",
     "portraitUrl": null,
     "iconUrl": null
   },
