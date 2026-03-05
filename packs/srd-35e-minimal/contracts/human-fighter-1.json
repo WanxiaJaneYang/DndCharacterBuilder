@@ -485,8 +485,8 @@
             "ability": 1,
             "racial": 0,
             "misc": 0,
-            "acp": 0,
-            "total": 5
+            "acp": -7,
+            "total": -2
           },
           {
             "id": "search",
@@ -510,7 +510,7 @@
           },
           {
             "id": "sleight-of-hand",
-            "name": "Sleight Of Hand",
+            "name": "Sleight of Hand",
             "ranks": 0,
             "ability": 1,
             "racial": 0,
