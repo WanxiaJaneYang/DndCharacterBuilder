@@ -1,6 +1,6 @@
 # Backlog Triage
 
-Last updated: 2026-03-03
+Last updated: 2026-03-05
 
 This document records the recommended execution order for currently open GitHub issues, plus the intended duplicate and umbrella relationships. It exists to keep repo planning in sync with the actual codebase rather than a stale backlog snapshot.
 
@@ -20,8 +20,8 @@ This document records the recommended execution order for currently open GitHub 
    - `#104` expose skill budget breakdown
 3. Regression coverage for the same slice:
    - `#96` contract tests for skill-budget invariants
-   - `#94` E2E regression for the skills step
-   - `#93` E2E regression for the abilities step
+   - `#94` E2E regression for the skills step (completed via PR #121 on 2026-03-05)
+   - `#93` E2E regression for the abilities step (completed via PR #120 on 2026-03-05)
 4. `#72` Stabilize item schema for Phase-1 sheet output
 5. `#70` minimal SRD 3.5 skill list completion
 6. `#77` feat legality and fighter bonus-feat handling
