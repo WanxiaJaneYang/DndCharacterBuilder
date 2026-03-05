@@ -77,6 +77,7 @@ This living document tracks the engineering tasks required to implement the DnDC
 - Recorded the approved deferred-mechanics normalization direction in docs so backlog metadata can migrate from engine-oriented path hints to stable concept IDs and capability IDs in a later implementation phase.
 - Implemented deferred-mechanics normalization across schema validation, tests, docs, and SRD race/class/feat pack data.
 - Merged PR #128 (issue #69) to add fail-fast pack reference integrity checks in contracts with deterministic diagnostics and pack-closure ID resolution for `races.data.favoredClass -> classes.id`.
+- Merged PR #136 (issue #72) to stabilize item schema + Phase-1 combat output contracts: strict `items.data` category validation, canonicalized attack crit formatting, gear exclusion from attack-line generation, and regression coverage updates.
 
 ## Deferred Mechanics Follow-up
 
