@@ -32,7 +32,7 @@ This living document tracks the engineering tasks required to implement the DnDC
    - [x] Add unit tests for engine (engine package).
    - [x] Add contract tests for the minimal SRD pack.
    - [x] Add wizard integration coverage (Vitest RTL) and initial visual regression coverage (Playwright).
-   - [ ] Add deeper E2E coverage for critical abilities and skills regressions.
+   - [x] Add deeper E2E coverage for critical abilities and skills regressions.
 
 ### Future Phases (Beyond MVP)
 
@@ -72,6 +72,7 @@ This living document tracks the engineering tasks required to implement the DnDC
 - Added review/export surfaces backed by `sheetViewModel`, including attack breakdowns, skill breakdowns, provenance display, and JSON export.
 - Added pack contract fixtures for the minimal SRD pack, wired `npm run check:contract-fixtures` and `npm run contracts` into CI, and enforced ASCII/bidi safety for contract JSON.
 - Added initial Playwright visual regression coverage alongside the existing Vitest wizard-flow integration tests.
+- Merged PR #120 and PR #121 to add dedicated Playwright regression suites for the abilities and skills steps, including EN/ZH coverage and level-1 rank-cap assertions for skills.
 - Added race-level `deferredMechanics` tracking in schema and `races.json` so PHB-linked but not-yet-implemented race rules are indexed for fast follow-up when dependent systems land.
 - Recorded the approved deferred-mechanics normalization direction in docs so backlog metadata can migrate from engine-oriented path hints to stable concept IDs and capability IDs in a later implementation phase.
 - Implemented deferred-mechanics normalization across schema validation, tests, docs, and SRD race/class/feat pack data.
