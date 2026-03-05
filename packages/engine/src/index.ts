@@ -1399,6 +1399,20 @@ function isRangedWeaponItem(item: ResolvedEntity): boolean {
   return getEntityDataString(item, "range").length > 0;
 }
 
+function isAttackItem(item: ResolvedEntity): boolean {
+  const category = getEntityDataString(item, "category").toLowerCase();
+  if (category === "weapon") return true;
+  if (category === "armor" || category === "shield" || category === "gear") return false;
+
+  // Legacy fallback for packs that predate item category typing.
+  const hasCombatProfile =
+    getEntityDataString(item, "weaponType").length > 0 ||
+    getEntityDataString(item, "damage").length > 0 ||
+    getEntityDataString(item, "crit").length > 0 ||
+    getEntityDataString(item, "range").length > 0;
+  return hasCombatProfile;
+}
+
 function getItemWeight(item: ResolvedEntity): number {
   return getEntityDataNumber(item, "weight", 0);
 }
@@ -1536,7 +1550,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     misc: 0
   };
   sheet.stats.grapple = grapple.total;
-  const attackItems = selectedEquipmentEntities.filter((entity) => !isArmorOrShieldItem(entity));
+  const attackItems = selectedEquipmentEntities.filter((entity) => isAttackItem(entity));
   const meleeAttacks: AttackLine[] = [];
   const rangedAttacks: AttackLine[] = [];
   for (const item of attackItems) {

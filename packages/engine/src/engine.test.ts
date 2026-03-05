@@ -923,6 +923,8 @@ describe("engine determinism", () => {
     const sheet = finalizeCharacter(state, localContext);
     expect(sheet.phase2.equipment.totalWeight).toBe(90);
     expect(sheet.phase2.equipment.loadCategory).toBe("heavy");
+    expect(sheet.phase1.combat.attacks.ranged).toEqual([]);
+    expect(sheet.phase1.combat.attacks.melee[0]?.itemId).toBe("unarmed-strike");
   });
 
   it("scales inferred HP hit-die breakdown by parsed class level suffix", () => {
