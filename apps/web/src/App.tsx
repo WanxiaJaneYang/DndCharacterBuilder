@@ -22,6 +22,7 @@ import {
   type Language,
   type UIText,
 } from "./uiText";
+import { resolveSpecializedSkillLabel } from "./localization";
 import { AbilityMethodSelector } from "./components/AbilityMethodSelector";
 import { PointBuyPanel } from "./components/PointBuyPanel";
 
@@ -217,10 +218,18 @@ export function App() {
       if (path === "name") {
         const name = activeLocale?.entityNames?.[entityType]?.[entityId];
         if (typeof name === "string" && name.length > 0) return name;
+        if (entityType === "skills") {
+          const specialized = resolveSpecializedSkillLabel({
+            locale: activeLocale,
+            language,
+            skillId: entityId,
+          });
+          if (specialized) return specialized;
+        }
       }
       return fallback;
     },
-    [activeLocale],
+    [activeLocale, language],
   );
   const choices = useMemo(() => listChoices(state, context), [context, state]);
   const localizedChoices = useMemo(

@@ -47,7 +47,86 @@
       "climb": "攀爬",
       "jump": "跳跃",
       "diplomacy": "交涉",
-      "ride": "骑术"
+      "ride": "骑术",
+      "craft": "工艺",
+      "perform": "表演",
+      "profession": "行业",
+      "craft:alchemy": "工艺（炼金术）",
+      "craft:armorsmithing": "工艺（铠甲锻造）",
+      "craft:basketweaving": "工艺（编篮）",
+      "craft:blacksmithing": "工艺（铁匠）",
+      "craft:bookbinding": "工艺（装订）",
+      "craft:bowmaking": "工艺（制弓）",
+      "craft:calligraphy": "工艺（书法）",
+      "craft:carpentry": "工艺（木工）",
+      "craft:gemcutting": "工艺（宝石切割）",
+      "craft:glassblowing": "工艺（玻璃吹制）",
+      "craft:jewelry": "工艺（珠宝）",
+      "craft:leatherworking": "工艺（皮革）",
+      "craft:locksmithing": "工艺（锁匠）",
+      "craft:painting": "工艺（绘画）",
+      "craft:pottery": "工艺（陶艺）",
+      "craft:sculpting": "工艺（雕塑）",
+      "craft:shipmaking": "工艺（造船）",
+      "craft:stonemasonry": "工艺（石工）",
+      "craft:trapmaking": "工艺（制陷阱）",
+      "craft:weaponsmithing": "工艺（武器锻造）",
+      "craft:weaving": "工艺（织造）",
+      "perform:act": "表演（戏剧）",
+      "perform:comedy": "表演（喜剧）",
+      "perform:dance": "表演（舞蹈）",
+      "perform:keyboard-instruments": "表演（键盘乐器）",
+      "perform:oratory": "表演（演说）",
+      "perform:percussion-instruments": "表演（打击乐器）",
+      "perform:sing": "表演（歌唱）",
+      "perform:string-instruments": "表演（弦乐器）",
+      "perform:wind-instruments": "表演（管乐器）",
+      "profession:farmer": "行业（农夫）",
+      "profession:fisher": "行业（渔夫）",
+      "profession:herbalist": "行业（草药师）",
+      "profession:innkeeper": "行业（旅店老板）",
+      "profession:librarian": "行业（图书管理员）",
+      "profession:merchant": "行业（商人）",
+      "profession:miner": "行业（矿工）",
+      "profession:sailor": "行业（水手）",
+      "profession:scribe": "行业（抄写员）",
+      "profession:soldier": "行业（士兵）",
+      "appraise": "估价",
+      "balance": "平衡",
+      "bluff": "唬骗",
+      "concentration": "专注",
+      "decipher-script": "破译文字",
+      "disable-device": "拆除装置",
+      "disguise": "伪装",
+      "escape-artist": "脱逃术",
+      "forgery": "伪造",
+      "gather-information": "搜集情报",
+      "handle-animal": "驯养动物",
+      "heal": "医疗",
+      "hide": "躲藏",
+      "intimidate": "威吓",
+      "knowledge-arcana": "知识（奥秘）",
+      "knowledge-architecture-and-engineering": "知识（建筑与工程）",
+      "knowledge-dungeoneering": "知识（地下城）",
+      "knowledge-geography": "知识（地理）",
+      "knowledge-history": "知识（历史）",
+      "knowledge-local": "知识（地方）",
+      "knowledge-nature": "知识（自然）",
+      "knowledge-nobility-and-royalty": "知识（贵族与皇室）",
+      "knowledge-religion": "知识（宗教）",
+      "knowledge-the-planes": "知识（位面）",
+      "move-silently": "悄无声息",
+      "open-lock": "开锁",
+      "search": "搜索",
+      "sense-motive": "洞悉动机",
+      "sleight-of-hand": "巧手",
+      "speak-language": "语言",
+      "spellcraft": "法术辨识",
+      "survival": "生存",
+      "swim": "游泳",
+      "tumble": "翻滚",
+      "use-magic-device": "使用魔法装置",
+      "use-rope": "使用绳索"
     },
     "rules": {
       "base-ac": "基础AC",
@@ -150,6 +229,243 @@
       },
       "ride": {
         "name": "骑术"
+      },
+      "craft": {
+        "name": "工艺"
+      },
+      "perform": {
+        "name": "表演"
+      },
+      "profession": {
+        "name": "行业"
+      },
+      "craft:alchemy": {
+        "name": "工艺（炼金术）"
+      },
+      "craft:armorsmithing": {
+        "name": "工艺（铠甲锻造）"
+      },
+      "craft:basketweaving": {
+        "name": "工艺（编篮）"
+      },
+      "craft:blacksmithing": {
+        "name": "工艺（铁匠）"
+      },
+      "craft:bookbinding": {
+        "name": "工艺（装订）"
+      },
+      "craft:bowmaking": {
+        "name": "工艺（制弓）"
+      },
+      "craft:calligraphy": {
+        "name": "工艺（书法）"
+      },
+      "craft:carpentry": {
+        "name": "工艺（木工）"
+      },
+      "craft:gemcutting": {
+        "name": "工艺（宝石切割）"
+      },
+      "craft:glassblowing": {
+        "name": "工艺（玻璃吹制）"
+      },
+      "craft:jewelry": {
+        "name": "工艺（珠宝）"
+      },
+      "craft:leatherworking": {
+        "name": "工艺（皮革）"
+      },
+      "craft:locksmithing": {
+        "name": "工艺（锁匠）"
+      },
+      "craft:painting": {
+        "name": "工艺（绘画）"
+      },
+      "craft:pottery": {
+        "name": "工艺（陶艺）"
+      },
+      "craft:sculpting": {
+        "name": "工艺（雕塑）"
+      },
+      "craft:shipmaking": {
+        "name": "工艺（造船）"
+      },
+      "craft:stonemasonry": {
+        "name": "工艺（石工）"
+      },
+      "craft:trapmaking": {
+        "name": "工艺（制陷阱）"
+      },
+      "craft:weaponsmithing": {
+        "name": "工艺（武器锻造）"
+      },
+      "craft:weaving": {
+        "name": "工艺（织造）"
+      },
+      "perform:act": {
+        "name": "表演（戏剧）"
+      },
+      "perform:comedy": {
+        "name": "表演（喜剧）"
+      },
+      "perform:dance": {
+        "name": "表演（舞蹈）"
+      },
+      "perform:keyboard-instruments": {
+        "name": "表演（键盘乐器）"
+      },
+      "perform:oratory": {
+        "name": "表演（演说）"
+      },
+      "perform:percussion-instruments": {
+        "name": "表演（打击乐器）"
+      },
+      "perform:sing": {
+        "name": "表演（歌唱）"
+      },
+      "perform:string-instruments": {
+        "name": "表演（弦乐器）"
+      },
+      "perform:wind-instruments": {
+        "name": "表演（管乐器）"
+      },
+      "profession:farmer": {
+        "name": "行业（农夫）"
+      },
+      "profession:fisher": {
+        "name": "行业（渔夫）"
+      },
+      "profession:herbalist": {
+        "name": "行业（草药师）"
+      },
+      "profession:innkeeper": {
+        "name": "行业（旅店老板）"
+      },
+      "profession:librarian": {
+        "name": "行业（图书管理员）"
+      },
+      "profession:merchant": {
+        "name": "行业（商人）"
+      },
+      "profession:miner": {
+        "name": "行业（矿工）"
+      },
+      "profession:sailor": {
+        "name": "行业（水手）"
+      },
+      "profession:scribe": {
+        "name": "行业（抄写员）"
+      },
+      "profession:soldier": {
+        "name": "行业（士兵）"
+      },
+      "appraise": {
+        "name": "估价"
+      },
+      "balance": {
+        "name": "平衡"
+      },
+      "bluff": {
+        "name": "唬骗"
+      },
+      "concentration": {
+        "name": "专注"
+      },
+      "decipher-script": {
+        "name": "破译文字"
+      },
+      "disable-device": {
+        "name": "拆除装置"
+      },
+      "disguise": {
+        "name": "伪装"
+      },
+      "escape-artist": {
+        "name": "脱逃术"
+      },
+      "forgery": {
+        "name": "伪造"
+      },
+      "gather-information": {
+        "name": "搜集情报"
+      },
+      "handle-animal": {
+        "name": "驯养动物"
+      },
+      "heal": {
+        "name": "医疗"
+      },
+      "hide": {
+        "name": "躲藏"
+      },
+      "intimidate": {
+        "name": "威吓"
+      },
+      "knowledge-arcana": {
+        "name": "知识（奥秘）"
+      },
+      "knowledge-architecture-and-engineering": {
+        "name": "知识（建筑与工程）"
+      },
+      "knowledge-dungeoneering": {
+        "name": "知识（地下城）"
+      },
+      "knowledge-geography": {
+        "name": "知识（地理）"
+      },
+      "knowledge-history": {
+        "name": "知识（历史）"
+      },
+      "knowledge-local": {
+        "name": "知识（地方）"
+      },
+      "knowledge-nature": {
+        "name": "知识（自然）"
+      },
+      "knowledge-nobility-and-royalty": {
+        "name": "知识（贵族与皇室）"
+      },
+      "knowledge-religion": {
+        "name": "知识（宗教）"
+      },
+      "knowledge-the-planes": {
+        "name": "知识（位面）"
+      },
+      "move-silently": {
+        "name": "悄无声息"
+      },
+      "open-lock": {
+        "name": "开锁"
+      },
+      "search": {
+        "name": "搜索"
+      },
+      "sense-motive": {
+        "name": "洞悉动机"
+      },
+      "sleight-of-hand": {
+        "name": "巧手"
+      },
+      "speak-language": {
+        "name": "语言"
+      },
+      "spellcraft": {
+        "name": "法术辨识"
+      },
+      "survival": {
+        "name": "生存"
+      },
+      "swim": {
+        "name": "游泳"
+      },
+      "tumble": {
+        "name": "翻滚"
+      },
+      "use-magic-device": {
+        "name": "使用魔法装置"
+      },
+      "use-rope": {
+        "name": "使用绳索"
       }
     },
     "rules": {
