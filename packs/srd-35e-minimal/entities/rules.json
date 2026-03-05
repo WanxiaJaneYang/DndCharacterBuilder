@@ -70,13 +70,157 @@
             },
             "bonus": 2,
             "bonusType": "untyped",
-            "note": "3.5 synergy: 5 ranks in Tumble grants +2 on Balance checks."
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Tumble grants +2 on Balance checks."
+          }
+        },
+        {
+          "id": "synergy-tumble-jump",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "tumble"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "tumble"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "jump"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Tumble grants +2 on Jump checks."
+          }
+        },
+        {
+          "id": "synergy-jump-tumble",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "jump"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "jump"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "tumble"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Jump grants +2 on Tumble checks."
+          }
+        },
+        {
+          "id": "synergy-bluff-diplomacy",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "bluff"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "bluff"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "diplomacy"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Bluff grants +2 on Diplomacy checks."
+          }
+        },
+        {
+          "id": "synergy-bluff-intimidate",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "bluff"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "bluff"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "intimidate"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Bluff grants +2 on Intimidate checks."
+          }
+        },
+        {
+          "id": "synergy-bluff-sleight-of-hand",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "bluff"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "bluff"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "sleight-of-hand"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Bluff grants +2 on Sleight of Hand checks."
+          }
+        },
+        {
+          "id": "synergy-sense-motive-diplomacy",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "sense-motive"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "sense-motive"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "diplomacy"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Sense Motive grants +2 on Diplomacy checks."
           }
         }
       ]
     },
-    "summary": "Starter conditional skill synergy rules.",
-    "description": "Data-driven threshold-based skill synergy modifiers for SRD 3.5.",
+    "summary": "Conditional skill synergy rules from PHB 3.5.",
+    "description": "Data-driven threshold-based skill synergy modifiers aligned with PHB 3.5 Table 4-5.",
     "portraitUrl": null,
     "iconUrl": null
   }
