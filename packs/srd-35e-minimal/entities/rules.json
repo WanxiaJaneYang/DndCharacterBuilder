@@ -41,5 +41,43 @@
     "description": "Detailed reference entry for Initiative in the rules dataset.",
     "portraitUrl": null,
     "iconUrl": null
+  },
+  {
+    "id": "skill-synergy-core",
+    "name": "Skill Synergy Core",
+    "entityType": "rules",
+    "effects": [],
+    "data": {
+      "conditionalModifiers": [
+        {
+          "id": "synergy-tumble-balance",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "tumble"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "tumble"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "balance"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "3.5 synergy: 5 ranks in Tumble grants +2 on Balance checks."
+          }
+        }
+      ]
+    },
+    "summary": "Starter conditional skill synergy rules.",
+    "description": "Data-driven threshold-based skill synergy modifiers for SRD 3.5.",
+    "portraitUrl": null,
+    "iconUrl": null
   }
 ]

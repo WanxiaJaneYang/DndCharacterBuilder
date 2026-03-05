@@ -92,7 +92,16 @@ export interface SkillBreakdown {
   abilityMod: number;
   racialBonus: number;
   miscBonus: number;
+  miscBreakdown: SkillMiscBreakdownEntry[];
   total: number;
+}
+
+export interface SkillMiscBreakdownEntry {
+  id: string;
+  sourceType: string;
+  bonus: number;
+  bonusType?: string;
+  note?: string;
 }
 
 export interface RacialModifierBreakdown {
@@ -655,6 +664,164 @@ function buildEffectSkillBonusMap(sheet: Record<string, unknown>): Record<string
   }, {});
 }
 
+function buildEffectSkillBonusBreakdown(effectBonuses: Record<string, number>): Record<string, SkillMiscBreakdownEntry[]> {
+  const breakdown: Record<string, SkillMiscBreakdownEntry[]> = {};
+  for (const [skillId, bonus] of Object.entries(effectBonuses)) {
+    if (!Number.isFinite(bonus) || bonus === 0) continue;
+    breakdown[skillId] = [{
+      id: `effect:${skillId}`,
+      sourceType: "effect",
+      bonus
+    }];
+  }
+  return breakdown;
+}
+
+function mergeSkillBonusBreakdownMaps(
+  ...maps: Array<Record<string, SkillMiscBreakdownEntry[]>>
+): Record<string, SkillMiscBreakdownEntry[]> {
+  const merged: Record<string, SkillMiscBreakdownEntry[]> = {};
+  for (const map of maps) {
+    for (const [skillId, entries] of Object.entries(map)) {
+      if (!entries.length) continue;
+      (merged[skillId] ??= []).push(...entries);
+    }
+  }
+  return merged;
+}
+
+type ConditionalModifierPredicate =
+  | { op: "gte"; left: { kind: "skillRanks"; id: string }; right: number }
+  | { op: "and" | "or"; args: ConditionalModifierPredicate[] }
+  | { op: "hasFeat"; id: string }
+  | { op: "hasFeature"; id: string }
+  | { op: "isClassSkill"; target: { kind: "skill"; id: string } };
+
+type ParsedConditionalSkillModifier = {
+  id: string;
+  sourceType: string;
+  when: ConditionalModifierPredicate;
+  apply: {
+    targetSkillId: string;
+    bonus: number;
+    bonusType?: string;
+    note?: string;
+  };
+};
+
+type ConditionalPredicateEvaluationContext = {
+  skillRanks: Record<string, number>;
+  selectedFeatIds: Set<string>;
+  selectedFeatureIds: Set<string>;
+  classSkillIds: Set<string>;
+};
+
+function parseConditionalModifierPredicate(value: unknown): ConditionalModifierPredicate | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  const op = String(record.op ?? "").trim().toLowerCase();
+
+  if (op === "gte") {
+    const leftRaw = record.left;
+    const rightRaw = Number(record.right);
+    if (!leftRaw || typeof leftRaw !== "object" || Array.isArray(leftRaw) || !Number.isFinite(rightRaw)) return undefined;
+    const leftRecord = leftRaw as Record<string, unknown>;
+    if (String(leftRecord.kind ?? "").trim().toLowerCase() !== "skillranks") return undefined;
+    const skillId = normalizeSkillId(String(leftRecord.id ?? ""));
+    if (!skillId) return undefined;
+    return { op: "gte", left: { kind: "skillRanks", id: skillId }, right: rightRaw };
+  }
+
+  if (op === "and" || op === "or") {
+    if (!Array.isArray(record.args)) return undefined;
+    const parsedArgs = record.args.map((entry) => parseConditionalModifierPredicate(entry));
+    if (parsedArgs.length === 0 || parsedArgs.some((entry) => entry === undefined)) return undefined;
+    const args = parsedArgs as ConditionalModifierPredicate[];
+    return { op, args };
+  }
+
+  if (op === "hasfeat") {
+    const featId = normalizeSkillId(String(record.id ?? ""));
+    if (!featId) return undefined;
+    return { op: "hasFeat", id: featId };
+  }
+
+  if (op === "hasfeature") {
+    const featureId = normalizeSkillId(String(record.id ?? ""));
+    if (!featureId) return undefined;
+    return { op: "hasFeature", id: featureId };
+  }
+
+  if (op === "isclassskill" || op === "isproficient") {
+    const targetRaw = record.target;
+    if (!targetRaw || typeof targetRaw !== "object" || Array.isArray(targetRaw)) return undefined;
+    const target = targetRaw as Record<string, unknown>;
+    if (String(target.kind ?? "").trim().toLowerCase() !== "skill") return undefined;
+    const skillId = normalizeSkillId(String(target.id ?? ""));
+    if (!skillId) return undefined;
+    return { op: "isClassSkill", target: { kind: "skill", id: skillId } };
+  }
+
+  return undefined;
+}
+
+function parseConditionalSkillModifiers(value: unknown): ParsedConditionalSkillModifier[] {
+  if (!Array.isArray(value)) return [];
+  const output: ParsedConditionalSkillModifier[] = [];
+
+  for (const entry of value) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const record = entry as Record<string, unknown>;
+    const id = String(record.id ?? "").trim();
+    const sourceRaw = record.source as Record<string, unknown> | undefined;
+    const sourceType = String(sourceRaw?.type ?? "misc").trim();
+    const when = parseConditionalModifierPredicate(record.when);
+    const applyRaw = record.apply as Record<string, unknown> | undefined;
+    const targetRaw = applyRaw?.target as Record<string, unknown> | undefined;
+    const targetSkillId = normalizeSkillId(String(targetRaw?.id ?? ""));
+    const targetKind = String(targetRaw?.kind ?? "").trim().toLowerCase();
+    const bonus = Number(applyRaw?.bonus ?? 0);
+    const bonusType = typeof applyRaw?.bonusType === "string" && applyRaw.bonusType.trim()
+      ? applyRaw.bonusType.trim()
+      : undefined;
+    const note = typeof applyRaw?.note === "string" && applyRaw.note.trim()
+      ? applyRaw.note.trim()
+      : undefined;
+
+    if (!id || !when || targetKind !== "skill" || !targetSkillId || !Number.isFinite(bonus)) continue;
+
+    output.push({
+      id,
+      sourceType,
+      when,
+      apply: {
+        targetSkillId,
+        bonus,
+        bonusType,
+        note
+      }
+    });
+  }
+
+  return output;
+}
+
+function evaluateConditionalModifierPredicate(
+  predicate: ConditionalModifierPredicate,
+  context: ConditionalPredicateEvaluationContext
+): boolean {
+  if (predicate.op === "gte") {
+    const leftValue = context.skillRanks[predicate.left.id] ?? 0;
+    return leftValue >= predicate.right;
+  }
+  if (predicate.op === "and") return predicate.args.every((entry) => evaluateConditionalModifierPredicate(entry, context));
+  if (predicate.op === "or") return predicate.args.some((entry) => evaluateConditionalModifierPredicate(entry, context));
+  if (predicate.op === "hasFeat") return context.selectedFeatIds.has(predicate.id);
+  if (predicate.op === "hasFeature") return context.selectedFeatureIds.has(predicate.id);
+  if (predicate.op === "isClassSkill") return context.classSkillIds.has(predicate.target.id);
+  return false;
+}
+
 function parseRacialModifiers(raw: unknown): RacialModifierBreakdown[] {
   if (!Array.isArray(raw)) return [];
   const output: RacialModifierBreakdown[] = [];
@@ -820,7 +987,8 @@ function buildSkillBreakdown(
   context: EngineContext,
   abilities: Record<string, { score: number; mod: number }>,
   decisions: DecisionSummary,
-  effectBonuses: Record<string, number>
+  effectBonuses: Record<string, number>,
+  miscBreakdownBySkill: Record<string, SkillMiscBreakdownEntry[]>
 ): Record<string, SkillBreakdown> {
   const selectedRanks = getDerivedSkillRanks(state, context);
   const racialBonuses = buildRacialSkillBonusMap(state, context);
@@ -837,7 +1005,9 @@ function buildSkillBreakdown(
     const costPerRank = classSkill ? 1 : 2;
     const costSpent = ranks * costPerRank;
     const racialBonus = racialBonuses[normalizeSkillId(skillEntity.id)] ?? 0;
-    const miscBonus = effectBonuses[normalizeSkillId(skillEntity.id)] ?? 0;
+    const normalizedSkillId = normalizeSkillId(skillEntity.id);
+    const miscBonus = effectBonuses[normalizedSkillId] ?? 0;
+    const miscBreakdown = miscBreakdownBySkill[normalizedSkillId] ?? [];
     const abilityModifier = abilities[ability]?.mod ?? 0;
 
     output[skillEntity.id] = {
@@ -852,6 +1022,7 @@ function buildSkillBreakdown(
       abilityMod: abilityModifier,
       racialBonus,
       miscBonus,
+      miscBreakdown,
       total: ranks + abilityModifier + racialBonus + miscBonus
     };
   }
@@ -1357,6 +1528,69 @@ function getSelectedEntities(state: CharacterState, context: EngineContext): Res
   return selected;
 }
 
+function getSelectedFeatureIds(state: CharacterState, context: EngineContext): Set<string> {
+  const selected = new Set<string>();
+  for (const traitId of getRacialTraits(state, context)) {
+    const normalized = normalizeSkillId(traitId);
+    if (normalized) selected.add(normalized);
+  }
+  for (const gain of getApplicableClassGains(state, context)) {
+    for (const grant of gain.grants) {
+      if (grant.kind !== "grantFeature") continue;
+      const normalized = normalizeSkillId(String(grant.featureId ?? ""));
+      if (normalized) selected.add(normalized);
+    }
+  }
+  return selected;
+}
+
+function buildConditionalSkillBonusData(
+  state: CharacterState,
+  context: EngineContext
+): {
+  totals: Record<string, number>;
+  breakdown: Record<string, SkillMiscBreakdownEntry[]>;
+} {
+  const totals: Record<string, number> = {};
+  const breakdown: Record<string, SkillMiscBreakdownEntry[]> = {};
+  const selectedFeatIds = new Set(getSelectedFeatIds(state).map((id) => normalizeSkillId(id)).filter(Boolean));
+  const selectedFeatureIds = getSelectedFeatureIds(state, context);
+  const classSkillIds = getClassSkills(state, context);
+  const skillRanks = getDerivedSkillRanks(state, context);
+  const rules = Object.values(context.resolvedData.entities.rules ?? {});
+  const entities = [...rules, ...getSelectedEntities(state, context)]
+    .filter((entity) => Array.isArray(getEntityDataRecord(entity).conditionalModifiers));
+  const seenEntities = new Set<string>();
+  const evaluationContext: ConditionalPredicateEvaluationContext = {
+    skillRanks,
+    selectedFeatIds,
+    selectedFeatureIds,
+    classSkillIds
+  };
+
+  for (const entity of entities) {
+    const entityKey = `${entity._source.packId}:${entity.entityType}:${entity.id}`;
+    if (seenEntities.has(entityKey)) continue;
+    seenEntities.add(entityKey);
+
+    const rawConditionalModifiers = getEntityDataRecord(entity).conditionalModifiers;
+    for (const modifier of parseConditionalSkillModifiers(rawConditionalModifiers)) {
+      if (!evaluateConditionalModifierPredicate(modifier.when, evaluationContext)) continue;
+      const skillId = modifier.apply.targetSkillId;
+      totals[skillId] = (totals[skillId] ?? 0) + modifier.apply.bonus;
+      (breakdown[skillId] ??= []).push({
+        id: modifier.id,
+        sourceType: modifier.sourceType,
+        bonus: modifier.apply.bonus,
+        ...(modifier.apply.bonusType ? { bonusType: modifier.apply.bonusType } : {}),
+        ...(modifier.apply.note ? { note: modifier.apply.note } : {})
+      });
+    }
+  }
+
+  return { totals, breakdown };
+}
+
 function collectUnresolvedRules(state: CharacterState, context: EngineContext): UnresolvedRule[] {
   return getSelectedEntities(state, context)
     .flatMap((entity) =>
@@ -1644,7 +1878,24 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     }
   };
   const effectSkillBonuses = buildEffectSkillBonusMap(sheet);
-  const skills = buildSkillBreakdown(state, context, finalAbilities, decisions, effectSkillBonuses);
+  const effectSkillBonusBreakdown = buildEffectSkillBonusBreakdown(effectSkillBonuses);
+  const conditionalSkillBonusData = buildConditionalSkillBonusData(state, context);
+  const combinedSkillBonuses: Record<string, number> = { ...effectSkillBonuses };
+  for (const [skillId, bonus] of Object.entries(conditionalSkillBonusData.totals)) {
+    combinedSkillBonuses[skillId] = (combinedSkillBonuses[skillId] ?? 0) + bonus;
+  }
+  const combinedSkillBonusBreakdown = mergeSkillBonusBreakdownMaps(
+    effectSkillBonusBreakdown,
+    conditionalSkillBonusData.breakdown
+  );
+  const skills = buildSkillBreakdown(
+    state,
+    context,
+    finalAbilities,
+    decisions,
+    combinedSkillBonuses,
+    combinedSkillBonusBreakdown
+  );
   const selectedFeatIds = getSelectedFeatIds(state);
   const phase2Feats = selectedFeatIds.map((featId) => {
     const feat = entityBuckets.feats?.[featId];

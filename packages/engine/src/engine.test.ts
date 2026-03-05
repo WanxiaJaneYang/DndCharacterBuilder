@@ -1073,6 +1073,334 @@ describe("engine determinism", () => {
     expect(sheet.skills.spot?.total).toBe(3);
     expect(sheet.phase2.skills.find((skill) => skill.id === "jump")?.misc).toBe(2);
     expect(sheet.phase2.skills.find((skill) => skill.id === "spot")?.misc).toBe(2);
+    expect(sheet.skills.jump?.miscBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceType: "effect",
+          bonus: 2
+        })
+      ])
+    );
+  });
+
+  it("treats malformed composite conditional predicates as invalid and applies no bonus", () => {
+    const malformedConditionalPack: LoadedPack = {
+      manifest: { id: "malformed-conditional-pack", name: "MalformedConditionalPack", version: "1.0.0", priority: 5, dependencies: [] },
+      entities: {
+        races: [{
+          id: "human",
+          name: "Human",
+          entityType: "races",
+          summary: "Human",
+          description: "Human",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            size: "medium",
+            baseSpeed: 30,
+            abilityModifiers: {},
+            vision: { lowLight: false, darkvisionFeet: 0 },
+            automaticLanguages: ["Common"],
+            bonusLanguages: ["Any"],
+            favoredClass: "any",
+            racialTraits: []
+          }
+        }],
+        classes: [{
+          id: "fighter",
+          name: "Fighter",
+          entityType: "classes",
+          summary: "Fighter",
+          description: "Fighter",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: { hitDie: 10, skillPointsPerLevel: 2, classSkills: ["climb"] }
+        }],
+        feats: [],
+        items: [],
+        skills: [
+          { id: "climb", name: "Climb", entityType: "skills", summary: "Climb", description: "Climb", portraitUrl: null, iconUrl: null, data: { ability: "str", armorCheckPenaltyApplies: true } },
+          { id: "balance", name: "Balance", entityType: "skills", summary: "Balance", description: "Balance", portraitUrl: null, iconUrl: null, data: { ability: "dex", armorCheckPenaltyApplies: true } }
+        ],
+        rules: [{
+          id: "base-ac",
+          name: "Base AC",
+          entityType: "rules",
+          summary: "Base AC",
+          description: "Base AC",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }]
+        }, {
+          id: "bad-composite",
+          name: "Bad Composite",
+          entityType: "rules",
+          summary: "Bad Composite",
+          description: "Should not apply when malformed",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            conditionalModifiers: [{
+              id: "malformed-or",
+              source: { type: "misc" },
+              when: {
+                op: "or",
+                args: [
+                  { op: "gte", left: { kind: "skillRanks", id: "climb" }, right: 1 },
+                  { op: "gte", left: { kind: "not-skill-ranks", id: "climb" }, right: 1 }
+                ]
+              },
+              apply: {
+                target: { kind: "skill", id: "balance" },
+                bonus: 9
+              }
+            }]
+          }
+        }]
+      },
+      flow: {
+        steps: [
+          { id: "name", kind: "metadata", label: "Name", source: { type: "manual" } },
+          { id: "abilities", kind: "abilities", label: "Ability Scores", source: { type: "manual" } },
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType", entityType: "races", limit: 1 } },
+          { id: "class", kind: "class", label: "Class", source: { type: "entityType", entityType: "classes", limit: 1 } }
+        ]
+      },
+      patches: [],
+      packPath: "malformed-conditional-pack"
+    };
+    const malformedContext = {
+      enabledPackIds: ["malformed-conditional-pack"],
+      resolvedData: resolveLoadedPacks([makePack("base", 1), malformedConditionalPack], ["malformed-conditional-pack"])
+    };
+
+    let state = applyChoice(initialState, "name", "MalformedPredicate");
+    state = applyChoice(state, "abilities", { str: 12, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { climb: 1 }, malformedContext);
+
+    const sheet = finalizeCharacter(state, malformedContext);
+    expect(sheet.skills.balance?.miscBonus).toBe(0);
+  });
+
+  it("parses conditional predicate operators and discriminator strings case-insensitively", () => {
+    const caseInsensitivePack: LoadedPack = {
+      manifest: { id: "case-insensitive-pack", name: "CaseInsensitivePack", version: "1.0.0", priority: 5, dependencies: [] },
+      entities: {
+        races: [{
+          id: "human",
+          name: "Human",
+          entityType: "races",
+          summary: "Human",
+          description: "Human",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            size: "medium",
+            baseSpeed: 30,
+            abilityModifiers: {},
+            vision: { lowLight: false, darkvisionFeet: 0 },
+            automaticLanguages: ["Common"],
+            bonusLanguages: ["Any"],
+            favoredClass: "any",
+            racialTraits: []
+          }
+        }],
+        classes: [{
+          id: "fighter",
+          name: "Fighter",
+          entityType: "classes",
+          summary: "Fighter",
+          description: "Fighter",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: { hitDie: 10, skillPointsPerLevel: 2, classSkills: ["climb"] }
+        }],
+        feats: [],
+        items: [],
+        skills: [
+          { id: "climb", name: "Climb", entityType: "skills", summary: "Climb", description: "Climb", portraitUrl: null, iconUrl: null, data: { ability: "str", armorCheckPenaltyApplies: true } },
+          { id: "balance", name: "Balance", entityType: "skills", summary: "Balance", description: "Balance", portraitUrl: null, iconUrl: null, data: { ability: "dex", armorCheckPenaltyApplies: true } }
+        ],
+        rules: [{
+          id: "base-ac",
+          name: "Base AC",
+          entityType: "rules",
+          summary: "Base AC",
+          description: "Base AC",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }]
+        }, {
+          id: "case-predicate",
+          name: "Case Predicate",
+          entityType: "rules",
+          summary: "Case Predicate",
+          description: "Case-insensitive conditional parsing",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            conditionalModifiers: [{
+              id: "case-insensitive-gte",
+              source: { type: "misc" },
+              when: {
+                op: "GTE",
+                left: { kind: "skillRanks", id: "climb" },
+                right: 5
+              },
+              apply: {
+                target: { kind: "SkIlL", id: "balance" },
+                bonus: 3
+              }
+            }]
+          }
+        }]
+      },
+      flow: {
+        steps: [
+          { id: "name", kind: "metadata", label: "Name", source: { type: "manual" } },
+          { id: "abilities", kind: "abilities", label: "Ability Scores", source: { type: "manual" } },
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType", entityType: "races", limit: 1 } },
+          { id: "class", kind: "class", label: "Class", source: { type: "entityType", entityType: "classes", limit: 1 } }
+        ]
+      },
+      patches: [],
+      packPath: "case-insensitive-pack"
+    };
+    const caseInsensitiveContext = {
+      enabledPackIds: ["case-insensitive-pack"],
+      resolvedData: resolveLoadedPacks([makePack("base", 1), caseInsensitivePack], ["case-insensitive-pack"])
+    };
+
+    let state = applyChoice(initialState, "name", "CasePredicate");
+    state = applyChoice(state, "abilities", { str: 12, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { climb: 5 }, caseInsensitiveContext);
+
+    const sheet = finalizeCharacter(state, caseInsensitiveContext);
+    expect(sheet.skills.balance?.miscBonus).toBe(3);
+  });
+
+  it("supports explicit isClassSkill predicates and retains isProficient compatibility", () => {
+    const classSkillPredicatePack: LoadedPack = {
+      manifest: { id: "class-skill-predicate-pack", name: "ClassSkillPredicatePack", version: "1.0.0", priority: 5, dependencies: [] },
+      entities: {
+        races: [{
+          id: "human",
+          name: "Human",
+          entityType: "races",
+          summary: "Human",
+          description: "Human",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            size: "medium",
+            baseSpeed: 30,
+            abilityModifiers: {},
+            vision: { lowLight: false, darkvisionFeet: 0 },
+            automaticLanguages: ["Common"],
+            bonusLanguages: ["Any"],
+            favoredClass: "any",
+            racialTraits: []
+          }
+        }],
+        classes: [{
+          id: "fighter",
+          name: "Fighter",
+          entityType: "classes",
+          summary: "Fighter",
+          description: "Fighter",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: { hitDie: 10, skillPointsPerLevel: 2, classSkills: ["climb"] }
+        }],
+        feats: [],
+        items: [],
+        skills: [
+          { id: "climb", name: "Climb", entityType: "skills", summary: "Climb", description: "Climb", portraitUrl: null, iconUrl: null, data: { ability: "str", armorCheckPenaltyApplies: true } },
+          { id: "listen", name: "Listen", entityType: "skills", summary: "Listen", description: "Listen", portraitUrl: null, iconUrl: null, data: { ability: "wis", armorCheckPenaltyApplies: false } }
+        ],
+        rules: [{
+          id: "base-ac",
+          name: "Base AC",
+          entityType: "rules",
+          summary: "Base AC",
+          description: "Base AC",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }]
+        }, {
+          id: "class-skill-predicate",
+          name: "Class Skill Predicate",
+          entityType: "rules",
+          summary: "Class Skill Predicate",
+          description: "Class-skill conditional parsing",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            conditionalModifiers: [
+              {
+                id: "is-class-skill",
+                source: { type: "misc" },
+                when: {
+                  op: "isClassSkill",
+                  target: { kind: "skill", id: "climb" }
+                },
+                apply: {
+                  target: { kind: "skill", id: "listen" },
+                  bonus: 2
+                }
+              },
+              {
+                id: "is-proficient-legacy",
+                source: { type: "misc" },
+                when: {
+                  op: "isProficient",
+                  target: { kind: "skill", id: "climb" }
+                },
+                apply: {
+                  target: { kind: "skill", id: "listen" },
+                  bonus: 1
+                }
+              }
+            ]
+          }
+        }]
+      },
+      flow: {
+        steps: [
+          { id: "name", kind: "metadata", label: "Name", source: { type: "manual" } },
+          { id: "abilities", kind: "abilities", label: "Ability Scores", source: { type: "manual" } },
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType", entityType: "races", limit: 1 } },
+          { id: "class", kind: "class", label: "Class", source: { type: "entityType", entityType: "classes", limit: 1 } }
+        ]
+      },
+      patches: [],
+      packPath: "class-skill-predicate-pack"
+    };
+    const classSkillPredicateContext = {
+      enabledPackIds: ["class-skill-predicate-pack"],
+      resolvedData: resolveLoadedPacks([makePack("base", 1), classSkillPredicatePack], ["class-skill-predicate-pack"])
+    };
+
+    let state = applyChoice(initialState, "name", "ClassSkillPredicate");
+    state = applyChoice(state, "abilities", { str: 12, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+
+    const sheet = finalizeCharacter(state, classSkillPredicateContext);
+    expect(sheet.skills.listen?.miscBonus).toBe(3);
   });
 
   it("applies minimum level-1 skill budget floor before multiplier", () => {
@@ -1526,6 +1854,59 @@ describe("engine determinism", () => {
       misc: 0,
       acp: -5,
       total: 1
+    });
+  });
+
+  it("does not apply synergy bonuses when effective cross-class source ranks are below threshold", () => {
+    let state = applyChoice(initialState, "name", "SynergyBelowThreshold");
+    state = applyChoice(state, "abilities", { str: 10, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { tumble: 4.75 }, context);
+
+    const sheet = finalizeCharacter(state, context);
+    const balance = sheet.skills.balance;
+    const phase2Balance = sheet.phase2.skills.find((skill) => skill.id === "balance");
+
+    expect(sheet.skills.tumble?.ranks).toBe(4.5);
+    expect(balance).toMatchObject({
+      miscBonus: 0,
+      total: 1
+    });
+    expect(phase2Balance).toMatchObject({
+      misc: 0,
+      total: 1
+    });
+  });
+
+  it("applies 3.5 skill synergy at 5 effective source ranks and surfaces misc breakdown", () => {
+    let state = applyChoice(initialState, "name", "SynergyAtThreshold");
+    state = applyChoice(state, "abilities", { str: 10, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { tumble: 5 }, context);
+
+    const sheet = finalizeCharacter(state, context);
+    const balance = sheet.skills.balance;
+    const phase2Balance = sheet.phase2.skills.find((skill) => skill.id === "balance");
+
+    expect(sheet.skills.tumble?.ranks).toBe(5);
+    expect(balance).toMatchObject({
+      miscBonus: 2,
+      total: 3
+    });
+    expect(balance?.miscBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "synergy-tumble-balance",
+          sourceType: "skillSynergy",
+          bonus: 2
+        })
+      ])
+    );
+    expect(phase2Balance).toMatchObject({
+      misc: 2,
+      total: 3
     });
   });
 
