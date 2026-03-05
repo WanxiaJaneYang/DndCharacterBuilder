@@ -1,0 +1,182 @@
+{
+  "entityNames": {
+    "skills": {
+      "craft": "Craft",
+      "perform": "Perform",
+      "profession": "Profession",
+      "craft:alchemy": "Craft (Alchemy)",
+      "craft:armorsmithing": "Craft (Armorsmithing)",
+      "craft:basketweaving": "Craft (Basketweaving)",
+      "craft:blacksmithing": "Craft (Blacksmithing)",
+      "craft:bookbinding": "Craft (Bookbinding)",
+      "craft:bowmaking": "Craft (Bowmaking)",
+      "craft:calligraphy": "Craft (Calligraphy)",
+      "craft:carpentry": "Craft (Carpentry)",
+      "craft:gemcutting": "Craft (Gemcutting)",
+      "craft:glassblowing": "Craft (Glassblowing)",
+      "craft:jewelry": "Craft (Jewelry)",
+      "craft:leatherworking": "Craft (Leatherworking)",
+      "craft:locksmithing": "Craft (Locksmithing)",
+      "craft:painting": "Craft (Painting)",
+      "craft:pottery": "Craft (Pottery)",
+      "craft:sculpting": "Craft (Sculpting)",
+      "craft:shipmaking": "Craft (Shipmaking)",
+      "craft:stonemasonry": "Craft (Stonemasonry)",
+      "craft:trapmaking": "Craft (Trapmaking)",
+      "craft:weaponsmithing": "Craft (Weaponsmithing)",
+      "craft:weaving": "Craft (Weaving)",
+      "perform:act": "Perform (Act)",
+      "perform:comedy": "Perform (Comedy)",
+      "perform:dance": "Perform (Dance)",
+      "perform:keyboard-instruments": "Perform (Keyboard Instruments)",
+      "perform:oratory": "Perform (Oratory)",
+      "perform:percussion-instruments": "Perform (Percussion Instruments)",
+      "perform:sing": "Perform (Sing)",
+      "perform:string-instruments": "Perform (String Instruments)",
+      "perform:wind-instruments": "Perform (Wind Instruments)",
+      "profession:farmer": "Profession (Farmer)",
+      "profession:fisher": "Profession (Fisher)",
+      "profession:herbalist": "Profession (Herbalist)",
+      "profession:innkeeper": "Profession (Innkeeper)",
+      "profession:librarian": "Profession (Librarian)",
+      "profession:merchant": "Profession (Merchant)",
+      "profession:miner": "Profession (Miner)",
+      "profession:sailor": "Profession (Sailor)",
+      "profession:scribe": "Profession (Scribe)",
+      "profession:soldier": "Profession (Soldier)"
+    }
+  },
+  "entityText": {
+    "skills": {
+      "craft": {
+        "name": "Craft"
+      },
+      "perform": {
+        "name": "Perform"
+      },
+      "profession": {
+        "name": "Profession"
+      },
+      "craft:alchemy": {
+        "name": "Craft (Alchemy)"
+      },
+      "craft:armorsmithing": {
+        "name": "Craft (Armorsmithing)"
+      },
+      "craft:basketweaving": {
+        "name": "Craft (Basketweaving)"
+      },
+      "craft:blacksmithing": {
+        "name": "Craft (Blacksmithing)"
+      },
+      "craft:bookbinding": {
+        "name": "Craft (Bookbinding)"
+      },
+      "craft:bowmaking": {
+        "name": "Craft (Bowmaking)"
+      },
+      "craft:calligraphy": {
+        "name": "Craft (Calligraphy)"
+      },
+      "craft:carpentry": {
+        "name": "Craft (Carpentry)"
+      },
+      "craft:gemcutting": {
+        "name": "Craft (Gemcutting)"
+      },
+      "craft:glassblowing": {
+        "name": "Craft (Glassblowing)"
+      },
+      "craft:jewelry": {
+        "name": "Craft (Jewelry)"
+      },
+      "craft:leatherworking": {
+        "name": "Craft (Leatherworking)"
+      },
+      "craft:locksmithing": {
+        "name": "Craft (Locksmithing)"
+      },
+      "craft:painting": {
+        "name": "Craft (Painting)"
+      },
+      "craft:pottery": {
+        "name": "Craft (Pottery)"
+      },
+      "craft:sculpting": {
+        "name": "Craft (Sculpting)"
+      },
+      "craft:shipmaking": {
+        "name": "Craft (Shipmaking)"
+      },
+      "craft:stonemasonry": {
+        "name": "Craft (Stonemasonry)"
+      },
+      "craft:trapmaking": {
+        "name": "Craft (Trapmaking)"
+      },
+      "craft:weaponsmithing": {
+        "name": "Craft (Weaponsmithing)"
+      },
+      "craft:weaving": {
+        "name": "Craft (Weaving)"
+      },
+      "perform:act": {
+        "name": "Perform (Act)"
+      },
+      "perform:comedy": {
+        "name": "Perform (Comedy)"
+      },
+      "perform:dance": {
+        "name": "Perform (Dance)"
+      },
+      "perform:keyboard-instruments": {
+        "name": "Perform (Keyboard Instruments)"
+      },
+      "perform:oratory": {
+        "name": "Perform (Oratory)"
+      },
+      "perform:percussion-instruments": {
+        "name": "Perform (Percussion Instruments)"
+      },
+      "perform:sing": {
+        "name": "Perform (Sing)"
+      },
+      "perform:string-instruments": {
+        "name": "Perform (String Instruments)"
+      },
+      "perform:wind-instruments": {
+        "name": "Perform (Wind Instruments)"
+      },
+      "profession:farmer": {
+        "name": "Profession (Farmer)"
+      },
+      "profession:fisher": {
+        "name": "Profession (Fisher)"
+      },
+      "profession:herbalist": {
+        "name": "Profession (Herbalist)"
+      },
+      "profession:innkeeper": {
+        "name": "Profession (Innkeeper)"
+      },
+      "profession:librarian": {
+        "name": "Profession (Librarian)"
+      },
+      "profession:merchant": {
+        "name": "Profession (Merchant)"
+      },
+      "profession:miner": {
+        "name": "Profession (Miner)"
+      },
+      "profession:sailor": {
+        "name": "Profession (Sailor)"
+      },
+      "profession:scribe": {
+        "name": "Profession (Scribe)"
+      },
+      "profession:soldier": {
+        "name": "Profession (Soldier)"
+      }
+    }
+  }
+}

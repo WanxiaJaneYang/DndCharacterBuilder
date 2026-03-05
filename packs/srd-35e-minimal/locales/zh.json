@@ -47,7 +47,50 @@
       "climb": "攀爬",
       "jump": "跳跃",
       "diplomacy": "交涉",
-      "ride": "骑术"
+      "ride": "骑术",
+      "craft": "工艺",
+      "perform": "表演",
+      "profession": "行业",
+      "craft:alchemy": "工艺（炼金术）",
+      "craft:armorsmithing": "工艺（铠甲锻造）",
+      "craft:basketweaving": "工艺（编篮）",
+      "craft:blacksmithing": "工艺（铁匠）",
+      "craft:bookbinding": "工艺（装订）",
+      "craft:bowmaking": "工艺（制弓）",
+      "craft:calligraphy": "工艺（书法）",
+      "craft:carpentry": "工艺（木工）",
+      "craft:gemcutting": "工艺（宝石切割）",
+      "craft:glassblowing": "工艺（玻璃吹制）",
+      "craft:jewelry": "工艺（珠宝）",
+      "craft:leatherworking": "工艺（皮革）",
+      "craft:locksmithing": "工艺（锁匠）",
+      "craft:painting": "工艺（绘画）",
+      "craft:pottery": "工艺（陶艺）",
+      "craft:sculpting": "工艺（雕塑）",
+      "craft:shipmaking": "工艺（造船）",
+      "craft:stonemasonry": "工艺（石工）",
+      "craft:trapmaking": "工艺（制陷阱）",
+      "craft:weaponsmithing": "工艺（武器锻造）",
+      "craft:weaving": "工艺（织造）",
+      "perform:act": "表演（戏剧）",
+      "perform:comedy": "表演（喜剧）",
+      "perform:dance": "表演（舞蹈）",
+      "perform:keyboard-instruments": "表演（键盘乐器）",
+      "perform:oratory": "表演（演说）",
+      "perform:percussion-instruments": "表演（打击乐器）",
+      "perform:sing": "表演（歌唱）",
+      "perform:string-instruments": "表演（弦乐器）",
+      "perform:wind-instruments": "表演（管乐器）",
+      "profession:farmer": "行业（农夫）",
+      "profession:fisher": "行业（渔夫）",
+      "profession:herbalist": "行业（草药师）",
+      "profession:innkeeper": "行业（旅店老板）",
+      "profession:librarian": "行业（图书管理员）",
+      "profession:merchant": "行业（商人）",
+      "profession:miner": "行业（矿工）",
+      "profession:sailor": "行业（水手）",
+      "profession:scribe": "行业（抄写员）",
+      "profession:soldier": "行业（士兵）"
     },
     "rules": {
       "base-ac": "基础AC",
@@ -150,6 +193,135 @@
       },
       "ride": {
         "name": "骑术"
+      },
+      "craft": {
+        "name": "工艺"
+      },
+      "perform": {
+        "name": "表演"
+      },
+      "profession": {
+        "name": "行业"
+      },
+      "craft:alchemy": {
+        "name": "工艺（炼金术）"
+      },
+      "craft:armorsmithing": {
+        "name": "工艺（铠甲锻造）"
+      },
+      "craft:basketweaving": {
+        "name": "工艺（编篮）"
+      },
+      "craft:blacksmithing": {
+        "name": "工艺（铁匠）"
+      },
+      "craft:bookbinding": {
+        "name": "工艺（装订）"
+      },
+      "craft:bowmaking": {
+        "name": "工艺（制弓）"
+      },
+      "craft:calligraphy": {
+        "name": "工艺（书法）"
+      },
+      "craft:carpentry": {
+        "name": "工艺（木工）"
+      },
+      "craft:gemcutting": {
+        "name": "工艺（宝石切割）"
+      },
+      "craft:glassblowing": {
+        "name": "工艺（玻璃吹制）"
+      },
+      "craft:jewelry": {
+        "name": "工艺（珠宝）"
+      },
+      "craft:leatherworking": {
+        "name": "工艺（皮革）"
+      },
+      "craft:locksmithing": {
+        "name": "工艺（锁匠）"
+      },
+      "craft:painting": {
+        "name": "工艺（绘画）"
+      },
+      "craft:pottery": {
+        "name": "工艺（陶艺）"
+      },
+      "craft:sculpting": {
+        "name": "工艺（雕塑）"
+      },
+      "craft:shipmaking": {
+        "name": "工艺（造船）"
+      },
+      "craft:stonemasonry": {
+        "name": "工艺（石工）"
+      },
+      "craft:trapmaking": {
+        "name": "工艺（制陷阱）"
+      },
+      "craft:weaponsmithing": {
+        "name": "工艺（武器锻造）"
+      },
+      "craft:weaving": {
+        "name": "工艺（织造）"
+      },
+      "perform:act": {
+        "name": "表演（戏剧）"
+      },
+      "perform:comedy": {
+        "name": "表演（喜剧）"
+      },
+      "perform:dance": {
+        "name": "表演（舞蹈）"
+      },
+      "perform:keyboard-instruments": {
+        "name": "表演（键盘乐器）"
+      },
+      "perform:oratory": {
+        "name": "表演（演说）"
+      },
+      "perform:percussion-instruments": {
+        "name": "表演（打击乐器）"
+      },
+      "perform:sing": {
+        "name": "表演（歌唱）"
+      },
+      "perform:string-instruments": {
+        "name": "表演（弦乐器）"
+      },
+      "perform:wind-instruments": {
+        "name": "表演（管乐器）"
+      },
+      "profession:farmer": {
+        "name": "行业（农夫）"
+      },
+      "profession:fisher": {
+        "name": "行业（渔夫）"
+      },
+      "profession:herbalist": {
+        "name": "行业（草药师）"
+      },
+      "profession:innkeeper": {
+        "name": "行业（旅店老板）"
+      },
+      "profession:librarian": {
+        "name": "行业（图书管理员）"
+      },
+      "profession:merchant": {
+        "name": "行业（商人）"
+      },
+      "profession:miner": {
+        "name": "行业（矿工）"
+      },
+      "profession:sailor": {
+        "name": "行业（水手）"
+      },
+      "profession:scribe": {
+        "name": "行业（抄写员）"
+      },
+      "profession:soldier": {
+        "name": "行业（士兵）"
       }
     },
     "rules": {
