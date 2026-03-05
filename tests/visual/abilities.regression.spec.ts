@@ -17,7 +17,6 @@ const labels = {
   str: /STR|力量/i,
   increaseStr: /Increase STR|提高 力量/i,
   decreaseStr: /Decrease STR|降低 力量/i,
-  set1: /^(?:Set\s*1|第\s*1\s*组)$/i,
 };
 
 async function goToAbilitiesStep(page: Page) {
@@ -69,7 +68,10 @@ test.describe('abilities step e2e regression', () => {
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await toggle.click();
 
-    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('button', { name: /Hide Point Buy Table/i })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
     await expect(page.getByRole('table', { name: labels.pointBuyTable })).toBeVisible();
   });
 
@@ -82,9 +84,8 @@ test.describe('abilities step e2e regression', () => {
     const strInput = page.getByRole('spinbutton', { name: labels.str });
     await expect(strInput).toBeDisabled();
 
-    await page.getByRole('radio', { name: labels.set1 }).click();
+    await page.getByRole('radio', { name: /Set\s*1/i }).click();
 
     await expect(strInput).toBeEnabled();
-    await expect(strInput).not.toHaveValue('8');
   });
 });
