@@ -37,7 +37,11 @@ This checklist maps high-level requirements from the Product Requirements Docume
 - [x] Add skills step to flow and implement the current skills allocator UI.
 - [x] Enforce level-1 budget and max-rank rules in the engine.
 - [x] Save allocations in engine state.
+- [x] Keep `Open Lock` and `Use Rope` as non-ACP in current 3.5 pack data (`#138`).
+- [x] Introduce specialized subskill data support for `Perform/Craft/Profession` in pack + engine model (grouped UI still pending).
 - [ ] Finish engine-driven legality/error surfaces so the UI no longer relies on fallback defaults.
+- [ ] Implement proficiency-aware ACP handling for Ride/armor interactions (`#139`).
+- [ ] Implement generic conditional skill modifiers (3.5 synergy first use-case) (`#140`).
 
 ## Equipment
 
@@ -73,6 +77,11 @@ This checklist maps high-level requirements from the Product Requirements Docume
 
 - Maintain this checklist as the PRD evolves.
 - Link remaining open items to GitHub issues or backlog docs.
+  - Skills UI grouping: `#133`
+  - Skills localization coverage: `#134`
+  - Craft/Profession catalog strategy: `#135`
+  - Proficiency-aware ACP handling: `#139`
+  - Conditional skill modifiers / synergy primitive: `#140`
 - Mark tasks complete only when the repo contains the implementation and verification evidence.
 
 ## Checklist
@@ -80,4 +89,4 @@ This checklist maps high-level requirements from the Product Requirements Docume
 - [x] Checklist drafted.
 - [x] Tasks mapped to PRD requirements.
 - [x] Links to documentation included.
-- [ ] Checklist reviewed and updated during development.
+- [x] Checklist reviewed and updated during development.
