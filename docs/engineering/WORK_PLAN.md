@@ -90,6 +90,32 @@ This living document tracks the engineering tasks required to implement the DnDC
 - Recommended implementation order and issue relationships are tracked in `docs/engineering/BACKLOG_TRIAGE.md`.
 - Use that document before starting new issue work so duplicate or umbrella issues stay aligned with the repo's actual state.
 
+## Next Sprint Plan (2026-03-06 to 2026-03-13)
+
+### Sprint Goal
+
+Ship a reliable baseline for equipment/combat + unresolved-rules contract confidence while expanding minimal SRD equipment data.
+
+### Planned Scope
+
+1. Reliability baseline
+   - `#82` [P0] Minimal equipment model to support AC + attack lines
+   - `#123` [P1] E2E regression: Race step
+2. Contract confidence
+   - `#96` [P1] Contract tests: skill points budget invariants
+   - `#142` [P1] Expand unresolved-rules contract fixture coverage
+3. Data breadth kickoff
+   - `#141` [P1] Expand SRD 3.5 equipment catalog in minimal pack
+4. Carry-in if capacity remains
+   - `#131` [P1] Show untrained skills with modifiers on review sheet
+   - `#77` [P1] Feat legality + fighter bonus feat handling
+
+### Exit Criteria
+
+- Equipment/attack output is stable under contract and E2E checks.
+- Unresolved-rules fixture coverage blocks regressions in sheet-mapped fields.
+- Minimal equipment catalog supports representative level-1 build paths.
+
 ## Checklist
 
 - [x] Normalized MVP export/review contract implemented.
