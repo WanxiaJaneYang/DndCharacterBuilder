@@ -1,53 +1,14 @@
 [
   {
-    "id": "spot",
-    "name": "Spot",
+    "id": "appraise",
+    "name": "Appraise",
     "entityType": "skills",
     "data": {
-      "ability": "wis",
+      "ability": "int",
       "armorCheckPenaltyApplies": false
     },
-    "summary": "Spot (skill) option.",
-    "description": "Detailed reference entry for Spot in the skills dataset.",
-    "portraitUrl": null,
-    "iconUrl": null
-  },
-  {
-    "id": "listen",
-    "name": "Listen",
-    "entityType": "skills",
-    "data": {
-      "ability": "wis",
-      "armorCheckPenaltyApplies": false
-    },
-    "summary": "Listen (skill) option.",
-    "description": "Detailed reference entry for Listen in the skills dataset.",
-    "portraitUrl": null,
-    "iconUrl": null
-  },
-  {
-    "id": "climb",
-    "name": "Climb",
-    "entityType": "skills",
-    "data": {
-      "ability": "str",
-      "armorCheckPenaltyApplies": true
-    },
-    "summary": "Climb (skill) option.",
-    "description": "Detailed reference entry for Climb in the skills dataset.",
-    "portraitUrl": null,
-    "iconUrl": null
-  },
-  {
-    "id": "jump",
-    "name": "Jump",
-    "entityType": "skills",
-    "data": {
-      "ability": "str",
-      "armorCheckPenaltyApplies": true
-    },
-    "summary": "Jump (skill) option.",
-    "description": "Detailed reference entry for Jump in the skills dataset.",
+    "summary": "Appraise (skill) option.",
+    "description": "Detailed reference entry for Appraise in the skills dataset.",
     "portraitUrl": null,
     "iconUrl": null
   },
@@ -65,28 +26,67 @@
     "iconUrl": null
   },
   {
-    "id": "escape-artist",
-    "name": "Escape Artist",
+    "id": "bluff",
+    "name": "Bluff",
     "entityType": "skills",
     "data": {
-      "ability": "dex",
-      "armorCheckPenaltyApplies": true
+      "ability": "cha",
+      "armorCheckPenaltyApplies": false
     },
-    "summary": "Escape Artist (skill) option.",
-    "description": "Detailed reference entry for Escape Artist in the skills dataset.",
+    "summary": "Bluff (skill) option.",
+    "description": "Detailed reference entry for Bluff in the skills dataset.",
     "portraitUrl": null,
     "iconUrl": null
   },
   {
-    "id": "tumble",
-    "name": "Tumble",
+    "id": "climb",
+    "name": "Climb",
     "entityType": "skills",
     "data": {
-      "ability": "dex",
+      "ability": "str",
       "armorCheckPenaltyApplies": true
     },
-    "summary": "Tumble (skill) option.",
-    "description": "Detailed reference entry for Tumble in the skills dataset.",
+    "summary": "Climb (skill) option.",
+    "description": "Detailed reference entry for Climb in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "concentration",
+    "name": "Concentration",
+    "entityType": "skills",
+    "data": {
+      "ability": "con",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Concentration (skill) option.",
+    "description": "Detailed reference entry for Concentration in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "craft",
+    "name": "Craft",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Craft (skill) option.",
+    "description": "Detailed reference entry for Craft in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "decipher-script",
+    "name": "Decipher Script",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Decipher Script (skill) option.",
+    "description": "Detailed reference entry for Decipher Script in the skills dataset.",
     "portraitUrl": null,
     "iconUrl": null
   },
@@ -104,15 +104,483 @@
     "iconUrl": null
   },
   {
-    "id": "ride",
-    "name": "Ride",
+    "id": "disable-device",
+    "name": "Disable Device",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Disable Device (skill) option.",
+    "description": "Detailed reference entry for Disable Device in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "disguise",
+    "name": "Disguise",
+    "entityType": "skills",
+    "data": {
+      "ability": "cha",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Disguise (skill) option.",
+    "description": "Detailed reference entry for Disguise in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "escape-artist",
+    "name": "Escape Artist",
     "entityType": "skills",
     "data": {
       "ability": "dex",
       "armorCheckPenaltyApplies": true
     },
+    "summary": "Escape Artist (skill) option.",
+    "description": "Detailed reference entry for Escape Artist in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "forgery",
+    "name": "Forgery",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Forgery (skill) option.",
+    "description": "Detailed reference entry for Forgery in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "gather-information",
+    "name": "Gather Information",
+    "entityType": "skills",
+    "data": {
+      "ability": "cha",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Gather Information (skill) option.",
+    "description": "Detailed reference entry for Gather Information in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "handle-animal",
+    "name": "Handle Animal",
+    "entityType": "skills",
+    "data": {
+      "ability": "cha",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Handle Animal (skill) option.",
+    "description": "Detailed reference entry for Handle Animal in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "heal",
+    "name": "Heal",
+    "entityType": "skills",
+    "data": {
+      "ability": "wis",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Heal (skill) option.",
+    "description": "Detailed reference entry for Heal in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "hide",
+    "name": "Hide",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Hide (skill) option.",
+    "description": "Detailed reference entry for Hide in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "intimidate",
+    "name": "Intimidate",
+    "entityType": "skills",
+    "data": {
+      "ability": "cha",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Intimidate (skill) option.",
+    "description": "Detailed reference entry for Intimidate in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "jump",
+    "name": "Jump",
+    "entityType": "skills",
+    "data": {
+      "ability": "str",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Jump (skill) option.",
+    "description": "Detailed reference entry for Jump in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-arcana",
+    "name": "Knowledge (Arcana)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Arcana) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Arcana) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-architecture-and-engineering",
+    "name": "Knowledge (Architecture and Engineering)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Architecture and Engineering) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Architecture and Engineering) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-dungeoneering",
+    "name": "Knowledge (Dungeoneering)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Dungeoneering) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Dungeoneering) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-geography",
+    "name": "Knowledge (Geography)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Geography) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Geography) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-history",
+    "name": "Knowledge (History)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (History) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (History) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-local",
+    "name": "Knowledge (Local)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Local) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Local) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-nature",
+    "name": "Knowledge (Nature)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Nature) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Nature) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-nobility-and-royalty",
+    "name": "Knowledge (Nobility and Royalty)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Nobility and Royalty) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Nobility and Royalty) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-religion",
+    "name": "Knowledge (Religion)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (Religion) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (Religion) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "knowledge-the-planes",
+    "name": "Knowledge (The Planes)",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Knowledge (The Planes) (skill) option.",
+    "description": "Detailed reference entry for Knowledge (The Planes) in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "listen",
+    "name": "Listen",
+    "entityType": "skills",
+    "data": {
+      "ability": "wis",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Listen (skill) option.",
+    "description": "Detailed reference entry for Listen in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "move-silently",
+    "name": "Move Silently",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Move Silently (skill) option.",
+    "description": "Detailed reference entry for Move Silently in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "open-lock",
+    "name": "Open Lock",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Open Lock (skill) option.",
+    "description": "Detailed reference entry for Open Lock in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "perform",
+    "name": "Perform",
+    "entityType": "skills",
+    "data": {
+      "ability": "cha",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Perform (skill) option.",
+    "description": "Detailed reference entry for Perform in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "profession",
+    "name": "Profession",
+    "entityType": "skills",
+    "data": {
+      "ability": "wis",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Profession (skill) option.",
+    "description": "Detailed reference entry for Profession in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "ride",
+    "name": "Ride",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": false
+    },
     "summary": "Ride (skill) option.",
     "description": "Detailed reference entry for Ride in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "search",
+    "name": "Search",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Search (skill) option.",
+    "description": "Detailed reference entry for Search in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "sense-motive",
+    "name": "Sense Motive",
+    "entityType": "skills",
+    "data": {
+      "ability": "wis",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Sense Motive (skill) option.",
+    "description": "Detailed reference entry for Sense Motive in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "sleight-of-hand",
+    "name": "Sleight Of Hand",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Sleight Of Hand (skill) option.",
+    "description": "Detailed reference entry for Sleight Of Hand in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "speak-language",
+    "name": "Speak Language",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Speak Language (skill) option.",
+    "description": "Detailed reference entry for Speak Language in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "spellcraft",
+    "name": "Spellcraft",
+    "entityType": "skills",
+    "data": {
+      "ability": "int",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Spellcraft (skill) option.",
+    "description": "Detailed reference entry for Spellcraft in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "spot",
+    "name": "Spot",
+    "entityType": "skills",
+    "data": {
+      "ability": "wis",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Spot (skill) option.",
+    "description": "Detailed reference entry for Spot in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "survival",
+    "name": "Survival",
+    "entityType": "skills",
+    "data": {
+      "ability": "wis",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Survival (skill) option.",
+    "description": "Detailed reference entry for Survival in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "swim",
+    "name": "Swim",
+    "entityType": "skills",
+    "data": {
+      "ability": "str",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Swim (skill) option.",
+    "description": "Detailed reference entry for Swim in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "tumble",
+    "name": "Tumble",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": true
+    },
+    "summary": "Tumble (skill) option.",
+    "description": "Detailed reference entry for Tumble in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "use-magic-device",
+    "name": "Use Magic Device",
+    "entityType": "skills",
+    "data": {
+      "ability": "cha",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Use Magic Device (skill) option.",
+    "description": "Detailed reference entry for Use Magic Device in the skills dataset.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "use-rope",
+    "name": "Use Rope",
+    "entityType": "skills",
+    "data": {
+      "ability": "dex",
+      "armorCheckPenaltyApplies": false
+    },
+    "summary": "Use Rope (skill) option.",
+    "description": "Detailed reference entry for Use Rope in the skills dataset.",
     "portraitUrl": null,
     "iconUrl": null
   }
