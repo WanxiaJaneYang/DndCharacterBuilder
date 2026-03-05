@@ -36,6 +36,7 @@ Expected: FAIL because no referential-integrity check exists yet.
 - Build pack-closure ID indexes by entity type (pack + declared dependencies), not global cross-pack indexes.
 - Add initial curated rule:
   - races.data.favoredClass -> classes (`\"any\"` sentinel excluded)
+- Explicitly defer `classSkills` and `skillBonuses` validation rules until skill dataset completeness issues (`#70`, `#91`) are resolved.
 - Collect missing references and throw one consolidated error.
 
 **Step 2: Run targeted tests**
