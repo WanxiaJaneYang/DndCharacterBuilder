@@ -12,6 +12,7 @@ const playerNamePattern = new RegExp(`${en.playerTitle}|${zh.playerTitle}`, 'i')
 const dmNamePattern = new RegExp(`${en.dmTitle}|${zh.dmTitle}`, 'i');
 const nextPattern = new RegExp(`${en.next}|${zh.next}`, 'i');
 const reviewPattern = new RegExp(`${en.review}|${zh.review}`, 'i');
+const unresolvedPattern = new RegExp(`${en.reviewUnresolvedLabel}|${zh.reviewUnresolvedLabel}`, 'i');
 const startWizardPattern = new RegExp(`${en.startWizard}|${zh.startWizard}`, 'i');
 const rulesSetupTitlePattern = new RegExp(`${en.rulesSetupTitle}|${zh.rulesSetupTitle}`, 'i');
 const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|战士(?:（1级）)?)$/i;
@@ -454,6 +455,23 @@ describe('role and language behavior', () => {
     expect(screen.getAllByText(elfLabelPattern).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Race/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Fighter|战士/i)).toBeNull();
+  });
+
+  it('shows unresolved placeholders on review when metadata selections are missing', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+
+    const nextButton = screen.getByRole('button', { name: nextPattern });
+    for (let i = 0; i < 16; i += 1) {
+      if ((nextButton as HTMLButtonElement).disabled) break;
+      await user.click(nextButton);
+    }
+
+    expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
+    expect(screen.getAllByText(unresolvedPattern).length).toBeGreaterThanOrEqual(2);
   });
 
   it('supports back navigation from rules setup and from first wizard step', async () => {
