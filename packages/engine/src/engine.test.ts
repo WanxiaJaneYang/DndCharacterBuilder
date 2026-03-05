@@ -1529,6 +1529,59 @@ describe("engine determinism", () => {
     });
   });
 
+  it("does not apply synergy bonuses when effective cross-class source ranks are below threshold", () => {
+    let state = applyChoice(initialState, "name", "SynergyBelowThreshold");
+    state = applyChoice(state, "abilities", { str: 10, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { tumble: 4.75 }, context);
+
+    const sheet = finalizeCharacter(state, context);
+    const balance = sheet.skills.balance;
+    const phase2Balance = sheet.phase2.skills.find((skill) => skill.id === "balance");
+
+    expect(sheet.skills.tumble?.ranks).toBe(4.5);
+    expect(balance).toMatchObject({
+      miscBonus: 0,
+      total: 1
+    });
+    expect(phase2Balance).toMatchObject({
+      misc: 0,
+      total: 1
+    });
+  });
+
+  it("applies 3.5 skill synergy at 5 effective source ranks and surfaces misc breakdown", () => {
+    let state = applyChoice(initialState, "name", "SynergyAtThreshold");
+    state = applyChoice(state, "abilities", { str: 10, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { tumble: 5 }, context);
+
+    const sheet = finalizeCharacter(state, context);
+    const balance = sheet.skills.balance;
+    const phase2Balance = sheet.phase2.skills.find((skill) => skill.id === "balance");
+
+    expect(sheet.skills.tumble?.ranks).toBe(5);
+    expect(balance).toMatchObject({
+      miscBonus: 2,
+      total: 3
+    });
+    expect(balance?.miscBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "synergy-tumble-balance",
+          sourceType: "skillSynergy",
+          bonus: 2
+        })
+      ])
+    );
+    expect(phase2Balance).toMatchObject({
+      misc: 2,
+      total: 3
+    });
+  });
+
   it("returns STEP_LIMIT_EXCEEDED when selections exceed dynamic feat limit", () => {
     let state = applyChoice(initialState, "name", "FeatLimit");
     state = applyChoice(state, "abilities", { str: 16, dex: 10, con: 10, int: 10, wis: 10, cha: 10 });
