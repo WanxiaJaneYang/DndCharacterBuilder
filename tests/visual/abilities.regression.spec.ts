@@ -1,8 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from "@playwright/test";
 
-type Locale = 'en' | 'zh';
+type Locale = "en" | "zh";
 
-const locales: Locale[] = ['en', 'zh'];
+const locales: Locale[] = ["en", "zh"];
 
 const labels = {
   player: /Player|\u73a9\u5bb6/i,
@@ -15,14 +15,17 @@ const labels = {
   abilityHeading: /Ability Scores|\u5c5e\u6027/i,
   featHeading: /Feat|\u4e13\u957f/i,
   reviewHeading: /Review|\u603b\u89c8/i,
-  reviewAbilityBreakdown: /Ability Score Breakdown|\u5c5e\u6027\u503c\u660e\u7ec6/i,
+  reviewAbilityBreakdown:
+    /Ability Score Breakdown|\u5c5e\u6027\u503c\u660e\u7ec6/i,
   reviewFingerprintLabel: /Fingerprint|\u6307\u7eb9/i,
   human: /Human|\u4eba\u7c7b/i,
-  fighter: /^(?:Fighter(?: \(Level 1\))?|\u6218\u58eb(?:\uff081\u7ea7\uff09)?)$/i,
+  fighter:
+    /^(?:Fighter(?: \(Level 1\))?|\u6218\u58eb(?:\uff081\u7ea7\uff09)?)$/i,
   abilityGeneration: /Ability Generation|\u751f\u6210\u65b9\u5f0f/i,
   pointCap: /Point Cap|\u70b9\u6570\u4e0a\u9650/i,
   pointsRemaining: /Points Remaining|\u5269\u4f59\u70b9\u6570/i,
-  pointBuyToggle: /(?:Show|Hide) Point Buy Table|(?:\u5c55\u5f00|\u6536\u8d77)\u70b9\u8d2d\u8868/i,
+  pointBuyToggle:
+    /(?:Show|Hide) Point Buy Table|(?:\u5c55\u5f00|\u6536\u8d77)\u70b9\u8d2d\u8868/i,
   pointBuyTable: /Point Buy Cost Table|\u70b9\u8d2d\u82b1\u8d39\u8868/i,
   str: /STR|\u529b\u91cf/i,
   increaseStr: /Increase STR|\u63d0\u9ad8\s*\u529b\u91cf/i,
@@ -33,14 +36,14 @@ const labels = {
 };
 
 async function chooseLanguage(page: Page, locale: Locale) {
-  const radioName = locale === 'zh' ? labels.chinese : labels.english;
-  const radio = page.getByRole('radio', { name: radioName });
+  const radioName = locale === "zh" ? labels.chinese : labels.english;
+  const radio = page.getByRole("radio", { name: radioName });
   await radio.click();
   await expect(page.locator(`main[lang="${locale}"]`)).toBeVisible();
 }
 
 async function clickNext(page: Page) {
-  const next = page.getByRole('button', { name: labels.next });
+  const next = page.getByRole("button", { name: labels.next });
   await expect(next).toBeVisible();
   await next.scrollIntoViewIfNeeded();
   // Mobile layouts can have overlapping content near footer actions.
@@ -48,117 +51,174 @@ async function clickNext(page: Page) {
 }
 
 async function goToReviewStep(page: Page) {
-  for (let i = 0; i < 12; i += 1) {
-    if (await page.getByRole('heading', { name: labels.reviewHeading }).isVisible()) {
+  for (let i = 0; i < 50; i += 1) {
+    if (
+      await page
+        .getByRole("heading", { name: labels.reviewHeading })
+        .isVisible()
+    ) {
       return;
     }
+    const next = page.getByRole("button", { name: labels.next });
+    if (!(await next.isVisible()) || (await next.isDisabled())) break;
     await clickNext(page);
   }
-  await expect(page.getByRole('heading', { name: labels.reviewHeading })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: labels.reviewHeading }),
+  ).toBeVisible();
 }
 
 async function goToAbilitiesStep(page: Page, locale: Locale) {
-  await page.goto('/');
+  await page.goto("/");
   await chooseLanguage(page, locale);
 
-  await page.getByRole('button', { name: labels.player }).click();
-  await expect(page.getByRole('heading', { name: labels.rulesSetupHeading })).toBeVisible();
-  await page.getByRole('button', { name: labels.startWizard }).click();
+  await page.getByRole("button", { name: labels.player }).click();
+  await expect(
+    page.getByRole("heading", { name: labels.rulesSetupHeading }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: labels.startWizard }).click();
 
-  await expect(page.getByRole('heading', { name: labels.raceHeading })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: labels.raceHeading }),
+  ).toBeVisible();
   await page.getByLabel(labels.human).click();
   await clickNext(page);
 
-  await expect(page.getByRole('heading', { name: labels.classHeading })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: labels.classHeading }),
+  ).toBeVisible();
   await page.getByLabel(labels.fighter).click();
   await clickNext(page);
 
-  await expect(page.getByRole('heading', { name: labels.abilityHeading })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: labels.abilityHeading }),
+  ).toBeVisible();
 }
 
-test.describe('abilities step e2e regression', () => {
+test.describe("abilities step e2e regression", () => {
   for (const locale of locales) {
-    test(`point-buy defaults and STR stepping update remaining points correctly (${locale})`, async ({ page }) => {
+    test(`point-buy defaults and STR stepping update remaining points correctly (${locale})`, async ({
+      page,
+    }) => {
       await goToAbilitiesStep(page, locale);
 
-      await expect(page.getByRole('combobox', { name: labels.abilityGeneration })).toHaveValue('pointBuy');
-      await expect(page.getByRole('spinbutton', { name: labels.pointCap })).toHaveValue('32');
-      await expect(page.getByText(/(?:Points Remaining|\u5269\u4f59\u70b9\u6570):\s*32/i)).toBeVisible();
+      await expect(
+        page.getByRole("combobox", { name: labels.abilityGeneration }),
+      ).toHaveValue("pointBuy");
+      await expect(
+        page.getByRole("spinbutton", { name: labels.pointCap }),
+      ).toHaveValue("32");
+      await expect(
+        page.getByText(/(?:Points Remaining|\u5269\u4f59\u70b9\u6570):\s*32/i),
+      ).toBeVisible();
 
-      const strInput = page.getByRole('spinbutton', { name: labels.str });
-      await expect(strInput).toHaveValue('8');
+      const strInput = page.getByRole("spinbutton", { name: labels.str });
+      await expect(strInput).toHaveValue("8");
 
-      await page.getByRole('button', { name: labels.increaseStr }).click();
-      await expect(strInput).toHaveValue('9');
-      await expect(page.getByText(/(?:Points Remaining|\u5269\u4f59\u70b9\u6570):\s*31/i)).toBeVisible();
+      await page.getByRole("button", { name: labels.increaseStr }).click();
+      await expect(strInput).toHaveValue("9");
+      await expect(
+        page.getByText(/(?:Points Remaining|\u5269\u4f59\u70b9\u6570):\s*31/i),
+      ).toBeVisible();
 
-      await page.getByRole('button', { name: labels.increaseStr }).click();
-      await expect(strInput).toHaveValue('10');
-      await expect(page.getByText(/(?:Points Remaining|\u5269\u4f59\u70b9\u6570):\s*30/i)).toBeVisible();
+      await page.getByRole("button", { name: labels.increaseStr }).click();
+      await expect(strInput).toHaveValue("10");
+      await expect(
+        page.getByText(/(?:Points Remaining|\u5269\u4f59\u70b9\u6570):\s*30/i),
+      ).toBeVisible();
 
-      await page.getByRole('button', { name: labels.decreaseStr }).click();
-      await expect(strInput).toHaveValue('9');
-      await expect(page.getByText(/(?:Points Remaining|\u5269\u4f59\u70b9\u6570):\s*31/i)).toBeVisible();
+      await page.getByRole("button", { name: labels.decreaseStr }).click();
+      await expect(strInput).toHaveValue("9");
+      await expect(
+        page.getByText(/(?:Points Remaining|\u5269\u4f59\u70b9\u6570):\s*31/i),
+      ).toBeVisible();
     });
 
-    test(`point-buy table is hidden by default and toggles open (${locale})`, async ({ page }) => {
+    test(`point-buy table is hidden by default and toggles open (${locale})`, async ({
+      page,
+    }) => {
       await goToAbilitiesStep(page, locale);
 
-      const table = page.getByRole('table', { name: labels.pointBuyTable });
+      const table = page.getByRole("table", { name: labels.pointBuyTable });
       await expect(table).toBeHidden();
 
-      const toggle = page.getByRole('button', { name: labels.pointBuyToggle });
-      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      const toggle = page.getByRole("button", { name: labels.pointBuyToggle });
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
       await toggle.click();
 
-      await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
       await expect(table).toBeVisible();
     });
 
-    test(`roll-sets mode disables ability input before set selection and enables after selection (${locale})`, async ({ page }) => {
+    test(`roll-sets mode disables ability input before set selection and enables after selection (${locale})`, async ({
+      page,
+    }) => {
       await goToAbilitiesStep(page, locale);
 
-      const generationSelect = page.getByRole('combobox', { name: labels.abilityGeneration });
-      await generationSelect.selectOption('rollSets');
+      const generationSelect = page.getByRole("combobox", {
+        name: labels.abilityGeneration,
+      });
+      await generationSelect.selectOption("rollSets");
 
-      const strInput = page.getByRole('spinbutton', { name: labels.str });
+      const strInput = page.getByRole("spinbutton", { name: labels.str });
       await expect(strInput).toBeDisabled();
 
-      await page.getByRole('radio', { name: labels.set1 }).click();
+      await page.getByRole("radio", { name: labels.set1 }).click();
       await expect(strInput).toBeEnabled();
     });
 
-    test(`ability changes persist after navigating away and back (${locale})`, async ({ page }) => {
+    test(`ability changes persist after navigating away and back (${locale})`, async ({
+      page,
+    }) => {
       await goToAbilitiesStep(page, locale);
 
-      const strInput = page.getByRole('spinbutton', { name: labels.str });
-      await page.getByRole('button', { name: labels.increaseStr }).click();
-      await expect(strInput).toHaveValue('9');
+      const strInput = page.getByRole("spinbutton", { name: labels.str });
+      await page.getByRole("button", { name: labels.increaseStr }).click();
+      await expect(strInput).toHaveValue("9");
 
       await clickNext(page);
-      await expect(page.getByRole('heading', { name: labels.featHeading })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: labels.featHeading }),
+      ).toBeVisible();
 
-      await page.getByRole('button', { name: labels.back }).click();
-      await expect(page.getByRole('heading', { name: labels.abilityHeading })).toBeVisible();
-      await expect(page.getByRole('spinbutton', { name: labels.str })).toHaveValue('9');
+      await page.getByRole("button", { name: labels.back }).click();
+      await expect(
+        page.getByRole("heading", { name: labels.abilityHeading }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("spinbutton", { name: labels.str }),
+      ).toHaveValue("9");
     });
 
-    test(`review reflects ability changes and provenance metadata (${locale})`, async ({ page }) => {
+    test(`review reflects ability changes and provenance metadata (${locale})`, async ({
+      page,
+    }) => {
       await goToAbilitiesStep(page, locale);
 
-      await page.getByRole('button', { name: labels.increaseStr }).click();
-      await expect(page.getByRole('spinbutton', { name: labels.str })).toHaveValue('9');
+      await page.getByRole("button", { name: labels.increaseStr }).click();
+      await expect(
+        page.getByRole("spinbutton", { name: labels.str }),
+      ).toHaveValue("9");
 
       await goToReviewStep(page);
-      await expect(page.getByRole('heading', { name: labels.reviewAbilityBreakdown })).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: labels.reviewAbilityBreakdown }),
+      ).toBeVisible();
       await expect(page.getByText(labels.reviewFingerprintLabel)).toBeVisible();
 
       const abilitySection = page
-        .locator('article')
-        .filter({ has: page.getByRole('heading', { name: labels.reviewAbilityBreakdown }) })
+        .locator("article")
+        .filter({
+          has: page.getByRole("heading", {
+            name: labels.reviewAbilityBreakdown,
+          }),
+        })
         .first();
-      const strRow = abilitySection.locator('tr').filter({ hasText: labels.str }).first();
-      await expect(strRow).toContainText('9');
+      const strRow = abilitySection
+        .locator("tr")
+        .filter({ hasText: labels.str })
+        .first();
+      await expect(strRow).toContainText("9");
     });
   }
 });
