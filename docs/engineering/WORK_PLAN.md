@@ -76,6 +76,7 @@ This living document tracks the engineering tasks required to implement the DnDC
 - Added race-level `deferredMechanics` tracking in schema and `races.json` so PHB-linked but not-yet-implemented race rules are indexed for fast follow-up when dependent systems land.
 - Recorded the approved deferred-mechanics normalization direction in docs so backlog metadata can migrate from engine-oriented path hints to stable concept IDs and capability IDs in a later implementation phase.
 - Implemented deferred-mechanics normalization across schema validation, tests, docs, and SRD race/class/feat pack data.
+- Merged PR #128 (issue #69) to add fail-fast pack reference integrity checks in contracts with deterministic diagnostics and pack-closure ID resolution for `races.data.favoredClass -> classes.id`.
 
 ## Deferred Mechanics Follow-up
 

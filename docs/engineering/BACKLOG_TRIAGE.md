@@ -6,48 +6,48 @@ This document records the recommended execution order for currently open GitHub 
 
 ## Evidence-Based Notes
 
+- `#69` is completed via PR #128 (merged on 2026-03-05), establishing the initial pack-reference integrity guardrail in contracts.
 - The repo already has minimal SRD contract fixtures, contract CI wiring, and contract-fixture safety checks.
 - The repo already has level-1 skill budget math, cross-class cost/rank validation, and web/UI coverage for the current skills step.
 - The repo already has a review/export surface and `sheetViewModel`, so follow-up issues in that area should target contract hardening and cleanup, not greenfield implementation.
 
 ## Recommended Order
 
-1. `#69` Pack validation: enforce referential integrity across entities
-2. Skill-system follow-up slice:
+1. Skill-system follow-up slice:
    - `#95` remaining engine/export skill-budget gaps
    - `#102` engine-driven skill allocation validation
    - `#103` remove UI defaults for missing metadata
    - `#104` expose skill budget breakdown
-3. Regression coverage for the same slice:
+2. Regression coverage for the same slice:
    - `#96` contract tests for skill-budget invariants
    - `#94` E2E regression for the skills step (completed via PR #121 on 2026-03-05)
    - `#93` E2E regression for the abilities step (completed via PR #120 on 2026-03-05)
-4. `#72` Stabilize item schema for Phase-1 sheet output
-5. `#70` minimal SRD 3.5 skill list completion
-6. `#77` feat legality and fighter bonus-feat handling
-7. Unresolved-rules slice:
+3. `#72` Stabilize item schema for Phase-1 sheet output
+4. `#70` minimal SRD 3.5 skill list completion
+5. `#77` feat legality and fighter bonus-feat handling
+6. Unresolved-rules slice:
    - `#84` sheet-mapped unresolved-rules contract
    - `#76` unresolved-rules review UX
-8. Sheet/export contract hardening:
+7. Sheet/export contract hardening:
    - `#86` sheet-spec contract snapshot
    - `#110` `sheetViewModel` schema versioning
    - `#111` attacks/damage-model reshaping
-9. `#114` and `#115` `sheetViewModel` cleanup follow-ups from `#113`
-10. `#92` sheet-spec compliance and UI layout polish
-11. Localization and data presentation:
+8. `#114` and `#115` `sheetViewModel` cleanup follow-ups from `#113`
+9. `#92` sheet-spec compliance and UI layout polish
+10. Localization and data presentation:
    - `#89` localization layer for pack entities
    - `#90` prevent raw IDs in UI
    - `#85` class-feature/feat rules text
-12. Expanded content and architecture:
+11. Expanded content and architecture:
    - `#91` SRD-complete skill dataset
    - `#88` flow-driven wizard runner
    - `#74` engine modularization
    - `#78` pack tooling
-13. `#79` export/import UX
+12. `#79` export/import UX
 
 ## Ordering Rationale
 
-- `#69` stays first because bad pack references make every other issue noisier and can invalidate later triage.
+- `#69` landed first to reduce noisy failures and provide clearer diagnostics before broader data expansion work.
 - The skill-system engine and regression slice comes before `#72` because the current repo already has partial skill-budget behavior, and locking those invariants down will de-risk the most active area faster.
 - `#72` remains early, but after the skill slice, because item-schema stabilization matters most once the current skill/export contract is trustworthy.
 
