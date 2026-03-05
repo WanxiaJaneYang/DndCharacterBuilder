@@ -33,11 +33,9 @@ Expected: FAIL because no referential-integrity check exists yet.
 **Step 1: Write minimal implementation**
 - Add `assertPackReferenceIntegrity(packsRoot: string)`.
 - Load each pack directory + entity files.
-- Build ID indexes by entity type.
-- Add curated rules:
-  - classes.data.classSkills[] -> skills
-  - races.data.favoredClass -> classes
-  - races.data.skillBonuses[].skill -> skills
+- Build pack-closure ID indexes by entity type (pack + declared dependencies), not global cross-pack indexes.
+- Add initial curated rule:
+  - races.data.favoredClass -> classes (`\"any\"` sentinel excluded)
 - Collect missing references and throw one consolidated error.
 
 **Step 2: Run targeted tests**

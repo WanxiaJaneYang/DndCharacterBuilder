@@ -5,6 +5,78 @@ import { describe, expect, it } from "vitest";
 import { ContractFixtureSchema } from "@dcb/schema";
 import { runAuthenticityChecks, runContracts } from "./index";
 
+function writeMinimalPack(
+  root: string,
+  spec: {
+    id: string;
+    dependencies?: string[];
+    raceFavoredClass?: string;
+    classes?: string[];
+  }
+): void {
+  const packDir = path.join(root, spec.id);
+  fs.mkdirSync(path.join(packDir, "entities"), { recursive: true });
+
+  fs.writeFileSync(
+    path.join(packDir, "manifest.json"),
+    JSON.stringify(
+      {
+        id: spec.id,
+        name: spec.id,
+        version: "1.0.0",
+        priority: 1,
+        dependencies: spec.dependencies ?? []
+      },
+      null,
+      2
+    )
+  );
+
+  if (spec.raceFavoredClass) {
+    fs.writeFileSync(
+      path.join(packDir, "entities/races.json"),
+      JSON.stringify(
+        [
+          {
+            id: "race-a",
+            name: "Race A",
+            entityType: "races",
+            summary: "Race summary",
+            description: "Race description",
+            data: { favoredClass: spec.raceFavoredClass }
+          }
+        ],
+        null,
+        2
+      )
+    );
+  }
+
+  const classes = spec.classes ?? [];
+  fs.writeFileSync(
+    path.join(packDir, "entities/classes.json"),
+    JSON.stringify(
+      classes.map((classId) => ({
+        id: classId,
+        name: classId,
+        entityType: "classes",
+        summary: `${classId} summary`,
+        description: `${classId} description`,
+        data: {
+          skillPointsPerLevel: 2,
+          classSkills: ["listen"],
+          hitDie: 6,
+          baseAttackProgression: "half",
+          baseSaveProgression: { fort: "poor", ref: "poor", will: "good" },
+          levelTable: [{ level: 1, bab: 0, fort: 0, ref: 0, will: 2 }]
+        }
+      })),
+      null,
+      2
+    )
+  );
+}
+
 describe("pack contracts", () => {
   it("runs all contract fixtures", () => {
     expect(() => runContracts(path.resolve(process.cwd(), "../../packs"))).not.toThrow();
@@ -190,6 +262,32 @@ describe("pack contracts", () => {
       expect(message).toMatch(/races\.json/i);
       expect(message).toMatch(/favoredClass/i);
       expect(message).toMatch(/missing-class-id/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails when favoredClass exists only in an unrelated pack", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-ref-closure-fail-"));
+    writeMinimalPack(tempRoot, { id: "pack-a", raceFavoredClass: "wizard" });
+    writeMinimalPack(tempRoot, { id: "pack-b", classes: ["wizard"] });
+
+    try {
+      expect(() => runContracts(tempRoot)).toThrow(/reference integrity/i);
+      expect(() => runContracts(tempRoot)).toThrow(/pack=pack-a/i);
+      expect(() => runContracts(tempRoot)).toThrow(/missing=wizard/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("passes when favoredClass is provided by a declared dependency", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-ref-closure-pass-"));
+    writeMinimalPack(tempRoot, { id: "pack-b", classes: ["wizard"] });
+    writeMinimalPack(tempRoot, { id: "pack-a", dependencies: ["pack-b"], raceFavoredClass: "wizard" });
+
+    try {
+      expect(() => runContracts(tempRoot)).not.toThrow();
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
