@@ -93,7 +93,7 @@
       "profession:soldier": "行业（士兵）",
       "appraise": "估价",
       "balance": "平衡",
-      "bluff": "唜骗",
+      "bluff": "唬骗",
       "concentration": "专注",
       "decipher-script": "破译文字",
       "disable-device": "拆除装置",
@@ -366,7 +366,7 @@
         "name": "平衡"
       },
       "bluff": {
-        "name": "唜骗"
+        "name": "唬骗"
       },
       "concentration": {
         "name": "专注"
