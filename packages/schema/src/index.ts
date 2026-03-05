@@ -611,6 +611,36 @@ const FeatDataSchema = z.object({
   deferredMechanics: z.array(DeferredMechanicSchema).optional()
 }).strict();
 
+const ItemWeightSchema = z.number().nonnegative();
+const ItemArmorCheckPenaltySchema = z.number().max(0);
+const WeaponDamageSchema = z.string().regex(/^\d+d\d+(?:[+-]\d+)?$/);
+const WeaponCritSchema = z.string().regex(/^(?:x\d+|\d{1,2}(?:-\d{1,2})?\/x\d+)$/);
+
+const ItemDataSchema = z.discriminatedUnion("category", [
+  z.object({
+    category: z.literal("weapon"),
+    weaponType: z.enum(["melee", "ranged"]),
+    damage: WeaponDamageSchema,
+    crit: WeaponCritSchema,
+    range: z.string().min(1).optional(),
+    weight: ItemWeightSchema.optional()
+  }).strict(),
+  z.object({
+    category: z.literal("armor"),
+    weight: ItemWeightSchema,
+    armorCheckPenalty: ItemArmorCheckPenaltySchema.optional()
+  }).strict(),
+  z.object({
+    category: z.literal("shield"),
+    weight: ItemWeightSchema,
+    armorCheckPenalty: ItemArmorCheckPenaltySchema.optional()
+  }).strict(),
+  z.object({
+    category: z.literal("gear"),
+    weight: ItemWeightSchema.optional()
+  }).strict()
+]);
+
 export const EntitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -656,6 +686,19 @@ export const EntitySchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Invalid feats.data: ${issue.message}`,
+          path: ["data", ...issue.path]
+        });
+      });
+    }
+  }
+
+  if (entity.entityType === "items") {
+    const result = ItemDataSchema.safeParse(entity.data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid items.data: ${issue.message}`,
           path: ["data", ...issue.path]
         });
       });

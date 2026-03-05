@@ -1417,6 +1417,14 @@ function formatDamageWithModifier(baseDamage: string, modifier: number): string 
   return `${baseDamage}${modifier > 0 ? "+" : ""}${modifier}`;
 }
 
+function normalizeCritProfile(rawCrit: string | undefined): string {
+  const crit = (rawCrit ?? "").trim().toLowerCase();
+  if (!crit) return "20/x2";
+  if (/^x\d+$/.test(crit)) return `20/${crit}`;
+  if (/^\d{1,2}(?:-\d{1,2})?\/x\d+$/.test(crit)) return crit;
+  return "20/x2";
+}
+
 export function finalizeCharacter(state: CharacterState, context: EngineContext): CharacterSheet {
   const abilities = Object.fromEntries(
     Object.entries(state.abilities).map(([k, score]) => [k, { score, mod: abilityMod(score) }])
@@ -1537,19 +1545,20 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
       name: item.name
     };
     if (isRangedWeaponItem(item)) {
+      const itemRange = getEntityDataString(item, "range");
       rangedAttacks.push({
         ...baseLine,
         attackBonus: bab + (finalAbilities.dex?.mod ?? 0) + decisions.sizeModifiers.attack,
         damage: getEntityDataString(item, "damage") || "1d8",
-        crit: getEntityDataString(item, "crit") || "x2",
-        range: getEntityDataString(item, "range") || "varies"
+        crit: normalizeCritProfile(getEntityDataString(item, "crit")),
+        ...(itemRange ? { range: itemRange } : {})
       });
     } else {
       meleeAttacks.push({
         ...baseLine,
         attackBonus: bab + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack,
         damage: getEntityDataString(item, "damage") || formatDamageWithModifier("1d8", finalAbilities.str?.mod ?? 0),
-        crit: getEntityDataString(item, "crit") || "x2"
+        crit: normalizeCritProfile(getEntityDataString(item, "crit"))
       });
     }
   }
@@ -1559,7 +1568,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
       name: "Unarmed Strike",
       attackBonus: bab + (finalAbilities.str?.mod ?? 0) + decisions.sizeModifiers.attack,
       damage: formatDamageWithModifier("1d3", finalAbilities.str?.mod ?? 0),
-      crit: "x2"
+      crit: "20/x2"
     });
   }
   const fortBase = Number(sheet.stats.fort ?? 0);

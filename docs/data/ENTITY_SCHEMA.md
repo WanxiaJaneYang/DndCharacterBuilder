@@ -128,17 +128,32 @@ Engine note:
 - Use `data.deferredMechanics` when a feat should be present in the catalog but its benefit is not yet computable on the final character sheet.
 - The enforced deferred feat metadata contract is defined in `docs/data/DEFERRED_MECHANICS_VOCABULARY.md`.
 
-## Planned Extensions For Sheet Parity
+## Item `data` model
 
-To support a more complete SRD-style final character sheet, additional entity `data` fields should be added in future phases.
+For `entityType = "items"`, `data` is validated with a strict category schema:
 
-### Item `data` (planned additions)
+- `category`: `weapon | armor | shield | gear`
 
-- `slot` (optional): worn slot (`armor`, `shield`, `weapon`, etc.)
-- `weight`: number
-- `cost`: number + currency unit
-- `armor` (optional): armor bonus, max dex, armor check penalty, arcane spell failure, speed impact
-- `weapon` (optional): attack type, damage, crit profile, range increment
+When `category = "weapon"`:
+
+- `weaponType`: `melee | ranged`
+- `damage`: dice expression (`XdY` with optional `+N`/`-N`, for example `1d8` or `1d6+1`)
+- `crit`: crit profile (`x2` shorthand or canonical threat form like `19-20/x2`)
+- `range` (optional): non-empty range text
+- `weight` (optional): number >= 0
+
+When `category = "armor"` or `category = "shield"`:
+
+- `weight`: number >= 0
+- `armorCheckPenalty` (optional): number <= 0
+
+When `category = "gear"`:
+
+- `weight` (optional): number >= 0
+
+Engine note:
+
+- Crit shorthand values like `x2` are accepted in data and normalized to canonical output form (`20/x2`) in final attack lines.
 
 ### Skill `data` (planned additions)
 
