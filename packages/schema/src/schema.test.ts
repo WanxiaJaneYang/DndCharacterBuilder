@@ -1309,6 +1309,161 @@ describe("feat entity schema", () => {
   });
 });
 
+describe("item entity schema", () => {
+  it("accepts structured item data for weapon, armor, shield, and gear categories", () => {
+    const weapon = EntitySchema.parse({
+      id: "longsword",
+      name: "Longsword",
+      entityType: "items",
+      summary: "Martial melee weapon.",
+      description: "One-handed martial blade.",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        category: "weapon",
+        weaponType: "melee",
+        damage: "1d8",
+        crit: "19-20/x2",
+        weight: 4
+      }
+    });
+    expect(weapon.id).toBe("longsword");
+
+    const armor = EntitySchema.parse({
+      id: "chainmail",
+      name: "Chainmail",
+      entityType: "items",
+      summary: "Medium armor.",
+      description: "Interlocking metal armor links.",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        category: "armor",
+        weight: 40,
+        armorCheckPenalty: -5
+      }
+    });
+    expect(armor.id).toBe("chainmail");
+
+    const shield = EntitySchema.parse({
+      id: "heavy-wooden-shield",
+      name: "Heavy Wooden Shield",
+      entityType: "items",
+      summary: "Shield for defense.",
+      description: "Heavy wooden shield.",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        category: "shield",
+        weight: 10,
+        armorCheckPenalty: -2
+      }
+    });
+    expect(shield.id).toBe("heavy-wooden-shield");
+
+    const gear = EntitySchema.parse({
+      id: "rope",
+      name: "Rope",
+      entityType: "items",
+      summary: "Adventuring gear.",
+      description: "General utility rope.",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        category: "gear",
+        weight: 10
+      }
+    });
+    expect(gear.id).toBe("rope");
+  });
+
+  it("rejects items with unknown categories", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "mystery",
+        name: "Mystery Item",
+        entityType: "items",
+        summary: "Unknown item category.",
+        description: "Unknown item category.",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          category: "artifact",
+          weight: 1
+        }
+      })
+    ).toThrow(/invalid items\.data/i);
+  });
+
+  it("rejects items missing data with explicit message", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "missing-item-data",
+        name: "Missing Item Data",
+        entityType: "items",
+        summary: "Missing data.",
+        description: "Missing data.",
+        portraitUrl: null,
+        iconUrl: null
+      })
+    ).toThrow(/items\.data is required/i);
+  });
+
+  it("rejects weapon items without required combat profile", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-weapon",
+        name: "Broken Weapon",
+        entityType: "items",
+        summary: "Broken weapon entry.",
+        description: "Broken weapon entry.",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          category: "weapon",
+          weight: 4
+        }
+      })
+    ).toThrow(/invalid items\.data/i);
+  });
+
+  it("rejects armor and shield items that declare positive ACP", () => {
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-armor",
+        name: "Broken Armor",
+        entityType: "items",
+        summary: "Broken armor entry.",
+        description: "Broken armor entry.",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          category: "armor",
+          weight: 25,
+          armorCheckPenalty: 2
+        }
+      })
+    ).toThrow(/invalid items\.data/i);
+
+    expect(() =>
+      EntitySchema.parse({
+        id: "broken-shield",
+        name: "Broken Shield",
+        entityType: "items",
+        summary: "Broken shield entry.",
+        description: "Broken shield entry.",
+        portraitUrl: null,
+        iconUrl: null,
+        data: {
+          category: "shield",
+          weight: 10,
+          armorCheckPenalty: 1
+        }
+      })
+    ).toThrow(/invalid items\.data/i);
+  });
+});
+
 
 describe("entity UI metadata", () => {
   it("requires summary/description on all entities", () => {
@@ -1330,7 +1485,14 @@ describe("entity UI metadata", () => {
       description: "A versatile one-handed blade favored by trained warriors.",
       portraitUrl: null,
       iconUrl: null,
-      effects: []
+      effects: [],
+      data: {
+        category: "weapon",
+        weaponType: "melee",
+        damage: "1d8",
+        crit: "19-20/x2",
+        weight: 4
+      }
     });
 
     expect(parsed.id).toBe("longsword");
@@ -1340,7 +1502,11 @@ describe("entity UI metadata", () => {
       name: "Shield",
       entityType: "items",
       summary: "Shield summary",
-      description: "Shield detail"
+      description: "Shield detail",
+      data: {
+        category: "shield",
+        weight: 6
+      }
     });
 
     expect(parsedOmitted.id).toBe("shield");
