@@ -664,6 +664,32 @@ function buildEffectSkillBonusMap(sheet: Record<string, unknown>): Record<string
   }, {});
 }
 
+function buildEffectSkillBonusBreakdown(effectBonuses: Record<string, number>): Record<string, SkillMiscBreakdownEntry[]> {
+  const breakdown: Record<string, SkillMiscBreakdownEntry[]> = {};
+  for (const [skillId, bonus] of Object.entries(effectBonuses)) {
+    if (!Number.isFinite(bonus) || bonus === 0) continue;
+    breakdown[skillId] = [{
+      id: `effect:${skillId}`,
+      sourceType: "effect",
+      bonus
+    }];
+  }
+  return breakdown;
+}
+
+function mergeSkillBonusBreakdownMaps(
+  ...maps: Array<Record<string, SkillMiscBreakdownEntry[]>>
+): Record<string, SkillMiscBreakdownEntry[]> {
+  const merged: Record<string, SkillMiscBreakdownEntry[]> = {};
+  for (const map of maps) {
+    for (const [skillId, entries] of Object.entries(map)) {
+      if (!entries.length) continue;
+      (merged[skillId] ??= []).push(...entries);
+    }
+  }
+  return merged;
+}
+
 type ConditionalModifierPredicate =
   | { op: "gte"; left: { kind: "skillRanks"; id: string }; right: number }
   | { op: "and" | "or"; args: ConditionalModifierPredicate[] }
@@ -708,10 +734,9 @@ function parseConditionalModifierPredicate(value: unknown): ConditionalModifierP
 
   if (op === "and" || op === "or") {
     if (!Array.isArray(record.args)) return undefined;
-    const args = record.args
-      .map((entry) => parseConditionalModifierPredicate(entry))
-      .filter((entry): entry is ConditionalModifierPredicate => Boolean(entry));
-    if (args.length === 0) return undefined;
+    const parsedArgs = record.args.map((entry) => parseConditionalModifierPredicate(entry));
+    if (parsedArgs.length === 0 || parsedArgs.some((entry) => entry === undefined)) return undefined;
+    const args = parsedArgs as ConditionalModifierPredicate[];
     return { op, args };
   }
 
@@ -963,7 +988,7 @@ function buildSkillBreakdown(
   abilities: Record<string, { score: number; mod: number }>,
   decisions: DecisionSummary,
   effectBonuses: Record<string, number>,
-  conditionalBonusBreakdown: Record<string, SkillMiscBreakdownEntry[]>
+  miscBreakdownBySkill: Record<string, SkillMiscBreakdownEntry[]>
 ): Record<string, SkillBreakdown> {
   const selectedRanks = getDerivedSkillRanks(state, context);
   const racialBonuses = buildRacialSkillBonusMap(state, context);
@@ -982,7 +1007,7 @@ function buildSkillBreakdown(
     const racialBonus = racialBonuses[normalizeSkillId(skillEntity.id)] ?? 0;
     const normalizedSkillId = normalizeSkillId(skillEntity.id);
     const miscBonus = effectBonuses[normalizedSkillId] ?? 0;
-    const miscBreakdown = conditionalBonusBreakdown[normalizedSkillId] ?? [];
+    const miscBreakdown = miscBreakdownBySkill[normalizedSkillId] ?? [];
     const abilityModifier = abilities[ability]?.mod ?? 0;
 
     output[skillEntity.id] = {
@@ -1533,7 +1558,8 @@ function buildConditionalSkillBonusData(
   const proficientSkillIds = getClassSkills(state, context);
   const skillRanks = getDerivedSkillRanks(state, context);
   const rules = Object.values(context.resolvedData.entities.rules ?? {});
-  const entities = [...rules, ...getSelectedEntities(state, context)];
+  const entities = [...rules, ...getSelectedEntities(state, context)]
+    .filter((entity) => Array.isArray(getEntityDataRecord(entity).conditionalModifiers));
   const seenEntities = new Set<string>();
   const evaluationContext: ConditionalPredicateEvaluationContext = {
     skillRanks,
@@ -1547,7 +1573,8 @@ function buildConditionalSkillBonusData(
     if (seenEntities.has(entityKey)) continue;
     seenEntities.add(entityKey);
 
-    for (const modifier of parseConditionalSkillModifiers(getEntityDataRecord(entity).conditionalModifiers)) {
+    const rawConditionalModifiers = getEntityDataRecord(entity).conditionalModifiers;
+    for (const modifier of parseConditionalSkillModifiers(rawConditionalModifiers)) {
       if (!evaluateConditionalModifierPredicate(modifier.when, evaluationContext)) continue;
       const skillId = modifier.apply.targetSkillId;
       totals[skillId] = (totals[skillId] ?? 0) + modifier.apply.bonus;
@@ -1851,18 +1878,23 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     }
   };
   const effectSkillBonuses = buildEffectSkillBonusMap(sheet);
+  const effectSkillBonusBreakdown = buildEffectSkillBonusBreakdown(effectSkillBonuses);
   const conditionalSkillBonusData = buildConditionalSkillBonusData(state, context);
   const combinedSkillBonuses: Record<string, number> = { ...effectSkillBonuses };
   for (const [skillId, bonus] of Object.entries(conditionalSkillBonusData.totals)) {
     combinedSkillBonuses[skillId] = (combinedSkillBonuses[skillId] ?? 0) + bonus;
   }
+  const combinedSkillBonusBreakdown = mergeSkillBonusBreakdownMaps(
+    effectSkillBonusBreakdown,
+    conditionalSkillBonusData.breakdown
+  );
   const skills = buildSkillBreakdown(
     state,
     context,
     finalAbilities,
     decisions,
     combinedSkillBonuses,
-    conditionalSkillBonusData.breakdown
+    combinedSkillBonusBreakdown
   );
   const selectedFeatIds = getSelectedFeatIds(state);
   const phase2Feats = selectedFeatIds.map((featId) => {
