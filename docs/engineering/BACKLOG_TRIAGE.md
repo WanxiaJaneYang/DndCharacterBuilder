@@ -2,21 +2,40 @@
 
 Last updated: 2026-03-05
 
-This document records the recommended execution order for currently open GitHub issues, plus intended umbrella relationships, so planning stays aligned with live repository state.
+This document records the recommended execution order for currently open GitHub issues, plus the intended duplicate and umbrella relationships. It exists to keep repo planning in sync with the actual codebase rather than a stale backlog snapshot.
 
 ## Evidence-Based Notes
 
-- `#69` is completed via PR #128 (merged on 2026-03-05), establishing pack-reference integrity checks.
-- `#72` is completed via PR #136 (merged on 2026-03-05), stabilizing item schema validation and Phase-1 combat output.
-- `#70`, `#95`, `#102`, `#103`, and `#104` are closed and must not remain in active sequencing.
-- New planning epics and follow-ups were opened on 2026-03-05: `#124`, `#125`, `#126`, `#132`, `#139`, `#140`, `#141`, `#142`.
+- `#69` is completed via PR #128 (merged on 2026-03-05), establishing the initial pack-reference integrity guardrail in contracts.
+- `#72` is completed via PR #136 (merged on 2026-03-05), stabilizing item schema validation and Phase-1 combat attack-line item classification.
+- The repo already has minimal SRD contract fixtures, contract CI wiring, and contract-fixture safety checks.
+- The repo already has level-1 skill budget math, cross-class cost/rank validation, and web/UI coverage for the current skills step.
+- The repo already has a review/export surface and `sheetViewModel`, so follow-up issues in that area should target contract hardening and cleanup, not greenfield implementation.
+- Closed follow-ups removed from active sequencing:
+  - `#70` minimal SRD 3.5 skill list completion
+  - `#95` engine/export skill-budget gaps
+  - `#102` engine-driven skill allocation validation
+  - `#103` remove UI defaults for missing metadata
+  - `#104` expose skill budget breakdown
+- New 2026-03-05 planning issues now in active backlog:
+  - `#124` [Epic] Rules/Data Integrity and Engine Foundations
+  - `#125` [Epic] Wizard Reliability and Sheet Output Stabilization
+  - `#126` [Epic] Character Persistence UX
+  - `#132` Specialized skill subskills rollout umbrella
+  - `#139` Proficiency-aware ACP follow-up
+  - `#140` Conditional skill modifiers (synergy first)
+  - `#141` Expand SRD 3.5 equipment catalog
+  - `#142` Expand unresolved-rules contract fixture coverage
 
 ## Recommended Order
 
-1. P0 foundations first (blockers for dependable iteration):
-   - `#82` minimal equipment model for AC + attack lines
-   - `#88` flow-driven wizard runner architecture
-   - `#84` unresolved-rules surfaced on sheet fields
+1. P0 issues first (all current P0 scope):
+   - `#124` [Epic] Rules/Data Integrity and Engine Foundations
+   - `#125` [Epic] Wizard Reliability and Sheet Output Stabilization
+   - `#88` [Umbrella] Flow-driven wizard runner
+   - `#84` [Umbrella] Unresolved-rules surfaced on sheet fields
+   - `#83` [Umbrella] Skills completeness + legality
+   - `#82` Minimal equipment model for AC + attack lines
 2. Finish P1 regressions and contract hardening that reduce rework risk:
    - `#123` race-step E2E regression
    - `#96` skill-budget contract invariants
