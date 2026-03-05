@@ -134,6 +134,21 @@ export type UIText = {
   skillsMaxLabel: string;
   skillsRacialLabel: string;
   skillsPerRankUnit: string;
+  ROLL_SET_SELECTION_TITLE: string;
+  ROLL_SET_REROLL_BUTTON: string;
+  ROLL_SET_SELECTION_DESCRIPTION: string;
+  ROLL_SET_OPTIONS_ARIA_LABEL: string;
+  ROLL_SET_OPTION_PREFIX: string;
+  ROLL_SET_OPTION_SUFFIX: string;
+  INCREASE_LABEL: string;
+  DECREASE_LABEL: string;
+  SKILLS_TYPE_COLUMN: string;
+  SKILLS_POINTS_COLUMN: string;
+  SKILLS_RANKS_COLUMN: string;
+  SKILLS_BREAKDOWN_COLUMN: string;
+  SKILLS_NOTES_COLUMN: string;
+  SKILLS_ACP_APPLIES_LABEL: string;
+  SKILLS_ACP_NOT_APPLICABLE_LABEL: string;
   abilityLabels: AbilityLabels;
 };
 
@@ -268,6 +283,21 @@ const uiTextStringKeys: Array<Exclude<keyof UIText, 'abilityLabels'>> = [
   'skillsMaxLabel',
   'skillsRacialLabel',
   'skillsPerRankUnit',
+  'ROLL_SET_SELECTION_TITLE',
+  'ROLL_SET_REROLL_BUTTON',
+  'ROLL_SET_SELECTION_DESCRIPTION',
+  'ROLL_SET_OPTIONS_ARIA_LABEL',
+  'ROLL_SET_OPTION_PREFIX',
+  'ROLL_SET_OPTION_SUFFIX',
+  'INCREASE_LABEL',
+  'DECREASE_LABEL',
+  'SKILLS_TYPE_COLUMN',
+  'SKILLS_POINTS_COLUMN',
+  'SKILLS_RANKS_COLUMN',
+  'SKILLS_BREAKDOWN_COLUMN',
+  'SKILLS_NOTES_COLUMN',
+  'SKILLS_ACP_APPLIES_LABEL',
+  'SKILLS_ACP_NOT_APPLICABLE_LABEL',
 ];
 
 const abilityLabelKeys: AbilityCode[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'];

@@ -1248,23 +1248,15 @@ export function App() {
           {selectedAbilityMode === "rollSets" && rollSetsConfig && (
             <section className="sheet">
               <div className="rollsets-header">
-                <h3>
-                  {language === "zh" ? "掷骰组选取" : "Roll-Set Selection"}
-                </h3>
+                <h3>{t.ROLL_SET_SELECTION_TITLE}</h3>
                 <button type="button" onClick={regenerateRollSetOptions}>
-                  {language === "zh" ? "重新掷骰" : "Reroll Sets"}
+                  {t.ROLL_SET_REROLL_BUTTON}
                 </button>
               </div>
-              <p>
-                {language === "zh"
-                  ? "掷出多个属性组，选择一组并按你的意愿分配。"
-                  : "Roll multiple sets, pick one, then assign scores as you wish."}
-              </p>
+              <p>{t.ROLL_SET_SELECTION_DESCRIPTION}</p>
               <fieldset
                 role="radiogroup"
-                aria-label={
-                  language === "zh" ? "掷骰组列表" : "Roll-Set Options"
-                }
+                aria-label={t.ROLL_SET_OPTIONS_ARIA_LABEL}
               >
                 {generatedRollSets.map((set, index) => (
                   <label key={`roll-set-${index}`} className="rollset-option">
@@ -1275,9 +1267,9 @@ export function App() {
                       onChange={() => applySelectedRollSet(set, index)}
                     />
                     <span>
-                      {language === "zh"
-                        ? `第 ${index + 1} 组`
-                        : `Set ${index + 1}`}
+                      {[t.ROLL_SET_OPTION_PREFIX, String(index + 1), t.ROLL_SET_OPTION_SUFFIX]
+                        .filter((part) => part.length > 0)
+                        .join(" ")}
                     </span>
                     <code>{set.join(", ")}</code>
                   </label>
@@ -1299,11 +1291,7 @@ export function App() {
                     <button
                       type="button"
                       className="ability-step-btn"
-                      aria-label={
-                        language === "zh"
-                          ? `降低 ${label}`
-                          : `Decrease ${label}`
-                      }
+                      aria-label={`${t.DECREASE_LABEL} ${label}`}
                       disabled={!canDecrease}
                       onClick={() => stepAbility(key, -1)}
                     >
@@ -1323,11 +1311,7 @@ export function App() {
                     <button
                       type="button"
                       className="ability-step-btn"
-                      aria-label={
-                        language === "zh"
-                          ? `提高 ${label}`
-                          : `Increase ${label}`
-                      }
+                      aria-label={`${t.INCREASE_LABEL} ${label}`}
                       disabled={!canIncrease}
                       onClick={() => stepAbility(key, 1)}
                     >
@@ -1445,9 +1429,7 @@ export function App() {
         action: "increase" | "decrease",
         skillName: string,
       ) =>
-        language === "zh"
-          ? `${action === "increase" ? "提高" : "降低"} ${skillName}`
-          : `${action === "increase" ? "Increase" : "Decrease"} ${skillName}`;
+        `${action === "increase" ? t.INCREASE_LABEL : t.DECREASE_LABEL} ${skillName}`;
 
       return (
         <section>
@@ -1462,12 +1444,12 @@ export function App() {
               <thead>
                 <tr>
                   <th>{t.reviewSkillColumn}</th>
-                  <th>{language === "zh" ? "类型" : "Type"}</th>
-                  <th>{language === "zh" ? "点数" : "Points"}</th>
-                  <th>{language === "zh" ? "等级" : "Ranks"}</th>
-                  <th>{language === "zh" ? "明细" : "Breakdown"}</th>
+                  <th>{t.SKILLS_TYPE_COLUMN}</th>
+                  <th>{t.SKILLS_POINTS_COLUMN}</th>
+                  <th>{t.SKILLS_RANKS_COLUMN}</th>
+                  <th>{t.SKILLS_BREAKDOWN_COLUMN}</th>
                   <th>{t.reviewTotalColumn}</th>
-                  <th>{language === "zh" ? "备注" : "Notes"}</th>
+                  <th>{t.SKILLS_NOTES_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1564,12 +1546,8 @@ export function App() {
                         </div>
                         <div>
                           {armorCheckPenaltyApplies
-                            ? language === "zh"
-                              ? "受护甲检定惩罚影响"
-                              : "ACP applies"
-                            : language === "zh"
-                              ? "不受护甲检定惩罚影响"
-                              : "ACP n/a"}
+                            ? t.SKILLS_ACP_APPLIES_LABEL
+                            : t.SKILLS_ACP_NOT_APPLICABLE_LABEL}
                         </div>
                       </td>
                     </tr>
