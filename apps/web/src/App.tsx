@@ -606,7 +606,7 @@ export function App() {
       const formatSigned = (value: number) =>
         `${value >= 0 ? "+" : ""}${value}`;
       const formatSourceLabel = (packId: string, entityId: string) =>
-        sourceNameByEntityId.get(`${packId}:${entityId}`) ?? entityId;
+        sourceNameByEntityId.get(`${packId}:${entityId}`) ?? t.reviewUnresolvedLabel;
       const selectedRaceId = String(state.selections.race ?? "");
       const selectedClassId = String(state.selections.class ?? "");
       const selectedRaceName = selectedRaceId
@@ -615,18 +615,18 @@ export function App() {
             selectedRaceId,
             "name",
             context.resolvedData.entities.races?.[selectedRaceId]?.name ??
-              selectedRaceId,
+              t.reviewUnresolvedLabel,
           )
-        : "-";
+        : t.reviewUnresolvedLabel;
       const selectedClassName = selectedClassId
         ? localizeEntityText(
             "classes",
             selectedClassId,
             "name",
             context.resolvedData.entities.classes?.[selectedClassId]?.name ??
-              selectedClassId,
+              t.reviewUnresolvedLabel,
           )
-        : "-";
+        : t.reviewUnresolvedLabel;
       const reviewSkills = sheet.sheetViewModel.skills
         .filter((skill) => {
           const detail = sheet.skills[skill.id];
@@ -1105,7 +1105,8 @@ export function App() {
       const sourceTypeLabels = abilityPresentation?.sourceTypeLabels ?? {};
       const hideZeroGroups = abilityPresentation?.hideZeroEffectGroups ?? true;
       const groupLabel = (sourceType: string) =>
-        sourceTypeLabels[sourceType] ?? sourceType;
+        sourceTypeLabels[sourceType] ??
+        (sourceType === "unknown" ? t.reviewUnresolvedLabel : sourceType);
       const modeUi = abilityPresentation?.modeUi ?? {};
       const textMap = t as unknown as Record<string, unknown>;
       const defaultModeLabel = (mode: AbilityMode) =>
@@ -1372,7 +1373,7 @@ export function App() {
                       );
                       const sourceType = meta?.sourceType ?? "unknown";
                       const sourceLabel =
-                        meta?.sourceLabel ?? record.source.entityId;
+                        meta?.sourceLabel ?? t.reviewUnresolvedLabel;
                       const list = grouped.get(sourceType) ?? [];
                       list.push({ sourceLabel, delta });
                       grouped.set(sourceType, list);
