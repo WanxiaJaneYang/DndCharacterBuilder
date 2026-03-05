@@ -293,6 +293,33 @@ describe("pack contracts", () => {
     }
   });
 
+  it("fails when an entities file is not a JSON array", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-ref-array-shape-"));
+    const packDir = path.join(tempRoot, "bad-pack");
+    fs.mkdirSync(path.join(packDir, "entities"), { recursive: true });
+    fs.writeFileSync(
+      path.join(packDir, "manifest.json"),
+      JSON.stringify(
+        {
+          id: "bad-pack",
+          name: "bad-pack",
+          version: "1.0.0",
+          priority: 1,
+          dependencies: []
+        },
+        null,
+        2
+      )
+    );
+    fs.writeFileSync(path.join(packDir, "entities/races.json"), JSON.stringify({ id: "not-an-array" }, null, 2));
+
+    try {
+      expect(() => runContracts(tempRoot)).toThrow(/Expected JSON array in entities file/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("keeps key PHB race mechanics encoded in races data", () => {
     const racesPath = path.resolve(process.cwd(), "../../packs/srd-35e-minimal/entities/races.json");
     const races = JSON.parse(fs.readFileSync(racesPath, "utf8")) as Array<{

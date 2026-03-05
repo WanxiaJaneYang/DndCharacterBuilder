@@ -77,7 +77,10 @@ function listEntityFiles(packDir: string): Array<{ entityType: string; filePath:
 
 function parseEntityArray(filePath: string): EntityRecord[] {
   const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  return Array.isArray(parsed) ? (parsed as EntityRecord[]) : [];
+  if (!Array.isArray(parsed)) {
+    throw new Error(`[contracts] Expected JSON array in entities file: ${filePath}`);
+  }
+  return parsed as EntityRecord[];
 }
 
 function parsePackManifest(packDir: string): PackManifest {

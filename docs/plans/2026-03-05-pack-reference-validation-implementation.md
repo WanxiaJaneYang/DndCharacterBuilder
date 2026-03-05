@@ -1,4 +1,4 @@
-﻿# Pack Reference Integrity Validation Implementation Plan
+# Pack Reference Integrity Validation Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
@@ -17,7 +17,7 @@
 
 **Step 1: Write the failing test**
 - Add a test that copies `packs/srd-35e-minimal` to a temp directory.
-- Corrupt one known reference in `entities/classes.json` (`classSkills` entry to a missing id).
+- Corrupt one known reference in `entities/races.json` (`favoredClass` to a missing class id).
 - Assert `runContracts(tempRoot)` throws with `Pack reference integrity` and includes file/path/missing id text.
 
 **Step 2: Run test to verify it fails**

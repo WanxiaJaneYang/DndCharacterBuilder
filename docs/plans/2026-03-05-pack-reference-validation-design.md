@@ -1,4 +1,4 @@
-﻿# Pack Reference Integrity Validation Design
+# Pack Reference Integrity Validation Design
 
 Date: 2026-03-05  
 Issue: #69
@@ -25,10 +25,12 @@ Use a curated ruleset validator:
 3. Validate extracted references against indexed IDs.
 4. Throw a single consolidated error when any missing reference is found.
 
-## Initial Validation Rules
+## Initial Validation Rules (this PR)
 - `entities/races.json`: `*.data.favoredClass -> classes.id`
 
-Current PR scope intentionally ships only this rule to stay compatible with the known minimal-skill dataset gaps tracked in backlog issues (`#70`, `#91`). Additional rules (`classSkills`, `skillBonuses`) are planned follow-ups once those datasets are complete.
+### Deferred Validation Rules (post-#70/#91)
+- `entities/classes.json`: `*.data.classSkills[] -> skills.id`
+- `entities/races.json`: `*.data.skillBonuses[].skill -> skills.id`
 
 ## Error Contract
 `[contracts] Pack reference integrity check failed` with per-item lines:
