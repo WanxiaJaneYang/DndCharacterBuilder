@@ -434,7 +434,7 @@
     "entityType": "skills",
     "data": {
       "ability": "dex",
-      "armorCheckPenaltyApplies": false
+      "armorCheckPenaltyApplies": true
     },
     "summary": "Ride (skill) option.",
     "description": "Detailed reference entry for Ride in the skills dataset.",
@@ -469,14 +469,14 @@
   },
   {
     "id": "sleight-of-hand",
-    "name": "Sleight Of Hand",
+    "name": "Sleight of Hand",
     "entityType": "skills",
     "data": {
       "ability": "dex",
       "armorCheckPenaltyApplies": true
     },
-    "summary": "Sleight Of Hand (skill) option.",
-    "description": "Detailed reference entry for Sleight Of Hand in the skills dataset.",
+    "summary": "Sleight of Hand (skill) option.",
+    "description": "Detailed reference entry for Sleight of Hand in the skills dataset.",
     "portraitUrl": null,
     "iconUrl": null
   },
