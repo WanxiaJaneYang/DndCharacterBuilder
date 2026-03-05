@@ -43,7 +43,49 @@
       "profession:miner": "Profession (Miner)",
       "profession:sailor": "Profession (Sailor)",
       "profession:scribe": "Profession (Scribe)",
-      "profession:soldier": "Profession (Soldier)"
+      "profession:soldier": "Profession (Soldier)",
+      "appraise": "Appraise",
+      "balance": "Balance",
+      "bluff": "Bluff",
+      "climb": "Climb",
+      "concentration": "Concentration",
+      "decipher-script": "Decipher Script",
+      "diplomacy": "Diplomacy",
+      "disable-device": "Disable Device",
+      "disguise": "Disguise",
+      "escape-artist": "Escape Artist",
+      "forgery": "Forgery",
+      "gather-information": "Gather Information",
+      "handle-animal": "Handle Animal",
+      "heal": "Heal",
+      "hide": "Hide",
+      "intimidate": "Intimidate",
+      "jump": "Jump",
+      "knowledge-arcana": "Knowledge (Arcana)",
+      "knowledge-architecture-and-engineering": "Knowledge (Architecture and Engineering)",
+      "knowledge-dungeoneering": "Knowledge (Dungeoneering)",
+      "knowledge-geography": "Knowledge (Geography)",
+      "knowledge-history": "Knowledge (History)",
+      "knowledge-local": "Knowledge (Local)",
+      "knowledge-nature": "Knowledge (Nature)",
+      "knowledge-nobility-and-royalty": "Knowledge (Nobility and Royalty)",
+      "knowledge-religion": "Knowledge (Religion)",
+      "knowledge-the-planes": "Knowledge (The Planes)",
+      "listen": "Listen",
+      "move-silently": "Move Silently",
+      "open-lock": "Open Lock",
+      "ride": "Ride",
+      "search": "Search",
+      "sense-motive": "Sense Motive",
+      "sleight-of-hand": "Sleight of Hand",
+      "speak-language": "Speak Language",
+      "spellcraft": "Spellcraft",
+      "spot": "Spot",
+      "survival": "Survival",
+      "swim": "Swim",
+      "tumble": "Tumble",
+      "use-magic-device": "Use Magic Device",
+      "use-rope": "Use Rope"
     }
   },
   "entityText": {
@@ -176,6 +218,132 @@
       },
       "profession:soldier": {
         "name": "Profession (Soldier)"
+      },
+      "appraise": {
+        "name": "Appraise"
+      },
+      "balance": {
+        "name": "Balance"
+      },
+      "bluff": {
+        "name": "Bluff"
+      },
+      "climb": {
+        "name": "Climb"
+      },
+      "concentration": {
+        "name": "Concentration"
+      },
+      "decipher-script": {
+        "name": "Decipher Script"
+      },
+      "diplomacy": {
+        "name": "Diplomacy"
+      },
+      "disable-device": {
+        "name": "Disable Device"
+      },
+      "disguise": {
+        "name": "Disguise"
+      },
+      "escape-artist": {
+        "name": "Escape Artist"
+      },
+      "forgery": {
+        "name": "Forgery"
+      },
+      "gather-information": {
+        "name": "Gather Information"
+      },
+      "handle-animal": {
+        "name": "Handle Animal"
+      },
+      "heal": {
+        "name": "Heal"
+      },
+      "hide": {
+        "name": "Hide"
+      },
+      "intimidate": {
+        "name": "Intimidate"
+      },
+      "jump": {
+        "name": "Jump"
+      },
+      "knowledge-arcana": {
+        "name": "Knowledge (Arcana)"
+      },
+      "knowledge-architecture-and-engineering": {
+        "name": "Knowledge (Architecture and Engineering)"
+      },
+      "knowledge-dungeoneering": {
+        "name": "Knowledge (Dungeoneering)"
+      },
+      "knowledge-geography": {
+        "name": "Knowledge (Geography)"
+      },
+      "knowledge-history": {
+        "name": "Knowledge (History)"
+      },
+      "knowledge-local": {
+        "name": "Knowledge (Local)"
+      },
+      "knowledge-nature": {
+        "name": "Knowledge (Nature)"
+      },
+      "knowledge-nobility-and-royalty": {
+        "name": "Knowledge (Nobility and Royalty)"
+      },
+      "knowledge-religion": {
+        "name": "Knowledge (Religion)"
+      },
+      "knowledge-the-planes": {
+        "name": "Knowledge (The Planes)"
+      },
+      "listen": {
+        "name": "Listen"
+      },
+      "move-silently": {
+        "name": "Move Silently"
+      },
+      "open-lock": {
+        "name": "Open Lock"
+      },
+      "ride": {
+        "name": "Ride"
+      },
+      "search": {
+        "name": "Search"
+      },
+      "sense-motive": {
+        "name": "Sense Motive"
+      },
+      "sleight-of-hand": {
+        "name": "Sleight of Hand"
+      },
+      "speak-language": {
+        "name": "Speak Language"
+      },
+      "spellcraft": {
+        "name": "Spellcraft"
+      },
+      "spot": {
+        "name": "Spot"
+      },
+      "survival": {
+        "name": "Survival"
+      },
+      "swim": {
+        "name": "Swim"
+      },
+      "tumble": {
+        "name": "Tumble"
+      },
+      "use-magic-device": {
+        "name": "Use Magic Device"
+      },
+      "use-rope": {
+        "name": "Use Rope"
       }
     }
   }
