@@ -14,6 +14,9 @@ const labels = {
   classHeading: /Class|\u804c\u4e1a/i,
   abilityHeading: /Ability Scores|\u5c5e\u6027/i,
   featHeading: /Feat|\u4e13\u957f/i,
+  reviewHeading: /Review|\u603b\u89c8/i,
+  reviewAbilityBreakdown: /Ability Score Breakdown|\u5c5e\u6027\u503c\u660e\u7ec6/i,
+  reviewFingerprintLabel: /Fingerprint|\u6307\u7eb9/i,
   human: /Human|\u4eba\u7c7b/i,
   fighter: /^(?:Fighter(?: \(Level 1\))?|\u6218\u58eb(?:\uff081\u7ea7\uff09)?)$/i,
   abilityGeneration: /Ability Generation|\u751f\u6210\u65b9\u5f0f/i,
@@ -42,6 +45,16 @@ async function clickNext(page: Page) {
   await next.scrollIntoViewIfNeeded();
   // Mobile layouts can have overlapping content near footer actions.
   await next.click({ force: true });
+}
+
+async function goToReviewStep(page: Page) {
+  for (let i = 0; i < 12; i += 1) {
+    if (await page.getByRole('heading', { name: labels.reviewHeading }).isVisible()) {
+      return;
+    }
+    await clickNext(page);
+  }
+  await expect(page.getByRole('heading', { name: labels.reviewHeading })).toBeVisible();
 }
 
 async function goToAbilitiesStep(page: Page, locale: Locale) {
@@ -128,6 +141,24 @@ test.describe('abilities step e2e regression', () => {
       await page.getByRole('button', { name: labels.back }).click();
       await expect(page.getByRole('heading', { name: labels.abilityHeading })).toBeVisible();
       await expect(page.getByRole('spinbutton', { name: labels.str })).toHaveValue('9');
+    });
+
+    test(`review reflects ability changes and provenance metadata (${locale})`, async ({ page }) => {
+      await goToAbilitiesStep(page, locale);
+
+      await page.getByRole('button', { name: labels.increaseStr }).click();
+      await expect(page.getByRole('spinbutton', { name: labels.str })).toHaveValue('9');
+
+      await goToReviewStep(page);
+      await expect(page.getByRole('heading', { name: labels.reviewAbilityBreakdown })).toBeVisible();
+      await expect(page.getByText(labels.reviewFingerprintLabel)).toBeVisible();
+
+      const abilitySection = page
+        .locator('article')
+        .filter({ has: page.getByRole('heading', { name: labels.reviewAbilityBreakdown }) })
+        .first();
+      const strRow = abilitySection.locator('tr').filter({ hasText: labels.str }).first();
+      await expect(strRow).toContainText('9');
     });
   }
 });
