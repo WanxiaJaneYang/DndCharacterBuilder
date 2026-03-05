@@ -159,6 +159,42 @@ describe("pack contracts", () => {
     }
   });
 
+  it("fails when entity references point to missing IDs", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-ref-integrity-"));
+    const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+    fs.cpSync(packSource, packDest, { recursive: true });
+
+    const racesPath = path.join(packDest, "entities/races.json");
+    const races = JSON.parse(fs.readFileSync(racesPath, "utf8")) as Array<{
+      id: string;
+      data?: { favoredClass?: string };
+    }>;
+
+    const dwarf = races.find((entry) => entry.id === "dwarf");
+    if (!dwarf?.data?.favoredClass) {
+      throw new Error("Fixture precondition failed: dwarf favoredClass missing");
+    }
+    dwarf.data.favoredClass = "missing-class-id";
+    fs.writeFileSync(racesPath, JSON.stringify(races, null, 2));
+
+    try {
+      let thrown: unknown;
+      try {
+        runContracts(tempRoot);
+      } catch (error) {
+        thrown = error;
+      }
+      const message = thrown instanceof Error ? thrown.message : String(thrown);
+      expect(message).toMatch(/reference integrity/i);
+      expect(message).toMatch(/races\.json/i);
+      expect(message).toMatch(/favoredClass/i);
+      expect(message).toMatch(/missing-class-id/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("keeps key PHB race mechanics encoded in races data", () => {
     const racesPath = path.resolve(process.cwd(), "../../packs/srd-35e-minimal/entities/races.json");
     const races = JSON.parse(fs.readFileSync(racesPath, "utf8")) as Array<{

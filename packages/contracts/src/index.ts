@@ -4,6 +4,7 @@ import { ContractFixtureSchema } from "@dcb/schema";
 import { resolvePackSet } from "@dcb/datapack/node";
 import { applyChoice, finalizeCharacter, initialState, listChoices, validateState, type CharacterState } from "@dcb/engine";
 export { runAuthenticityChecks } from "./authenticity";
+import { assertPackReferenceIntegrity } from "./references";
 
 const NON_ASCII_PATTERN = /[^\x00-\x7F]/;
 const BIDI_CONTROL_PATTERN = /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
@@ -102,6 +103,7 @@ function contractFailure(packId: string, fixtureFile: string, message: string, e
 
 export function runContracts(packsRoot: string): void {
   assertContractFixturesUseAscii(packsRoot);
+  assertPackReferenceIntegrity(packsRoot);
   const packDirs = fs
     .readdirSync(packsRoot, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
