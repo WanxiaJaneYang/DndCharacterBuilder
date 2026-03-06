@@ -1,5 +1,6 @@
 import type { Constraint, Effect, Entity, Expr } from "@dcb/schema";
 import type { ResolvedEntity, ResolvedPackSet } from "@dcb/datapack";
+import type { CharacterState } from "./characterSpec";
 
 type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
@@ -48,11 +49,18 @@ function normalizeSkillId(id: string): string {
   return id.trim().toLowerCase();
 }
 
-export interface CharacterState {
-  metadata: { name?: string };
-  abilities: Record<string, number>;
-  selections: Record<string, unknown>;
-}
+export type {
+  CharacterSpec,
+  CharacterSpecClassSelection,
+  CharacterSpecMeta,
+  CharacterSpecValidationIssue,
+  CharacterState
+} from "./characterSpec";
+export {
+  characterSpecToState,
+  normalizeCharacterSpec,
+  validateCharacterSpec
+} from "./characterSpec";
 
 export interface EngineContext {
   enabledPackIds: string[];

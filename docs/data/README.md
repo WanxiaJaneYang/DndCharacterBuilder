@@ -7,6 +7,7 @@ This section documents the JSON pack and schema contract used by the builder.
 - `DEFERRED_MECHANICS_VOCABULARY.md`: stable vocabulary for `deferredMechanics` concept IDs, capability IDs, and migration semantics.
 - `FLOW_SCHEMA.md`: flow step schema and constraints.
 - `EXPORT_SCHEMA.md`: export payload expectations.
+- `CHARACTER_SPEC_V1.md`: flow-independent engine input contract (`CharacterSpec`).
 - `SRD_AUTHENTICITY_VALIDATION.md`: automatic authenticity strategy for official SRD datasets.
 
 ## Recent updates
@@ -22,3 +23,4 @@ This section documents the JSON pack and schema contract used by the builder.
   - Phase 1 core combat/save/hp breakdowns
   - Phase 2 non-caster sheet completeness
   - Phase 3 caster and multiclass progression blocks
+
