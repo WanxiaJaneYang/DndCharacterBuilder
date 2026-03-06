@@ -40,6 +40,10 @@ function normalizeSkillId(id: string): string {
   return id.trim().toLowerCase();
 }
 
+function normalizeString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function parseFiniteSkillRank(value: unknown): number | undefined {
   const numeric = Number(value);
   if (!Number.isFinite(numeric) || numeric < 0) return undefined;
@@ -92,22 +96,34 @@ export function normalizeCharacterSpec(spec: CharacterSpec): CharacterSpec {
   );
 
   const normalizedMeta: CharacterSpecMeta = {
-    ...spec.meta,
-    ...(spec.meta.name !== undefined ? { name: spec.meta.name.trim() } : {}),
-    rulesetId: spec.meta.rulesetId.trim(),
+    ...(spec.meta.name !== undefined ? { name: normalizeString(spec.meta.name) } : {}),
+    rulesetId: normalizeString(spec.meta.rulesetId),
     sourceIds: normalizeUniqueIdList(spec.meta.sourceIds) ?? []
   };
 
-  return {
-    ...spec,
+  const normalized: CharacterSpec = {
     meta: normalizedMeta,
-    ...(normalizeId(spec.raceId) ? { raceId: normalizeId(spec.raceId) } : {}),
-    ...(normalizeClassSelection(spec.class) ? { class: normalizeClassSelection(spec.class) } : {}),
     abilities: { ...spec.abilities },
     skillRanks,
     featIds: normalizeUniqueIdList(spec.featIds) ?? [],
     equipmentIds: normalizeUniqueIdList(spec.equipmentIds) ?? []
   };
+
+  const normalizedRaceId = normalizeId(spec.raceId);
+  if (normalizedRaceId) {
+    normalized.raceId = normalizedRaceId;
+  }
+
+  const normalizedClass = normalizeClassSelection(spec.class);
+  if (normalizedClass) {
+    normalized.class = normalizedClass;
+  }
+
+  if (spec.overrides !== undefined) {
+    normalized.overrides = spec.overrides;
+  }
+
+  return normalized;
 }
 
 export function validateCharacterSpec(spec: CharacterSpec): CharacterSpecValidationIssue[] {
@@ -122,7 +138,7 @@ export function validateCharacterSpec(spec: CharacterSpec): CharacterSpecValidat
     });
   }
 
-  if (!Array.isArray(normalized.meta.sourceIds)) {
+  if (!Array.isArray((spec as { meta?: { sourceIds?: unknown } }).meta?.sourceIds)) {
     issues.push({
       code: "SPEC_META_SOURCEIDS_INVALID",
       message: "meta.sourceIds must be an array.",

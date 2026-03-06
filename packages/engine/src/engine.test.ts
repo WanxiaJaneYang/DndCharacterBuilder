@@ -10,7 +10,8 @@ import {
   listChoices,
   validateState,
   normalizeCharacterSpec,
-  characterSpecToState
+  characterSpecToState,
+  validateCharacterSpec
 } from "./index";
 
 const resolved = resolvePackSet(path.resolve(process.cwd(), "../../packs"), ["srd-35e-minimal"]);
@@ -2137,5 +2138,33 @@ describe("CharacterSpec v1", () => {
     expect(state.selections.skills).toEqual({ climb: 4, listen: 2 });
     expect(state.selections.feats).toEqual(["power-attack"]);
     expect(state.selections.equipment).toEqual(["longsword"]);
+  });
+
+  it("drops malformed optional ids during normalization and state mapping", () => {
+    const spec = {
+      meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "   ",
+      class: { classId: "   ", level: 0 },
+      abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+      featIds: ["power-attack"]
+    };
+
+    const normalized = normalizeCharacterSpec(spec);
+    const state = characterSpecToState(spec);
+
+    expect(normalized.raceId).toBeUndefined();
+    expect(normalized.class).toBeUndefined();
+    expect(state.selections.race).toBeUndefined();
+    expect(state.selections.class).toBeUndefined();
+  });
+
+  it("reports invalid sourceIds shape instead of silently normalizing non-array values", () => {
+    const invalidSpec = {
+      meta: { rulesetId: "dnd35e", sourceIds: "srd-35e-minimal" },
+      abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
+    } as unknown as Parameters<typeof normalizeCharacterSpec>[0];
+
+    const issues = validateCharacterSpec(invalidSpec);
+    expect(issues.some((issue) => issue.code === "SPEC_META_SOURCEIDS_INVALID")).toBe(true);
   });
 });
