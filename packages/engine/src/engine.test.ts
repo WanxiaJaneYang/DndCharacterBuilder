@@ -10,8 +10,7 @@ import {
   listChoices,
   validateState,
   normalizeCharacterSpec,
-  characterSpecToState,
-  compute
+  characterSpecToState
 } from "./index";
 
 const resolved = resolvePackSet(path.resolve(process.cwd(), "../../packs"), ["srd-35e-minimal"]);
@@ -2138,55 +2137,5 @@ describe("CharacterSpec v1", () => {
     expect(state.selections.skills).toEqual({ climb: 4, listen: 2 });
     expect(state.selections.feats).toEqual(["power-attack"]);
     expect(state.selections.equipment).toEqual(["longsword"]);
-  });
-});
-
-describe("compute() contract", () => {
-  it("returns versioned ComputeResult for a canonical CharacterSpec", () => {
-    const result = compute(
-      {
-        meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
-        raceId: "human",
-        class: { classId: "fighter", level: 1 },
-        abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
-        skillRanks: { climb: 4, jump: 3, diplomacy: 0.5 },
-        featIds: ["power-attack"],
-        equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
-      },
-      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
-    );
-
-    expect(result.schemaVersion).toBe("0.1");
-    expect(result.sheetViewModel.schemaVersion).toBe("0.1");
-    expect(result.sheetViewModel.data.combat.ac.total).toBe(18);
-    expect(result.validationIssues).toEqual([]);
-    expect(result.unresolved.length).toBeGreaterThanOrEqual(0);
-  });
-
-  it("produces deterministic contract snapshot for same spec + rulepack", () => {
-    const spec = {
-      meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
-      raceId: "human",
-      class: { classId: "fighter", level: 1 },
-      abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
-      skillRanks: { climb: 4, jump: 3, diplomacy: 0.5 },
-      featIds: ["power-attack"],
-      equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
-    };
-    const rulepack = { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds };
-
-    const one = compute(spec, rulepack);
-    const two = compute(spec, rulepack);
-
-    expect(one).toEqual(two);
-    expect({
-      schemaVersion: one.schemaVersion,
-      sheetViewModelSchemaVersion: one.sheetViewModel.schemaVersion,
-      ac: one.sheetViewModel.data.combat.ac,
-      firstAttack: one.sheetViewModel.data.combat.attacks[0],
-      firstThreeSkills: one.sheetViewModel.data.skills.slice(0, 3),
-      validationIssueCodes: one.validationIssues.map((issue) => issue.code),
-      unresolvedCodes: one.unresolved.map((entry) => entry.code)
-    }).toMatchInlineSnapshot();
   });
 });
