@@ -50,7 +50,7 @@ function parseFiniteSkillRank(value: unknown): number | undefined {
   return Math.floor(numeric * 2) / 2;
 }
 
-function normalizeId(value: string | undefined): string | undefined {
+function normalizeId(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const normalized = value.trim().toLowerCase();
   return normalized.length > 0 ? normalized : undefined;
@@ -97,7 +97,7 @@ export function normalizeCharacterSpec(spec: CharacterSpec): CharacterSpec {
 
   const normalizedMeta: CharacterSpecMeta = {
     ...(spec.meta.name !== undefined ? { name: normalizeString(spec.meta.name) } : {}),
-    rulesetId: normalizeString(spec.meta.rulesetId),
+    rulesetId: normalizeId(spec.meta.rulesetId) ?? "",
     sourceIds: normalizeUniqueIdList(spec.meta.sourceIds) ?? []
   };
 
@@ -170,13 +170,14 @@ export function validateCharacterSpec(spec: CharacterSpec): CharacterSpecValidat
 
 export function characterSpecToState(spec: CharacterSpec): CharacterState {
   const normalized = normalizeCharacterSpec(spec);
+  const hasSkillRanks = Object.keys(normalized.skillRanks ?? {}).length > 0;
   return {
     metadata: normalized.meta.name?.length ? { name: normalized.meta.name } : {},
     abilities: { ...normalized.abilities },
     selections: {
       ...(normalized.raceId ? { race: normalized.raceId } : {}),
       ...(toClassSelectionId(normalized.class) ? { class: toClassSelectionId(normalized.class) } : {}),
-      ...(normalized.skillRanks ? { skills: normalized.skillRanks } : {}),
+      ...(hasSkillRanks ? { skills: normalized.skillRanks } : {}),
       feats: normalized.featIds ?? [],
       equipment: normalized.equipmentIds ?? []
     }

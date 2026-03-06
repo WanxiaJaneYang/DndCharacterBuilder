@@ -2098,10 +2098,10 @@ describe("engine determinism", () => {
 });
 
 describe("CharacterSpec v1", () => {
-  it("normalizes and validates a minimal flow-independent spec", () => {
+  it("normalizes a minimal flow-independent spec and passes validation", () => {
     const normalized = normalizeCharacterSpec({
       meta: {
-        rulesetId: "  dnd35e  ",
+        rulesetId: "  DnD35E  ",
         sourceIds: [" srd-35e-minimal ", "srd-35e-minimal"]
       },
       raceId: " Human ",
@@ -2118,6 +2118,7 @@ describe("CharacterSpec v1", () => {
     expect(normalized.skillRanks).toEqual({ climb: 2 });
     expect(normalized.featIds).toEqual(["power-attack"]);
     expect(normalized.equipmentIds).toEqual(["longsword"]);
+    expect(validateCharacterSpec(normalized)).toEqual([]);
   });
 
   it("maps CharacterSpec to legacy CharacterState for engine compatibility", () => {
@@ -2138,6 +2139,18 @@ describe("CharacterSpec v1", () => {
     expect(state.selections.skills).toEqual({ climb: 4, listen: 2 });
     expect(state.selections.feats).toEqual(["power-attack"]);
     expect(state.selections.equipment).toEqual(["longsword"]);
+  });
+
+  it("omits legacy skills selection when normalized skillRanks are empty", () => {
+    const state = characterSpecToState({
+      meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+      skillRanks: {}
+    });
+
+    expect(state.selections.skills).toBeUndefined();
   });
 
   it("drops malformed optional ids during normalization and state mapping", () => {
