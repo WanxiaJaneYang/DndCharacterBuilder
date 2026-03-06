@@ -11,7 +11,8 @@ import {
   validateState,
   normalizeCharacterSpec,
   characterSpecToState,
-  validateCharacterSpec
+  validateCharacterSpec,
+  compute
 } from "./index";
 
 const resolved = resolvePackSet(path.resolve(process.cwd(), "../../packs"), ["srd-35e-minimal"]);
@@ -2179,5 +2180,166 @@ describe("CharacterSpec v1", () => {
 
     const issues = validateCharacterSpec(invalidSpec);
     expect(issues.some((issue) => issue.code === "SPEC_META_SOURCEIDS_INVALID")).toBe(true);
+  });
+});
+
+describe("compute() contract", () => {
+  it("returns versioned ComputeResult for a canonical CharacterSpec", () => {
+    const result = compute(
+      {
+        meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+        skillRanks: { climb: 4, jump: 3, diplomacy: 0.5 },
+        featIds: ["power-attack"],
+        equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    expect(result.schemaVersion).toBe("0.1");
+    expect(result.sheetViewModel.schemaVersion).toBe("0.1");
+    expect(result.sheetViewModel.data.combat.ac.total).toBe(18);
+    expect(result.validationIssues).toEqual([]);
+    expect(result.unresolved.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it("produces deterministic contract snapshot for same spec + rulepack", () => {
+    const spec = {
+      meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+      skillRanks: { climb: 4, jump: 3, diplomacy: 0.5 },
+      featIds: ["power-attack"],
+      equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
+    };
+    const rulepack = { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds };
+
+    const one = compute(spec, rulepack);
+    const two = compute(spec, rulepack);
+
+    expect(one).toEqual(two);
+    const contractSlice = {
+      schemaVersion: one.schemaVersion,
+      sheetViewModelSchemaVersion: one.sheetViewModel.schemaVersion,
+      ac: one.sheetViewModel.data.combat.ac,
+      firstAttack: one.sheetViewModel.data.combat.attacks[0],
+      firstThreeSkills: one.sheetViewModel.data.skills.slice(0, 3),
+      validationIssueCodes: one.validationIssues.map((issue) => issue.code),
+      unresolvedCodes: one.unresolved.map((entry) => entry.code)
+    };
+
+    expect(contractSlice).toMatchInlineSnapshot(`
+      {
+        "ac": {
+          "components": [
+            {
+              "id": "base",
+              "label": "Base",
+              "value": 10,
+            },
+            {
+              "id": "armor",
+              "label": "Armor",
+              "value": 5,
+            },
+            {
+              "id": "shield",
+              "label": "Shield",
+              "value": 2,
+            },
+            {
+              "id": "dex",
+              "label": "Dex",
+              "value": 1,
+            },
+            {
+              "id": "size",
+              "label": "Size",
+              "value": 0,
+            },
+            {
+              "id": "natural",
+              "label": "Natural",
+              "value": 0,
+            },
+            {
+              "id": "deflection",
+              "label": "Deflection",
+              "value": 0,
+            },
+            {
+              "id": "misc",
+              "label": "Misc",
+              "value": 0,
+            },
+          ],
+          "flatFooted": 17,
+          "total": 18,
+          "touch": 11,
+        },
+        "firstAttack": {
+          "attackBonus": 4,
+          "attackBonusBreakdown": {
+            "ability": 3,
+            "bab": 1,
+            "misc": 0,
+            "size": 0,
+            "total": 4,
+          },
+          "category": "melee",
+          "crit": "19-20/x2",
+          "damage": "1d8",
+          "damageLine": "1d8+3",
+          "itemId": "longsword",
+          "name": "Longsword",
+        },
+        "firstThreeSkills": [
+          {
+            "abilityKey": "int",
+            "abilityMod": 0,
+            "acp": 0,
+            "acpApplied": false,
+            "id": "appraise",
+            "misc": 0,
+            "name": "Appraise",
+            "ranks": 0,
+            "total": 0,
+          },
+          {
+            "abilityKey": "dex",
+            "abilityMod": 1,
+            "acp": -7,
+            "acpApplied": true,
+            "id": "balance",
+            "misc": 0,
+            "name": "Balance",
+            "ranks": 0,
+            "total": -6,
+          },
+          {
+            "abilityKey": "cha",
+            "abilityMod": -1,
+            "acp": 0,
+            "acpApplied": false,
+            "id": "bluff",
+            "misc": 0,
+            "name": "Bluff",
+            "ranks": 0,
+            "total": -1,
+          },
+        ],
+        "schemaVersion": "0.1",
+        "sheetViewModelSchemaVersion": "0.1",
+        "unresolvedCodes": [
+          "srd-35e-minimal:classes:fighter:fighter-bonus-feat-runtime",
+          "srd-35e-minimal:classes:fighter:fighter-proficiency-automation",
+          "srd-35e-minimal:feats:power-attack:power-attack-benefit",
+        ],
+        "validationIssueCodes": [],
+      }
+    `);
   });
 });

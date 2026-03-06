@@ -1,6 +1,12 @@
 import type { Constraint, Effect, Entity, Expr } from "@dcb/schema";
 import type { ResolvedEntity, ResolvedPackSet } from "@dcb/datapack";
-import type { CharacterState } from "./characterSpec";
+import {
+  characterSpecToState,
+  normalizeCharacterSpec,
+  validateCharacterSpec,
+  type CharacterSpec,
+  type CharacterState
+} from "./characterSpec";
 
 type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
@@ -8,6 +14,7 @@ const ABILITY_KEYS: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 const FIRST_LEVEL_SKILL_MULTIPLIER = 4;
 const FEAT_SLOT_TYPE = "feat";
 const ABILITY_STEP_ID = "abilities";
+const COMPUTE_RESULT_SCHEMA_VERSION = "0.1";
 
 type AbilityGenerationMode = "pointBuy" | "phb" | "rollSets";
 
@@ -61,6 +68,48 @@ export {
   normalizeCharacterSpec,
   validateCharacterSpec
 } from "./characterSpec";
+
+export interface ComputeResultValidationIssue {
+  code: string;
+  severity: "error" | "warning";
+  message: string;
+  path?: string;
+  relatedIds?: string[];
+}
+
+export interface ComputeResultUnresolvedEntry {
+  code: string;
+  message: string;
+  path?: string;
+  relatedIds?: string[];
+  suggestedNext?: string;
+}
+
+export interface ComputeResultAssumptionEntry {
+  code: string;
+  message: string;
+  path?: string;
+  defaultUsed: unknown;
+}
+
+export interface VersionedSheetViewModel {
+  schemaVersion: string;
+  data: SheetViewModel;
+}
+
+export interface ComputeResult {
+  schemaVersion: string;
+  sheetViewModel: VersionedSheetViewModel;
+  validationIssues: ComputeResultValidationIssue[];
+  unresolved: ComputeResultUnresolvedEntry[];
+  assumptions: ComputeResultAssumptionEntry[];
+  provenance?: ProvenanceRecord[];
+}
+
+export interface RulepackInput {
+  resolvedData: ResolvedPackSet;
+  enabledPackIds?: string[];
+}
 
 export interface EngineContext {
   enabledPackIds: string[];
@@ -311,6 +360,64 @@ export interface CharacterSheet {
   provenance: ProvenanceRecord[];
   unresolvedRules: UnresolvedRule[];
   packSetFingerprint: string;
+}
+
+export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeResult {
+  const normalizedSpec = normalizeCharacterSpec(spec);
+  const validationIssues: ComputeResultValidationIssue[] = [
+    ...validateCharacterSpec(spec).map((issue) => ({
+      code: issue.code,
+      severity: "error" as const,
+      message: issue.message,
+      ...(issue.path ? { path: issue.path } : {})
+    }))
+  ];
+  const assumptions: ComputeResultAssumptionEntry[] = [];
+
+  if (spec.class && Number(spec.class.level) < 1) {
+    assumptions.push({
+      code: "SPEC_CLASS_LEVEL_CLAMPED",
+      message: "Class level below 1 was clamped to 1 during normalization.",
+      path: "class.level",
+      defaultUsed: 1
+    });
+  }
+
+  const state = characterSpecToState(normalizedSpec);
+  const context: EngineContext = {
+    resolvedData: rulepack.resolvedData,
+    enabledPackIds: rulepack.enabledPackIds ?? normalizedSpec.meta.sourceIds
+  };
+
+  validationIssues.push(
+    ...validateState(state, context).map((issue) => ({
+      code: issue.code,
+      severity: "error" as const,
+      message: issue.message,
+      ...(issue.stepId ? { path: `selections.${issue.stepId}` } : {})
+    }))
+  );
+
+  const sheet = finalizeCharacter(state, context);
+  const unresolved: ComputeResultUnresolvedEntry[] = sheet.unresolvedRules.map((entry) => ({
+    code: entry.id,
+    message: entry.description,
+    ...(entry.dependsOn.length || entry.source.entityId
+      ? { relatedIds: [entry.source.entityId, ...entry.dependsOn] }
+      : {})
+  }));
+
+  return {
+    schemaVersion: COMPUTE_RESULT_SCHEMA_VERSION,
+    sheetViewModel: {
+      schemaVersion: COMPUTE_RESULT_SCHEMA_VERSION,
+      data: sheet.sheetViewModel
+    },
+    validationIssues,
+    unresolved,
+    assumptions,
+    provenance: sheet.provenance
+  };
 }
 
 type DeferredMechanicRecord = {

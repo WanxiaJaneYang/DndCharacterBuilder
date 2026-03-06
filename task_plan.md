@@ -4,11 +4,11 @@
 Implement issue #166 on a clean worktree by defining the public `ComputeResult` output contract, versioned `SheetViewModel` wrapper, explicit stability/ordering guarantees, tests, docs, and an MR.
 
 ## Phases
-- [in_progress] Design and planning docs
-- [pending] Red: add failing compute() contract tests
-- [pending] Green: implement exported output contract + `compute()` bridge
-- [pending] Docs: add ComputeResult contract doc and data README entry
-- [pending] Verify: run relevant test/type/build commands
+- [completed] Design and planning docs
+- [completed] Red: add failing compute() contract tests
+- [completed] Green: implement exported output contract + `compute()` bridge
+- [completed] Docs: add ComputeResult contract doc and data README entry
+- [completed] Verify: run relevant test/type/build commands
 - [pending] Git: commit, push, create MR
 
 ## Key Decisions
@@ -23,4 +23,4 @@ Implement issue #166 on a clean worktree by defining the public `ComputeResult` 
 - The bridge must stay deterministic and not mutate `CharacterSpec` input.
 
 ## Errors Encountered
-- None yet.
+- `npm --workspace @dcb/engine run test -- --runInBand` failed because Vitest does not support `--runInBand`; corrected to `npm --workspace @dcb/engine run test`.

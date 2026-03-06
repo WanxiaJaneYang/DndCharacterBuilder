@@ -8,3 +8,10 @@
 - Created worktree `D:/aiProjects/workspaces/DndCharacterBuilder/.worktrees/issue-166-compute-result-contract` on branch `feat/issue-166-compute-result-contract` from `origin/main`.
 - Ran baseline `npm test` in the worktree: all workspace tests passed.
 - Writing design and implementation plan docs now.
+- Committed design and planning docs in `docs: plan compute result contract`.
+- Added failing `compute()` contract tests in `packages/engine/src/engine.test.ts`.
+- Verified the Red step with `npm --workspace @dcb/engine run test`; failure was `compute is not a function`.
+- Implemented `compute()` and versioned output contract types in `packages/engine/src/index.ts`.
+- Re-ran `npm --workspace @dcb/engine run test`; engine suite passed and wrote the inline snapshot for the deterministic contract test.
+- Added `docs/data/COMPUTE_RESULT_V1.md` and linked it from `docs/data/README.md`.
+- Re-ran `npm run check:contract-fixtures`, `npm run typecheck`, `npm run build`, and `npm test` after the final inline snapshot update; all passed.
