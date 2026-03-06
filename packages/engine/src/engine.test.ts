@@ -3,7 +3,16 @@ import { describe, expect, it } from "vitest";
 import type { LoadedPack } from "@dcb/datapack";
 import { resolveLoadedPacks } from "@dcb/datapack";
 import { resolvePackSet } from "@dcb/datapack/node";
-import { finalizeCharacter, initialState, applyChoice, listChoices, validateState } from "./index";
+import {
+  finalizeCharacter,
+  initialState,
+  applyChoice,
+  listChoices,
+  validateState,
+  normalizeCharacterSpec,
+  characterSpecToState,
+  compute
+} from "./index";
 
 const resolved = resolvePackSet(path.resolve(process.cwd(), "../../packs"), ["srd-35e-minimal"]);
 const context = { enabledPackIds: ["srd-35e-minimal"], resolvedData: resolved };
@@ -2085,5 +2094,99 @@ describe("engine determinism", () => {
 
     expect(acSource?.setValue).toBe(15);
     expect(acSource?.source.packId).toBe("override");
+  });
+});
+
+describe("CharacterSpec v1", () => {
+  it("normalizes and validates a minimal flow-independent spec", () => {
+    const normalized = normalizeCharacterSpec({
+      meta: {
+        rulesetId: "  dnd35e  ",
+        sourceIds: [" srd-35e-minimal ", "srd-35e-minimal"]
+      },
+      raceId: " Human ",
+      class: { classId: "fighter", level: 1 },
+      abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+      skillRanks: { " Climb ": 2, "": 1, Spot: -1 },
+      featIds: [" Power-Attack ", "power-attack"],
+      equipmentIds: [" Longsword ", "longsword"]
+    });
+
+    expect(normalized.meta.rulesetId).toBe("dnd35e");
+    expect(normalized.meta.sourceIds).toEqual(["srd-35e-minimal"]);
+    expect(normalized.raceId).toBe("human");
+    expect(normalized.skillRanks).toEqual({ climb: 2 });
+    expect(normalized.featIds).toEqual(["power-attack"]);
+    expect(normalized.equipmentIds).toEqual(["longsword"]);
+  });
+
+  it("maps CharacterSpec to legacy CharacterState for engine compatibility", () => {
+    const state = characterSpecToState({
+      meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 3 },
+      abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+      skillRanks: { climb: 4, listen: 2 },
+      featIds: ["power-attack"],
+      equipmentIds: ["longsword"]
+    });
+
+    expect(state.metadata).toEqual({ name: "Aric" });
+    expect(state.abilities).toEqual({ str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 });
+    expect(state.selections.race).toBe("human");
+    expect(state.selections.class).toBe("fighter-3");
+    expect(state.selections.skills).toEqual({ climb: 4, listen: 2 });
+    expect(state.selections.feats).toEqual(["power-attack"]);
+    expect(state.selections.equipment).toEqual(["longsword"]);
+  });
+});
+
+describe("compute() contract", () => {
+  it("returns versioned ComputeResult for a canonical CharacterSpec", () => {
+    const result = compute(
+      {
+        meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+        skillRanks: { climb: 4, jump: 3, diplomacy: 0.5 },
+        featIds: ["power-attack"],
+        equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    expect(result.schemaVersion).toBe("0.1");
+    expect(result.sheetViewModel.schemaVersion).toBe("0.1");
+    expect(result.sheetViewModel.data.combat.ac.total).toBe(18);
+    expect(result.validationIssues).toEqual([]);
+    expect(result.unresolved.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it("produces deterministic contract snapshot for same spec + rulepack", () => {
+    const spec = {
+      meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+      skillRanks: { climb: 4, jump: 3, diplomacy: 0.5 },
+      featIds: ["power-attack"],
+      equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
+    };
+    const rulepack = { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds };
+
+    const one = compute(spec, rulepack);
+    const two = compute(spec, rulepack);
+
+    expect(one).toEqual(two);
+    expect({
+      schemaVersion: one.schemaVersion,
+      sheetViewModelSchemaVersion: one.sheetViewModel.schemaVersion,
+      ac: one.sheetViewModel.data.combat.ac,
+      firstAttack: one.sheetViewModel.data.combat.attacks[0],
+      firstThreeSkills: one.sheetViewModel.data.skills.slice(0, 3),
+      validationIssueCodes: one.validationIssues.map((issue) => issue.code),
+      unresolvedCodes: one.unresolved.map((entry) => entry.code)
+    }).toMatchInlineSnapshot();
   });
 });
