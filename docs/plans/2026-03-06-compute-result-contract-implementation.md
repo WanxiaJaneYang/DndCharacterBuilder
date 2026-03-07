@@ -23,7 +23,7 @@ Add a `describe("compute() contract")` block that imports `compute` and asserts:
 - deterministic snapshot covers selected contract slices.
 
 **Step 2: Run test to verify it fails**
-Run: `npm --workspace @dcb/engine run test -- --runInBand`
+Run: `npm --workspace @dcb/engine run test`
 Expected: FAIL because `compute` is not exported yet.
 
 **Step 3: Commit**
@@ -54,7 +54,7 @@ Implementation requirements:
 - populate assumptions for normalization-driven class-level clamping.
 
 **Step 2: Run engine tests to verify they pass**
-Run: `npm --workspace @dcb/engine run test -- --runInBand`
+Run: `npm --workspace @dcb/engine run test`
 Expected: PASS with the new contract tests included.
 
 **Step 3: Refactor only if needed**
@@ -83,7 +83,7 @@ Expected: PASS or no relevant doc-related changes required.
 
 **Step 1: Run focused verification**
 Run:
-- `npm --workspace @dcb/engine run test -- --runInBand`
+- `npm --workspace @dcb/engine run test`
 - `npm test`
 - `npm run typecheck`
 

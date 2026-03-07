@@ -2197,12 +2197,48 @@ describe("compute() contract", () => {
       },
       { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
     );
+    const schemaVersion: "0.1" = result.schemaVersion;
+    const sheetSchemaVersion: "0.1" = result.sheetViewModel.schemaVersion;
 
-    expect(result.schemaVersion).toBe("0.1");
-    expect(result.sheetViewModel.schemaVersion).toBe("0.1");
+    expect(schemaVersion).toBe("0.1");
+    expect(sheetSchemaVersion).toBe("0.1");
     expect(result.sheetViewModel.data.combat.ac.total).toBe(18);
     expect(result.validationIssues).toEqual([]);
-    expect(result.unresolved.length).toBeGreaterThanOrEqual(0);
+    expect(result.unresolved).toEqual(expect.any(Array));
+    expect(result.assumptions).toEqual(expect.any(Array));
+  });
+
+  it("maps validation paths to CharacterSpec fields and records normalization assumptions", () => {
+    const result = compute(
+      {
+        meta: { name: " ", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1.9 },
+        abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+        skillRanks: { climb: 4, jump: 3, diplomacy: 0.5 },
+        featIds: ["power-attack"],
+        equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    expect(result.validationIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "NAME_REQUIRED",
+          path: "meta.name"
+        })
+      ])
+    );
+    expect(result.assumptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_CLASS_LEVEL_CLAMPED",
+          path: "class.level",
+          defaultUsed: 1
+        })
+      ])
+    );
   });
 
   it("produces deterministic contract snapshot for same spec + rulepack", () => {
@@ -2219,6 +2255,9 @@ describe("compute() contract", () => {
 
     const one = compute(spec, rulepack);
     const two = compute(spec, rulepack);
+    const firstThreeSkills = ["climb", "diplomacy", "jump"]
+      .map((id) => one.sheetViewModel.data.skills.find((skill) => skill.id === id))
+      .filter((skill) => skill !== undefined);
 
     expect(one).toEqual(two);
     const contractSlice = {
@@ -2226,7 +2265,7 @@ describe("compute() contract", () => {
       sheetViewModelSchemaVersion: one.sheetViewModel.schemaVersion,
       ac: one.sheetViewModel.data.combat.ac,
       firstAttack: one.sheetViewModel.data.combat.attacks[0],
-      firstThreeSkills: one.sheetViewModel.data.skills.slice(0, 3),
+      firstThreeSkills,
       validationIssueCodes: one.validationIssues.map((issue) => issue.code),
       unresolvedCodes: one.unresolved.map((entry) => entry.code)
     };
@@ -2298,36 +2337,36 @@ describe("compute() contract", () => {
         },
         "firstThreeSkills": [
           {
-            "abilityKey": "int",
-            "abilityMod": 0,
-            "acp": 0,
-            "acpApplied": false,
-            "id": "appraise",
-            "misc": 0,
-            "name": "Appraise",
-            "ranks": 0,
-            "total": 0,
-          },
-          {
-            "abilityKey": "dex",
-            "abilityMod": 1,
+            "abilityKey": "str",
+            "abilityMod": 3,
             "acp": -7,
             "acpApplied": true,
-            "id": "balance",
+            "id": "climb",
             "misc": 0,
-            "name": "Balance",
-            "ranks": 0,
-            "total": -6,
+            "name": "Climb",
+            "ranks": 4,
+            "total": 0,
           },
           {
             "abilityKey": "cha",
             "abilityMod": -1,
             "acp": 0,
             "acpApplied": false,
-            "id": "bluff",
+            "id": "diplomacy",
             "misc": 0,
-            "name": "Bluff",
-            "ranks": 0,
+            "name": "Diplomacy",
+            "ranks": 0.5,
+            "total": -0.5,
+          },
+          {
+            "abilityKey": "str",
+            "abilityMod": 3,
+            "acp": -7,
+            "acpApplied": true,
+            "id": "jump",
+            "misc": 0,
+            "name": "Jump",
+            "ranks": 3,
             "total": -1,
           },
         ],

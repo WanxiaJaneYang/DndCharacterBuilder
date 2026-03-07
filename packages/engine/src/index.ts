@@ -14,7 +14,23 @@ const ABILITY_KEYS: AbilityKey[] = ["str", "dex", "con", "int", "wis", "cha"];
 const FIRST_LEVEL_SKILL_MULTIPLIER = 4;
 const FEAT_SLOT_TYPE = "feat";
 const ABILITY_STEP_ID = "abilities";
-const COMPUTE_RESULT_SCHEMA_VERSION = "0.1";
+export const COMPUTE_RESULT_SCHEMA_VERSION = "0.1" as const;
+
+type ComputeResultSchemaVersion = typeof COMPUTE_RESULT_SCHEMA_VERSION;
+
+const STEP_ID_TO_SPEC_PATH: Record<string, string> = {
+  name: "meta.name",
+  abilities: "abilities",
+  race: "raceId",
+  races: "raceId",
+  class: "class.classId",
+  classes: "class.classId",
+  feat: "featIds",
+  feats: "featIds",
+  skills: "skillRanks",
+  equipment: "equipmentIds",
+  items: "equipmentIds"
+};
 
 type AbilityGenerationMode = "pointBuy" | "phb" | "rollSets";
 
@@ -93,12 +109,12 @@ export interface ComputeResultAssumptionEntry {
 }
 
 export interface VersionedSheetViewModel {
-  schemaVersion: string;
+  schemaVersion: ComputeResultSchemaVersion;
   data: SheetViewModel;
 }
 
 export interface ComputeResult {
-  schemaVersion: string;
+  schemaVersion: ComputeResultSchemaVersion;
   sheetViewModel: VersionedSheetViewModel;
   validationIssues: ComputeResultValidationIssue[];
   unresolved: ComputeResultUnresolvedEntry[];
@@ -362,6 +378,10 @@ export interface CharacterSheet {
   packSetFingerprint: string;
 }
 
+function mapStepIdToSpecPath(stepId: string): string | undefined {
+  return STEP_ID_TO_SPEC_PATH[stepId];
+}
+
 export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeResult {
   const normalizedSpec = normalizeCharacterSpec(spec);
   const validationIssues: ComputeResultValidationIssue[] = [
@@ -374,13 +394,18 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
   ];
   const assumptions: ComputeResultAssumptionEntry[] = [];
 
-  if (spec.class && Number(spec.class.level) < 1) {
-    assumptions.push({
-      code: "SPEC_CLASS_LEVEL_CLAMPED",
-      message: "Class level below 1 was clamped to 1 during normalization.",
-      path: "class.level",
-      defaultUsed: 1
-    });
+  if (spec.class && normalizedSpec.class) {
+    const originalLevel = Number(spec.class.level);
+    const normalizedLevel = normalizedSpec.class.level;
+
+    if (originalLevel !== normalizedLevel) {
+      assumptions.push({
+        code: "SPEC_CLASS_LEVEL_CLAMPED",
+        message: `Class level was adjusted during normalization (set to ${normalizedLevel}).`,
+        path: "class.level",
+        defaultUsed: normalizedLevel
+      });
+    }
   }
 
   const state = characterSpecToState(normalizedSpec);
@@ -394,7 +419,9 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
       code: issue.code,
       severity: "error" as const,
       message: issue.message,
-      ...(issue.stepId ? { path: `selections.${issue.stepId}` } : {})
+      ...(issue.stepId && mapStepIdToSpecPath(issue.stepId)
+        ? { path: mapStepIdToSpecPath(issue.stepId) }
+        : {})
     }))
   );
 

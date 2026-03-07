@@ -44,9 +44,10 @@ type ComputeResult = {
 
 ## Field guarantees
 
-- `schemaVersion` is always present on the top-level result.
-- `sheetViewModel` is always present and always includes its own `schemaVersion`.
+- `schemaVersion` is always present on the top-level result and is always `"0.1"`.
+- `sheetViewModel` is always present and always includes its own `schemaVersion`, also `"0.1"`.
 - `validationIssues`, `unresolved`, and `assumptions` are always arrays, even when empty.
+- `validationIssues.path`, when present, points to the corresponding `CharacterSpec` field instead of wizard-state internals.
 - `provenance` is optional and must not be required for UI correctness.
 
 ## Ordering guarantees
@@ -75,7 +76,8 @@ This is covered by engine tests under `compute() contract`, including a determin
 
 - Invalid or missing CharacterSpec data surfaces through `validationIssues`.
 - Legacy engine validation also flows into `validationIssues`.
-- Normalization-driven defaults that change meaning, such as class levels clamped up to `1`, surface through `assumptions`.
+- `compute()` still returns a `sheetViewModel` after normalization and the current engine pipeline, even when `validationIssues` are present.
+- Normalization-driven defaults that change meaning, such as class levels adjusted during normalization, surface through `assumptions`.
 - Incomplete or deferred mechanics continue to surface through `unresolved`.
 
 ## Migration note
