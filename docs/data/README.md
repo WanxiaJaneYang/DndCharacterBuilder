@@ -8,6 +8,7 @@ This section documents the JSON pack and schema contract used by the builder.
 - `FLOW_SCHEMA.md`: flow step schema and constraints.
 - `EXPORT_SCHEMA.md`: export payload expectations.
 - `CHARACTER_SPEC_V1.md`: flow-independent engine input contract (`CharacterSpec`).
+- `COMPUTE_RESULT_V1.md`: versioned engine output contract for `compute(spec, rulepack)`.
 - `SRD_AUTHENTICITY_VALIDATION.md`: automatic authenticity strategy for official SRD datasets.
 
 ## Recent updates
