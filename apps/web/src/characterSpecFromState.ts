@@ -32,6 +32,8 @@ export function characterSpecFromState({
   rulesetId,
   sourceIds,
 }: CharacterSpecFromStateInput): CharacterSpec {
+  const classSelection = toClassSelection(state.selections.class);
+
   return {
     meta: {
       ...(state.metadata.name ? { name: state.metadata.name } : {}),
@@ -41,9 +43,7 @@ export function characterSpecFromState({
     ...(typeof state.selections.race === "string"
       ? { raceId: state.selections.race }
       : {}),
-    ...(toClassSelection(state.selections.class)
-      ? { class: toClassSelection(state.selections.class) }
-      : {}),
+    ...(classSelection ? { class: classSelection } : {}),
     abilities: {
       str: Number(state.abilities.str),
       dex: Number(state.abilities.dex),
