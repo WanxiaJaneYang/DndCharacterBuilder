@@ -266,6 +266,24 @@ export interface SheetViewModel {
       }
     >;
   };
+  review: {
+    hp: {
+      total: number;
+      breakdown: {
+        hitDie: number;
+        con: number;
+        misc: number;
+      };
+    };
+    initiative: { total: number; dex: number; misc: number };
+    grapple: { total: number; bab: number; str: number; size: number; misc: number };
+    saves: {
+      fort: { total: number; base: number; ability: number; misc: number };
+      ref: { total: number; base: number; ability: number; misc: number };
+      will: { total: number; base: number; ability: number; misc: number };
+    };
+    abilities: Record<AbilityKey, { score: number; mod: number }>;
+  };
   skills: Array<{
     id: string;
     name: string;
@@ -2108,7 +2126,7 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     }
   };
   const unresolvedRules = collectUnresolvedRules(state, context);
-  const sheetViewModel = buildSheetViewModel({ phase1, phase2, skills, decisions });
+  const sheetViewModel = buildSheetViewModel({ abilities: finalAbilities, phase1, phase2, skills, decisions });
 
   return {
     metadata: { name: sheet.metadata.name },
@@ -2126,7 +2144,9 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
   };
 }
 
-export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1" | "phase2" | "skills" | "decisions">): SheetViewModel {
+export function buildSheetViewModel(
+  characterSheet: Pick<CharacterSheet, "abilities" | "phase1" | "phase2" | "skills" | "decisions">
+): SheetViewModel {
   const ac = characterSheet.phase1.combat.ac;
   const acBase =
     ac.total
@@ -2195,6 +2215,19 @@ export function buildSheetViewModel(characterSheet: Pick<CharacterSheet, "phase1
         flatFooted: ac.flatFooted
       },
       attacks
+    },
+    review: {
+      hp: characterSheet.phase1.combat.hp,
+      initiative: characterSheet.phase1.combat.initiative,
+      grapple: characterSheet.phase1.combat.grapple,
+      saves: characterSheet.phase1.combat.saves,
+      abilities: ABILITY_KEYS.reduce((result, ability) => {
+        result[ability] = {
+          score: Number(characterSheet.abilities[ability]?.score ?? 10),
+          mod: Number(characterSheet.abilities[ability]?.mod ?? 0)
+        };
+        return result;
+      }, {} as Record<AbilityKey, { score: number; mod: number }>)
     },
     skills: characterSheet.phase2.skills.map((skill) => {
       const detail = characterSheet.skills[skill.id];

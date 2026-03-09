@@ -146,6 +146,76 @@
           }
         }
       },
+      "sheetViewModel": {
+        "review": {
+          "hp": {
+            "total": 10,
+            "breakdown": {
+              "hitDie": 10,
+              "con": 0,
+              "misc": 0
+            }
+          },
+          "initiative": {
+            "total": 1,
+            "dex": 1,
+            "misc": 0
+          },
+          "grapple": {
+            "total": 3,
+            "bab": 1,
+            "str": 2,
+            "size": 0,
+            "misc": 0
+          },
+          "saves": {
+            "fort": {
+              "total": 2,
+              "base": 2,
+              "ability": 0,
+              "misc": 0
+            },
+            "ref": {
+              "total": 1,
+              "base": 0,
+              "ability": 1,
+              "misc": 0
+            },
+            "will": {
+              "total": 0,
+              "base": 0,
+              "ability": 0,
+              "misc": 0
+            }
+          },
+          "abilities": {
+            "str": {
+              "score": 14,
+              "mod": 2
+            },
+            "dex": {
+              "score": 12,
+              "mod": 1
+            },
+            "con": {
+              "score": 10,
+              "mod": 0
+            },
+            "int": {
+              "score": 10,
+              "mod": 0
+            },
+            "wis": {
+              "score": 10,
+              "mod": 0
+            },
+            "cha": {
+              "score": 8,
+              "mod": -1
+            }
+          }
+        }
+      },
       "phase2": {
         "skills": [
           {
