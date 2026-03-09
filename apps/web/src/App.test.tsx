@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import * as engine from '@dcb/engine';
 import { App } from './App';
 import uiTextJson from './uiText.json';
 
@@ -132,6 +133,180 @@ describe('wizard e2e-ish happy path', () => {
 
     expect(screen.getByText(/\(\s*(?:STR|鍔涢噺)\s*\)/i)).toBeTruthy();
   });
+
+  it('renders the skills step without legacy finalizeCharacter totals', async () => {
+    const user = userEvent.setup();
+    const realFinalizeCharacter = engine.finalizeCharacter;
+    const finalizeSpy = vi.spyOn(engine, 'finalizeCharacter').mockImplementation((state, context) => {
+      const sheet = realFinalizeCharacter(state, context);
+      const climb = sheet.skills.climb!;
+      return {
+        ...sheet,
+        decisions: {
+          ...sheet.decisions,
+          skillPoints: {
+            ...sheet.decisions.skillPoints,
+            total: 99,
+            spent: 88,
+            remaining: 11,
+          },
+        },
+        skills: {
+          ...sheet.skills,
+          climb: {
+            ...climb,
+            racialBonus: 7,
+            costSpent: 77,
+            costPerRank: 9,
+          },
+        },
+      };
+    });
+
+    try {
+      render(<App />);
+
+      await reachSkillsStep(user);
+
+      expect(screen.getByText(/(?:Budget|鎬荤偣鏁?):\s*12/i)).toBeTruthy();
+      expect(screen.getByText(/(?:Remaining|鍓╀綑):\s*12/i)).toBeTruthy();
+
+      const climbRow = screen.getByRole('row', { name: climbSkillPattern });
+      expect(within(climbRow).getByText(/1\/rank/i)).toBeTruthy();
+      expect(within(climbRow).getByText(/Racial\s+\+0/i)).toBeTruthy();
+    } finally {
+      finalizeSpy.mockRestore();
+    }
+  });
+
+  it('renders the review screen without legacy finalizeCharacter totals', async () => {
+    const user = userEvent.setup();
+    const realFinalizeCharacter = engine.finalizeCharacter;
+    const finalizeSpy = vi.spyOn(engine, 'finalizeCharacter').mockImplementation((state, context) => {
+      const sheet = realFinalizeCharacter(state, context);
+      const climb = sheet.skills.climb!;
+      return {
+        ...sheet,
+        metadata: { name: 'Legacy Sheet' },
+        abilities: {
+          ...sheet.abilities,
+          str: { score: 3, mod: -4 },
+        },
+        stats: {
+          ...sheet.stats,
+          hp: 999,
+          initiative: 99,
+          speed: 5,
+          bab: 42,
+          fort: 21,
+          ref: 22,
+          will: 23,
+        },
+        phase1: {
+          ...sheet.phase1,
+          identity: {
+            ...sheet.phase1.identity,
+            speed: {
+              base: 5,
+              adjusted: 5,
+            },
+          },
+          combat: {
+            ...sheet.phase1.combat,
+            initiative: { total: 99, dex: 99, misc: 99 },
+            grapple: { total: 98, bab: 98, str: 98, size: 98, misc: 98 },
+            saves: {
+              fort: { total: 21, base: 21, ability: 21, misc: 21 },
+              ref: { total: 22, base: 22, ability: 22, misc: 22 },
+              will: { total: 23, base: 23, ability: 23, misc: 23 },
+            },
+            hp: {
+              total: 999,
+              breakdown: { hitDie: 111, con: 222, misc: 333 },
+            },
+          },
+        },
+        phase2: {
+          ...sheet.phase2,
+          feats: [{ id: 'legacy-feat', name: 'Legacy Feat', summary: 'Legacy summary' }],
+          traits: [{ source: 'race', name: 'Legacy Trait', summary: 'Legacy trait summary' }],
+          equipment: {
+            selectedItems: ['legacy-item'],
+            totalWeight: 999,
+            loadCategory: 'heavy',
+            speedImpact: 'Legacy reduction',
+          },
+          movement: {
+            base: 5,
+            adjusted: 5,
+            notes: ['Legacy movement note'],
+          },
+        },
+        decisions: {
+          ...sheet.decisions,
+          favoredClass: 'legacy-class',
+          ignoresMulticlassXpPenalty: false,
+          featSelectionLimit: 99,
+          skillPoints: {
+            ...sheet.decisions.skillPoints,
+            total: 99,
+            spent: 88,
+            remaining: 11,
+          },
+        },
+        skills: {
+          ...sheet.skills,
+          climb: {
+            ...climb,
+            racialBonus: 7,
+            costSpent: 77,
+            costPerRank: 9,
+          },
+        },
+      };
+    });
+
+    try {
+      render(<App />);
+
+      await user.click(screen.getByRole('button', { name: playerNamePattern }));
+      await user.click(screen.getByRole('button', { name: startWizardPattern }));
+      await user.click(screen.getByLabelText(humanLabelPattern));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByLabelText(fighterLabelPattern));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+
+      const strInput = screen.getByLabelText('STR');
+      await user.clear(strInput);
+      await user.type(strInput, '16');
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByLabelText('Power Attack'));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByLabelText('Chainmail'));
+      await user.click(screen.getByLabelText('Heavy Wooden Shield'));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.type(
+        screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i')),
+        'Aric',
+      );
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+
+      expect(screen.queryByText('Legacy Sheet')).toBeNull();
+      expect(screen.getByText('Aric')).toBeTruthy();
+      expect(screen.queryByText(/^999$/)).toBeNull();
+      expect(screen.queryByText(/^99$/)).toBeNull();
+      expect(screen.getByText(/Power Attack/i)).toBeTruthy();
+      expect(screen.queryByText(/Legacy Feat/i)).toBeNull();
+      expect(screen.getAllByText(/Chainmail/i).length).toBeGreaterThan(0);
+      expect(screen.queryByText(/Legacy reduction/i)).toBeNull();
+      expect(screen.getByText(/Feat Slots.*3/i)).toBeTruthy();
+      expect(screen.getByText(/Points Spent.*0.*8.*remaining/i)).toBeTruthy();
+    } finally {
+      finalizeSpy.mockRestore();
+    }
+  });
+
   it('exports ComputeResult JSON from review', async () => {
     const user = userEvent.setup();
     const originalCreateObjectUrl = URL.createObjectURL;
