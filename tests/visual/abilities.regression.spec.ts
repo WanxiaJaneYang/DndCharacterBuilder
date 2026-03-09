@@ -238,7 +238,12 @@ test.describe("abilities step e2e regression", () => {
         sheetViewModel?: {
           schemaVersion?: string;
           data?: {
-            combat?: { ac?: { total?: number } };
+            combat?: {
+              ac?: { total?: number };
+              attacks?: Array<{
+                attackBonusBreakdown?: { ability?: number };
+              }>;
+            };
             skills?: Array<{ id?: string; total?: number }>;
           };
         };
@@ -256,6 +261,10 @@ test.describe("abilities step e2e regression", () => {
         0,
       );
       expect(Array.isArray(exported.sheetViewModel?.data?.skills)).toBe(true);
+      const attackAbilityMods = (
+        exported.sheetViewModel?.data?.combat?.attacks ?? []
+      ).map((attack) => attack.attackBonusBreakdown?.ability);
+      expect(attackAbilityMods).toContain(-1);
       expect(Array.isArray(exported.validationIssues)).toBe(true);
       expect(Array.isArray(exported.unresolved)).toBe(true);
       expect(Array.isArray(exported.assumptions)).toBe(true);

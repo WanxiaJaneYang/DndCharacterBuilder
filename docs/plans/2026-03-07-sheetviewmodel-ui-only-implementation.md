@@ -1,6 +1,6 @@
 # SheetViewModel-Only UI Integration Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
+> **Implementation checklist:** Work through the tasks in this document step-by-step, running the indicated commands and tests at each stage.
 
 **Goal:** Cut the web UI over to `compute(spec, rulepack)` for sheet/review totals so React stops deriving those totals from the legacy `CharacterSheet` shape.
 
