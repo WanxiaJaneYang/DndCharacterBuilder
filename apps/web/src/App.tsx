@@ -4,6 +4,7 @@ import { loadMinimalPack } from "./loadMinimalPack";
 import {
   DEFAULT_STATS,
   applyChoice,
+  compute,
   finalizeCharacter,
   initialState,
   listChoices,
@@ -25,6 +26,7 @@ import {
 import { resolveSpecializedSkillLabel } from "./localization";
 import { AbilityMethodSelector } from "./components/AbilityMethodSelector";
 import { PointBuyPanel } from "./components/PointBuyPanel";
+import { characterSpecFromState } from "./characterSpecFromState";
 
 const embeddedPacks = [loadMinimalPack()];
 type Role = "dm" | "player" | null;
@@ -261,6 +263,19 @@ export function App() {
     [activeLocale?.flowStepLabels, choices, localizeEntityText, wizardSteps],
   );
   const choiceMap = new Map(localizedChoices.map((c) => [c.stepId, c]));
+  const spec = useMemo(
+    () =>
+      characterSpecFromState({
+        state,
+        rulesetId: selectedEdition.id,
+        sourceIds: enabledPackIds,
+      }),
+    [enabledPackIds, selectedEdition.id, state],
+  );
+  const computeResult = useMemo(
+    () => compute(spec, { resolvedData, enabledPackIds }),
+    [enabledPackIds, resolvedData, spec],
+  );
   const sheet = useMemo(
     () => finalizeCharacter(state, context),
     [context, state],
@@ -301,8 +316,9 @@ export function App() {
     return map;
   }, [context.resolvedData.manifests, t.REVIEW_UNKNOWN_VERSION]);
   const provenanceByTargetPath = useMemo(() => {
-    const map = new Map<string, typeof sheet.provenance>();
-    for (const record of sheet.provenance) {
+    const provenance = computeResult.provenance ?? [];
+    const map = new Map<string, typeof provenance>();
+    for (const record of provenance) {
       const existing = map.get(record.targetPath);
       if (existing) {
         existing.push(record);
@@ -311,7 +327,7 @@ export function App() {
       }
     }
     return map;
-  }, [sheet.provenance]);
+  }, [computeResult.provenance]);
   const sourceMetaByEntityKey = useMemo(() => {
     const map = new Map<string, { sourceType: string; sourceLabel: string }>();
     for (const [entityType, bucket] of Object.entries(
@@ -541,13 +557,13 @@ export function App() {
   };
 
   const exportJson = () => {
-    const blob = new Blob([JSON.stringify(sheet, null, 2)], {
+    const blob = new Blob([JSON.stringify(computeResult, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${sheet.metadata.name || DEFAULT_EXPORT_NAME}.json`;
+    a.download = `${spec.meta.name || DEFAULT_EXPORT_NAME}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -580,7 +596,7 @@ export function App() {
     if (currentStep.kind === "review") {
       const phase1 = sheet.phase1;
       const phase2 = sheet.phase2;
-      const reviewCombat = sheet.sheetViewModel.combat;
+      const reviewCombat = computeResult.sheetViewModel.data.combat;
       const abilityOrder = ["str", "dex", "con", "int", "wis", "cha"] as const;
       const statOrder = [
         "hp",
@@ -636,7 +652,7 @@ export function App() {
               t.REVIEW_UNRESOLVED_LABEL,
           )
         : t.REVIEW_UNRESOLVED_LABEL;
-      const reviewSkills = sheet.sheetViewModel.skills
+      const reviewSkills = computeResult.sheetViewModel.data.skills
         .filter((skill) => {
           const detail = sheet.skills[skill.id];
           return skill.ranks > 0 || (detail?.racialBonus ?? 0) !== 0;
@@ -1440,7 +1456,7 @@ export function App() {
           | Record<string, number>
           | undefined) ?? {};
       const skillViewModelById = new Map(
-        sheet.sheetViewModel.skills.map((skill) => [skill.id, skill]),
+        computeResult.sheetViewModel.data.skills.map((skill) => [skill.id, skill]),
       );
       const formatSkillValue = (value: number) =>
         `${Number.isInteger(value) ? value : value.toFixed(1)}`;

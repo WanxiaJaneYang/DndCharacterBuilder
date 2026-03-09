@@ -234,13 +234,40 @@ test.describe("abilities step e2e regression", () => {
       const exported = JSON.parse(
         await readFile(filePath as string, "utf-8"),
       ) as {
-        abilities?: { str?: { score?: number } };
+        schemaVersion?: string;
+        sheetViewModel?: {
+          schemaVersion?: string;
+          data?: {
+            combat?: {
+              ac?: { total?: number };
+              attacks?: Array<{
+                attackBonusBreakdown?: { ability?: number };
+              }>;
+            };
+            skills?: Array<{ id?: string; total?: number }>;
+          };
+        };
+        validationIssues?: unknown[];
+        unresolved?: unknown[];
+        assumptions?: unknown[];
         provenance?: Array<{
           targetPath?: string;
           source?: { packId?: string; entityId?: string };
         }>;
       };
-      expect(exported.abilities?.str?.score).toBe(9);
+      expect(exported.schemaVersion).toBe("0.1");
+      expect(exported.sheetViewModel?.schemaVersion).toBe("0.1");
+      expect(exported.sheetViewModel?.data?.combat?.ac?.total).toBeGreaterThan(
+        0,
+      );
+      expect(Array.isArray(exported.sheetViewModel?.data?.skills)).toBe(true);
+      const attackAbilityMods = (
+        exported.sheetViewModel?.data?.combat?.attacks ?? []
+      ).map((attack) => attack.attackBonusBreakdown?.ability);
+      expect(attackAbilityMods).toContain(-1);
+      expect(Array.isArray(exported.validationIssues)).toBe(true);
+      expect(Array.isArray(exported.unresolved)).toBe(true);
+      expect(Array.isArray(exported.assumptions)).toBe(true);
       expect(Array.isArray(exported.provenance)).toBe(true);
       expect((exported.provenance ?? []).length).toBeGreaterThan(0);
       expect(

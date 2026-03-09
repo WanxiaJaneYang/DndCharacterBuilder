@@ -132,6 +132,72 @@ describe('wizard e2e-ish happy path', () => {
 
     expect(screen.getByText(/\(\s*(?:STR|鍔涢噺)\s*\)/i)).toBeTruthy();
   });
+  it('exports ComputeResult JSON from review', async () => {
+    const user = userEvent.setup();
+    const originalCreateObjectUrl = URL.createObjectURL;
+    const originalRevokeObjectUrl = URL.revokeObjectURL;
+    const createObjectUrl = vi.fn(() => 'blob:test');
+    const revokeObjectUrl = vi.fn();
+    const stringifySpy = vi.spyOn(JSON, 'stringify');
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: createObjectUrl,
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: revokeObjectUrl,
+    });
+    try {
+      render(<App />);
+
+      await user.click(screen.getByRole('button', { name: playerNamePattern }));
+      await user.click(screen.getByRole('button', { name: startWizardPattern }));
+      await user.click(screen.getByLabelText(humanLabelPattern));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByLabelText(fighterLabelPattern));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+
+      const strInput = screen.getByLabelText('STR');
+      await user.clear(strInput);
+      await user.type(strInput, '16');
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByLabelText('Power Attack'));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.click(screen.getByLabelText('Chainmail'));
+      await user.click(screen.getByLabelText('Heavy Wooden Shield'));
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+      await user.type(
+        screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i')),
+        'Aric',
+      );
+      await user.click(screen.getByRole('button', { name: nextPattern }));
+
+      await user.click(screen.getByRole('button', { name: /Export JSON|瀵煎嚭 JSON/i }));
+
+      const exported = stringifySpy.mock.calls.at(-1)?.[0];
+
+      expect(exported.schemaVersion).toBe('0.1');
+      expect(exported.sheetViewModel).toBeTruthy();
+      expect(exported.validationIssues).toEqual(expect.any(Array));
+      expect(exported.unresolved).toEqual(expect.any(Array));
+      expect(exported.assumptions).toEqual(expect.any(Array));
+    } finally {
+      clickSpy.mockRestore();
+      Object.defineProperty(URL, 'createObjectURL', {
+        configurable: true,
+        value: originalCreateObjectUrl,
+      });
+      Object.defineProperty(URL, 'revokeObjectURL', {
+        configurable: true,
+        value: originalRevokeObjectUrl,
+      });
+      stringifySpy.mockRestore();
+    }
+  });
 });
 
 describe('role and language behavior', () => {
