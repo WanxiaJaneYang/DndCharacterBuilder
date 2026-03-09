@@ -2437,11 +2437,11 @@ describe("compute() contract", () => {
           "name": "Longsword",
         },
         "firstThreeSkills": [
-        {
-          "abilityKey": "str",
-          "abilityMod": 3,
-          "acp": -7,
-          "acpApplied": true,
+          {
+            "abilityKey": "str",
+            "abilityMod": 3,
+            "acp": -7,
+            "acpApplied": true,
             "id": "climb",
             "misc": 0,
             "name": "Climb",
