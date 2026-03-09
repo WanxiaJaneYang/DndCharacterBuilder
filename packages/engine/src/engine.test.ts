@@ -114,6 +114,56 @@ describe("sheetViewModel", () => {
         })
       ])
     );
+    expect(sheet.sheetViewModel.review).toEqual({
+      hp: {
+        total: 12,
+        breakdown: {
+          hitDie: 10,
+          con: 2,
+          misc: 0
+        }
+      },
+      initiative: {
+        total: 1,
+        dex: 1,
+        misc: 0
+      },
+      grapple: {
+        total: 4,
+        bab: 1,
+        str: 3,
+        size: 0,
+        misc: 0
+      },
+      saves: {
+        fort: {
+          total: 4,
+          base: 2,
+          ability: 2,
+          misc: 0
+        },
+        ref: {
+          total: 1,
+          base: 0,
+          ability: 1,
+          misc: 0
+        },
+        will: {
+          total: 0,
+          base: 0,
+          ability: 0,
+          misc: 0
+        }
+      },
+      abilities: {
+        str: { score: 16, mod: 3 },
+        dex: { score: 12, mod: 1 },
+        con: { score: 14, mod: 2 },
+        int: { score: 10, mod: 0 },
+        wis: { score: 10, mod: 0 },
+        cha: { score: 8, mod: -1 }
+      }
+    });
   });
 
   it("derives the base AC component from the actual AC total", () => {
@@ -2203,6 +2253,56 @@ describe("compute() contract", () => {
     expect(schemaVersion).toBe("0.1");
     expect(sheetSchemaVersion).toBe("0.1");
     expect(result.sheetViewModel.data.combat.ac.total).toBe(18);
+    expect(result.sheetViewModel.data.review).toMatchObject({
+      hp: {
+        total: 12,
+        breakdown: {
+          hitDie: 10,
+          con: 2,
+          misc: 0
+        }
+      },
+      initiative: {
+        total: 1,
+        dex: 1,
+        misc: 0
+      },
+      grapple: {
+        total: 4,
+        bab: 1,
+        str: 3,
+        size: 0,
+        misc: 0
+      },
+      saves: {
+        fort: {
+          total: 4,
+          base: 2,
+          ability: 2,
+          misc: 0
+        },
+        ref: {
+          total: 1,
+          base: 0,
+          ability: 1,
+          misc: 0
+        },
+        will: {
+          total: 0,
+          base: 0,
+          ability: 0,
+          misc: 0
+        }
+      },
+      abilities: {
+        str: { score: 16, mod: 3 },
+        dex: { score: 12, mod: 1 },
+        con: { score: 14, mod: 2 },
+        int: { score: 10, mod: 0 },
+        wis: { score: 10, mod: 0 },
+        cha: { score: 8, mod: -1 }
+      }
+    });
     expect(result.validationIssues).toEqual([]);
     expect(result.unresolved).toEqual(expect.any(Array));
     expect(result.assumptions).toEqual(expect.any(Array));
@@ -2266,6 +2366,7 @@ describe("compute() contract", () => {
       ac: one.sheetViewModel.data.combat.ac,
       firstAttack: one.sheetViewModel.data.combat.attacks[0],
       firstThreeSkills,
+      review: one.sheetViewModel.data.review,
       validationIssueCodes: one.validationIssues.map((issue) => issue.code),
       unresolvedCodes: one.unresolved.map((entry) => entry.code)
     };
@@ -2370,6 +2471,74 @@ describe("compute() contract", () => {
             "total": -1,
           },
         ],
+        "review": {
+          "abilities": {
+            "cha": {
+              "mod": -1,
+              "score": 8,
+            },
+            "con": {
+              "mod": 2,
+              "score": 14,
+            },
+            "dex": {
+              "mod": 1,
+              "score": 12,
+            },
+            "int": {
+              "mod": 0,
+              "score": 10,
+            },
+            "str": {
+              "mod": 3,
+              "score": 16,
+            },
+            "wis": {
+              "mod": 0,
+              "score": 10,
+            },
+          },
+          "grapple": {
+            "bab": 1,
+            "misc": 0,
+            "size": 0,
+            "str": 3,
+            "total": 4,
+          },
+          "hp": {
+            "breakdown": {
+              "con": 2,
+              "hitDie": 10,
+              "misc": 0,
+            },
+            "total": 12,
+          },
+          "initiative": {
+            "dex": 1,
+            "misc": 0,
+            "total": 1,
+          },
+          "saves": {
+            "fort": {
+              "ability": 2,
+              "base": 2,
+              "misc": 0,
+              "total": 4,
+            },
+            "ref": {
+              "ability": 1,
+              "base": 0,
+              "misc": 0,
+              "total": 1,
+            },
+            "will": {
+              "ability": 0,
+              "base": 0,
+              "misc": 0,
+              "total": 0,
+            },
+          },
+        },
         "schemaVersion": "0.1",
         "sheetViewModelSchemaVersion": "0.1",
         "unresolvedCodes": [
