@@ -39,8 +39,16 @@ The `docs/` folder is organised by discipline. To work on a specific area, start
 
 Each documentation folder contains a todo list and a checklist to track progress. Use these to orient yourself and plan work.
 
+## Agent workflow note
+Start each substantive session with `/trellis:start` when available. If it is unavailable in your harness, follow the manual startup flow in `AGENTS.md`.
+
+- Use `.trellis/tasks/` for active execution-task status.
+- Use `.trellis/workspace/` for per-agent session journals.
+- Use `docs/` for durable product, architecture, data, UX, UI, and engineering documentation.
+- Use `docs/engineering/WORK_PLAN.md` for roadmap and sprint intent, not live task-status tracking.
+
 ## MR/PR workflow note
-Before starting any merge-request or pull-request task, read `.codex/mr-flow-and-approvals.md` and follow its flow and approval preferences.
+Before starting any merge-request or pull-request task, run the Trellis startup flow first, then read `.codex/mr-flow-and-approvals.md` and follow its repo-specific review and approval preferences.
 
 ## Run locally
 ```bash
