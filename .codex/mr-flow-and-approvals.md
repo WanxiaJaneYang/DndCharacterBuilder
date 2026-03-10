@@ -2,7 +2,7 @@
 
 ## Workflow Boundary
 
-- Start every MR-related session with `/trellis:start` when available. If it is unavailable, manually read `.trellis/workflow.md`, initialize the developer if needed, and run `python .\\.trellis\\scripts\\get_context.py`.
+- Start every MR-related session with `/trellis:start` when available. If it is unavailable, manually read `.trellis/workflow.md`, initialize the developer if needed, and run `python ./.trellis/scripts/get_context.py`.
 - Treat `.trellis/tasks/` as the source of truth for active execution-task state during MR work.
 - Treat `.trellis/workspace/` as the source of truth for per-session journals and handoff notes.
 - Treat `docs/engineering/WORK_PLAN.md` as roadmap and sprint-planning context only, not as a live MR status log.
