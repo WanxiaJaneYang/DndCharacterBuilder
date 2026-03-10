@@ -75,63 +75,11 @@ type AbilityPresentationConfig = {
 const DEFAULT_ABILITY_MIN = 3;
 const DEFAULT_ABILITY_MAX = 18;
 
-type LocalSkillUiDetail = {
-  classSkill: boolean;
-  costPerRank: number;
-  maxRanks: number;
-  racialBonus: number;
-};
-
 function getEntityDataRecord(entity: { data?: unknown } | undefined): Record<string, unknown> {
   if (!entity?.data || typeof entity.data !== "object" || Array.isArray(entity.data)) {
     return {};
   }
   return entity.data as Record<string, unknown>;
-}
-
-function getClassSkillIds(classEntity: { data?: unknown } | undefined): Set<string> {
-  const raw = getEntityDataRecord(classEntity).classSkills;
-  if (!Array.isArray(raw)) return new Set();
-  return new Set(raw.map((entry) => String(entry ?? "").trim()).filter(Boolean));
-}
-
-function getCharacterLevel(classSelection: { level: number } | undefined): number {
-  const level = Number(classSelection?.level ?? 0);
-  return Number.isInteger(level) && level > 0 ? level : 0;
-}
-
-function getSkillMaxRanksForLevel(level: number, classSkill: boolean): number {
-  if (!Number.isFinite(level) || level <= 0) return 0;
-  return classSkill ? level + 3 : (level + 3) / 2;
-}
-
-function getRacialTraitIds(raceEntity: { data?: unknown } | undefined): Set<string> {
-  const raw = getEntityDataRecord(raceEntity).racialTraits;
-  if (!Array.isArray(raw)) return new Set();
-  return new Set(
-    raw
-      .map((entry) =>
-        entry && typeof entry === "object" && !Array.isArray(entry)
-          ? String((entry as Record<string, unknown>).id ?? "").trim()
-          : "",
-      )
-      .filter(Boolean),
-  );
-}
-
-function getRacialSkillBonuses(raceEntity: { data?: unknown } | undefined): Map<string, number> {
-  const raw = getEntityDataRecord(raceEntity).skillBonuses;
-  const bonuses = new Map<string, number>();
-  if (!Array.isArray(raw)) return bonuses;
-  for (const entry of raw) {
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
-    const record = entry as Record<string, unknown>;
-    const skillId = String(record.skill ?? "").trim();
-    const bonus = Number(record.bonus ?? 0);
-    if (!skillId || !Number.isFinite(bonus)) continue;
-    bonuses.set(skillId, (bonuses.get(skillId) ?? 0) + bonus);
-  }
-  return bonuses;
 }
 
 function rollScoreByFormula(formula: string): number {
@@ -260,6 +208,19 @@ export function App() {
   }, [abilityMethodHintPinned]);
 
   const t = uiText[language];
+  const localizeLoadCategory = (category: "light" | "medium" | "heavy") => {
+    if (category === "medium") return t.REVIEW_LOAD_CATEGORY_MEDIUM;
+    if (category === "heavy") return t.REVIEW_LOAD_CATEGORY_HEAVY;
+    return t.REVIEW_LOAD_CATEGORY_LIGHT;
+  };
+  const formatSpeedImpact = (adjustedSpeed: number, reducesSpeed: boolean) =>
+    reducesSpeed
+      ? t.REVIEW_SPEED_IMPACT_REDUCED.replace("{speed}", String(adjustedSpeed))
+      : t.REVIEW_SPEED_IMPACT_NONE;
+  const formatMovementNotes = (reducedByArmorOrLoad: boolean) =>
+    reducedByArmorOrLoad
+      ? [t.REVIEW_MOVEMENT_NOTE_ARMOR_OR_LOAD]
+      : [t.REVIEW_MOVEMENT_NOTE_NONE];
   const localizeAbilityLabel = useCallback(
     (ability: string): string => {
       return t.ABILITY_LABELS[ability.toUpperCase() as Uppercase<AbilityCode>] ?? ability.toUpperCase();
@@ -436,36 +397,6 @@ export function App() {
       {},
     );
   }, [state.selections]);
-  const classSkillIds = useMemo(
-    () => getClassSkillIds(selectedClassEntity),
-    [selectedClassEntity],
-  );
-  const racialSkillBonuses = useMemo(
-    () => getRacialSkillBonuses(selectedRaceEntity),
-    [selectedRaceEntity],
-  );
-  const skillUiDetailById = useMemo(() => {
-    const level = getCharacterLevel(spec.class);
-    return new Map(
-      skillEntities.map((skill) => {
-        const classSkill = classSkillIds.has(skill.id);
-        return [
-          skill.id,
-          {
-            classSkill,
-            costPerRank: classSkill ? 1 : 2,
-            maxRanks: getSkillMaxRanksForLevel(level, classSkill),
-            racialBonus: racialSkillBonuses.get(skill.id) ?? 0,
-          } satisfies LocalSkillUiDetail,
-        ] as const;
-      }),
-    );
-  }, [
-    classSkillIds,
-    racialSkillBonuses,
-    skillEntities,
-    spec.class,
-  ]);
 
   const selectedStepValues = (stepId: string): string[] => {
     if (stepId === STEP_ID_FEAT) return selectedFeats;
@@ -738,6 +669,8 @@ export function App() {
       };
       const formatSigned = (value: number) =>
         `${value >= 0 ? "+" : ""}${value}`;
+      const formatSkillValue = (value: number) =>
+        `${Number.isInteger(value) ? value : value.toFixed(1)}`;
       const formatSourceLabel = (packId: string, entityId: string) =>
         sourceNameByEntityId.get(`${packId}:${entityId}`) ?? t.REVIEW_UNRESOLVED_LABEL;
       const selectedRaceId = String(state.selections.race ?? "");
@@ -784,6 +717,7 @@ export function App() {
         packId,
         version: packVersionById.get(packId) ?? t.REVIEW_UNKNOWN_VERSION,
       }));
+      const skillBudget = reviewData.skillBudget;
       return (
         <section className="review-page">
           <h2>{t.REVIEW}</h2>
@@ -808,10 +742,10 @@ export function App() {
           <article className="sheet review-decisions">
             <h3>{t.REVIEW_IDENTITY_PROGRESSION}</h3>
             <p>
-              {t.REVIEW_LEVEL_LABEL}: {spec.class?.level ?? 0}
+              {t.REVIEW_LEVEL_LABEL}: {reviewData.identity.level}
             </p>
             <p>
-              {t.REVIEW_XP_LABEL}: 0
+              {t.REVIEW_XP_LABEL}: {reviewData.identity.xp}
             </p>
           </article>
 
@@ -1081,6 +1015,10 @@ export function App() {
 
           <article className="sheet">
             <h3>{t.REVIEW_SKILLS_BREAKDOWN}</h3>
+            <p>
+              {t.SKILLS_BUDGET_LABEL}: {skillBudget.total} | {t.SKILLS_SPENT_LABEL}:{" "}
+              {skillBudget.spent} | {t.SKILLS_REMAINING_LABEL}: {skillBudget.remaining}
+            </p>
             <table className="review-table">
               <caption className="sr-only">
                 {t.REVIEW_SKILLS_TABLE_CAPTION}
@@ -1088,11 +1026,14 @@ export function App() {
               <thead>
                 <tr>
                   <th>{t.REVIEW_SKILL_COLUMN}</th>
+                  <th>{t.SKILLS_TYPE_COLUMN}</th>
+                  <th>{t.SKILLS_POINTS_COLUMN}</th>
                   <th>{t.REVIEW_RANKS_COLUMN}</th>
                   <th>{t.REVIEW_ABILITY_COLUMN}</th>
                   <th>{t.REVIEW_MISC_COLUMN}</th>
                   <th>{t.REVIEW_ACP_COLUMN}</th>
                   <th>{t.REVIEW_TOTAL_COLUMN}</th>
+                  <th>{t.SKILLS_NOTES_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1106,18 +1047,110 @@ export function App() {
                         skill.name,
                       )}
                     </td>
-                    <td>{skill.ranks}</td>
+                    <td>
+                      {skill.classSkill ? t.SKILLS_CLASS_LABEL : t.SKILLS_CROSS_LABEL}
+                    </td>
+                    <td>
+                      {skill.costPerRank}
+                      {t.SKILLS_PER_RANK_UNIT}
+                    </td>
+                    <td>{formatSkillValue(skill.ranks)}</td>
                     <td>
                       {formatSigned(skill.abilityMod)} (
                       {localizeAbilityLabel(skill.abilityKey)})
                     </td>
                     <td>{formatSigned(skill.misc)}</td>
                     <td>{formatSigned(skill.acp)}</td>
-                    <td>{skill.total}</td>
+                    <td>{formatSkillValue(skill.total)}</td>
+                    <td>
+                      <div>
+                        {t.SKILLS_MAX_LABEL} {formatSkillValue(skill.maxRanks)}
+                      </div>
+                      <div>
+                        {t.SKILLS_RACIAL_LABEL} {skill.racialBonus >= 0 ? "+" : ""}
+                        {formatSkillValue(skill.racialBonus)}
+                      </div>
+                      <div>
+                        {skill.acpApplied
+                          ? t.SKILLS_ACP_APPLIES_LABEL
+                          : t.SKILLS_ACP_NOT_APPLICABLE_LABEL}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </article>
+
+          <article className="sheet">
+            <h3>{t.REVIEW_EQUIPMENT_LOAD}</h3>
+            <p>
+              {t.REVIEW_SELECTED_ITEMS_LABEL}:{" "}
+              {reviewData.equipmentLoad.selectedItems.length > 0
+                ? reviewData.equipmentLoad.selectedItems
+                    .map((itemId) =>
+                      localizeEntityText("items", itemId, "name", itemId),
+                    )
+                    .join(", ")
+                : "-"}
+            </p>
+            <p>
+              {t.REVIEW_TOTAL_WEIGHT_LABEL}: {reviewData.equipmentLoad.totalWeight}
+            </p>
+            <p>
+              {t.REVIEW_LOAD_CATEGORY_LABEL}:{" "}
+              {localizeLoadCategory(reviewData.equipmentLoad.loadCategory)}
+            </p>
+            <p>
+              {t.REVIEW_SPEED_IMPACT_LABEL}:{" "}
+              {formatSpeedImpact(
+                reviewData.speed.adjusted,
+                reviewData.equipmentLoad.reducesSpeed,
+              )}
+            </p>
+          </article>
+
+          <article className="sheet">
+            <h3>{t.REVIEW_MOVEMENT_DETAIL}</h3>
+            <p>
+              {t.REVIEW_BAB_LABEL}: {reviewData.bab}
+            </p>
+            <p>
+              {t.REVIEW_SPEED_BASE_LABEL}: {reviewData.speed.base}
+            </p>
+            <p>
+              {t.REVIEW_SPEED_ADJUSTED_LABEL}: {reviewData.speed.adjusted}
+            </p>
+            <p>
+              {t.REVIEW_MOVEMENT_NOTES_LABEL}:{" "}
+              {formatMovementNotes(reviewData.movement.reducedByArmorOrLoad).join("; ")}
+            </p>
+          </article>
+
+          <article className="sheet review-decisions">
+            <h3>{t.REVIEW_RULES_DECISIONS}</h3>
+            <p>
+              {t.REVIEW_FAVORED_CLASS_LABEL}:{" "}
+              {reviewData.rulesDecisions.favoredClass
+                ? reviewData.rulesDecisions.favoredClass === "any"
+                  ? t.REVIEW_FAVORED_CLASS_ANY
+                  : localizeEntityText(
+                      "classes",
+                      reviewData.rulesDecisions.favoredClass,
+                      "name",
+                      reviewData.rulesDecisions.favoredClass,
+                    )
+                : t.REVIEW_UNRESOLVED_LABEL}
+            </p>
+            <p>
+              {t.REVIEW_MULTICLASS_XP_IGNORED_LABEL}:{" "}
+              {reviewData.rulesDecisions.ignoresMulticlassXpPenalty
+                ? t.REVIEW_YES
+                : t.REVIEW_NO}
+            </p>
+            <p>
+              {t.REVIEW_FEAT_SLOTS_LABEL}: {reviewData.rulesDecisions.featSelectionLimit}
+            </p>
           </article>
 
           <article className="sheet review-decisions">
@@ -1508,10 +1541,15 @@ export function App() {
         skillName: string,
       ) =>
         `${action === "increase" ? t.INCREASE_LABEL : t.DECREASE_LABEL} ${skillName}`;
+      const skillBudget = reviewData.skillBudget;
 
       return (
         <section>
           <h2>{currentStep.label}</h2>
+          <p>
+            {t.SKILLS_BUDGET_LABEL}: {skillBudget.total} | {t.SKILLS_SPENT_LABEL}:{" "}
+            {skillBudget.spent} | {t.SKILLS_REMAINING_LABEL}: {skillBudget.remaining}
+          </p>
           <div className="skills-table-wrap">
             <table className="review-table skills-table">
               <thead>
@@ -1527,23 +1565,25 @@ export function App() {
               </thead>
               <tbody>
                 {skillEntities.map((skill) => {
-                  const detail = skillUiDetailById.get(skill.id);
                   const skillView = skillViewModelById.get(skill.id);
                   const ranks = selectedSkillRanks[skill.id] ?? 0;
-                  const classSkill = detail?.classSkill ?? false;
-                  const costPerRank = detail?.costPerRank ?? 2;
-                  const maxRanks = detail?.maxRanks ?? 2;
-                  const racialBonus = detail?.racialBonus ?? 0;
+                  const classSkill = skillView?.classSkill ?? false;
+                  const costPerRank = skillView?.costPerRank ?? 2;
+                  const maxRanks = skillView?.maxRanks ?? 0;
+                  const racialBonus = skillView?.racialBonus ?? 0;
                   const miscBonus = skillView?.misc ?? 0;
                   const acpPenalty = skillView?.acp ?? 0;
                   const abilityMod = skillView?.abilityMod ?? 0;
                   const total = skillView?.total ?? 0;
                   const rankStep = classSkill ? 1 : 0.5;
+                  const costToIncrease = rankStep * costPerRank;
                   const armorCheckPenaltyApplies =
                     skillView?.acpApplied ??
                     Boolean(skill.data?.armorCheckPenaltyApplies);
                   const canDecrease = ranks > 0;
-                  const canIncrease = ranks + rankStep <= maxRanks;
+                  const canIncrease =
+                    ranks + rankStep <= maxRanks &&
+                    skillBudget.remaining + 1e-9 >= costToIncrease;
 
                   const updateRanks = (nextValue: number) => {
                     const nextRanks = {
