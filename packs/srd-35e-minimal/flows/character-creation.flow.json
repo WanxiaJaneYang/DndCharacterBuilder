@@ -26,6 +26,7 @@
       "id": "abilities",
       "kind": "abilities",
       "label": "Ability Scores",
+      "pageSchemaId": "character.abilities",
       "source": {
         "type": "manual"
       },
@@ -115,6 +116,7 @@
       "id": "skills",
       "kind": "skills",
       "label": "Skills",
+      "pageSchemaId": "character.skills",
       "source": {
         "type": "manual"
       }

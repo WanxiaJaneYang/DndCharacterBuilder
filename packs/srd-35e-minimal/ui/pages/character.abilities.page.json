@@ -1,0 +1,15 @@
+{
+  "id": "character.abilities",
+  "root": {
+    "id": "abilities-root",
+    "componentId": "layout.singleColumn",
+    "children": [
+      {
+        "id": "abilities-allocator",
+        "componentId": "abilities.allocator",
+        "slot": "main",
+        "dataSource": "page.abilitiesAllocator"
+      }
+    ]
+  }
+}

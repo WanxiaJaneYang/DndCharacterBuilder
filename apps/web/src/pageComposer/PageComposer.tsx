@@ -1,6 +1,8 @@
 import type { Page, PageSchemaNode } from "@dcb/schema";
-import type { ReactNode } from "react";
+import type { FocusEvent, KeyboardEvent, ReactNode, RefObject } from "react";
 import type { UIText } from "../uiText";
+import { AbilityMethodSelector } from "../components/AbilityMethodSelector";
+import { PointBuyPanel } from "../components/PointBuyPanel";
 
 type SlotChildren = Record<string, ReactNode[]>;
 
@@ -19,6 +21,112 @@ export interface MetadataNameFieldData {
   value: string;
   placeholder?: string;
   onChange: (value: string) => void;
+}
+
+export interface AbilityAllocatorData {
+  t: UIText;
+  title: string;
+  modeSelector: {
+    label: string;
+    helpLabel: string;
+    helpText: string;
+    isHintVisible: boolean;
+    isHintAvailable: boolean;
+    value: string;
+    options: Array<{ value: string; label: string }>;
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+    onFocus: () => void;
+    onBlur: (event: FocusEvent<HTMLButtonElement>) => void;
+    onClick: () => void;
+    onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+    onChange: (value: string) => void;
+    helpRef: RefObject<HTMLDivElement>;
+  };
+  pointBuyPanel?: {
+    pointCap: number;
+    pointCapMin: number;
+    pointCapMax: number;
+    pointCapStep: number;
+    pointBuyRemaining: number;
+    isTableOpen: boolean;
+    costTable: Record<string, number>;
+    onPointCapChange: (value: number) => void;
+    onToggleTable: () => void;
+  };
+  rollSetsPanel?: {
+    title: string;
+    description: string;
+    rerollLabel: string;
+    ariaLabel: string;
+    options: Array<{
+      id: string;
+      label: string;
+      scores: string;
+      checked: boolean;
+      onSelect: () => void;
+    }>;
+    onReroll: () => void;
+  };
+  abilityRows: Array<{
+    id: string;
+    label: string;
+    value: number;
+    disabled: boolean;
+    min: number;
+    max: number;
+    canDecrease: boolean;
+    canIncrease: boolean;
+    onChange: (value: number) => void;
+    onBlur: () => void;
+    onDecrease: () => void;
+    onIncrease: () => void;
+  }>;
+  modifierRows: Array<{
+    id: string;
+    label: string;
+    base: number;
+    adjustment: string;
+    groups: Array<{
+      id: string;
+      label: string;
+      total: string;
+      items: Array<{
+        id: string;
+        delta: string;
+        sourceLabel: string;
+      }>;
+    }>;
+    final: number;
+    mod: string;
+  }>;
+  showModifierTable: boolean;
+}
+
+export interface SkillsAllocatorData {
+  t: UIText;
+  title: string;
+  budget: {
+    total: number;
+    spent: number;
+    remaining: number;
+  };
+  rows: Array<{
+    id: string;
+    name: string;
+    typeLabel: string;
+    pointsLabel: string;
+    ranks: string;
+    decreaseLabel: string;
+    increaseLabel: string;
+    canDecrease: boolean;
+    canIncrease: boolean;
+    onDecrease: () => void;
+    onIncrease: () => void;
+    breakdown: string;
+    total: string;
+    notes: string[];
+  }>;
 }
 
 export interface ReviewSheetAdjustmentData {
@@ -202,6 +310,241 @@ function MetadataNameFieldBlock({ node, data }: RegistryComponentProps) {
         aria-label={field.label}
         onChange={(event) => field.onChange(event.target.value)}
       />
+    </section>
+  );
+}
+
+function AbilityAllocatorBlock({ node, data }: RegistryComponentProps) {
+  const abilities = data as AbilityAllocatorData | undefined;
+  if (!abilities) {
+    throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
+  }
+
+  const { t } = abilities;
+
+  return (
+    <section data-node-id={node.id}>
+      <h2>{abilities.title}</h2>
+      <AbilityMethodSelector
+        label={abilities.modeSelector.label}
+        helpLabel={abilities.modeSelector.helpLabel}
+        helpText={abilities.modeSelector.helpText}
+        isHintVisible={abilities.modeSelector.isHintVisible}
+        isHintAvailable={abilities.modeSelector.isHintAvailable}
+        value={abilities.modeSelector.value}
+        options={abilities.modeSelector.options}
+        onMouseEnter={abilities.modeSelector.onMouseEnter}
+        onMouseLeave={abilities.modeSelector.onMouseLeave}
+        onFocus={abilities.modeSelector.onFocus}
+        onBlur={abilities.modeSelector.onBlur}
+        onClick={abilities.modeSelector.onClick}
+        onKeyDown={abilities.modeSelector.onKeyDown}
+        onChange={abilities.modeSelector.onChange}
+        helpRef={abilities.modeSelector.helpRef}
+      />
+      {abilities.pointBuyPanel && (
+        <PointBuyPanel
+          pointCapLabel={t.POINT_CAP_LABEL}
+          pointCap={abilities.pointBuyPanel.pointCap}
+          pointCapMin={abilities.pointBuyPanel.pointCapMin}
+          pointCapMax={abilities.pointBuyPanel.pointCapMax}
+          pointCapStep={abilities.pointBuyPanel.pointCapStep}
+          pointBuyRemainingLabel={t.POINT_BUY_REMAINING_LABEL}
+          pointBuyRemaining={abilities.pointBuyPanel.pointBuyRemaining}
+          showTableLabel={t.POINT_BUY_SHOW_TABLE_LABEL}
+          hideTableLabel={t.POINT_BUY_HIDE_TABLE_LABEL}
+          tableCaption={t.POINT_BUY_TABLE_CAPTION}
+          scoreColumnLabel={t.POINT_BUY_SCORE_COLUMN}
+          costColumnLabel={t.POINT_BUY_COST_COLUMN}
+          isTableOpen={abilities.pointBuyPanel.isTableOpen}
+          costTable={abilities.pointBuyPanel.costTable}
+          onPointCapChange={abilities.pointBuyPanel.onPointCapChange}
+          onToggleTable={abilities.pointBuyPanel.onToggleTable}
+        />
+      )}
+      {abilities.rollSetsPanel && (
+        <section className="sheet">
+          <div className="rollsets-header">
+            <h3>{abilities.rollSetsPanel.title}</h3>
+            <button type="button" onClick={abilities.rollSetsPanel.onReroll}>
+              {abilities.rollSetsPanel.rerollLabel}
+            </button>
+          </div>
+          <p>{abilities.rollSetsPanel.description}</p>
+          <fieldset role="radiogroup" aria-label={abilities.rollSetsPanel.ariaLabel}>
+            {abilities.rollSetsPanel.options.map((option) => (
+              <label key={option.id} className="rollset-option">
+                <input
+                  type="radio"
+                  name="roll-set-choice"
+                  checked={option.checked}
+                  onChange={option.onSelect}
+                />
+                <span>{option.label}</span>
+                <code>{option.scores}</code>
+              </label>
+            ))}
+          </fieldset>
+        </section>
+      )}
+      <div className="grid">
+        {abilities.abilityRows.map((ability) => (
+          <div key={ability.id} className="ability-input-row">
+            <label htmlFor={`ability-input-${ability.id}`}>{ability.label}</label>
+            <div className="ability-stepper">
+              <button
+                type="button"
+                className="ability-step-btn"
+                aria-label={`${t.DECREASE_LABEL} ${ability.label}`}
+                disabled={!ability.canDecrease}
+                onClick={ability.onDecrease}
+              >
+                -
+              </button>
+              <input
+                id={`ability-input-${ability.id}`}
+                type="number"
+                disabled={ability.disabled}
+                min={ability.min}
+                max={ability.max}
+                step={1}
+                value={ability.value}
+                onChange={(event) => ability.onChange(Number(event.target.value))}
+                onBlur={ability.onBlur}
+              />
+              <button
+                type="button"
+                className="ability-step-btn"
+                aria-label={`${t.INCREASE_LABEL} ${ability.label}`}
+                disabled={!ability.canIncrease}
+                onClick={ability.onIncrease}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      {abilities.showModifierTable && (
+        <article className="sheet">
+          <h3>{t.ABILITY_EXISTING_MODIFIERS_LABEL}</h3>
+          <table className="review-table">
+            <thead>
+              <tr>
+                <th>{t.REVIEW_ABILITY_COLUMN}</th>
+                <th>{t.REVIEW_BASE_COLUMN}</th>
+                <th>{t.ABILITY_EXISTING_MODIFIERS_LABEL}</th>
+                <th>{t.REVIEW_FINAL_COLUMN}</th>
+                <th>{t.REVIEW_MODIFIER_COLUMN}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {abilities.modifierRows.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.label}</td>
+                  <td>{row.base}</td>
+                  <td>
+                    <div>{row.adjustment}</div>
+                    {row.groups.length > 0 && (
+                      <ul className="calc-list">
+                        {row.groups.map((group) => (
+                          <li key={group.id}>
+                            <strong>{group.label}</strong>: {group.total}
+                            <ul className="calc-list">
+                              {group.items.map((item) => (
+                                <li key={item.id}>
+                                  <code>{item.delta}</code> {item.sourceLabel}
+                                </li>
+                              ))}
+                            </ul>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </td>
+                  <td>{row.final}</td>
+                  <td>{row.mod}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </article>
+      )}
+    </section>
+  );
+}
+
+function SkillsAllocatorBlock({ node, data }: RegistryComponentProps) {
+  const skills = data as SkillsAllocatorData | undefined;
+  if (!skills) {
+    throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
+  }
+
+  const { t } = skills;
+
+  return (
+    <section data-node-id={node.id}>
+      <h2>{skills.title}</h2>
+      <p className="skill-points-summary">
+        {t.SKILLS_BUDGET_LABEL}: {skills.budget.total} | {t.SKILLS_SPENT_LABEL}:{" "}
+        {skills.budget.spent} | {t.SKILLS_REMAINING_LABEL}: {skills.budget.remaining}
+      </p>
+      <div className="skills-table-wrap">
+        <table className="review-table skills-table">
+          <thead>
+            <tr>
+              <th>{t.REVIEW_SKILL_COLUMN}</th>
+              <th>{t.SKILLS_TYPE_COLUMN}</th>
+              <th>{t.SKILLS_POINTS_COLUMN}</th>
+              <th>{t.SKILLS_RANKS_COLUMN}</th>
+              <th>{t.SKILLS_BREAKDOWN_COLUMN}</th>
+              <th>{t.REVIEW_TOTAL_COLUMN}</th>
+              <th>{t.SKILLS_NOTES_COLUMN}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {skills.rows.map((row) => (
+              <tr key={row.id}>
+                <td className="review-cell-key">{row.name}</td>
+                <td>{row.typeLabel}</td>
+                <td>{row.pointsLabel}</td>
+                <td>
+                  <div className="skill-rank-stepper">
+                    <button
+                      type="button"
+                      className="ability-step-btn"
+                      aria-label={row.decreaseLabel}
+                      disabled={!row.canDecrease}
+                      onClick={row.onDecrease}
+                    >
+                      -
+                    </button>
+                    <output aria-label={`${row.name} ranks`} className="skill-rank-value">
+                      {row.ranks}
+                    </output>
+                    <button
+                      type="button"
+                      className="ability-step-btn"
+                      aria-label={row.increaseLabel}
+                      disabled={!row.canIncrease}
+                      onClick={row.onIncrease}
+                    >
+                      +
+                    </button>
+                  </div>
+                </td>
+                <td>{row.breakdown}</td>
+                <td>{row.total}</td>
+                <td>
+                  {row.notes.map((note) => (
+                    <div key={note}>{note}</div>
+                  ))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
@@ -520,6 +863,8 @@ const componentRegistry: Record<string, (props: RegistryComponentProps) => React
   "layout.singleColumn": SingleColumnLayout,
   "entityType.singleSelect": EntityTypeSingleSelectBlock,
   "metadata.nameField": MetadataNameFieldBlock,
+  "abilities.allocator": AbilityAllocatorBlock,
+  "skills.allocator": SkillsAllocatorBlock,
   "review.sheet": ReviewSheetBlock,
 };
 

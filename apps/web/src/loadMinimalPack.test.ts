@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadMinimalPack } from "./loadMinimalPack";
 
 describe("loadMinimalPack", () => {
-  it("includes pack-owned page schemas for migrated race, class, metadata, and review steps", () => {
+  it("includes pack-owned page schemas for migrated race, class, abilities, skills, metadata, and review steps", () => {
     const pack = loadMinimalPack();
     const pageSchemas = pack.pageSchemas;
 
@@ -11,6 +11,12 @@ describe("loadMinimalPack", () => {
     );
     expect(pack.flow.steps.find((step) => step.id === "class")?.pageSchemaId).toBe(
       "character.class",
+    );
+    expect(
+      pack.flow.steps.find((step) => step.id === "abilities")?.pageSchemaId,
+    ).toBe("character.abilities");
+    expect(pack.flow.steps.find((step) => step.id === "skills")?.pageSchemaId).toBe(
+      "character.skills",
     );
     expect(pack.flow.steps.find((step) => step.id === "name")?.pageSchemaId).toBe(
       "character.name",
@@ -29,6 +35,14 @@ describe("loadMinimalPack", () => {
       pageSchemas?.["character.name"]?.root.children?.[0]
         ?.componentId,
     ).toBe("metadata.nameField");
+    expect(
+      pageSchemas?.["character.abilities"]?.root.children?.[0]
+        ?.componentId,
+    ).toBe("abilities.allocator");
+    expect(
+      pageSchemas?.["character.skills"]?.root.children?.[0]
+        ?.componentId,
+    ).toBe("skills.allocator");
     expect(
       pageSchemas?.["character.review"]?.root.children?.[0]
         ?.componentId,

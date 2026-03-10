@@ -1,0 +1,15 @@
+{
+  "id": "character.skills",
+  "root": {
+    "id": "skills-root",
+    "componentId": "layout.singleColumn",
+    "children": [
+      {
+        "id": "skills-allocator",
+        "componentId": "skills.allocator",
+        "slot": "main",
+        "dataSource": "page.skillsAllocator"
+      }
+    ]
+  }
+}

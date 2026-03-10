@@ -300,6 +300,8 @@ const AllowedPageComponentIds = [
   "layout.twoColumn",
   "entityType.singleSelect",
   "metadata.nameField",
+  "abilities.allocator",
+  "skills.allocator",
   "review.sheet",
   "metadataNameField",
   "metadataCharacterDetails",

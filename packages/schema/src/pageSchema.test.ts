@@ -63,6 +63,42 @@ describe("page schema", () => {
     expect(parsed.root.children?.[0]?.componentId).toBe("review.sheet");
   });
 
+  it("accepts abilities and skills allocator blocks in the closed component registry", () => {
+    const abilities = PageSchema.parse({
+      id: "character.abilities",
+      root: {
+        id: "abilities-root",
+        componentId: "layout.singleColumn",
+        children: [
+          {
+            id: "abilities-allocator",
+            componentId: "abilities.allocator",
+            slot: "main",
+            dataSource: "page.abilitiesAllocator"
+          }
+        ]
+      }
+    });
+    const skills = PageSchema.parse({
+      id: "character.skills",
+      root: {
+        id: "skills-root",
+        componentId: "layout.singleColumn",
+        children: [
+          {
+            id: "skills-allocator",
+            componentId: "skills.allocator",
+            slot: "main",
+            dataSource: "page.skillsAllocator"
+          }
+        ]
+      }
+    });
+
+    expect(abilities.root.children?.[0]?.componentId).toBe("abilities.allocator");
+    expect(skills.root.children?.[0]?.componentId).toBe("skills.allocator");
+  });
+
   it("rejects unknown component ids", () => {
     expect(() =>
       PageSchema.parse({

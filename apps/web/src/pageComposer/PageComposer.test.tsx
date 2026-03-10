@@ -102,6 +102,161 @@ describe("PageComposer", () => {
     expect(onChange).toHaveBeenCalledWith("Arica");
   });
 
+  it("renders an abilities allocator block from prepared page data", async () => {
+    const user = userEvent.setup();
+    const onModeChange = vi.fn();
+    const onIncrease = vi.fn();
+    const schema: Page = {
+      id: "character.abilities",
+      root: {
+        id: "abilities-root",
+        componentId: "layout.singleColumn",
+        children: [
+          {
+            id: "abilities-allocator",
+            componentId: "abilities.allocator",
+            slot: "main",
+            dataSource: "page.abilitiesAllocator"
+          }
+        ]
+      }
+    };
+
+    render(
+      <PageComposer
+        schema={schema}
+        dataRoot={{
+          page: {
+            abilitiesAllocator: {
+              t,
+              title: "Ability Scores",
+              modeSelector: {
+                label: t.ABILITY_GENERATION_LABEL,
+                helpLabel: t.ABILITY_METHOD_HELP_LABEL,
+                helpText: t.ABILITY_METHOD_HINT_POINT_BUY,
+                isHintVisible: false,
+                isHintAvailable: true,
+                value: "pointBuy",
+                options: [
+                  { value: "pointBuy", label: t.ABILITY_MODE_POINT_BUY },
+                  { value: "rollSets", label: t.ABILITY_MODE_ROLL_SETS }
+                ],
+                onMouseEnter: vi.fn(),
+                onMouseLeave: vi.fn(),
+                onFocus: vi.fn(),
+                onBlur: vi.fn(),
+                onClick: vi.fn(),
+                onKeyDown: vi.fn(),
+                onChange: onModeChange,
+                helpRef: { current: null }
+              },
+              pointBuyPanel: {
+                pointCap: 32,
+                pointCapMin: 20,
+                pointCapMax: 40,
+                pointCapStep: 1,
+                pointBuyRemaining: 32,
+                isTableOpen: false,
+                costTable: { "8": 0, "9": 1 },
+                onPointCapChange: vi.fn(),
+                onToggleTable: vi.fn()
+              },
+              abilityRows: [{
+                id: "str",
+                label: "STR",
+                value: 8,
+                disabled: false,
+                min: 8,
+                max: 18,
+                canDecrease: false,
+                canIncrease: true,
+                onChange: vi.fn(),
+                onBlur: vi.fn(),
+                onDecrease: vi.fn(),
+                onIncrease
+              }],
+              modifierRows: [],
+              showModifierTable: false
+            }
+          }
+        }}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "Ability Scores" })).toBeTruthy();
+
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: t.ABILITY_GENERATION_LABEL }),
+      "rollSets",
+    );
+    await user.click(screen.getByRole("button", { name: /Increase STR/i }));
+
+    expect(onModeChange).toHaveBeenCalledWith("rollSets");
+    expect(onIncrease).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders a skills allocator block from prepared page data", async () => {
+    const user = userEvent.setup();
+    const onIncrease = vi.fn();
+    const schema: Page = {
+      id: "character.skills",
+      root: {
+        id: "skills-root",
+        componentId: "layout.singleColumn",
+        children: [
+          {
+            id: "skills-allocator",
+            componentId: "skills.allocator",
+            slot: "main",
+            dataSource: "page.skillsAllocator"
+          }
+        ]
+      }
+    };
+
+    render(
+      <PageComposer
+        schema={schema}
+        dataRoot={{
+          page: {
+            skillsAllocator: {
+              t,
+              title: "Skills",
+              budget: {
+                total: 8,
+                spent: 0,
+                remaining: 8
+              },
+              rows: [{
+                id: "climb",
+                name: "Climb",
+                typeLabel: t.SKILLS_CLASS_LABEL,
+                pointsLabel: `1${t.SKILLS_PER_RANK_UNIT}`,
+                ranks: "0",
+                decreaseLabel: "Decrease Climb",
+                increaseLabel: "Increase Climb",
+                canDecrease: false,
+                canIncrease: true,
+                onDecrease: vi.fn(),
+                onIncrease,
+                breakdown: "0 + 3 + 0 - 0 = 3",
+                total: "3",
+                notes: ["max 4", "racial +0", t.SKILLS_ACP_APPLIES_LABEL]
+              }]
+            }
+          }
+        }}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: "Skills" })).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: t.SKILLS_TYPE_COLUMN })).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Increase Climb" }));
+
+    expect(onIncrease).toHaveBeenCalledTimes(1);
+  });
+
   it("renders a review sheet block from prepared review data", async () => {
     const user = userEvent.setup();
     const onExportJson = vi.fn();
