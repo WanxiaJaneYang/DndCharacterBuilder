@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadMinimalPack } from "./loadMinimalPack";
 
 describe("loadMinimalPack", () => {
-  it("includes pack-owned page schemas for migrated race, class, and metadata steps", () => {
+  it("includes pack-owned page schemas for migrated race, class, metadata, and review steps", () => {
     const pack = loadMinimalPack();
     const pageSchemas = pack.pageSchemas;
 
@@ -15,6 +15,9 @@ describe("loadMinimalPack", () => {
     expect(pack.flow.steps.find((step) => step.id === "name")?.pageSchemaId).toBe(
       "character.name",
     );
+    expect(pack.flow.steps.find((step) => step.id === "review")?.pageSchemaId).toBe(
+      "character.review",
+    );
     expect(pageSchemas?.["character.race"]?.root.componentId).toBe(
       "layout.singleColumn",
     );
@@ -26,5 +29,9 @@ describe("loadMinimalPack", () => {
       pageSchemas?.["character.name"]?.root.children?.[0]
         ?.componentId,
     ).toBe("metadata.nameField");
+    expect(
+      pageSchemas?.["character.review"]?.root.children?.[0]
+        ?.componentId,
+    ).toBe("review.sheet");
   });
 });

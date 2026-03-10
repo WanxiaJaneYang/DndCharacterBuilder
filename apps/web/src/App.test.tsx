@@ -218,6 +218,17 @@ describe('wizard e2e-ish happy path', () => {
     expect(screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i'))).toBeTruthy();
   });
 
+  it('renders the review page through a page schema when the flow references one', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await reachReviewStep(user);
+
+    expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
+    const reviewPage = document.querySelector('[data-page-schema-id="character.review"]');
+    expect(reviewPage).toBeTruthy();
+  });
+
   it('lets user complete flow and see final stats', async () => {
     const user = userEvent.setup();
     render(<App />);

@@ -26,7 +26,10 @@ import { resolveSpecializedSkillLabel } from "./localization";
 import { AbilityMethodSelector } from "./components/AbilityMethodSelector";
 import { PointBuyPanel } from "./components/PointBuyPanel";
 import { characterSpecFromState } from "./characterSpecFromState";
-import { PageComposer } from "./pageComposer/PageComposer";
+import {
+  PageComposer,
+  type ReviewSheetData,
+} from "./pageComposer/PageComposer";
 
 const embeddedPacks = [loadMinimalPack()];
 type Role = "dm" | "player" | null;
@@ -644,6 +647,292 @@ export function App() {
     if (currentStep.pageSchemaId) {
       const pageSchema = context.resolvedData.pageSchemas[currentStep.pageSchemaId];
       if (pageSchema) {
+        if (currentStep.kind === "review") {
+          const reviewCombat = combatData;
+          const abilityOrder = ["str", "dex", "con", "int", "wis", "cha"] as const;
+          const statOrder = [
+            "hp",
+            "ac",
+            "initiative",
+            "bab",
+            "fort",
+            "ref",
+            "will",
+          ] as const;
+          const statLabels: Record<(typeof statOrder)[number], string> = {
+            hp: t.REVIEW_HP_LABEL,
+            ac: t.REVIEW_AC_LABEL,
+            initiative: t.REVIEW_INITIATIVE_LABEL,
+            bab: t.REVIEW_BAB_LABEL,
+            fort: t.REVIEW_FORT_LABEL,
+            ref: t.REVIEW_REF_LABEL,
+            will: t.REVIEW_WILL_LABEL,
+          };
+          const statBaseDefaults: Record<(typeof statOrder)[number], number> = {
+            hp: DEFAULT_STATS.hp,
+            ac: DEFAULT_STATS.ac,
+            initiative: DEFAULT_STATS.initiative,
+            bab: DEFAULT_STATS.bab,
+            fort: DEFAULT_STATS.fort,
+            ref: DEFAULT_STATS.ref,
+            will: DEFAULT_STATS.will,
+          };
+          const formatSigned = (value: number) =>
+            `${value >= 0 ? "+" : ""}${value}`;
+          const formatSkillValue = (value: number) =>
+            `${Number.isInteger(value) ? value : value.toFixed(1)}`;
+          const formatSourceLabel = (packId: string, entityId: string) =>
+            sourceNameByEntityId.get(`${packId}:${entityId}`) ?? t.REVIEW_UNRESOLVED_LABEL;
+          const selectedRaceId = String(state.selections.race ?? "");
+          const selectedClassId = spec.class?.classId ?? String(state.selections.class ?? "");
+          const selectedRaceName = selectedRaceId
+            ? localizeEntityText(
+                "races",
+                selectedRaceId,
+                "name",
+                selectedRaceEntity?.name ?? t.REVIEW_UNRESOLVED_LABEL,
+              )
+            : t.REVIEW_UNRESOLVED_LABEL;
+          const selectedClassName = selectedClassId
+            ? localizeEntityText(
+                "classes",
+                selectedClassId,
+                "name",
+                selectedClassEntity?.name ?? t.REVIEW_UNRESOLVED_LABEL,
+              )
+            : t.REVIEW_UNRESOLVED_LABEL;
+          const finalStatValues = {
+            hp: reviewData.hp.total,
+            ac: reviewCombat.ac.total,
+            initiative: reviewData.initiative.total,
+            bab: reviewData.bab,
+            fort: reviewData.saves.fort.total,
+            ref: reviewData.saves.ref.total,
+            will: reviewData.saves.will.total,
+          } as const;
+          const racialTraits = Array.isArray(
+            getEntityDataRecord(selectedRaceEntity).racialTraits,
+          )
+            ? (getEntityDataRecord(selectedRaceEntity).racialTraits as Array<
+                Record<string, unknown>
+              >)
+            : [];
+          const reviewSkills = computeResult.sheetViewModel.data.skills
+            .filter((skill) => skill.ranks > 0 || skill.racialBonus !== 0)
+            .sort((a, b) => {
+              const left = localizeEntityText("skills", a.id, "name", a.name);
+              const right = localizeEntityText("skills", b.id, "name", b.name);
+              return b.total - a.total || left.localeCompare(right);
+            });
+          const enabledPackDetails = enabledPackIds.map((packId) => ({
+            packId,
+            version: packVersionById.get(packId) ?? t.REVIEW_UNKNOWN_VERSION,
+          }));
+          const skillBudget = reviewData.skillBudget;
+          const reviewSheetData: ReviewSheetData = {
+            t,
+            characterName: spec.meta.name || t.UNNAMED_CHARACTER,
+            selectedRaceName,
+            selectedClassName,
+            identityRows: [
+              { label: t.REVIEW_LEVEL_LABEL, value: reviewData.identity.level },
+              { label: t.REVIEW_XP_LABEL, value: reviewData.identity.xp },
+              { label: t.REVIEW_SIZE_LABEL, value: reviewData.identity.size },
+              { label: t.REVIEW_SPEED_BASE_LABEL, value: reviewData.identity.speed.base },
+              { label: t.REVIEW_SPEED_ADJUSTED_LABEL, value: reviewData.identity.speed.adjusted },
+            ],
+            statCards: [
+              { label: t.REVIEW_AC_LABEL, value: reviewCombat.ac.total },
+              { label: t.REVIEW_AC_TOUCH_LABEL, value: reviewCombat.ac.touch },
+              { label: t.REVIEW_AC_FLAT_FOOTED_LABEL, value: reviewCombat.ac.flatFooted },
+              { label: t.REVIEW_HP_LABEL, value: reviewData.hp.total },
+              { label: t.REVIEW_INITIATIVE_LABEL, value: reviewData.initiative.total },
+              { label: t.REVIEW_GRAPPLE_LABEL, value: reviewData.grapple.total },
+            ],
+            saveHpRows: [
+              {
+                label: t.REVIEW_FORT_LABEL,
+                base: reviewData.saves.fort.base,
+                ability: reviewData.saves.fort.ability,
+                adjustments: reviewData.saves.fort.misc,
+                final: reviewData.saves.fort.total,
+              },
+              {
+                label: t.REVIEW_REF_LABEL,
+                base: reviewData.saves.ref.base,
+                ability: reviewData.saves.ref.ability,
+                adjustments: reviewData.saves.ref.misc,
+                final: reviewData.saves.ref.total,
+              },
+              {
+                label: t.REVIEW_WILL_LABEL,
+                base: reviewData.saves.will.base,
+                ability: reviewData.saves.will.ability,
+                adjustments: reviewData.saves.will.misc,
+                final: reviewData.saves.will.total,
+              },
+              {
+                label: t.REVIEW_HP_LABEL,
+                base: reviewData.hp.breakdown.hitDie,
+                ability: reviewData.hp.breakdown.con,
+                adjustments: reviewData.hp.breakdown.misc,
+                final: reviewData.hp.total,
+              },
+            ],
+            attackRows: reviewCombat.attacks.map((attack) => ({
+              id: `${attack.category}-${attack.itemId}`,
+              typeLabel:
+                attack.category === "melee"
+                  ? t.REVIEW_ATTACK_MELEE_LABEL
+                  : t.REVIEW_ATTACK_RANGED_LABEL,
+              name: attack.name,
+              attackBonus: formatSigned(attack.attackBonus),
+              damage: attack.damageLine,
+              crit: attack.crit,
+              range: attack.category === "ranged" ? attack.range ?? "-" : "-",
+            })),
+            featSummary: selectedFeats.map((featId) => {
+              const feat = context.resolvedData.entities.feats?.[featId];
+              return {
+                id: featId,
+                name: feat?.name ?? featId,
+                description: feat?.summary ?? feat?.description ?? featId,
+              };
+            }),
+            traitSummary: racialTraits.map((trait, index) => ({
+              id: `${String(trait.name ?? "")}-${index}`,
+              name: String(trait.name ?? ""),
+              description: String(trait.description ?? "").trim(),
+            })),
+            abilityRows: abilityOrder.map((ability) => {
+              const baseScore = Number(state.abilities[ability] ?? 10);
+              const targetPath = `abilities.${ability}.score`;
+              const records = provenanceByTargetPath.get(targetPath) ?? [];
+              const finalScore = reviewData.abilities[ability]?.score ?? baseScore;
+              const finalMod = reviewData.abilities[ability]?.mod ?? 0;
+              return {
+                id: ability,
+                label: localizeAbilityLabel(ability),
+                base: baseScore,
+                adjustments: records.map((record) => ({
+                  value:
+                    record.delta !== undefined
+                      ? formatSigned(record.delta)
+                      : `= ${record.setValue ?? 0}`,
+                  source: formatSourceLabel(record.source.packId, record.source.entityId),
+                })),
+                final: finalScore,
+                mod: formatSigned(finalMod),
+              };
+            }),
+            combatRows: statOrder.map((statKey) => {
+              const targetPath = `stats.${statKey}`;
+              const records = provenanceByTargetPath.get(targetPath) ?? [];
+              const firstSetIndex = records.findIndex(
+                (record) => record.setValue !== undefined,
+              );
+              const baseValue =
+                firstSetIndex >= 0
+                  ? Number(
+                      records[firstSetIndex]?.setValue ??
+                        statBaseDefaults[statKey],
+                    )
+                  : statBaseDefaults[statKey];
+              const adjustmentRecords = records.filter(
+                (_, index) => index !== firstSetIndex,
+              );
+              return {
+                id: statKey,
+                label: statLabels[statKey],
+                base: baseValue,
+                adjustments: adjustmentRecords.map((record) => ({
+                  value:
+                    record.delta !== undefined
+                      ? formatSigned(record.delta)
+                      : `= ${record.setValue ?? 0}`,
+                  source: formatSourceLabel(record.source.packId, record.source.entityId),
+                })),
+                final: String(finalStatValues[statKey]),
+              };
+            }),
+            skillsSummary: {
+              spent: skillBudget.spent,
+              total: skillBudget.total,
+              remaining: skillBudget.remaining,
+            },
+            skillsRows: reviewSkills.map((skill) => ({
+              id: skill.id,
+              name: localizeEntityText("skills", skill.id, "name", skill.name),
+              ranks: formatSkillValue(skill.ranks),
+              ability: `${formatSigned(skill.abilityMod)} (${localizeAbilityLabel(skill.abilityKey)})`,
+              racial: formatSigned(skill.racialBonus),
+              misc: formatSigned(skill.misc),
+              acp: formatSigned(skill.acp),
+              total: formatSkillValue(skill.total),
+              pointCost: `${formatSkillValue(skill.costSpent)} (${skill.costPerRank}${t.REVIEW_PER_RANK_UNIT})`,
+            })),
+            equipmentLoad: {
+              selectedItems:
+                reviewData.equipmentLoad.selectedItems.length > 0
+                  ? reviewData.equipmentLoad.selectedItems
+                      .map((itemId) =>
+                        localizeEntityText("items", itemId, "name", itemId),
+                      )
+                      .join(", ")
+                  : "-",
+              totalWeight: reviewData.equipmentLoad.totalWeight,
+              loadCategory: localizeLoadCategory(reviewData.equipmentLoad.loadCategory),
+              speedImpact: formatSpeedImpact(
+                reviewData.speed.adjusted,
+                reviewData.equipmentLoad.reducesSpeed,
+              ),
+            },
+            movementDetail: {
+              base: reviewData.speed.base,
+              adjusted: reviewData.speed.adjusted,
+              notes: formatMovementNotes(
+                reviewData.movement.reducedByArmorOrLoad,
+              ).join("; "),
+            },
+            rulesDecisions: {
+              favoredClass: reviewData.rulesDecisions.favoredClass
+                ? reviewData.rulesDecisions.favoredClass === "any"
+                  ? t.REVIEW_FAVORED_CLASS_ANY
+                  : localizeEntityText(
+                      "classes",
+                      reviewData.rulesDecisions.favoredClass,
+                      "name",
+                      reviewData.rulesDecisions.favoredClass,
+                    )
+                : t.REVIEW_UNRESOLVED_LABEL,
+              ignoresMulticlassXpPenalty: reviewData.rulesDecisions.ignoresMulticlassXpPenalty
+                ? t.REVIEW_YES
+                : t.REVIEW_NO,
+              featSelectionLimit: reviewData.rulesDecisions.featSelectionLimit,
+            },
+            packInfo: {
+              selectedEdition: selectedEdition.label || selectedEdition.id || "-",
+              enabledPacks: enabledPackDetails,
+              fingerprint: context.resolvedData.fingerprint,
+            },
+            showProvenance: showProv,
+            provenanceJson: JSON.stringify(computeResult.provenance ?? [], null, 2),
+            onExportJson: exportJson,
+            onToggleProvenance: () => setShowProv((s) => !s),
+          };
+
+          return (
+            <PageComposer
+              schema={pageSchema}
+              dataRoot={{
+                page: {
+                  reviewSheet: reviewSheetData,
+                },
+              }}
+            />
+          );
+        }
+
         if (currentStep.kind === "metadata") {
           return (
             <PageComposer
