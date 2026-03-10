@@ -43,6 +43,26 @@ describe("page schema", () => {
     expect(parsed.root.children?.[0]?.componentId).toBe("entityType.singleSelect");
   });
 
+  it("accepts review sheet blocks in the closed component registry", () => {
+    const parsed = PageSchema.parse({
+      id: "character.review",
+      root: {
+        id: "review-root",
+        componentId: "layout.singleColumn",
+        children: [
+          {
+            id: "review-sheet",
+            componentId: "review.sheet",
+            slot: "main",
+            dataSource: "page.reviewSheet"
+          }
+        ]
+      }
+    });
+
+    expect(parsed.root.children?.[0]?.componentId).toBe("review.sheet");
+  });
+
   it("rejects unknown component ids", () => {
     expect(() =>
       PageSchema.parse({

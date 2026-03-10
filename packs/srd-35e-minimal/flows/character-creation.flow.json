@@ -142,6 +142,7 @@
       "id": "review",
       "kind": "review",
       "label": "Review",
+      "pageSchemaId": "character.review",
       "source": {
         "type": "manual"
       }

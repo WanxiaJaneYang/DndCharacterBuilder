@@ -300,6 +300,7 @@ const AllowedPageComponentIds = [
   "layout.twoColumn",
   "entityType.singleSelect",
   "metadata.nameField",
+  "review.sheet",
   "metadataNameField",
   "metadataCharacterDetails",
   "reviewHero",
