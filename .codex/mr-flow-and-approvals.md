@@ -1,5 +1,13 @@
 # MR Flow And Approval Preferences
 
+## Workflow Boundary
+
+- Start every MR-related session with `/trellis:start` when available. If it is unavailable, manually read `.trellis/workflow.md`, initialize the developer if needed, and run `python ./.trellis/scripts/get_context.py`.
+- Treat `.trellis/tasks/` as the source of truth for active execution-task state during MR work.
+- Treat `.trellis/workspace/` as the source of truth for per-session journals and handoff notes.
+- Treat `docs/engineering/WORK_PLAN.md` as roadmap and sprint-planning context only, not as a live MR status log.
+- Treat this file as the source of truth for repo-specific MR review, approval, polling, and merge discipline.
+
 ## User Preferences
 - Do not repeatedly ask for GitHub-related approvals when an approved command prefix already exists.
 - Prefer reusing saved approved prefixes for `gh`/GitHub operations.
@@ -17,16 +25,17 @@
 - Merge commands: `gh pr merge` (including admin merge when required by branch policy and user workflow)
 
 ## Standard MR Flow
-1. Identify latest/open MR tied to current branch.
-2. Check merge conflict state first (`mergeStateStatus` / `gh pr view`).
-3. If conflict/dirty, resolve conflicts on the MR branch **before** requesting/rerunning CI.
-4. Pull unresolved review threads/comments.
-5. Address unaddressed comments in code/docs/workflows.
-6. Resolve addressed threads.
-7. Re-request review (Copilot/reviewer) using direct reviewer-request APIs and re-check CI.
-8. Iterate steps 4-7 until review threads are resolved and checks pass.
-9. Merge MR (prefer normal merge; use `--admin` only when required by policy/workflow).
-10. Verify merged state and report merge commit SHA.
+1. Start with Trellis context bootstrap and confirm the active execution task in `.trellis/tasks/` if the work is non-trivial.
+2. Identify latest/open MR tied to current branch.
+3. Check merge conflict state first (`mergeStateStatus` / `gh pr view`).
+4. If conflict/dirty, resolve conflicts on the MR branch **before** requesting/rerunning CI.
+5. Pull unresolved review threads/comments.
+6. Address unaddressed comments in code/docs/workflows.
+7. Resolve addressed threads.
+8. Re-request review (Copilot/reviewer) using direct reviewer-request APIs and re-check CI.
+9. Iterate steps 5-8 until review threads are resolved and checks pass.
+10. Merge MR (prefer normal merge; use `--admin` only when required by policy/workflow).
+11. Verify merged state and report merge commit SHA.
 
 ## Copilot Review Trigger Rules
 - Use direct reviewer requests, not comments:
@@ -52,9 +61,11 @@
 
 ## Operational Rules For Future Sessions
 - Read this file at the start of MR-related tasks.
+- Run Trellis startup first so MR work begins with current branch/task/session context.
 - Assume user wants end-to-end completion (fix -> resolve -> review -> merge) unless user says otherwise.
 - Surface only hard blockers (policy limitations, failed CI, missing required reviewer approval).
 - Keep user updates brief and action-focused.
+- Do not maintain duplicate live status in `docs/engineering/WORK_PLAN.md`; update `.trellis/tasks/` and `.trellis/workspace/` instead.
 
 ## Workspace Notes (Current Migration)
 - Local guidance/skill artifacts are being tracked on branch: `chore/agent-guidance-and-local-skills`.

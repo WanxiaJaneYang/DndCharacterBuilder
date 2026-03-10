@@ -1,6 +1,8 @@
 # Engineering Work Plan
 
-This living document tracks the engineering tasks required to implement the DnDCharacterBuilder MVP and future iterations. It serves as a roadmap for developers, with high-level milestones and granular tasks.
+This living document tracks the engineering tasks required to implement the DnDCharacterBuilder MVP and future iterations. It serves as a roadmap for developers, with high-level milestones and planning context.
+
+> Workflow note: use `.trellis/tasks/` as the source of truth for active execution-task status and `.trellis/workspace/` for session journals. This document is roadmap and sprint guidance, not a live task-status log.
 
 ## Current Phase: MVP Implementation
 

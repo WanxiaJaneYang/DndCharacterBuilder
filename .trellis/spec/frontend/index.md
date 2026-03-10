@@ -1,39 +1,41 @@
 # Frontend Development Guidelines
 
-> Best practices for frontend development in this project.
+> AI-facing frontend guidance index for this repository.
 
 ---
 
-## Overview
+## Source Of Truth
 
-This directory contains guidelines for frontend development. Fill in each file with your project's specific conventions.
+This Trellis index is a routing layer, not a replacement for the repo's frontend documentation.
 
----
-
-## Guidelines Index
-
-| Guide | Description | Status |
-|-------|-------------|--------|
-| [Directory Structure](./directory-structure.md) | Module organization and file layout | To fill |
-| [Component Guidelines](./component-guidelines.md) | Component patterns, props, composition | To fill |
-| [Hook Guidelines](./hook-guidelines.md) | Custom hooks, data fetching patterns | To fill |
-| [State Management](./state-management.md) | Local state, global state, server state | To fill |
-| [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | To fill |
-| [Type Safety](./type-safety.md) | Type patterns, validation | To fill |
+- Canonical UI and component behavior docs live under `docs/ui/`.
+- Canonical user-flow and UX intent docs live under `docs/ux/`.
+- Canonical frontend testing expectations live in `docs/engineering/TESTING_STRATEGY.md`.
+- If a file in this directory is still placeholder content, fall back to those repo docs and sync the relevant guidance back here later.
 
 ---
 
-## How to Fill These Guidelines
+## Read In This Order
 
-For each guideline file:
+1. `docs/ui/README.md`
+2. `docs/ui/UI_SPEC.md`
+3. `docs/ux/README.md`
+4. `docs/ux/steps/` docs relevant to the feature
+5. `docs/engineering/TESTING_STRATEGY.md`
 
-1. Document your project's **actual conventions** (not ideals)
-2. Include **code examples** from your codebase
-3. List **forbidden patterns** and why
-4. Add **common mistakes** your team has made
+Then read the most relevant local Trellis files in this directory:
 
-The goal is to help AI assistants and new team members understand how YOUR project works.
+| Guide | Purpose | Current State |
+|-------|---------|---------------|
+| [Directory Structure](./directory-structure.md) | Frontend module organization and file placement | Bootstrap placeholder |
+| [Component Guidelines](./component-guidelines.md) | Component patterns and composition rules | Bootstrap placeholder |
+| [Hook Guidelines](./hook-guidelines.md) | Hook boundaries and data-flow rules | Bootstrap placeholder |
+| [State Management](./state-management.md) | Local state and derived-state guidance | Bootstrap placeholder |
+| [Quality Guidelines](./quality-guidelines.md) | Test and review expectations | Bootstrap placeholder |
+| [Type Safety](./type-safety.md) | Frontend type boundaries and validation | Bootstrap placeholder |
 
 ---
 
-**Language**: All documentation should be written in **English**.
+## Working Rule
+
+Document this repository's actual conventions here over time. Do not invent generic frontend rules that conflict with the existing docs or codebase.
