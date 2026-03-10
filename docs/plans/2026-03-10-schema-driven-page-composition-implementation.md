@@ -4,7 +4,7 @@
 
 **Goal:** Introduce schema-driven page composition so wizard pages are assembled from pack-owned JSON page schemas and stable registered UI components instead of hardcoded `App.tsx` branches.
 
-**Architecture:** Keep `flow` responsible for wizard sequencing and `pageSchemaId` references. Add standalone page schema files under pack-owned UI config, a typed page-schema contract and loader, a closed component registry, and a `PageComposer` runtime. Migrate existing page branches to schema-driven composition incrementally, starting with simpler surfaces and preserving the engine/UI boundary from `#162`.
+**Architecture:** Keep `flow` responsible for wizard sequencing and `pageSchemaId` references. Add standalone page schema files under pack-owned UI config, a typed recursive page-schema contract, a closed component registry, and a `PageComposer` runtime that walks a recursive node tree with optional named `slot` placement. Migrate existing page branches to schema-driven composition incrementally, starting with simpler surfaces and preserving the engine/UI boundary from `#162`.
 
 **Tech Stack:** React, TypeScript, npm workspaces, pack JSON files, schema validation package, Vitest, Playwright, GitHub issues.
 
@@ -56,23 +56,25 @@ Do not store page layout blocks inline inside flow step objects.
 
 Add a `PageSchema` contract that validates:
 - page id
-- title/description keys where needed
-- ordered block list
-- block ids
-- block type enum / discriminated union
+- recursive root node
+- node ids
+- component id enum / discriminated union
 - static props
 - path-only bindings
+- optional `children`
+- optional `slot`
 
 Expected runtime behavior:
 - invalid page schema fails load/validation
-- unknown block type fails validation
+- unknown component id fails validation
 
 **Step 3: Add pack-local fixture coverage**
 
 Add tests proving:
 - valid sample page schema parses
-- unknown block type is rejected
+- unknown component id is rejected
 - forbidden expression-like binding strings are rejected if they violate the path-only rule
+- invalid slot usage is rejected where the schema can validate it
 
 ### Task 3: Extend flow to reference page schemas without swallowing layout config
 
@@ -92,7 +94,7 @@ Keep existing flow responsibilities intact:
 - gating
 - step ids
 
-Do not add nested block trees to the flow step object.
+Do not add recursive page trees to the flow step object.
 
 **Step 2: Decide how legacy step config coexists during migration**
 
@@ -150,15 +152,17 @@ This adapter is where shaping belongs. Do not move shaping logic into JSON.
 
 **Step 1: Introduce a closed registry**
 
-Implement a typed registry mapping block `type` to React component.
+Implement a typed registry mapping `componentId` to React component, including layout components.
 
 Runtime rule:
-- unknown block types are validation/runtime errors, not silent no-ops
+- unknown component ids are validation/runtime errors, not silent no-ops
 
 **Step 2: Implement minimal composer behavior**
 
 Support:
-- ordered block rendering
+- recursive node rendering
+- static child lists
+- optional slot routing into parent components
 - static props
 - path-bound values from prepared page context
 - consistent wrapper/layout behavior
@@ -166,10 +170,11 @@ Support:
 **Step 3: Add targeted tests**
 
 Cover:
-- block dispatch by type
-- missing block handling
+- node dispatch by component id
+- missing component handling
 - binding resolution for valid path references
-- deterministic rendering order
+- deterministic child rendering order
+- slot placement behavior
 
 ### Task 6: Extract stable block components from the current App.tsx branches
 
@@ -178,9 +183,9 @@ Cover:
 - Modify: `apps/web/src/App.tsx`
 - Test: `apps/web/src/App.test.tsx`
 
-**Step 1: Extract semantically meaningful blocks first**
+**Step 1: Extract semantically meaningful components first**
 
-Candidate first-class blocks:
+Candidate first-class components:
 - `ReviewHeroBlock`
 - `StatCardsBlock`
 - `AbilityBreakdownBlock`
@@ -189,10 +194,11 @@ Candidate first-class blocks:
 - `MetadataNameFieldBlock`
 - `AbilityAllocatorBlock`
 - `SkillsAllocatorBlock`
+- `TwoColumnReviewLayout`
 
 **Step 2: Preserve domain meaning**
 
-Do not flatten everything into low-level primitives unless the block is genuinely reusable.
+Do not flatten everything into low-level primitives unless the component is genuinely reusable.
 
 **Step 3: Keep behavior unchanged**
 
@@ -209,7 +215,7 @@ Extraction should not redesign the UI. Existing tests should remain the regressi
 
 Move the current metadata page structure into a page schema and render it through `PageComposer`.
 
-**Step 2: Migrate low-risk display-only review blocks**
+**Step 2: Migrate low-risk display-only review components**
 
 Good initial candidates:
 - review hero
@@ -219,7 +225,7 @@ Good initial candidates:
 
 **Step 3: Verify no behavior drift**
 
-Run focused tests after each migrated page/block.
+Run focused tests after each migrated page/component.
 
 ### Task 8: Migrate complex interactive pages in controlled slices
 

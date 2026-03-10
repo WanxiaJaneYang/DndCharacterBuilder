@@ -28,10 +28,13 @@ That creates two kinds of drift:
 
 1. Keep `flow` focused on wizard sequencing, not page layout details.
 2. Give every page its own schema file.
-3. Compose pages from typed, registered UI blocks rather than arbitrary renderer ids.
+3. Represent each page as a recursive component tree rather than a flat block list.
+4. Compose pages from typed, registered UI components rather than arbitrary renderer ids.
 4. Keep v1 declarative only:
    - fixed data-path bindings
    - static props
+   - recursive `children`
+   - explicit `slot` placement
    - no expressions
    - no embedded filtering / sorting language
    - no custom renderer escape hatch
@@ -92,30 +95,51 @@ This keeps page schemas:
 Each page schema declares:
 
 - page identity
-- optional title / description keys
-- ordered block list
-- static block props
+- a recursive root node
+- static node props
 - declarative data bindings by path
+- optional `children`
+- optional `slot` routing into a parent component
 
 Example direction:
 
 ```json
 {
   "id": "character.review",
-  "titleKey": "REVIEW",
-  "blocks": [
-    { "id": "hero", "type": "reviewHero", "bindings": { "name": "spec.meta.name" } },
-    { "id": "summary", "type": "statCards", "source": "review.summaryCards" },
-    { "id": "skills", "type": "skillsBreakdown", "source": "review.skills" }
-  ]
+  "root": {
+    "id": "review-root",
+    "componentId": "layout.twoColumnReview",
+    "children": [
+      {
+        "id": "hero",
+        "componentId": "reviewHero",
+        "slot": "header",
+        "dataSource": "page.review.hero"
+      },
+      {
+        "id": "summary",
+        "componentId": "statCards",
+        "slot": "main",
+        "dataSource": "page.review.summaryCards"
+      },
+      {
+        "id": "skills",
+        "componentId": "skillsBreakdown",
+        "slot": "main",
+        "dataSource": "page.review.skills"
+      }
+    ]
+  }
 }
 ```
 
 ### Layer 3: Page Composer + Component Registry
 
-The web app owns a typed registry of allowed block components.
+The web app owns a typed registry of allowed components.
 
-Representative block types:
+Layouts are not a separate schema layer. A layout is just another registered component that accepts children in named slots.
+
+Representative component ids:
 
 - `textField`
 - `choiceGroup`
@@ -128,12 +152,14 @@ Representative block types:
 - `combatBreakdown`
 - `skillsBreakdown`
 - `provenancePanel`
+- `layout.singleColumn`
+- `layout.twoColumnReview`
 
-The registry is explicit and closed. Unknown block types fail validation rather than silently rendering nothing.
+The registry is explicit and closed. Unknown component ids fail validation rather than silently rendering nothing.
 
 `PageComposer` becomes the only runtime that turns:
 
-`pageSchemaId -> page schema -> registered block tree -> rendered page`
+`pageSchemaId -> page schema root node -> registered component tree -> rendered page`
 
 ## Binding model (v1)
 
@@ -155,6 +181,34 @@ Disallowed in v1:
 
 This keeps the page schemas stable and reviewable. Any nontrivial transformation belongs in a typed selector/adapter layer inside the web app.
 
+## Tree model and slot routing
+
+Each page schema is a recursive node tree.
+
+Each node may contain:
+
+- `id`
+- `componentId`
+- `props`
+- `dataSource`
+- `children`
+- `slot`
+
+Rules:
+
+- `componentId` must exist in the registry
+- `dataSource` is optional and path-only
+- `children` is optional and static in v1
+- `slot` is optional and only meaningful when the parent component exposes named insertion regions
+
+This gives us one uniform composition model:
+
+- layout components are just nodes
+- domain blocks are just nodes
+- leaf display components are just nodes
+
+We do not need separate schema systems for layout, sections, and leaves.
+
 ## Data shaping rule
 
 JSON does not shape raw engine output directly.
@@ -175,7 +229,7 @@ This avoids turning page JSON into a query language.
 
 ## Component abstraction rule
 
-We should not over-normalize blocks into layout primitives only.
+We should not over-normalize components into layout primitives only.
 
 Keep semantically meaningful domain blocks when they are stable, for example:
 
@@ -183,8 +237,9 @@ Keep semantically meaningful domain blocks when they are stable, for example:
 - `abilityBreakdown`
 - `combatBreakdown`
 - `skillsBreakdown`
+- `layout.twoColumnReview`
 
-Those blocks are better than forcing every page author to reconstruct them from low-level primitives. Primitive blocks still exist, but they do not replace every domain block.
+Those components are better than forcing every page author to reconstruct them from low-level primitives. Primitive components still exist, but they do not replace every domain block.
 
 ## Current hardcoded surfaces to migrate
 
@@ -238,20 +293,25 @@ Expected migration sequence:
 2. Overly powerful schema language:
    expression support too early would move logic into config and make testing harder.
 
-3. Wrong block granularity:
-   if blocks are too low-level, schemas become noisy and fragile.
-   if blocks are too high-level, the schema adds little value.
+3. Wrong component granularity:
+   if components are too low-level, schemas become noisy and fragile.
+   if components are too high-level, the schema adds little value.
 
 4. Flow/page ownership drift:
    if page layout fields continue to accumulate inside flow step objects, the separation collapses again.
+
+5. Slot misuse:
+   if slot naming is inconsistent or under-specified, layouts become hard to reason about and schemas become trial-and-error.
 
 ## Guardrails
 
 - Keep flow and page schema responsibilities separate.
 - Validate page schemas in a typed schema package before runtime.
 - Keep bindings path-only in v1.
+- Keep children static and recursive in v1.
+- Keep slot names component-defined and validated.
 - Use typed selectors/adapters for shaping.
-- Fail closed on unknown block types and invalid bindings.
+- Fail closed on unknown component ids and invalid bindings.
 - Migrate page-by-page rather than doing a big-bang rewrite.
 
 ## Duplicate issue audit
