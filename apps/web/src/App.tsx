@@ -26,6 +26,7 @@ import { resolveSpecializedSkillLabel } from "./localization";
 import { AbilityMethodSelector } from "./components/AbilityMethodSelector";
 import { PointBuyPanel } from "./components/PointBuyPanel";
 import { characterSpecFromState } from "./characterSpecFromState";
+import { PageComposer } from "./pageComposer/PageComposer";
 
 const embeddedPacks = [loadMinimalPack()];
 type Role = "dm" | "player" | null;
@@ -639,6 +640,61 @@ export function App() {
 
   const renderCurrentStep = () => {
     if (!currentStep) return null;
+
+    if (currentStep.pageSchemaId) {
+      const pageSchema = context.resolvedData.pageSchemas[currentStep.pageSchemaId];
+      if (pageSchema) {
+        if (currentStep.kind === "metadata") {
+          return (
+            <PageComposer
+              schema={pageSchema}
+              dataRoot={{
+                page: {
+                  metadataName: {
+                    title: currentStep.label,
+                    label: t.NAME_LABEL,
+                    inputId: "character-name-input",
+                    value: state.metadata.name ?? "",
+                    placeholder: t.METADATA_PLACEHOLDER,
+                    onChange: (value: string) => {
+                      setState((s) => applyChoice(s, currentStep.id, value, context));
+                    },
+                  },
+                },
+              }}
+            />
+          );
+        }
+
+        if (currentStep.source.type === "entityType") {
+          const stepChoice = choiceMap.get(currentStep.id);
+          const options = stepChoice?.options ?? [];
+          const limit = stepChoice?.limit ?? currentStep.source.limit ?? 1;
+
+          if (limit <= 1 && currentStep.id !== STEP_ID_FEAT) {
+            const currentValue = String(state.selections[currentStep.id] ?? "");
+            return (
+              <PageComposer
+                schema={pageSchema}
+                dataRoot={{
+                  page: {
+                    entityChoice: {
+                      title: currentStep.label,
+                      inputName: currentStep.id,
+                      options,
+                      value: currentValue,
+                      onSelect: (id: string) => {
+                        setState((s) => applyChoice(s, currentStep.id, id, context));
+                      },
+                    },
+                  },
+                }}
+              />
+            );
+          }
+        }
+      }
+    }
 
     if (currentStep.kind === "review") {
       const reviewCombat = combatData;
@@ -1669,6 +1725,14 @@ export function App() {
       const options = stepChoice?.options ?? [];
       const limit = stepChoice?.limit ?? currentStep.source.limit ?? 1;
 
+      const handleSingleSelect = (id: string) => {
+        if (currentStep.id === STEP_ID_FEAT) {
+          setState((s) => applyChoice(s, currentStep.id, [id], context));
+          return;
+        }
+        setState((s) => applyChoice(s, currentStep.id, id, context));
+      };
+
       if (limit <= 1) {
         const currentValue =
           currentStep.id === STEP_ID_FEAT
@@ -1680,13 +1744,7 @@ export function App() {
             title={currentStep.label}
             options={options}
             value={currentValue}
-            onSelect={(id) => {
-              if (currentStep.id === STEP_ID_FEAT) {
-                setState((s) => applyChoice(s, currentStep.id, [id], context));
-                return;
-              }
-              setState((s) => applyChoice(s, currentStep.id, id, context));
-            }}
+            onSelect={handleSingleSelect}
           />
         );
       }

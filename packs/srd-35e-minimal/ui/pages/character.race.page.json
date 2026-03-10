@@ -1,0 +1,15 @@
+{
+  "id": "character.race",
+  "root": {
+    "id": "race-root",
+    "componentId": "layout.singleColumn",
+    "children": [
+      {
+        "id": "race-picker",
+        "componentId": "entityType.singleSelect",
+        "slot": "main",
+        "dataSource": "page.entityChoice"
+      }
+    ]
+  }
+}

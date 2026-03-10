@@ -1,0 +1,15 @@
+{
+  "id": "character.class",
+  "root": {
+    "id": "class-root",
+    "componentId": "layout.singleColumn",
+    "children": [
+      {
+        "id": "class-picker",
+        "componentId": "entityType.singleSelect",
+        "slot": "main",
+        "dataSource": "page.entityChoice"
+      }
+    ]
+  }
+}
