@@ -297,6 +297,14 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
   }
 
   if (!flow) throw new Error("No flow found while resolving packs");
+  for (const step of flow.steps) {
+    if (!step.pageSchemaId) continue;
+    if (!pageSchemas[step.pageSchemaId]) {
+      throw new Error(
+        `Missing page schema "${step.pageSchemaId}" referenced by flow step "${step.id}"`,
+      );
+    }
+  }
 
   const fingerprintPayload = {
     orderedPackIds: sorted.map((p) => p.manifest.id),

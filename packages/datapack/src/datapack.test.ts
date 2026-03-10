@@ -94,6 +94,37 @@ describe("resolvePackSet", () => {
     }
   });
 
+  it("fails pack resolution when a flow step references a missing page schema id", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-missing-page-schema-pack-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.mkdirSync(path.join(packDest, "ui", "pages"), { recursive: true });
+    fs.writeFileSync(
+      path.join(packDest, "flows", "character-creation.flow.json"),
+      JSON.stringify({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            pageSchemaId: "character.typoed-abilities"
+          }
+        ]
+      })
+    );
+
+    try {
+      expect(() => resolvePackSet(tempRoot, ["srd-35e-minimal"])).toThrow(
+        /missing page schema/i,
+      );
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("loads the finalized phb feat catalog with preserved modeled mechanics", () => {
     const root = path.resolve(process.cwd(), "../../packs");
     const resolved = resolvePackSet(root, ["srd-35e-minimal"]);

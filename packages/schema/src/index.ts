@@ -295,19 +295,39 @@ const ChoiceStepSchema = z.object({
 
 export const FlowSchema = z.object({ steps: z.array(ChoiceStepSchema) });
 
+const PageBindingPathSegmentSchema = z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/);
+const PageBindingPathSchema = z
+  .string()
+  .min(1)
+  .superRefine((value, ctx) => {
+    const segments = value.split(".");
+    if (segments.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid binding path: must contain at least one segment."
+      });
+      return;
+    }
+
+    for (const segment of segments) {
+      const parsed = PageBindingPathSegmentSchema.safeParse(segment);
+      if (!parsed.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid binding path: ${value}`
+        });
+        return;
+      }
+    }
+  });
+
 const AllowedPageComponentIds = [
   "layout.singleColumn",
-  "layout.twoColumn",
   "entityType.singleSelect",
   "metadata.nameField",
   "abilities.allocator",
   "skills.allocator",
-  "review.sheet",
-  "metadataNameField",
-  "metadataCharacterDetails",
-  "reviewHero",
-  "statCards",
-  "skillsBreakdown"
+  "review.sheet"
 ] as const;
 
 const PageComponentIdSchema = z.enum(AllowedPageComponentIds, {
@@ -324,7 +344,7 @@ const PageNodeSchema: z.ZodType<any> = z.lazy(() =>
     id: z.string().min(1),
     componentId: PageComponentIdSchema,
     slot: z.string().min(1).optional(),
-    dataSource: z.string().min(1).optional(),
+    dataSource: PageBindingPathSchema.optional(),
     props: z.record(z.any()).optional(),
     children: z.array(PageNodeSchema).optional()
   }).strict()

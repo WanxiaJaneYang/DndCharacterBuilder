@@ -117,8 +117,7 @@ export function resolvePageSchemaForStep(
   step: FlowStep,
   pageSchemas: Record<string, Page>,
 ): Page | undefined {
-  const configured = step.pageSchemaId ? pageSchemas[step.pageSchemaId] : undefined;
-  if (configured) return configured;
+  if (step.pageSchemaId) return pageSchemas[step.pageSchemaId];
   if (step.kind === "abilities") return FALLBACK_ABILITIES_PAGE_SCHEMA;
   if (step.kind === "skills") return FALLBACK_SKILLS_PAGE_SCHEMA;
   return undefined;
