@@ -212,6 +212,20 @@ describe('wizard e2e-ish happy path', () => {
     expect(screen.getByText(fighterLabelPattern, { selector: 'strong' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_ABILITY_BREAKDOWN })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_COMBAT_BREAKDOWN })).toBeTruthy();
+    const combatArticle = screen
+      .getByRole('heading', {
+        name: localizedPattern(en.REVIEW_COMBAT_BREAKDOWN, zh.REVIEW_COMBAT_BREAKDOWN),
+      })
+      .closest('article');
+    expect(combatArticle).toBeTruthy();
+    expect(
+      within(combatArticle!).getByText(
+        new RegExp(
+          `${escapeRegExp(en.REVIEW_BAB_LABEL)}|${escapeRegExp(zh.REVIEW_BAB_LABEL)}`,
+          'i',
+        ),
+      ),
+    ).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_SAVE_HP_BREAKDOWN })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_ATTACK_LINES })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_FEAT_SUMMARY })).toBeTruthy();
@@ -885,4 +899,3 @@ describe('role and language behavior', () => {
     });
   });
 });
-
