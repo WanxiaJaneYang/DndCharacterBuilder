@@ -12,6 +12,8 @@ import rulesJson from '../../../packs/srd-35e-minimal/entities/rules.json';
 import flowJson from '../../../packs/srd-35e-minimal/flows/character-creation.flow.json';
 import racePageJson from '../../../packs/srd-35e-minimal/ui/pages/character.race.page.json';
 import classPageJson from '../../../packs/srd-35e-minimal/ui/pages/character.class.page.json';
+import abilitiesPageJson from '../../../packs/srd-35e-minimal/ui/pages/character.abilities.page.json';
+import skillsPageJson from '../../../packs/srd-35e-minimal/ui/pages/character.skills.page.json';
 import namePageJson from '../../../packs/srd-35e-minimal/ui/pages/character.name.page.json';
 import reviewPageJson from '../../../packs/srd-35e-minimal/ui/pages/character.review.page.json';
 import enLocaleJson from '../../../packs/srd-35e-minimal/locales/en.json';
@@ -33,6 +35,8 @@ export function loadMinimalPack(): LoadedPack {
     pageSchemas: {
       [racePageJson.id]: racePageJson as Page,
       [classPageJson.id]: classPageJson as Page,
+      [abilitiesPageJson.id]: abilitiesPageJson as Page,
+      [skillsPageJson.id]: skillsPageJson as Page,
       [namePageJson.id]: namePageJson as Page,
       [reviewPageJson.id]: reviewPageJson as Page,
     },

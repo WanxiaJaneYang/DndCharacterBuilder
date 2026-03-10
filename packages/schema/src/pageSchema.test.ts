@@ -63,13 +63,105 @@ describe("page schema", () => {
     expect(parsed.root.children?.[0]?.componentId).toBe("review.sheet");
   });
 
+  it("accepts abilities and skills allocator blocks in the closed component registry", () => {
+    const abilities = PageSchema.parse({
+      id: "character.abilities",
+      root: {
+        id: "abilities-root",
+        componentId: "layout.singleColumn",
+        children: [
+          {
+            id: "abilities-allocator",
+            componentId: "abilities.allocator",
+            slot: "main",
+            dataSource: "page.abilitiesAllocator"
+          }
+        ]
+      }
+    });
+    const skills = PageSchema.parse({
+      id: "character.skills",
+      root: {
+        id: "skills-root",
+        componentId: "layout.singleColumn",
+        children: [
+          {
+            id: "skills-allocator",
+            componentId: "skills.allocator",
+            slot: "main",
+            dataSource: "page.skillsAllocator"
+          }
+        ]
+      }
+    });
+
+    expect(abilities.root.children?.[0]?.componentId).toBe("abilities.allocator");
+    expect(skills.root.children?.[0]?.componentId).toBe("skills.allocator");
+  });
+
+  it("rejects malformed data source bindings that are not path-only references", () => {
+    expect(() =>
+      PageSchema.parse({
+        id: "character.bad-binding",
+        root: {
+          id: "bad-binding-root",
+          componentId: "layout.singleColumn",
+          children: [
+            {
+              id: "bad-binding",
+              componentId: "metadata.nameField",
+              slot: "main",
+              dataSource: "page.reviewSheet | filter"
+            }
+          ]
+        }
+      })
+    ).toThrow(/binding path/i);
+
+    expect(() =>
+      PageSchema.parse({
+        id: "character.bad-segments",
+        root: {
+          id: "bad-segments-root",
+          componentId: "layout.singleColumn",
+          children: [
+            {
+              id: "bad-binding",
+              componentId: "metadata.nameField",
+              slot: "main",
+              dataSource: "page..metadata"
+            }
+          ]
+        }
+      })
+    ).toThrow(/binding path/i);
+
+    expect(() =>
+      PageSchema.parse({
+        id: "character.bad-brackets",
+        root: {
+          id: "bad-brackets-root",
+          componentId: "layout.singleColumn",
+          children: [
+            {
+              id: "bad-binding",
+              componentId: "metadata.nameField",
+              slot: "main",
+              dataSource: "page[0]"
+            }
+          ]
+        }
+      })
+    ).toThrow(/binding path/i);
+  });
+
   it("rejects unknown component ids", () => {
     expect(() =>
       PageSchema.parse({
         id: "character.metadata",
         root: {
           id: "metadata-root",
-          componentId: "layout.unknown"
+          componentId: "layout.twoColumn"
         }
       })
     ).toThrow(/unknown component/i);
