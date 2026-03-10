@@ -504,6 +504,12 @@ input { border: 1px solid #bca57d; border-radius: 6px; padding: 0.35rem 0.5rem; 
   .review-table td {
     font-size: 0.92rem;
   }
+  main[lang="en"] .review-skills-summary {
+    margin: 0 0 0.1875rem;
+    font-size: 0.95rem;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
 }
 
 @media (orientation: landscape) {

@@ -1028,7 +1028,7 @@ export function App() {
 
           <article className="sheet">
             <h3>{t.REVIEW_SKILLS_BREAKDOWN}</h3>
-            <p>
+            <p className="review-skills-summary">
               {t.REVIEW_POINTS_SPENT_LABEL} {skillBudget.spent} / {skillBudget.total} (
               {skillBudget.remaining} {t.REVIEW_REMAINING_LABEL})
             </p>
