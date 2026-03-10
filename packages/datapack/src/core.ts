@@ -5,7 +5,7 @@ export interface LoadedPack {
   manifest: Manifest;
   entities: Record<string, Entity[]>;
   flow: Flow;
-  pageSchemas: Record<string, Page>;
+  pageSchemas?: Record<string, Page>;
   patches: Array<{ op: "mergeEntity"; entityType: string; id: string; value: Partial<Entity> }>;
   locales?: Record<string, PackLocale>;
   packPath: string;
@@ -292,7 +292,7 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
     flow = pack.flow;
     pageSchemas = {
       ...pageSchemas,
-      ...pack.pageSchemas
+      ...(pack.pageSchemas ?? {})
     };
   }
 
