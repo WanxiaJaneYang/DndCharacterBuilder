@@ -36,7 +36,6 @@ const STEP_ID_ABILITIES = "abilities";
 const DEFAULT_EXPORT_NAME = "character";
 const ABILITY_ORDER = ["str", "dex", "con", "int", "wis", "cha"] as const;
 type AbilityMode = "pointBuy" | "phb" | "rollSets";
-const FIRST_LEVEL_SKILL_MULTIPLIER = 4;
 
 type AbilityStepConfig = {
   modes?: AbilityMode[];
@@ -75,51 +74,10 @@ type AbilityPresentationConfig = {
 
 const DEFAULT_ABILITY_MIN = 3;
 const DEFAULT_ABILITY_MAX = 18;
-const SRD_MEDIUM_LOAD_TABLE: Array<
-  { light: number; medium: number; heavy: number } | null
-> = [
-  null,
-  { light: 3, medium: 6, heavy: 10 },
-  { light: 6, medium: 13, heavy: 20 },
-  { light: 10, medium: 20, heavy: 30 },
-  { light: 13, medium: 26, heavy: 40 },
-  { light: 16, medium: 33, heavy: 50 },
-  { light: 20, medium: 40, heavy: 60 },
-  { light: 23, medium: 46, heavy: 70 },
-  { light: 26, medium: 53, heavy: 80 },
-  { light: 30, medium: 60, heavy: 90 },
-  { light: 33, medium: 66, heavy: 100 },
-  { light: 38, medium: 76, heavy: 115 },
-  { light: 43, medium: 86, heavy: 130 },
-  { light: 50, medium: 100, heavy: 150 },
-  { light: 58, medium: 116, heavy: 175 },
-  { light: 66, medium: 133, heavy: 200 },
-  { light: 76, medium: 153, heavy: 230 },
-  { light: 86, medium: 173, heavy: 260 },
-  { light: 100, medium: 200, heavy: 300 },
-  { light: 116, medium: 233, heavy: 350 },
-  { light: 133, medium: 266, heavy: 400 },
-  { light: 153, medium: 306, heavy: 460 },
-  { light: 173, medium: 346, heavy: 520 },
-  { light: 200, medium: 400, heavy: 600 },
-  { light: 233, medium: 466, heavy: 700 },
-  { light: 266, medium: 533, heavy: 800 },
-  { light: 306, medium: 613, heavy: 920 },
-  { light: 346, medium: 693, heavy: 1040 },
-  { light: 400, medium: 800, heavy: 1200 },
-  { light: 466, medium: 933, heavy: 1400 },
-];
-
-type SkillBudgetSummary = {
-  total: number;
-  spent: number;
-  remaining: number;
-};
 
 type LocalSkillUiDetail = {
   classSkill: boolean;
   costPerRank: number;
-  costSpent: number;
   maxRanks: number;
   racialBonus: number;
 };
@@ -129,20 +87,6 @@ function getEntityDataRecord(entity: { data?: unknown } | undefined): Record<str
     return {};
   }
   return entity.data as Record<string, unknown>;
-}
-
-function getEntityDataNumber(
-  entity: { data?: unknown } | undefined,
-  key: string,
-  fallback = 0,
-): number {
-  const value = getEntityDataRecord(entity)[key];
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-}
-
-function getEntityDataString(entity: { data?: unknown } | undefined, key: string): string {
-  const value = getEntityDataRecord(entity)[key];
-  return typeof value === "string" ? value.trim() : "";
 }
 
 function getClassSkillIds(classEntity: { data?: unknown } | undefined): Set<string> {
@@ -188,101 +132,6 @@ function getRacialSkillBonuses(raceEntity: { data?: unknown } | undefined): Map<
     bonuses.set(skillId, (bonuses.get(skillId) ?? 0) + bonus);
   }
   return bonuses;
-}
-
-function getSrdMediumLoadLimits(strScore: number): { light: number; medium: number; heavy: number } {
-  const normalizedScore = Number.isFinite(strScore) ? Math.max(1, Math.floor(strScore)) : 10;
-  if (normalizedScore < SRD_MEDIUM_LOAD_TABLE.length) {
-    return SRD_MEDIUM_LOAD_TABLE[normalizedScore] ?? {
-      light: 0,
-      medium: 0,
-      heavy: 0,
-    };
-  }
-  const baseEntry = SRD_MEDIUM_LOAD_TABLE[20]!;
-  const incrementsOfTen = Math.floor((normalizedScore - 20) / 10);
-  const remainderScore = normalizedScore - incrementsOfTen * 10;
-  const remainderEntry = SRD_MEDIUM_LOAD_TABLE[remainderScore] ?? baseEntry;
-  const multiplier = 4 ** incrementsOfTen;
-  return {
-    light: remainderEntry.light * multiplier,
-    medium: remainderEntry.medium * multiplier,
-    heavy: remainderEntry.heavy * multiplier,
-  };
-}
-
-function getCarryingCapacityMultiplier(size: string): number {
-  const normalized = size.trim().toLowerCase();
-  if (normalized === "small") return 0.75;
-  if (normalized === "large") return 2;
-  return 1;
-}
-
-function deriveValueFromProvenance(
-  records: Array<{ delta?: number; setValue?: unknown }>,
-  fallback: number,
-): number {
-  let value = fallback;
-  for (const record of records) {
-    if (record.setValue !== undefined) {
-      const nextValue = Number(record.setValue);
-      if (Number.isFinite(nextValue)) {
-        value = nextValue;
-      }
-      continue;
-    }
-    const delta = Number(record.delta ?? 0);
-    if (Number.isFinite(delta)) {
-      value += delta;
-    }
-  }
-  return value;
-}
-
-function buildSkillBudgetSummary(input: {
-  classEntity: { data?: unknown } | undefined;
-  classSelection: { level: number } | undefined;
-  raceEntity: { data?: unknown } | undefined;
-  intMod: number;
-  skillRanks: Record<string, number>;
-  classSkillIds: Set<string>;
-}): SkillBudgetSummary {
-  const characterLevel = getCharacterLevel(input.classSelection);
-  const classSkillPointsPerLevel = Math.max(
-    0,
-    Math.floor(getEntityDataNumber(input.classEntity, "skillPointsPerLevel", 0)),
-  );
-  const racialTraitIds = getRacialTraitIds(input.raceEntity);
-  const racialBonusAtLevel1 = racialTraitIds.has("extra-skill-points") ? 4 : 0;
-  const racialBonusPerLevel = racialTraitIds.has("extra-skill-points") ? 1 : 0;
-  const baseSkillPointsPerLevelWithInt = Math.max(
-    1,
-    classSkillPointsPerLevel + input.intMod,
-  );
-  const total = Array.from({ length: characterLevel }).reduce<number>(
-    (sum, _, index) => {
-      const level = index + 1;
-      const levelPoints =
-        level === 1
-          ? baseSkillPointsPerLevelWithInt * FIRST_LEVEL_SKILL_MULTIPLIER +
-            racialBonusAtLevel1
-          : baseSkillPointsPerLevelWithInt + racialBonusPerLevel;
-      return sum + Math.max(0, levelPoints);
-    },
-    0,
-  );
-  const spent = Object.entries(input.skillRanks).reduce<number>(
-    (sum, [skillId, ranks]) => {
-      const costPerRank = input.classSkillIds.has(skillId) ? 1 : 2;
-      return sum + ranks * costPerRank;
-    },
-    0,
-  );
-  return {
-    total,
-    spent,
-    remaining: total - spent,
-  };
 }
 
 function rollScoreByFormula(formula: string): number {
@@ -595,52 +444,16 @@ export function App() {
     () => getRacialSkillBonuses(selectedRaceEntity),
     [selectedRaceEntity],
   );
-  const selectedEquipmentIds = useMemo(
-    () =>
-      ((state.selections.equipment as string[] | undefined) ?? []).map((itemId) =>
-        String(itemId),
-      ),
-    [state.selections.equipment],
-  );
-  const selectedEquipmentEntities = useMemo(
-    () =>
-      selectedEquipmentIds
-        .map((itemId) => context.resolvedData.entities.items?.[itemId])
-        .filter((item): item is NonNullable<typeof item> => Boolean(item)),
-    [context.resolvedData.entities.items, selectedEquipmentIds],
-  );
-  const skillBudget = useMemo(
-    () =>
-      buildSkillBudgetSummary({
-        classEntity: selectedClassEntity,
-        classSelection: spec.class,
-        raceEntity: selectedRaceEntity,
-        intMod: reviewData.abilities.int?.mod ?? 0,
-        skillRanks: selectedSkillRanks,
-        classSkillIds,
-      }),
-    [
-      classSkillIds,
-      reviewData.abilities.int,
-      selectedClassEntity,
-      selectedRaceEntity,
-      selectedSkillRanks,
-      spec.class,
-    ],
-  );
   const skillUiDetailById = useMemo(() => {
     const level = getCharacterLevel(spec.class);
     return new Map(
       skillEntities.map((skill) => {
         const classSkill = classSkillIds.has(skill.id);
-        const costPerRank = classSkill ? 1 : 2;
-        const ranks = selectedSkillRanks[skill.id] ?? 0;
         return [
           skill.id,
           {
             classSkill,
-            costPerRank,
-            costSpent: ranks * costPerRank,
+            costPerRank: classSkill ? 1 : 2,
             maxRanks: getSkillMaxRanksForLevel(level, classSkill),
             racialBonus: racialSkillBonuses.get(skill.id) ?? 0,
           } satisfies LocalSkillUiDetail,
@@ -650,42 +463,9 @@ export function App() {
   }, [
     classSkillIds,
     racialSkillBonuses,
-    selectedSkillRanks,
     skillEntities,
     spec.class,
   ]);
-  const selectedRaceSize = getEntityDataString(selectedRaceEntity, "size") || "medium";
-  const baseSpeed = getEntityDataNumber(
-    selectedRaceEntity,
-    "baseSpeed",
-    DEFAULT_STATS.speed,
-  );
-  const adjustedSpeed = useMemo(
-    () =>
-      deriveValueFromProvenance(
-        provenanceByTargetPath.get("stats.speed") ?? [],
-        baseSpeed,
-      ),
-    [baseSpeed, provenanceByTargetPath],
-  );
-  const totalWeight = useMemo(
-    () =>
-      selectedEquipmentEntities.reduce(
-        (sum, item) => sum + getEntityDataNumber(item, "weight", 0),
-        0,
-      ),
-    [selectedEquipmentEntities],
-  );
-  const loadCategory = useMemo(() => {
-    const strScore = Number(reviewData.abilities.str?.score ?? 10);
-    const carryingMultiplier = getCarryingCapacityMultiplier(selectedRaceSize);
-    const limits = getSrdMediumLoadLimits(strScore);
-    const lightLoadLimit = limits.light * carryingMultiplier;
-    const mediumLoadLimit = limits.medium * carryingMultiplier;
-    if (totalWeight <= lightLoadLimit) return "light";
-    if (totalWeight <= mediumLoadLimit) return "medium";
-    return "heavy";
-  }, [reviewData.abilities.str, selectedRaceSize, totalWeight]);
 
   const selectedStepValues = (stepId: string): string[] => {
     if (stepId === STEP_ID_FEAT) return selectedFeats;
@@ -936,8 +716,6 @@ export function App() {
         "hp",
         "ac",
         "initiative",
-        "speed",
-        "bab",
         "fort",
         "ref",
         "will",
@@ -946,8 +724,6 @@ export function App() {
         hp: t.REVIEW_HP_LABEL,
         ac: t.REVIEW_AC_LABEL,
         initiative: t.REVIEW_INITIATIVE_LABEL,
-        speed: t.REVIEW_SPEED_LABEL,
-        bab: t.REVIEW_BAB_LABEL,
         fort: t.REVIEW_FORT_LABEL,
         ref: t.REVIEW_REF_LABEL,
         will: t.REVIEW_WILL_LABEL,
@@ -956,8 +732,6 @@ export function App() {
         hp: DEFAULT_STATS.hp,
         ac: DEFAULT_STATS.ac,
         initiative: DEFAULT_STATS.initiative,
-        speed: DEFAULT_STATS.speed,
-        bab: DEFAULT_STATS.bab,
         fort: DEFAULT_STATS.fort,
         ref: DEFAULT_STATS.ref,
         will: DEFAULT_STATS.will,
@@ -988,16 +762,10 @@ export function App() {
         hp: reviewData.hp.total,
         ac: reviewCombat.ac.total,
         initiative: reviewData.initiative.total,
-        speed: adjustedSpeed,
-        bab: deriveValueFromProvenance(
-          provenanceByTargetPath.get("stats.bab") ?? [],
-          DEFAULT_STATS.bab,
-        ),
         fort: reviewData.saves.fort.total,
         ref: reviewData.saves.ref.total,
         will: reviewData.saves.will.total,
       } as const;
-      const favoredClass = getEntityDataString(selectedRaceEntity, "favoredClass");
       const racialTraits = Array.isArray(
         getEntityDataRecord(selectedRaceEntity).racialTraits,
       )
@@ -1006,10 +774,7 @@ export function App() {
           >)
         : [];
       const reviewSkills = computeResult.sheetViewModel.data.skills
-        .filter((skill) => {
-          const detail = skillUiDetailById.get(skill.id);
-          return skill.ranks > 0 || (detail?.racialBonus ?? 0) !== 0;
-        })
+        .filter((skill) => skill.ranks > 0)
         .sort((a, b) => {
           const left = localizeEntityText("skills", a.id, "name", a.name);
           const right = localizeEntityText("skills", b.id, "name", b.name);
@@ -1047,15 +812,6 @@ export function App() {
             </p>
             <p>
               {t.REVIEW_XP_LABEL}: 0
-            </p>
-            <p>
-              {t.REVIEW_SIZE_LABEL}: {selectedRaceSize}
-            </p>
-            <p>
-              {t.REVIEW_SPEED_BASE_LABEL}: {baseSpeed}
-            </p>
-            <p>
-              {t.REVIEW_SPEED_ADJUSTED_LABEL}: {adjustedSpeed}
             </p>
           </article>
 
@@ -1325,10 +1081,6 @@ export function App() {
 
           <article className="sheet">
             <h3>{t.REVIEW_SKILLS_BREAKDOWN}</h3>
-            <p>
-              {t.REVIEW_POINTS_SPENT_LABEL} {skillBudget.spent} /{" "}
-              {skillBudget.total} ({skillBudget.remaining} {t.REVIEW_REMAINING_LABEL})
-            </p>
             <table className="review-table">
               <caption className="sr-only">
                 {t.REVIEW_SKILLS_TABLE_CAPTION}
@@ -1338,102 +1090,34 @@ export function App() {
                   <th>{t.REVIEW_SKILL_COLUMN}</th>
                   <th>{t.REVIEW_RANKS_COLUMN}</th>
                   <th>{t.REVIEW_ABILITY_COLUMN}</th>
-                  <th>{t.REVIEW_RACIAL_COLUMN}</th>
                   <th>{t.REVIEW_MISC_COLUMN}</th>
                   <th>{t.REVIEW_ACP_COLUMN}</th>
                   <th>{t.REVIEW_TOTAL_COLUMN}</th>
-                  <th>{t.REVIEW_POINT_COST_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
-                {reviewSkills.map((skill) => {
-                  const detail = skillUiDetailById.get(skill.id);
-                  return (
-                    <tr key={skill.id}>
-                      <td className="review-cell-key">
-                        {localizeEntityText(
-                          "skills",
-                          skill.id,
-                          "name",
-                          skill.name,
-                        )}
-                      </td>
-                      <td>{skill.ranks}</td>
-                      <td>
-                        {formatSigned(skill.abilityMod)} (
-                        {localizeAbilityLabel(skill.abilityKey)})
-                      </td>
-                      <td>{formatSigned(detail?.racialBonus ?? 0)}</td>
-                      <td>{formatSigned(skill.misc)}</td>
-                      <td>{formatSigned(skill.acp)}</td>
-                      <td>{skill.total}</td>
-                      <td>
-                        {detail?.costSpent ?? 0} ({detail?.costPerRank ?? 0}
-                        {t.REVIEW_PER_RANK_UNIT})
-                      </td>
-                    </tr>
-                  );
-                })}
+                {reviewSkills.map((skill) => (
+                  <tr key={skill.id}>
+                    <td className="review-cell-key">
+                      {localizeEntityText(
+                        "skills",
+                        skill.id,
+                        "name",
+                        skill.name,
+                      )}
+                    </td>
+                    <td>{skill.ranks}</td>
+                    <td>
+                      {formatSigned(skill.abilityMod)} (
+                      {localizeAbilityLabel(skill.abilityKey)})
+                    </td>
+                    <td>{formatSigned(skill.misc)}</td>
+                    <td>{formatSigned(skill.acp)}</td>
+                    <td>{skill.total}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-          </article>
-
-          <article className="sheet review-decisions">
-            <h3>{t.REVIEW_EQUIPMENT_LOAD}</h3>
-            <p>
-              {t.REVIEW_SELECTED_ITEMS_LABEL}:{" "}
-              {selectedEquipmentIds
-                .map((itemId) =>
-                  localizeEntityText("items", itemId, "name", itemId),
-                )
-                .join(", ") || "-"}
-            </p>
-            <p>
-              {t.REVIEW_TOTAL_WEIGHT_LABEL}: {totalWeight}
-            </p>
-            <p>
-              {t.REVIEW_LOAD_CATEGORY_LABEL}: {loadCategory}
-            </p>
-            <p>
-              {t.REVIEW_SPEED_IMPACT_LABEL}:{" "}
-              {adjustedSpeed < baseSpeed
-                ? `Reduced to ${adjustedSpeed} ft.`
-                : "No speed reduction"}
-            </p>
-          </article>
-
-          <article className="sheet review-decisions">
-            <h3>{t.REVIEW_MOVEMENT_DETAIL}</h3>
-            <p>
-              {t.REVIEW_SPEED_BASE_LABEL}: {baseSpeed}
-            </p>
-            <p>
-              {t.REVIEW_SPEED_ADJUSTED_LABEL}: {adjustedSpeed}
-            </p>
-            <p>
-              {t.REVIEW_MOVEMENT_NOTES_LABEL}:{" "}
-              {adjustedSpeed < baseSpeed
-                ? "Armor or load reduces movement speed."
-                : "No movement penalty detected."}
-            </p>
-          </article>
-
-          <article className="sheet review-decisions">
-            <h3>{t.REVIEW_RULES_DECISIONS}</h3>
-            <p>
-              {t.REVIEW_FAVORED_CLASS_LABEL}: {favoredClass || "-"}
-            </p>
-            <p>
-              {t.REVIEW_MULTICLASS_XP_IGNORED_LABEL}:{" "}
-              {(!favoredClass ||
-              favoredClass === "any" ||
-              favoredClass === (spec.class?.classId ?? ""))
-                ? t.REVIEW_YES
-                : t.REVIEW_NO}
-            </p>
-            <p>
-              {t.REVIEW_FEAT_SLOTS_LABEL}: {choiceMap.get(STEP_ID_FEAT)?.limit ?? 0}
-            </p>
           </article>
 
           <article className="sheet review-decisions">
@@ -1817,9 +1501,6 @@ export function App() {
     }
 
     if (currentStep.kind === "skills") {
-      const skillViewModelById = new Map(
-        computeResult.sheetViewModel.data.skills.map((skill) => [skill.id, skill]),
-      );
       const formatSkillValue = (value: number) =>
         `${Number.isInteger(value) ? value : value.toFixed(1)}`;
       const skillControlLabel = (
@@ -1831,11 +1512,6 @@ export function App() {
       return (
         <section>
           <h2>{currentStep.label}</h2>
-          <p className="skill-points-summary">
-            {t.SKILLS_BUDGET_LABEL}: {skillBudget.total} |{" "}
-            {t.SKILLS_SPENT_LABEL}: {skillBudget.spent} |{" "}
-            {t.SKILLS_REMAINING_LABEL}: {skillBudget.remaining}
-          </p>
           <div className="skills-table-wrap">
             <table className="review-table skills-table">
               <thead>
@@ -1854,29 +1530,25 @@ export function App() {
                   const detail = skillUiDetailById.get(skill.id);
                   const skillView = skillViewModelById.get(skill.id);
                   const ranks = selectedSkillRanks[skill.id] ?? 0;
-                  const maxRanks = detail?.maxRanks ?? 2;
                   const classSkill = detail?.classSkill ?? false;
                   const costPerRank = detail?.costPerRank ?? 2;
+                  const maxRanks = detail?.maxRanks ?? 2;
                   const racialBonus = detail?.racialBonus ?? 0;
                   const miscBonus = skillView?.misc ?? 0;
                   const acpPenalty = skillView?.acp ?? 0;
                   const abilityMod = skillView?.abilityMod ?? 0;
                   const total = skillView?.total ?? 0;
                   const rankStep = classSkill ? 1 : 0.5;
-                  const pointStepCost = rankStep * costPerRank;
                   const armorCheckPenaltyApplies =
                     skillView?.acpApplied ??
                     Boolean(skill.data?.armorCheckPenaltyApplies);
                   const canDecrease = ranks > 0;
-                  const canIncrease =
-                    ranks + rankStep <= maxRanks &&
-                    skillBudget.remaining >= pointStepCost;
+                  const canIncrease = ranks + rankStep <= maxRanks;
 
                   const updateRanks = (nextValue: number) => {
-                    const bounded = Math.min(maxRanks, Math.max(0, nextValue));
                     const nextRanks = {
                       ...selectedSkillRanks,
-                      [skill.id]: bounded,
+                      [skill.id]: Math.min(maxRanks, Math.max(0, nextValue)),
                     };
                     setState((s) =>
                       applyChoice(s, STEP_ID_SKILLS, nextRanks, context),

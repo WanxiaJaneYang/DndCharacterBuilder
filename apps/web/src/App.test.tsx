@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import * as engine from '@dcb/engine';
 import { App } from './App';
 import uiTextJson from './uiText.json';
 
@@ -102,8 +101,6 @@ describe('wizard e2e-ish happy path', () => {
     expect(screen.getByRole('heading', { name: en.REVIEW_ATTACK_LINES })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_FEAT_SUMMARY })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_TRAIT_SUMMARY })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.REVIEW_EQUIPMENT_LOAD })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: en.REVIEW_MOVEMENT_DETAIL })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_AC_TOUCH_LABEL })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_AC_FLAT_FOOTED_LABEL })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_PACK_INFO })).toBeTruthy();
@@ -115,6 +112,9 @@ describe('wizard e2e-ish happy path', () => {
     expect(screen.getAllByText(/Chainmail/i).length).toBeGreaterThan(0);
     expect(screen.getByText(new RegExp(en.REVIEW_FINGERPRINT_LABEL, 'i'))).toBeTruthy();
     expect(document.body.textContent).toMatch(/[a-f0-9]{64}/);
+    expect(screen.queryByRole('heading', { name: en.REVIEW_EQUIPMENT_LOAD })).toBeNull();
+    expect(screen.queryByRole('heading', { name: en.REVIEW_MOVEMENT_DETAIL })).toBeNull();
+    expect(screen.queryByRole('heading', { name: en.REVIEW_RULES_DECISIONS })).toBeNull();
   });
 
   it('renders review skill rows with a closed ability label parenthesis', async () => {
@@ -134,177 +134,22 @@ describe('wizard e2e-ish happy path', () => {
     expect(screen.getByText(/\(\s*(?:STR|鍔涢噺)\s*\)/i)).toBeTruthy();
   });
 
-  it('renders the skills step without legacy finalizeCharacter totals', async () => {
+  it('renders skills-step metadata for legal allocation controls', async () => {
     const user = userEvent.setup();
-    const realFinalizeCharacter = engine.finalizeCharacter;
-    const finalizeSpy = vi.spyOn(engine, 'finalizeCharacter').mockImplementation((state, context) => {
-      const sheet = realFinalizeCharacter(state, context);
-      const climb = sheet.skills.climb!;
-      return {
-        ...sheet,
-        decisions: {
-          ...sheet.decisions,
-          skillPoints: {
-            ...sheet.decisions.skillPoints,
-            total: 99,
-            spent: 88,
-            remaining: 11,
-          },
-        },
-        skills: {
-          ...sheet.skills,
-          climb: {
-            ...climb,
-            racialBonus: 7,
-            costSpent: 77,
-            costPerRank: 9,
-          },
-        },
-      };
-    });
+    render(<App />);
 
-    try {
-      render(<App />);
+    await reachSkillsStep(user);
 
-      await reachSkillsStep(user);
-
-      expect(screen.getByText(/(?:Budget|鎬荤偣鏁?):\s*12/i)).toBeTruthy();
-      expect(screen.getByText(/(?:Remaining|鍓╀綑):\s*12/i)).toBeTruthy();
-
-      const climbRow = screen.getByRole('row', { name: climbSkillPattern });
-      expect(within(climbRow).getByText(/1\/rank/i)).toBeTruthy();
-      expect(within(climbRow).getByText(/Racial\s+\+0/i)).toBeTruthy();
-    } finally {
-      finalizeSpy.mockRestore();
-    }
-  });
-
-  it('renders the review screen without legacy finalizeCharacter totals', async () => {
-    const user = userEvent.setup();
-    const realFinalizeCharacter = engine.finalizeCharacter;
-    const finalizeSpy = vi.spyOn(engine, 'finalizeCharacter').mockImplementation((state, context) => {
-      const sheet = realFinalizeCharacter(state, context);
-      const climb = sheet.skills.climb!;
-      return {
-        ...sheet,
-        metadata: { name: 'Legacy Sheet' },
-        abilities: {
-          ...sheet.abilities,
-          str: { score: 3, mod: -4 },
-        },
-        stats: {
-          ...sheet.stats,
-          hp: 999,
-          initiative: 99,
-          speed: 5,
-          bab: 42,
-          fort: 21,
-          ref: 22,
-          will: 23,
-        },
-        phase1: {
-          ...sheet.phase1,
-          identity: {
-            ...sheet.phase1.identity,
-            speed: {
-              base: 5,
-              adjusted: 5,
-            },
-          },
-          combat: {
-            ...sheet.phase1.combat,
-            initiative: { total: 99, dex: 99, misc: 99 },
-            grapple: { total: 98, bab: 98, str: 98, size: 98, misc: 98 },
-            saves: {
-              fort: { total: 21, base: 21, ability: 21, misc: 21 },
-              ref: { total: 22, base: 22, ability: 22, misc: 22 },
-              will: { total: 23, base: 23, ability: 23, misc: 23 },
-            },
-            hp: {
-              total: 999,
-              breakdown: { hitDie: 111, con: 222, misc: 333 },
-            },
-          },
-        },
-        phase2: {
-          ...sheet.phase2,
-          feats: [{ id: 'legacy-feat', name: 'Legacy Feat', summary: 'Legacy summary' }],
-          traits: [{ source: 'race', name: 'Legacy Trait', summary: 'Legacy trait summary' }],
-          equipment: {
-            selectedItems: ['legacy-item'],
-            totalWeight: 999,
-            loadCategory: 'heavy',
-            speedImpact: 'Legacy reduction',
-          },
-          movement: {
-            base: 5,
-            adjusted: 5,
-            notes: ['Legacy movement note'],
-          },
-        },
-        decisions: {
-          ...sheet.decisions,
-          favoredClass: 'legacy-class',
-          ignoresMulticlassXpPenalty: false,
-          featSelectionLimit: 99,
-          skillPoints: {
-            ...sheet.decisions.skillPoints,
-            total: 99,
-            spent: 88,
-            remaining: 11,
-          },
-        },
-        skills: {
-          ...sheet.skills,
-          climb: {
-            ...climb,
-            racialBonus: 7,
-            costSpent: 77,
-            costPerRank: 9,
-          },
-        },
-      };
-    });
-
-    try {
-      render(<App />);
-
-      await user.click(screen.getByRole('button', { name: playerNamePattern }));
-      await user.click(screen.getByRole('button', { name: startWizardPattern }));
-      await user.click(screen.getByLabelText(humanLabelPattern));
-      await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.click(screen.getByLabelText(fighterLabelPattern));
-      await user.click(screen.getByRole('button', { name: nextPattern }));
-
-      const strInput = screen.getByLabelText('STR');
-      await user.clear(strInput);
-      await user.type(strInput, '16');
-      await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.click(screen.getByLabelText('Power Attack'));
-      await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.click(screen.getByLabelText('Chainmail'));
-      await user.click(screen.getByLabelText('Heavy Wooden Shield'));
-      await user.click(screen.getByRole('button', { name: nextPattern }));
-      await user.type(
-        screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i')),
-        'Aric',
-      );
-      await user.click(screen.getByRole('button', { name: nextPattern }));
-
-      expect(screen.queryByText('Legacy Sheet')).toBeNull();
-      expect(screen.getByText('Aric')).toBeTruthy();
-      expect(screen.queryByText(/^999$/)).toBeNull();
-      expect(screen.queryByText(/^99$/)).toBeNull();
-      expect(screen.getByText(/Power Attack/i)).toBeTruthy();
-      expect(screen.queryByText(/Legacy Feat/i)).toBeNull();
-      expect(screen.getAllByText(/Chainmail/i).length).toBeGreaterThan(0);
-      expect(screen.queryByText(/Legacy reduction/i)).toBeNull();
-      expect(screen.getByText(/Feat Slots.*3/i)).toBeTruthy();
-      expect(screen.getByText(/Points Spent.*0.*8.*remaining/i)).toBeTruthy();
-    } finally {
-      finalizeSpy.mockRestore();
-    }
+    const climbRow = screen.getByRole('row', { name: climbSkillPattern });
+    expect(screen.queryByText(/Budget:/i)).toBeNull();
+    expect(screen.queryByText(/Spent:/i)).toBeNull();
+    expect(screen.queryByText(/Remaining:/i)).toBeNull();
+    expect(screen.getByRole('columnheader', { name: en.SKILLS_TYPE_COLUMN })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: en.SKILLS_POINTS_COLUMN })).toBeTruthy();
+    expect(within(climbRow).getByText(new RegExp(en.SKILLS_CLASS_LABEL, 'i'))).toBeTruthy();
+    expect(within(climbRow).getByText(/1\/rank/i)).toBeTruthy();
+    expect(within(climbRow).getByText(/Max\s+4/i)).toBeTruthy();
+    expect(within(climbRow).getByText(/Racial\s+\+0/i)).toBeTruthy();
   });
 
   it('exports ComputeResult JSON from review', async () => {
@@ -600,36 +445,38 @@ describe('role and language behavior', () => {
     expect(Number((screen.getByRole('spinbutton', { name: /STR|力量/i }) as HTMLInputElement).value)).toBe(before);
   });
 
-  it('shows a legal fighter skill allocation with remaining points and per-skill breakdowns', async () => {
+  it('preserves legal fighter skill allocation semantics', async () => {
     const user = userEvent.setup();
     render(<App />);
 
     await reachSkillsStep(user);
 
-    expect(screen.getByText(/(?:Budget|总点数):\s*12/i)).toBeTruthy();
-    expect(screen.getByText(/(?:Remaining|剩余):\s*12/i)).toBeTruthy();
-
     const climbRow = screen.getByRole('row', { name: climbSkillPattern });
-    const jumpRow = screen.getByRole('row', { name: jumpSkillPattern });
     const diplomacyRow = screen.getByRole('row', { name: diplomacySkillPattern });
+    const climbIncrease = within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i });
+    const diplomacyIncrease = within(diplomacyRow).getByRole('button', { name: /(?:Increase|提高) (?:Diplomacy|交涉)/i });
 
-    await user.click(within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i }));
-    await user.click(within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i }));
-    await user.click(within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i }));
-    await user.click(within(climbRow).getByRole('button', { name: /(?:Increase|提高) (?:Climb|攀爬)/i }));
-    await user.click(within(jumpRow).getByRole('button', { name: /(?:Increase|提高) (?:Jump|跳跃)/i }));
-    await user.click(within(jumpRow).getByRole('button', { name: /(?:Increase|提高) (?:Jump|跳跃)/i }));
-    await user.click(within(jumpRow).getByRole('button', { name: /(?:Increase|提高) (?:Jump|跳跃)/i }));
-    await user.click(within(diplomacyRow).getByRole('button', { name: /(?:Increase|提高) (?:Diplomacy|交涉)/i }));
+    for (let i = 0; i < 4; i += 1) {
+      await user.click(climbIncrease);
+    }
+    await user.click(diplomacyIncrease);
 
-    expect(screen.getByText(/(?:Spent|已花费):\s*8/i)).toBeTruthy();
-    expect(screen.getByText(/(?:Remaining|剩余):\s*4/i)).toBeTruthy();
-    expect(within(climbRow).getByText(/^4$/)).toBeTruthy();
+    expect(within(climbRow).getByLabelText(/Climb\s+ranks|攀爬\s+ranks/i).textContent).toBe('4');
     expect(within(climbRow).getByText(/4 \+ 2 \+ 0 - 0 = 6/i)).toBeTruthy();
-    expect(within(diplomacyRow).getByText(/^0\.5$/)).toBeTruthy();
+    expect((climbIncrease as HTMLButtonElement).disabled).toBe(true);
+    expect(within(diplomacyRow).getByLabelText(/Diplomacy\s+ranks|交涉\s+ranks/i).textContent).toBe('0.5');
     expect(within(diplomacyRow).getByText(/0\.5 \+ -1 \+ 0 - 0 = -0\.5/i)).toBeTruthy();
     expect(within(diplomacyRow).getByText(/2\/(?:rank|级)/i)).toBeTruthy();
-    expect(within(diplomacyRow).getByText(/(?:max|上限) 2/i)).toBeTruthy();
+    expect(within(diplomacyRow).getByText(/(?:Max|上限)\s+2/i)).toBeTruthy();
+
+    await user.click(diplomacyIncrease);
+    await user.click(diplomacyIncrease);
+    await user.click(diplomacyIncrease);
+
+    expect(within(diplomacyRow).getByLabelText(/Diplomacy\s+ranks|交涉\s+ranks/i).textContent).toBe('2');
+    expect((diplomacyIncrease as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.queryByText(/(?:Spent|已花费):/i)).toBeNull();
+    expect(screen.queryByText(/(?:Remaining|剩余):/i)).toBeNull();
     expect(within(climbRow).getByText(/(?:ACP applies|受护甲检定惩罚影响)/i)).toBeTruthy();
   });
 
