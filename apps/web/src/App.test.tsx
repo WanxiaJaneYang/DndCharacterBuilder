@@ -233,11 +233,22 @@ describe('wizard e2e-ish happy path', () => {
     expect(screen.getByRole('heading', { name: en.REVIEW_AC_TOUCH_LABEL })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_AC_FLAT_FOOTED_LABEL })).toBeTruthy();
     expect(screen.getByRole('heading', { name: en.REVIEW_PACK_INFO })).toBeTruthy();
+    const reviewSkillsArticle = screen
+      .getByRole('heading', {
+        name: localizedPattern(en.REVIEW_SKILLS_BREAKDOWN, zh.REVIEW_SKILLS_BREAKDOWN),
+      })
+      .closest('article');
+    expect(reviewSkillsArticle).toBeTruthy();
     expect(screen.getAllByRole('columnheader', { name: en.REVIEW_BASE_COLUMN }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('columnheader', { name: en.REVIEW_ADJUSTMENTS_COLUMN }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('columnheader', { name: en.REVIEW_FINAL_COLUMN }).length).toBeGreaterThan(0);
+    expect(within(reviewSkillsArticle!).getByRole('columnheader', { name: en.REVIEW_RACIAL_COLUMN })).toBeTruthy();
     expect(screen.getAllByRole('columnheader', { name: en.REVIEW_MISC_COLUMN }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('columnheader', { name: en.REVIEW_ACP_COLUMN }).length).toBeGreaterThan(0);
+    expect(within(reviewSkillsArticle!).getByRole('columnheader', { name: en.REVIEW_POINT_COST_COLUMN })).toBeTruthy();
+    expect(within(reviewSkillsArticle!).queryByRole('columnheader', { name: en.SKILLS_TYPE_COLUMN })).toBeNull();
+    expect(within(reviewSkillsArticle!).queryByRole('columnheader', { name: en.SKILLS_POINTS_COLUMN })).toBeNull();
+    expect(within(reviewSkillsArticle!).queryByRole('columnheader', { name: en.SKILLS_NOTES_COLUMN })).toBeNull();
     expect(screen.getAllByText(/Chainmail/i).length).toBeGreaterThan(0);
     expect(screen.getByText(new RegExp(en.REVIEW_FINGERPRINT_LABEL, 'i'))).toBeTruthy();
     expect(document.body.textContent).toMatch(/[a-f0-9]{64}/);
@@ -269,6 +280,14 @@ describe('wizard e2e-ish happy path', () => {
       screen.getByRole('heading', {
         name: localizedPattern(en.REVIEW_RULES_DECISIONS, zh.REVIEW_RULES_DECISIONS),
       }),
+    ).toBeTruthy();
+    expect(
+      screen.getByText(
+        new RegExp(
+          `${escapeRegExp(en.REVIEW_POINTS_SPENT_LABEL)}\\s+0\\s*/\\s*8\\s*\\(\\s*8\\s*${escapeRegExp(en.REVIEW_REMAINING_LABEL)}\\s*\\)|${escapeRegExp(zh.REVIEW_POINTS_SPENT_LABEL)}\\s+0\\s*/\\s*8\\s*\\(\\s*8\\s*${escapeRegExp(zh.REVIEW_REMAINING_LABEL)}\\s*\\)`,
+          'i',
+        ),
+      ),
     ).toBeTruthy();
     expect(
       screen.getByText(
@@ -312,7 +331,7 @@ describe('wizard e2e-ish happy path', () => {
     await reachReviewStep(user, { raceLabel: elfLabelPattern, characterName: 'Elaith' });
 
     const listenRow = screen.getByRole('row', { name: listenSkillPattern });
-    expect(within(listenRow).getByText(/Racial\s+\+2/i)).toBeTruthy();
+    expect(within(listenRow).getByText(/^\+2$/)).toBeTruthy();
   });
 
   it('preserves size and speed details in the identity and progression card', async () => {

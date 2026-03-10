@@ -1029,8 +1029,8 @@ export function App() {
           <article className="sheet">
             <h3>{t.REVIEW_SKILLS_BREAKDOWN}</h3>
             <p>
-              {t.SKILLS_BUDGET_LABEL}: {skillBudget.total} | {t.SKILLS_SPENT_LABEL}:{" "}
-              {skillBudget.spent} | {t.SKILLS_REMAINING_LABEL}: {skillBudget.remaining}
+              {t.REVIEW_POINTS_SPENT_LABEL} {skillBudget.spent} / {skillBudget.total} (
+              {skillBudget.remaining} {t.REVIEW_REMAINING_LABEL})
             </p>
             <table className="review-table">
               <caption className="sr-only">
@@ -1039,14 +1039,13 @@ export function App() {
               <thead>
                 <tr>
                   <th>{t.REVIEW_SKILL_COLUMN}</th>
-                  <th>{t.SKILLS_TYPE_COLUMN}</th>
-                  <th>{t.SKILLS_POINTS_COLUMN}</th>
                   <th>{t.REVIEW_RANKS_COLUMN}</th>
                   <th>{t.REVIEW_ABILITY_COLUMN}</th>
+                  <th>{t.REVIEW_RACIAL_COLUMN}</th>
                   <th>{t.REVIEW_MISC_COLUMN}</th>
                   <th>{t.REVIEW_ACP_COLUMN}</th>
                   <th>{t.REVIEW_TOTAL_COLUMN}</th>
-                  <th>{t.SKILLS_NOTES_COLUMN}</th>
+                  <th>{t.REVIEW_POINT_COST_COLUMN}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1060,34 +1059,18 @@ export function App() {
                         skill.name,
                       )}
                     </td>
-                    <td>
-                      {skill.classSkill ? t.SKILLS_CLASS_LABEL : t.SKILLS_CROSS_LABEL}
-                    </td>
-                    <td>
-                      {skill.costPerRank}
-                      {t.SKILLS_PER_RANK_UNIT}
-                    </td>
                     <td>{formatSkillValue(skill.ranks)}</td>
                     <td>
                       {formatSigned(skill.abilityMod)} (
                       {localizeAbilityLabel(skill.abilityKey)})
                     </td>
+                    <td>{formatSigned(skill.racialBonus)}</td>
                     <td>{formatSigned(skill.misc)}</td>
                     <td>{formatSigned(skill.acp)}</td>
                     <td>{formatSkillValue(skill.total)}</td>
                     <td>
-                      <div>
-                        {t.SKILLS_MAX_LABEL} {formatSkillValue(skill.maxRanks)}
-                      </div>
-                      <div>
-                        {t.SKILLS_RACIAL_LABEL} {skill.racialBonus >= 0 ? "+" : ""}
-                        {formatSkillValue(skill.racialBonus)}
-                      </div>
-                      <div>
-                        {skill.acpApplied
-                          ? t.SKILLS_ACP_APPLIES_LABEL
-                          : t.SKILLS_ACP_NOT_APPLICABLE_LABEL}
-                      </div>
+                      {formatSkillValue(skill.costSpent)} ({skill.costPerRank}
+                      {t.REVIEW_PER_RANK_UNIT})
                     </td>
                   </tr>
                 ))}
