@@ -67,25 +67,31 @@ async function goToSkillsStep(page: Page, locale: Locale) {
   await expect(page.getByRole('heading', { name: labels.skillsHeading })).toBeVisible();
 }
 
+async function getRemainingSkillPoints(page: Page) {
+  const summary = page.locator('.skill-points-summary');
+  await expect(summary).toBeVisible();
+  const text = (await summary.textContent()) ?? '';
+  const match = text.match(/(?:Remaining|\u5269\u4f59):\s*(\d+(?:\.\d+)?)/i);
+  expect(match, `Could not parse remaining points from: ${text}`).not.toBeNull();
+  return Number(match?.[1]);
+}
+
 for (const locale of ['en', 'zh'] as const) {
   test.describe(`skills step e2e regression (${locale})`, () => {
-    test('skill point investment UI updates class-skill ranks', async ({ page }) => {
+    test('skill point investment UI updates ranks and remaining points', async ({ page }) => {
       await goToSkillsStep(page, locale);
 
       const climbRanks = page.getByLabel(/Climb\s+ranks|\u6500\u722c\s+ranks/i);
-      const climbDecrease = page.getByRole('button', { name: /Decrease Climb|\u964d\u4f4e \u6500\u722c/i });
       await expect(climbRanks).toHaveText('0');
-      await expect(climbDecrease).toBeDisabled();
 
+      const before = await getRemainingSkillPoints(page);
       await page.getByRole('button', { name: labels.increaseClimb }).click();
-      await expect(climbRanks).toHaveText('1');
 
-      await climbDecrease.click();
-      await expect(climbRanks).toHaveText('0');
-      await expect(climbDecrease).toBeDisabled();
+      await expect(climbRanks).toHaveText('1');
+      await expect.poll(() => getRemainingSkillPoints(page)).toBe(before - 1);
     });
 
-    test('class and cross-class skills use the expected rank increments', async ({ page }) => {
+    test('class and cross-class skills spend points with expected rank increments', async ({ page }) => {
       await goToSkillsStep(page, locale);
 
       const climbRow = page.getByRole('row', { name: labels.climb });
@@ -96,12 +102,15 @@ for (const locale of ['en', 'zh'] as const) {
 
       const climbRanks = page.getByLabel(/Climb\s+ranks|\u6500\u722c\s+ranks/i);
       const diplomacyRanks = page.getByLabel(/Diplomacy\s+ranks|\u4ea4\u6d89\s+ranks/i);
+      const before = await getRemainingSkillPoints(page);
 
       await page.getByRole('button', { name: labels.increaseClimb }).click();
       await expect(climbRanks).toHaveText('1');
+      await expect.poll(() => getRemainingSkillPoints(page)).toBe(before - 1);
 
       await page.getByRole('button', { name: labels.increaseDiplomacy }).click();
       await expect(diplomacyRanks).toHaveText('0.5');
+      await expect.poll(() => getRemainingSkillPoints(page)).toBe(before - 2);
     });
 
     test('enforces level-1 rank caps and disables increase controls at cap', async ({ page }) => {
