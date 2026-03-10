@@ -267,6 +267,15 @@ export interface SheetViewModel {
     >;
   };
   review: {
+    identity: {
+      level: number;
+      xp: number;
+      size: string;
+      speed: {
+        base: number;
+        adjusted: number;
+      };
+    };
     hp: {
       total: number;
       breakdown: {
@@ -276,7 +285,33 @@ export interface SheetViewModel {
       };
     };
     initiative: { total: number; dex: number; misc: number };
+    bab: number;
     grapple: { total: number; bab: number; str: number; size: number; misc: number };
+    speed: {
+      base: number;
+      adjusted: number;
+    };
+    equipmentLoad: {
+      selectedItems: string[];
+      totalWeight: number;
+      loadCategory: "light" | "medium" | "heavy";
+      reducesSpeed: boolean;
+    };
+    movement: {
+      base: number;
+      adjusted: number;
+      reducedByArmorOrLoad: boolean;
+    };
+    rulesDecisions: {
+      featSelectionLimit: number;
+      favoredClass: string | null;
+      ignoresMulticlassXpPenalty: boolean;
+    };
+    skillBudget: {
+      total: number;
+      spent: number;
+      remaining: number;
+    };
     saves: {
       fort: { total: number; base: number; ability: number; misc: number };
       ref: { total: number; base: number; ability: number; misc: number };
@@ -288,8 +323,13 @@ export interface SheetViewModel {
     id: string;
     name: string;
     ranks: number;
+    classSkill: boolean;
     abilityKey: AbilityKey;
     abilityMod: number;
+    costPerRank: number;
+    costSpent: number;
+    maxRanks: number;
+    racialBonus: number;
     misc: number;
     acp: number;
     acpApplied: boolean;
@@ -368,17 +408,17 @@ export interface Phase2Sheet {
     acpApplied: boolean;
     total: number;
   }>;
-  equipment: {
-    selectedItems: string[];
-    totalWeight: number;
-    loadCategory: "light" | "medium" | "heavy";
-    speedImpact: string;
-  };
-  movement: {
-    base: number;
-    adjusted: number;
-    notes: string[];
-  };
+    equipment: {
+      selectedItems: string[];
+      totalWeight: number;
+      loadCategory: "light" | "medium" | "heavy";
+      reducesSpeed: boolean;
+    };
+    movement: {
+      base: number;
+      adjusted: number;
+      reducedByArmorOrLoad: boolean;
+    };
 }
 
 export interface CharacterSheet {
@@ -2105,6 +2145,8 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
       };
     });
   const adjustedSpeed = Number(sheet.stats.speed ?? DEFAULT_STATS.speed);
+  const baseSpeed = Number(selectedRace?.data?.baseSpeed ?? DEFAULT_STATS.speed);
+  const reducesSpeed = adjustedSpeed < baseSpeed;
   const phase2: Phase2Sheet = {
     feats: phase2Feats,
     traits: raceTraits,
@@ -2113,16 +2155,12 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
       selectedItems: selectedEquipment,
       totalWeight,
       loadCategory,
-      speedImpact: adjustedSpeed < Number(selectedRace?.data?.baseSpeed ?? DEFAULT_STATS.speed)
-        ? `Reduced to ${adjustedSpeed} ft.`
-        : "No speed reduction"
+      reducesSpeed
     },
     movement: {
-      base: Number(selectedRace?.data?.baseSpeed ?? DEFAULT_STATS.speed),
+      base: baseSpeed,
       adjusted: adjustedSpeed,
-      notes: adjustedSpeed < Number(selectedRace?.data?.baseSpeed ?? DEFAULT_STATS.speed)
-        ? ["Armor or load reduces movement speed."]
-        : ["No movement penalty detected."]
+      reducedByArmorOrLoad: reducesSpeed
     }
   };
   const unresolvedRules = collectUnresolvedRules(state, context);
@@ -2217,9 +2255,29 @@ export function buildSheetViewModel(
       attacks
     },
     review: {
+      identity: {
+        level: characterSheet.phase1.identity.level,
+        xp: characterSheet.phase1.identity.xp,
+        size: characterSheet.phase1.identity.size,
+        speed: characterSheet.phase1.identity.speed
+      },
       hp: characterSheet.phase1.combat.hp,
       initiative: characterSheet.phase1.combat.initiative,
+      bab: characterSheet.phase1.combat.grapple.bab,
       grapple: characterSheet.phase1.combat.grapple,
+      speed: characterSheet.phase1.identity.speed,
+      equipmentLoad: characterSheet.phase2.equipment,
+      movement: characterSheet.phase2.movement,
+      rulesDecisions: {
+        featSelectionLimit: characterSheet.decisions.featSelectionLimit,
+        favoredClass: characterSheet.decisions.favoredClass,
+        ignoresMulticlassXpPenalty: characterSheet.decisions.ignoresMulticlassXpPenalty
+      },
+      skillBudget: {
+        total: characterSheet.decisions.skillPoints.total,
+        spent: characterSheet.decisions.skillPoints.spent,
+        remaining: characterSheet.decisions.skillPoints.remaining
+      },
       saves: characterSheet.phase1.combat.saves,
       abilities: ABILITY_KEYS.reduce((result, ability) => {
         result[ability] = {
@@ -2235,8 +2293,13 @@ export function buildSheetViewModel(
         id: skill.id,
         name: skill.name,
         ranks: skill.ranks,
+        classSkill: detail?.classSkill ?? detail?.isClassSkill ?? false,
         abilityKey: detail?.ability ?? "str",
         abilityMod: skill.ability,
+        costPerRank: detail?.costPerRank ?? 1,
+        costSpent: detail?.costSpent ?? skill.ranks,
+        maxRanks: detail?.maxRanks ?? skill.ranks,
+        racialBonus: detail?.racialBonus ?? skill.racial,
         misc: skill.misc,
         acp: skill.acp,
         acpApplied: skill.acpApplied,

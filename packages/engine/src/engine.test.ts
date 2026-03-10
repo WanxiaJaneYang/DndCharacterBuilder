@@ -96,9 +96,14 @@ describe("sheetViewModel", () => {
         {
           id: "climb",
           name: "Climb",
+          classSkill: true,
           ranks: 1,
+          maxRanks: 4,
+          costPerRank: 1,
+          costSpent: 1,
           abilityKey: "str",
           abilityMod: 3,
+          racialBonus: 0,
           misc: 0,
           acp: -7,
           acpApplied: true,
@@ -107,14 +112,26 @@ describe("sheetViewModel", () => {
         expect.objectContaining({
           id: "listen",
           name: "Listen",
+          classSkill: false,
           abilityKey: "wis",
+          costPerRank: 2,
+          racialBonus: 0,
           abilityMod: 0,
           acp: 0,
           acpApplied: false
         })
       ])
     );
-    expect(sheet.sheetViewModel.review).toEqual({
+    expect(sheet.sheetViewModel.review).toMatchObject({
+      identity: {
+        level: 1,
+        xp: 0,
+        size: "medium",
+        speed: {
+          base: 30,
+          adjusted: 20
+        }
+      },
       hp: {
         total: 12,
         breakdown: {
@@ -128,6 +145,7 @@ describe("sheetViewModel", () => {
         dex: 1,
         misc: 0
       },
+      bab: 1,
       grapple: {
         total: 4,
         bab: 1,
@@ -162,7 +180,112 @@ describe("sheetViewModel", () => {
         int: { score: 10, mod: 0 },
         wis: { score: 10, mod: 0 },
         cha: { score: 8, mod: -1 }
+      },
+      speed: {
+        base: 30,
+        adjusted: 20
+      },
+      skillBudget: {
+        total: 12,
+        spent: 1,
+        remaining: 11
+      },
+      rulesDecisions: {
+        favoredClass: "any",
+        ignoresMulticlassXpPenalty: true,
+        featSelectionLimit: 3
+      },
+      equipmentLoad: {
+        selectedItems: expect.arrayContaining([
+          "longsword",
+          "chainmail",
+          "heavy-wooden-shield"
+        ]),
+        totalWeight: 54,
+        loadCategory: "light",
+        reducesSpeed: true
+      },
+      movement: {
+        base: 30,
+        adjusted: 20,
+        reducedByArmorOrLoad: true
       }
+    });
+  });
+
+  it("includes review context and skill budget metadata needed by the UI", () => {
+    let state = applyChoice(initialState, "name", "Aric");
+    state = applyChoice(state, "abilities", {
+      str: 16,
+      dex: 12,
+      con: 14,
+      int: 10,
+      wis: 10,
+      cha: 8
+    });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { climb: 4, jump: 3, diplomacy: 0.5 }, context);
+    state = applyChoice(state, "equipment", ["longsword", "chainmail", "heavy-wooden-shield"], context);
+
+    const sheet = finalizeCharacter(state, context);
+    const climb = sheet.sheetViewModel.skills.find((skill) => skill.id === "climb");
+    const diplomacy = sheet.sheetViewModel.skills.find((skill) => skill.id === "diplomacy");
+
+    expect(sheet.sheetViewModel.review).toMatchObject({
+      identity: {
+        level: 1,
+        xp: 0,
+        size: "medium",
+        speed: {
+          base: 30,
+          adjusted: 20
+        }
+      },
+      bab: 1,
+      speed: {
+        base: 30,
+        adjusted: 20
+      },
+      equipmentLoad: {
+        selectedItems: expect.arrayContaining([
+          "longsword",
+          "chainmail",
+          "heavy-wooden-shield"
+        ]),
+        totalWeight: 54,
+        loadCategory: "light",
+        reducesSpeed: true
+      },
+      movement: {
+        base: 30,
+        adjusted: 20,
+        reducedByArmorOrLoad: true
+      },
+      rulesDecisions: {
+        featSelectionLimit: 3,
+        favoredClass: "any",
+        ignoresMulticlassXpPenalty: true
+      },
+      skillBudget: {
+        total: 12,
+        spent: 8,
+        remaining: 4
+      }
+    });
+    expect(climb).toMatchObject({
+      classSkill: true,
+      costPerRank: 1,
+      costSpent: 4,
+      maxRanks: 4,
+      racialBonus: 0
+    });
+    expect(diplomacy).toMatchObject({
+      classSkill: false,
+      costPerRank: 2,
+      costSpent: 1,
+      maxRanks: 2,
+      racialBonus: 0
     });
   });
 
@@ -2254,6 +2377,15 @@ describe("compute() contract", () => {
     expect(sheetSchemaVersion).toBe("0.1");
     expect(result.sheetViewModel.data.combat.ac.total).toBe(18);
     expect(result.sheetViewModel.data.review).toMatchObject({
+      identity: {
+        level: 1,
+        xp: 0,
+        size: "medium",
+        speed: {
+          base: 30,
+          adjusted: 20
+        }
+      },
       hp: {
         total: 12,
         breakdown: {
@@ -2267,6 +2399,7 @@ describe("compute() contract", () => {
         dex: 1,
         misc: 0
       },
+      bab: 1,
       grapple: {
         total: 4,
         bab: 1,
@@ -2301,11 +2434,134 @@ describe("compute() contract", () => {
         int: { score: 10, mod: 0 },
         wis: { score: 10, mod: 0 },
         cha: { score: 8, mod: -1 }
+      },
+      speed: {
+        base: 30,
+        adjusted: 20
+      },
+      skillBudget: {
+        total: 12,
+        spent: 8,
+        remaining: 4
+      },
+      rulesDecisions: {
+        favoredClass: "any",
+        ignoresMulticlassXpPenalty: true,
+        featSelectionLimit: 3
+      },
+      equipmentLoad: {
+        selectedItems: expect.arrayContaining([
+          "longsword",
+          "chainmail",
+          "heavy-wooden-shield"
+        ]),
+        totalWeight: 54,
+        loadCategory: "light",
+        reducesSpeed: true
+      },
+      movement: {
+        base: 30,
+        adjusted: 20,
+        reducedByArmorOrLoad: true
       }
     });
+    expect(result.sheetViewModel.data.skills).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "climb",
+          classSkill: true,
+          maxRanks: 4,
+          costPerRank: 1,
+          costSpent: 4,
+          racialBonus: 0
+        }),
+        expect.objectContaining({
+          id: "diplomacy",
+          classSkill: false,
+          maxRanks: 2,
+          costPerRank: 2,
+          costSpent: 1,
+          racialBonus: 0
+        })
+      ])
+    );
     expect(result.validationIssues).toEqual([]);
     expect(result.unresolved).toEqual(expect.any(Array));
     expect(result.assumptions).toEqual(expect.any(Array));
+  });
+
+  it("projects review context and skill metadata through the public ComputeResult contract", () => {
+    const result = compute(
+      {
+        meta: { name: "Aric", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+        skillRanks: { climb: 4, jump: 3, diplomacy: 0.5 },
+        featIds: ["power-attack"],
+        equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    const climb = result.sheetViewModel.data.skills.find((skill) => skill.id === "climb");
+    const diplomacy = result.sheetViewModel.data.skills.find((skill) => skill.id === "diplomacy");
+
+    expect(result.sheetViewModel.data.review).toMatchObject({
+      identity: {
+        level: 1,
+        xp: 0,
+        size: "medium",
+        speed: {
+          base: 30,
+          adjusted: 20
+        }
+      },
+      bab: 1,
+      speed: {
+        base: 30,
+        adjusted: 20
+      },
+      equipmentLoad: {
+        selectedItems: expect.arrayContaining([
+          "longsword",
+          "chainmail",
+          "heavy-wooden-shield"
+        ]),
+        totalWeight: 54,
+        loadCategory: "light",
+        reducesSpeed: true
+      },
+      movement: {
+        base: 30,
+        adjusted: 20,
+        reducedByArmorOrLoad: true
+      },
+      rulesDecisions: {
+        featSelectionLimit: 3,
+        favoredClass: "any",
+        ignoresMulticlassXpPenalty: true
+      },
+      skillBudget: {
+        total: 12,
+        spent: 8,
+        remaining: 4
+      }
+    });
+    expect(climb).toMatchObject({
+      classSkill: true,
+      costPerRank: 1,
+      costSpent: 4,
+      maxRanks: 4,
+      racialBonus: 0
+    });
+    expect(diplomacy).toMatchObject({
+      classSkill: false,
+      costPerRank: 2,
+      costSpent: 1,
+      maxRanks: 2,
+      racialBonus: 0
+    });
   });
 
   it("maps validation paths to CharacterSpec fields and records normalization assumptions", () => {
@@ -2442,9 +2698,14 @@ describe("compute() contract", () => {
             "abilityMod": 3,
             "acp": -7,
             "acpApplied": true,
+            "classSkill": true,
+            "costPerRank": 1,
+            "costSpent": 4,
             "id": "climb",
+            "maxRanks": 4,
             "misc": 0,
             "name": "Climb",
+            "racialBonus": 0,
             "ranks": 4,
             "total": 0,
           },
@@ -2453,9 +2714,14 @@ describe("compute() contract", () => {
             "abilityMod": -1,
             "acp": 0,
             "acpApplied": false,
+            "classSkill": false,
+            "costPerRank": 2,
+            "costSpent": 1,
             "id": "diplomacy",
+            "maxRanks": 2,
             "misc": 0,
             "name": "Diplomacy",
+            "racialBonus": 0,
             "ranks": 0.5,
             "total": -0.5,
           },
@@ -2464,9 +2730,14 @@ describe("compute() contract", () => {
             "abilityMod": 3,
             "acp": -7,
             "acpApplied": true,
+            "classSkill": true,
+            "costPerRank": 1,
+            "costSpent": 3,
             "id": "jump",
+            "maxRanks": 4,
             "misc": 0,
             "name": "Jump",
+            "racialBonus": 0,
             "ranks": 3,
             "total": -1,
           },
@@ -2498,6 +2769,17 @@ describe("compute() contract", () => {
               "score": 10,
             },
           },
+          "bab": 1,
+          "equipmentLoad": {
+            "loadCategory": "light",
+            "reducesSpeed": true,
+            "selectedItems": [
+              "chainmail",
+              "heavy-wooden-shield",
+              "longsword",
+            ],
+            "totalWeight": 54,
+          },
           "grapple": {
             "bab": 1,
             "misc": 0,
@@ -2513,10 +2795,29 @@ describe("compute() contract", () => {
             },
             "total": 12,
           },
+          "identity": {
+            "level": 1,
+            "size": "medium",
+            "speed": {
+              "adjusted": 20,
+              "base": 30,
+            },
+            "xp": 0,
+          },
           "initiative": {
             "dex": 1,
             "misc": 0,
             "total": 1,
+          },
+          "movement": {
+            "adjusted": 20,
+            "base": 30,
+            "reducedByArmorOrLoad": true,
+          },
+          "rulesDecisions": {
+            "favoredClass": "any",
+            "featSelectionLimit": 3,
+            "ignoresMulticlassXpPenalty": true,
           },
           "saves": {
             "fort": {
@@ -2537,6 +2838,15 @@ describe("compute() contract", () => {
               "misc": 0,
               "total": 0,
             },
+          },
+          "skillBudget": {
+            "remaining": 4,
+            "spent": 8,
+            "total": 12,
+          },
+          "speed": {
+            "adjusted": 20,
+            "base": 30,
           },
         },
         "schemaVersion": "0.1",
