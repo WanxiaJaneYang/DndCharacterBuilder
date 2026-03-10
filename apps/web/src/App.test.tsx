@@ -41,6 +41,7 @@ const raceHeadingPattern = /^(?:Race|\u79cd\u65cf)$/;
 const climbSkillPattern = /(?:Climb|\u6500\u722c)/i;
 const jumpSkillPattern = /(?:Jump|\u8df3\u8dc3)/i;
 const diplomacySkillPattern = /(?:Diplomacy|\u4ea4\u6d89)/i;
+const listenSkillPattern = /(?:Listen|\u4fa6\u542c)/i;
 const abilityGenerationPattern = localizedPattern(
   en.ABILITY_GENERATION_LABEL,
   zh.ABILITY_GENERATION_LABEL,
@@ -145,6 +146,41 @@ async function reachSkillsStep(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: nextPattern }));
 }
 
+async function reachReviewStep(
+  user: ReturnType<typeof userEvent.setup>,
+  options?: {
+    raceLabel?: RegExp;
+    characterName?: string;
+    equipmentLabels?: string[];
+  },
+) {
+  await user.click(screen.getByRole('button', { name: playerNamePattern }));
+  await user.click(screen.getByRole('button', { name: startWizardPattern }));
+  await user.click(screen.getByLabelText(options?.raceLabel ?? humanLabelPattern));
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+  await user.click(screen.getByLabelText(fighterLabelPattern));
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+
+  const strInput = screen.getByLabelText('STR');
+  await user.clear(strInput);
+  await user.type(strInput, '16');
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+  await user.click(screen.getByLabelText(/Power Attack|\u5f3a\u529b\u653b\u51fb/i));
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+
+  for (const equipmentLabel of options?.equipmentLabels ?? []) {
+    await user.click(screen.getByLabelText(new RegExp(equipmentLabel, 'i')));
+  }
+
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+  await user.type(
+    screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i')),
+    options?.characterName ?? 'Aric',
+  );
+  await user.click(screen.getByRole('button', { name: nextPattern }));
+}
+
 describe('wizard e2e-ish happy path', () => {
   it('lets user complete flow and see final stats', async () => {
     const user = userEvent.setup();
@@ -201,6 +237,20 @@ describe('wizard e2e-ish happy path', () => {
         name: localizedPattern(en.REVIEW_MOVEMENT_DETAIL, zh.REVIEW_MOVEMENT_DETAIL),
       }),
     ).toBeTruthy();
+    const movementArticle = screen
+      .getByRole('heading', {
+        name: localizedPattern(en.REVIEW_MOVEMENT_DETAIL, zh.REVIEW_MOVEMENT_DETAIL),
+      })
+      .closest('article');
+    expect(movementArticle).toBeTruthy();
+    expect(
+      within(movementArticle!).queryByText(
+        new RegExp(
+          `${escapeRegExp(en.REVIEW_BAB_LABEL)}:|${escapeRegExp(zh.REVIEW_BAB_LABEL)}:`,
+          'i',
+        ),
+      ),
+    ).toBeNull();
     expect(
       screen.getByRole('heading', {
         name: localizedPattern(en.REVIEW_RULES_DECISIONS, zh.REVIEW_RULES_DECISIONS),
@@ -222,14 +272,6 @@ describe('wizard e2e-ish happy path', () => {
         ),
       ),
     ).toBeTruthy();
-    expect(
-      screen.getByText(
-        new RegExp(
-          `${escapeRegExp(en.REVIEW_BAB_LABEL)}:\\s*1|${escapeRegExp(zh.REVIEW_BAB_LABEL)}:\\s*1`,
-          'i',
-        ),
-      ),
-    ).toBeTruthy();
   });
 
   it('renders review skill rows with a closed ability label parenthesis', async () => {
@@ -247,6 +289,57 @@ describe('wizard e2e-ish happy path', () => {
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
     expect(screen.getByText(/\(\s*(?:STR|\u529b\u91cf)\s*\)/i)).toBeTruthy();
+  });
+
+  it('keeps racial-bonus-only skills visible on the review sheet', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await reachReviewStep(user, { raceLabel: elfLabelPattern, characterName: 'Elaith' });
+
+    const listenRow = screen.getByRole('row', { name: listenSkillPattern });
+    expect(within(listenRow).getByText(/Racial\s+\+2/i)).toBeTruthy();
+  });
+
+  it('preserves size and speed details in the identity and progression card', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await reachReviewStep(user, {
+      characterName: 'Aric',
+      equipmentLabels: ['Chainmail', 'Heavy Wooden Shield'],
+    });
+
+    const identityCard = screen
+      .getByRole('heading', {
+        name: localizedPattern(en.REVIEW_IDENTITY_PROGRESSION, zh.REVIEW_IDENTITY_PROGRESSION),
+      })
+      .closest('article');
+    expect(identityCard).toBeTruthy();
+    expect(
+      within(identityCard!).getByText(
+        new RegExp(
+          `${escapeRegExp(en.REVIEW_SIZE_LABEL)}:\\s*medium|${escapeRegExp(zh.REVIEW_SIZE_LABEL)}:\\s*medium`,
+          'i',
+        ),
+      ),
+    ).toBeTruthy();
+    expect(
+      within(identityCard!).getByText(
+        new RegExp(
+          `${escapeRegExp(en.REVIEW_SPEED_BASE_LABEL)}:\\s*30|${escapeRegExp(zh.REVIEW_SPEED_BASE_LABEL)}:\\s*30`,
+          'i',
+        ),
+      ),
+    ).toBeTruthy();
+    expect(
+      within(identityCard!).getByText(
+        new RegExp(
+          `${escapeRegExp(en.REVIEW_SPEED_ADJUSTED_LABEL)}:\\s*20|${escapeRegExp(zh.REVIEW_SPEED_ADJUSTED_LABEL)}:\\s*20`,
+          'i',
+        ),
+      ),
+    ).toBeTruthy();
   });
 
   it('renders skills-step metadata for legal allocation controls', async () => {
@@ -792,6 +885,4 @@ describe('role and language behavior', () => {
     });
   });
 });
-
-
 

@@ -707,7 +707,7 @@ export function App() {
           >)
         : [];
       const reviewSkills = computeResult.sheetViewModel.data.skills
-        .filter((skill) => skill.ranks > 0)
+        .filter((skill) => skill.ranks > 0 || skill.racialBonus !== 0)
         .sort((a, b) => {
           const left = localizeEntityText("skills", a.id, "name", a.name);
           const right = localizeEntityText("skills", b.id, "name", b.name);
@@ -746,6 +746,15 @@ export function App() {
             </p>
             <p>
               {t.REVIEW_XP_LABEL}: {reviewData.identity.xp}
+            </p>
+            <p>
+              {t.REVIEW_SIZE_LABEL}: {reviewData.identity.size}
+            </p>
+            <p>
+              {t.REVIEW_SPEED_BASE_LABEL}: {reviewData.identity.speed.base}
+            </p>
+            <p>
+              {t.REVIEW_SPEED_ADJUSTED_LABEL}: {reviewData.identity.speed.adjusted}
             </p>
           </article>
 
@@ -1112,9 +1121,6 @@ export function App() {
 
           <article className="sheet">
             <h3>{t.REVIEW_MOVEMENT_DETAIL}</h3>
-            <p>
-              {t.REVIEW_BAB_LABEL}: {reviewData.bab}
-            </p>
             <p>
               {t.REVIEW_SPEED_BASE_LABEL}: {reviewData.speed.base}
             </p>
@@ -1546,7 +1552,7 @@ export function App() {
       return (
         <section>
           <h2>{currentStep.label}</h2>
-          <p>
+          <p className="skill-points-summary">
             {t.SKILLS_BUDGET_LABEL}: {skillBudget.total} | {t.SKILLS_SPENT_LABEL}:{" "}
             {skillBudget.spent} | {t.SKILLS_REMAINING_LABEL}: {skillBudget.remaining}
           </p>
