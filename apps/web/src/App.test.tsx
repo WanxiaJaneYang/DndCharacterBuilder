@@ -182,6 +182,42 @@ async function reachReviewStep(
 }
 
 describe('wizard e2e-ish happy path', () => {
+  it('renders schema-driven race, class, and metadata pages when the flow references page schemas', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+
+    await screen.findByLabelText(humanLabelPattern);
+    const racePage = document.querySelector('[data-page-schema-id="character.race"]');
+    expect(racePage).toBeTruthy();
+    expect(screen.getByLabelText(humanLabelPattern)).toBeTruthy();
+
+    await user.click(screen.getByLabelText(humanLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    await screen.findByLabelText(fighterLabelPattern);
+    const classPage = document.querySelector('[data-page-schema-id="character.class"]');
+    expect(classPage).toBeTruthy();
+    expect(screen.getByLabelText(fighterLabelPattern)).toBeTruthy();
+
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    const featFieldset = screen.getByRole('group', { name: /(?:Feat|\u4e13\u957f)/i });
+    const featChoices = within(featFieldset).getAllByRole('checkbox');
+    await user.click(featChoices[0]!);
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    await screen.findByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i'));
+    const namePage = document.querySelector('[data-page-schema-id="character.name"]');
+    expect(namePage).toBeTruthy();
+    expect(screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i'))).toBeTruthy();
+  });
+
   it('lets user complete flow and see final stats', async () => {
     const user = userEvent.setup();
     render(<App />);

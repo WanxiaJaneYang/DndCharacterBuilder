@@ -1,0 +1,15 @@
+{
+  "id": "character.name",
+  "root": {
+    "id": "metadata-root",
+    "componentId": "layout.singleColumn",
+    "children": [
+      {
+        "id": "metadata-name-field",
+        "componentId": "metadata.nameField",
+        "slot": "main",
+        "dataSource": "page.metadataName"
+      }
+    ]
+  }
+}
