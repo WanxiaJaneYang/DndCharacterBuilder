@@ -446,9 +446,18 @@ function sanitizeStateForComputeOutput(
   let nextState: CharacterState | undefined;
   const assumptions: ComputeResultAssumptionEntry[] = [];
 
+  const toFiniteNumber = (value: unknown): number => {
+    try {
+      const numeric = Number(value);
+      return Number.isFinite(numeric) ? numeric : Number.NaN;
+    } catch {
+      return Number.NaN;
+    }
+  };
+
   for (const ability of ABILITY_KEYS) {
     const score = state.abilities[ability];
-    const numericScore = Number(score);
+    const numericScore = toFiniteNumber(score);
 
     if (Number.isFinite(numericScore)) {
       if (typeof score === "number") continue;
@@ -511,9 +520,12 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
     resolvedData: rulepack.resolvedData,
     enabledPackIds: rulepack.enabledPackIds ?? normalizedSpec.meta.sourceIds
   };
+  const sanitized = sanitizeStateForComputeOutput(state);
+
+  assumptions.push(...sanitized.assumptions);
 
   validationIssues.push(
-    ...validateState(state, context, { allowFlowDefaultAbilityMode: false }).map((issue) => ({
+    ...validateState(sanitized.state, context, { allowFlowDefaultAbilityMode: false }).map((issue) => ({
       code: issue.code,
       severity: "error" as const,
       message: issue.message,
@@ -522,9 +534,6 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
         : {})
     }))
   );
-
-  const sanitized = sanitizeStateForComputeOutput(state);
-  assumptions.push(...sanitized.assumptions);
 
   const sheet = finalizeCharacter(sanitized.state, context);
   const unresolved: ComputeResultUnresolvedEntry[] = sheet.unresolvedRules.map((entry) => ({

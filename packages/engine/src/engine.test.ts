@@ -2677,6 +2677,41 @@ describe("compute() contract", () => {
     );
   });
 
+  it("defaults malformed ability values that throw on numeric coercion without crashing compute", () => {
+    const malformedSpec = {
+      meta: { name: "Symbol Ability", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: { str: Symbol("18"), dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      featIds: ["power-attack"],
+      skillRanks: { climb: 4 }
+    } as unknown as Parameters<typeof compute>[0];
+
+    const result = compute(malformedSpec, {
+      resolvedData: context.resolvedData,
+      enabledPackIds: context.enabledPackIds
+    });
+
+    expect(result.validationIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITIES_INVALID",
+          path: "abilities.str"
+        })
+      ])
+    );
+    expect(result.sheetViewModel.data.review.abilities.str).toEqual({ score: 10, mod: 0 });
+    expect(result.assumptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITY_DEFAULTED",
+          path: "abilities.str",
+          defaultUsed: 10
+        })
+      ])
+    );
+  });
+
   it("maps validation paths to CharacterSpec fields and records normalization assumptions", () => {
     const result = compute(
       {
