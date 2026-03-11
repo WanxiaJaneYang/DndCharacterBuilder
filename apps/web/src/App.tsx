@@ -25,11 +25,20 @@ import {
 } from "./uiText";
 import { resolveSpecializedSkillLabel } from "./localization";
 import { characterSpecFromState } from "./characterSpecFromState";
+import { createAbilityModeSelectorHandlers } from "./createAbilityModeSelectorHandlers";
+import { buildAbilitiesAllocatorPageData } from "./pageComposer/buildAbilitiesAllocatorPageData";
+import { buildReviewSheetPageData } from "./pageComposer/buildReviewSheetPageData";
+import { buildSkillsAllocatorPageData } from "./pageComposer/buildSkillsAllocatorPageData";
+import type {
+  AbilityMode,
+} from "./pageComposer/pageDataBuilders";
+import {
+  buildEntityTypeSingleSelectData,
+  buildMetadataNameFieldData,
+  getUITextValue,
+} from "./pageComposer/pageDataBuilders";
 import {
   PageComposer,
-  type AbilityAllocatorData,
-  type ReviewSheetData,
-  type SkillsAllocatorData,
 } from "./pageComposer/PageComposer";
 
 const embeddedPacks = [loadMinimalPack()];
@@ -40,7 +49,6 @@ const STEP_ID_SKILLS = "skills";
 const STEP_ID_ABILITIES = "abilities";
 const DEFAULT_EXPORT_NAME = "character";
 const ABILITY_ORDER = ["str", "dex", "con", "int", "wis", "cha"] as const;
-type AbilityMode = "pointBuy" | "phb" | "rollSets";
 type FlowStep = ReturnType<typeof resolveLoadedPacks>["flow"]["steps"][number];
 
 type AbilityStepConfig = {
@@ -485,6 +493,12 @@ export function App() {
     selectedAbilityMode && isAbilityMode(selectedAbilityMode)
       ? selectedAbilityMode
       : (abilityModes[0] ?? "");
+  const activeAbilityModeHint = selectedAbilityMode
+    ? getUITextValue(
+        t,
+        abilityPresentation?.modeUi?.[selectedAbilityMode]?.hintKey,
+      ) ?? ""
+    : "";
   const rollSetsConfig = abilityStepConfig?.rollSets;
   const generatedRollSets = Array.isArray(abilityMeta.rollSets?.generatedSets)
     ? abilityMeta.rollSets.generatedSets
@@ -663,6 +677,28 @@ export function App() {
     URL.revokeObjectURL(url);
   };
 
+  const handleAbilityModeChange = (mode: AbilityMode) => {
+    if (mode === "rollSets") {
+      const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets)
+        ? abilityMeta.rollSets.generatedSets
+        : [];
+      const generatedSets =
+        currentSets.length > 0 ? currentSets : generateRollSets(rollSetsConfig);
+      applyAbilitySelection(
+        { ...state.abilities },
+        {
+          mode,
+          rollSets: {
+            generatedSets,
+            selectedSetIndex: selectedRollSetIndex,
+          },
+        },
+      );
+      return;
+    }
+    applyAbilitySelection({ ...state.abilities }, { mode });
+  };
+
   useEffect(() => {
     if (
       currentStep?.kind !== "abilities" ||
@@ -693,543 +729,133 @@ export function App() {
       context.resolvedData.pageSchemas,
     );
     if (pageSchema) {
-        if (currentStep.kind === "review") {
-          const reviewCombat = combatData;
-          const abilityOrder = ["str", "dex", "con", "int", "wis", "cha"] as const;
-          const statOrder = [
-            "hp",
-            "ac",
-            "initiative",
-            "bab",
-            "fort",
-            "ref",
-            "will",
-          ] as const;
-          const statLabels: Record<(typeof statOrder)[number], string> = {
-            hp: t.REVIEW_HP_LABEL,
-            ac: t.REVIEW_AC_LABEL,
-            initiative: t.REVIEW_INITIATIVE_LABEL,
-            bab: t.REVIEW_BAB_LABEL,
-            fort: t.REVIEW_FORT_LABEL,
-            ref: t.REVIEW_REF_LABEL,
-            will: t.REVIEW_WILL_LABEL,
-          };
-          const statBaseDefaults: Record<(typeof statOrder)[number], number> = {
-            hp: DEFAULT_STATS.hp,
-            ac: DEFAULT_STATS.ac,
-            initiative: DEFAULT_STATS.initiative,
-            bab: DEFAULT_STATS.bab,
-            fort: DEFAULT_STATS.fort,
-            ref: DEFAULT_STATS.ref,
-            will: DEFAULT_STATS.will,
-          };
-          const formatSigned = (value: number) =>
-            `${value >= 0 ? "+" : ""}${value}`;
-          const formatSkillValue = (value: number) =>
-            `${Number.isInteger(value) ? value : value.toFixed(1)}`;
-          const formatSourceLabel = (packId: string, entityId: string) =>
-            sourceNameByEntityId.get(`${packId}:${entityId}`) ?? t.REVIEW_UNRESOLVED_LABEL;
-          const selectedRaceId = String(state.selections.race ?? "");
-          const selectedClassId = spec.class?.classId ?? String(state.selections.class ?? "");
-          const selectedRaceName = selectedRaceId
-            ? localizeEntityText(
-                "races",
-                selectedRaceId,
-                "name",
-                selectedRaceEntity?.name ?? t.REVIEW_UNRESOLVED_LABEL,
-              )
-            : t.REVIEW_UNRESOLVED_LABEL;
-          const selectedClassName = selectedClassId
-            ? localizeEntityText(
-                "classes",
-                selectedClassId,
-                "name",
-                selectedClassEntity?.name ?? t.REVIEW_UNRESOLVED_LABEL,
-              )
-            : t.REVIEW_UNRESOLVED_LABEL;
-          const finalStatValues = {
-            hp: reviewData.hp.total,
-            ac: reviewCombat.ac.total,
-            initiative: reviewData.initiative.total,
-            bab: reviewData.bab,
-            fort: reviewData.saves.fort.total,
-            ref: reviewData.saves.ref.total,
-            will: reviewData.saves.will.total,
-          } as const;
-          const racialTraits = Array.isArray(
-            getEntityDataRecord(selectedRaceEntity).racialTraits,
-          )
-            ? (getEntityDataRecord(selectedRaceEntity).racialTraits as Array<
-                Record<string, unknown>
-              >)
-            : [];
-          const reviewSkills = computeResult.sheetViewModel.data.skills
-            .filter((skill) => skill.ranks > 0 || skill.racialBonus !== 0)
-            .sort((a, b) => {
-              const left = localizeEntityText("skills", a.id, "name", a.name);
-              const right = localizeEntityText("skills", b.id, "name", b.name);
-              return b.total - a.total || left.localeCompare(right);
-            });
-          const enabledPackDetails = enabledPackIds.map((packId) => ({
-            packId,
-            version: packVersionById.get(packId) ?? t.REVIEW_UNKNOWN_VERSION,
-          }));
-          const skillBudget = reviewData.skillBudget;
-          const reviewSheetData: ReviewSheetData = {
-            t,
-            characterName: spec.meta.name || t.UNNAMED_CHARACTER,
-            selectedRaceName,
-            selectedClassName,
-            identityRows: [
-              { label: t.REVIEW_LEVEL_LABEL, value: reviewData.identity.level },
-              { label: t.REVIEW_XP_LABEL, value: reviewData.identity.xp },
-              { label: t.REVIEW_SIZE_LABEL, value: reviewData.identity.size },
-              { label: t.REVIEW_SPEED_BASE_LABEL, value: reviewData.identity.speed.base },
-              { label: t.REVIEW_SPEED_ADJUSTED_LABEL, value: reviewData.identity.speed.adjusted },
-            ],
-            statCards: [
-              { label: t.REVIEW_AC_LABEL, value: reviewCombat.ac.total },
-              { label: t.REVIEW_AC_TOUCH_LABEL, value: reviewCombat.ac.touch },
-              { label: t.REVIEW_AC_FLAT_FOOTED_LABEL, value: reviewCombat.ac.flatFooted },
-              { label: t.REVIEW_HP_LABEL, value: reviewData.hp.total },
-              { label: t.REVIEW_INITIATIVE_LABEL, value: reviewData.initiative.total },
-              { label: t.REVIEW_GRAPPLE_LABEL, value: reviewData.grapple.total },
-            ],
-            saveHpRows: [
-              {
-                label: t.REVIEW_FORT_LABEL,
-                base: reviewData.saves.fort.base,
-                ability: reviewData.saves.fort.ability,
-                adjustments: reviewData.saves.fort.misc,
-                final: reviewData.saves.fort.total,
-              },
-              {
-                label: t.REVIEW_REF_LABEL,
-                base: reviewData.saves.ref.base,
-                ability: reviewData.saves.ref.ability,
-                adjustments: reviewData.saves.ref.misc,
-                final: reviewData.saves.ref.total,
-              },
-              {
-                label: t.REVIEW_WILL_LABEL,
-                base: reviewData.saves.will.base,
-                ability: reviewData.saves.will.ability,
-                adjustments: reviewData.saves.will.misc,
-                final: reviewData.saves.will.total,
-              },
-              {
-                label: t.REVIEW_HP_LABEL,
-                base: reviewData.hp.breakdown.hitDie,
-                ability: reviewData.hp.breakdown.con,
-                adjustments: reviewData.hp.breakdown.misc,
-                final: reviewData.hp.total,
-              },
-            ],
-            attackRows: reviewCombat.attacks.map((attack) => ({
-              id: `${attack.category}-${attack.itemId}`,
-              typeLabel:
-                attack.category === "melee"
-                  ? t.REVIEW_ATTACK_MELEE_LABEL
-                  : t.REVIEW_ATTACK_RANGED_LABEL,
-              name: attack.name,
-              attackBonus: formatSigned(attack.attackBonus),
-              damage: attack.damageLine,
-              crit: attack.crit,
-              range: attack.category === "ranged" ? attack.range ?? "-" : "-",
-            })),
-            featSummary: selectedFeats.map((featId) => {
-              const feat = context.resolvedData.entities.feats?.[featId];
-              return {
-                id: featId,
-                name: feat?.name ?? featId,
-                description: feat?.summary ?? feat?.description ?? featId,
-              };
-            }),
-            traitSummary: racialTraits.map((trait, index) => ({
-              id: `${String(trait.name ?? "")}-${index}`,
-              name: String(trait.name ?? ""),
-              description: String(trait.description ?? "").trim(),
-            })),
-            abilityRows: abilityOrder.map((ability) => {
-              const baseScore = Number(state.abilities[ability] ?? 10);
-              const targetPath = `abilities.${ability}.score`;
-              const records = provenanceByTargetPath.get(targetPath) ?? [];
-              const finalScore = reviewData.abilities[ability]?.score ?? baseScore;
-              const finalMod = reviewData.abilities[ability]?.mod ?? 0;
-              return {
-                id: ability,
-                label: localizeAbilityLabel(ability),
-                base: baseScore,
-                adjustments: records.map((record) => ({
-                  value:
-                    record.delta !== undefined
-                      ? formatSigned(record.delta)
-                      : `= ${record.setValue ?? 0}`,
-                  source: formatSourceLabel(record.source.packId, record.source.entityId),
-                })),
-                final: finalScore,
-                mod: formatSigned(finalMod),
-              };
-            }),
-            combatRows: statOrder.map((statKey) => {
-              const targetPath = `stats.${statKey}`;
-              const records = provenanceByTargetPath.get(targetPath) ?? [];
-              const firstSetIndex = records.findIndex(
-                (record) => record.setValue !== undefined,
-              );
-              const baseValue =
-                firstSetIndex >= 0
-                  ? Number(
-                      records[firstSetIndex]?.setValue ??
-                        statBaseDefaults[statKey],
-                    )
-                  : statBaseDefaults[statKey];
-              const adjustmentRecords = records.filter(
-                (_, index) => index !== firstSetIndex,
-              );
-              return {
-                id: statKey,
-                label: statLabels[statKey],
-                base: baseValue,
-                adjustments: adjustmentRecords.map((record) => ({
-                  value:
-                    record.delta !== undefined
-                      ? formatSigned(record.delta)
-                      : `= ${record.setValue ?? 0}`,
-                  source: formatSourceLabel(record.source.packId, record.source.entityId),
-                })),
-                final: String(finalStatValues[statKey]),
-              };
-            }),
-            skillsSummary: {
-              spent: skillBudget.spent,
-              total: skillBudget.total,
-              remaining: skillBudget.remaining,
-            },
-            skillsRows: reviewSkills.map((skill) => ({
-              id: skill.id,
-              name: localizeEntityText("skills", skill.id, "name", skill.name),
-              ranks: formatSkillValue(skill.ranks),
-              ability: `${formatSigned(skill.abilityMod)} (${localizeAbilityLabel(skill.abilityKey)})`,
-              racial: formatSigned(skill.racialBonus),
-              misc: formatSigned(skill.misc),
-              acp: formatSigned(skill.acp),
-              total: formatSkillValue(skill.total),
-              pointCost: `${formatSkillValue(skill.costSpent)} (${skill.costPerRank}${t.REVIEW_PER_RANK_UNIT})`,
-            })),
-            equipmentLoad: {
-              selectedItems:
-                reviewData.equipmentLoad.selectedItems.length > 0
-                  ? reviewData.equipmentLoad.selectedItems
-                      .map((itemId) =>
-                        localizeEntityText("items", itemId, "name", itemId),
-                      )
-                      .join(", ")
-                  : "-",
-              totalWeight: reviewData.equipmentLoad.totalWeight,
-              loadCategory: localizeLoadCategory(reviewData.equipmentLoad.loadCategory),
-              speedImpact: formatSpeedImpact(
-                reviewData.speed.adjusted,
-                reviewData.equipmentLoad.reducesSpeed,
-              ),
-            },
-            movementDetail: {
-              base: reviewData.speed.base,
-              adjusted: reviewData.speed.adjusted,
-              notes: formatMovementNotes(
-                reviewData.movement.reducedByArmorOrLoad,
-              ).join("; "),
-            },
-            rulesDecisions: {
-              favoredClass: reviewData.rulesDecisions.favoredClass
-                ? reviewData.rulesDecisions.favoredClass === "any"
-                  ? t.REVIEW_FAVORED_CLASS_ANY
-                  : localizeEntityText(
-                      "classes",
-                      reviewData.rulesDecisions.favoredClass,
-                      "name",
-                      reviewData.rulesDecisions.favoredClass,
-                    )
-                : t.REVIEW_UNRESOLVED_LABEL,
-              ignoresMulticlassXpPenalty: reviewData.rulesDecisions.ignoresMulticlassXpPenalty
-                ? t.REVIEW_YES
-                : t.REVIEW_NO,
-              featSelectionLimit: reviewData.rulesDecisions.featSelectionLimit,
-            },
-            packInfo: {
-              selectedEdition: selectedEdition.label || selectedEdition.id || "-",
-              enabledPacks: enabledPackDetails,
-              fingerprint: context.resolvedData.fingerprint,
-            },
-            showProvenance: showProv,
-            provenanceJson: JSON.stringify(computeResult.provenance ?? [], null, 2),
-            onExportJson: exportJson,
-            onToggleProvenance: () => setShowProv((s) => !s),
-          };
+      if (currentStep.kind === "review") {
+        const reviewSheetData = buildReviewSheetPageData({
+          t,
+          characterName: spec.meta.name,
+          selectedRaceId: String(state.selections.race ?? ""),
+          selectedClassId:
+            spec.class?.classId ?? String(state.selections.class ?? ""),
+          selectedRaceEntity,
+          selectedClassEntity,
+          reviewData,
+          reviewCombat: combatData,
+          selectedFeats,
+          featsById: context.resolvedData.entities.feats ?? {},
+          skills: computeResult.sheetViewModel.data.skills,
+          baseAbilityScores: state.abilities,
+          provenanceByTargetPath,
+          sourceNameByEntityId,
+          localizeAbilityLabel,
+          localizeEntityText,
+          enabledPackIds,
+          packVersionById,
+          selectedEditionLabel: selectedEdition.label || selectedEdition.id || "-",
+          fingerprint: context.resolvedData.fingerprint,
+          localizeLoadCategory,
+          formatSpeedImpact,
+          formatMovementNotes,
+          showProvenance: showProv,
+          provenanceJson: JSON.stringify(computeResult.provenance ?? [], null, 2),
+          onExportJson: exportJson,
+          onToggleProvenance: () => setShowProv((s) => !s),
+        });
 
-          return (
-            <PageComposer
-              schema={pageSchema}
-              dataRoot={{
-                page: {
-                  reviewSheet: reviewSheetData,
-                },
-              }}
-            />
-          );
-        }
+        return (
+          <PageComposer
+            schema={pageSchema}
+            dataRoot={{
+              page: {
+                reviewSheet: reviewSheetData,
+              },
+            }}
+          />
+        );
+      }
 
-        if (currentStep.kind === "abilities") {
-          const formatSigned = (value: number) =>
-            `${value >= 0 ? "+" : ""}${value}`;
-          const showModifierTable =
-            abilityPresentation?.showExistingModifiers ?? true;
-          const sourceTypeLabels = abilityPresentation?.sourceTypeLabels ?? {};
-          const hideZeroGroups = abilityPresentation?.hideZeroEffectGroups ?? true;
-          const groupLabel = (sourceType: string) =>
-            sourceTypeLabels[sourceType] ??
-            (sourceType === "unknown" ? t.REVIEW_UNRESOLVED_LABEL : sourceType);
-          const modeUi = abilityPresentation?.modeUi ?? {};
-          const textMap = t as unknown as Record<string, unknown>;
-          const defaultModeLabel = (mode: AbilityMode) =>
-            mode === "pointBuy"
-              ? t.ABILITY_MODE_POINT_BUY
-              : mode === "phb"
-                ? t.ABILITY_MODE_PHB
-                : t.ABILITY_MODE_ROLL_SETS;
-          const normalizeUITextKey = (key?: string) => {
-            if (!key) return undefined;
-            return key.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase();
-          };
-          const getModeLabel = (mode: AbilityMode) => {
-            const key = modeUi[mode]?.labelKey;
-            const fromKey = key ? textMap[key] : undefined;
-            const normalized = normalizeUITextKey(key);
-            const fromNormalized = normalized ? textMap[normalized] : undefined;
-            const value = fromKey ?? fromNormalized;
-            return typeof value === "string" && value.length > 0
-              ? value
-              : defaultModeLabel(mode);
-          };
-          const getModeHint = (mode: AbilityMode) => {
-            const key = modeUi[mode]?.hintKey;
-            const fromKey = key ? textMap[key] : undefined;
-            const normalized = normalizeUITextKey(key);
-            const fromNormalized = normalized ? textMap[normalized] : undefined;
-            const value = fromKey ?? fromNormalized;
-            return typeof value === "string" ? value : "";
-          };
-          const hintMode = selectedAbilityMode ?? abilityModes[0];
-          const activeModeHint = hintMode ? getModeHint(hintMode) : "";
-          const hasActiveModeHint = activeModeHint.length > 0;
-          const isHintVisible = abilityMethodHintOpen && hasActiveModeHint;
-          const handleAbilityModeChange = (mode: AbilityMode) => {
-            if (mode === "rollSets") {
-              const currentSets = Array.isArray(abilityMeta.rollSets?.generatedSets)
-                ? abilityMeta.rollSets.generatedSets
-                : [];
-              const generatedSets =
-                currentSets.length > 0
-                  ? currentSets
-                  : generateRollSets(rollSetsConfig);
-              applyAbilitySelection(
-                { ...state.abilities },
-                {
-                  mode,
-                  rollSets: {
-                    generatedSets,
-                    selectedSetIndex: selectedRollSetIndex,
+      if (currentStep.kind === "abilities") {
+        const modeSelectorHandlers = createAbilityModeSelectorHandlers({
+          hasActiveModeHint: activeAbilityModeHint.length > 0,
+          abilityMethodHintPinned,
+          abilityMethodHintRef,
+          setAbilityMethodHintOpen,
+          setAbilityMethodHintPinned,
+          isAbilityMode,
+          onAbilityModeChange: handleAbilityModeChange,
+        });
+        const abilitiesAllocatorData = buildAbilitiesAllocatorPageData({
+          t,
+          title: currentStep.label,
+          abilityModes,
+          selectedAbilityMode,
+          selectedAbilityModeValue,
+          modeUi: abilityPresentation?.modeUi ?? {},
+          abilityMethodHintOpen,
+          modeSelectorHandlers,
+          pointBuyPanel:
+            selectedAbilityMode === "pointBuy" && abilityStepConfig?.pointBuy
+              ? {
+                  pointCap: selectedPointCap,
+                  pointCapMin,
+                  pointCapMax,
+                  pointCapStep,
+                  pointBuyRemaining,
+                  isTableOpen: isPointBuyTableOpen,
+                  costTable: pointBuyCostTable,
+                  onPointCapChange: (value: number) => {
+                    const clamped = Math.min(
+                      pointCapMax,
+                      Math.max(pointCapMin, value),
+                    );
+                    applyAbilitySelection(
+                      { ...state.abilities },
+                      { pointCap: clamped },
+                    );
                   },
-                },
-              );
-              return;
-            }
-            applyAbilitySelection({ ...state.abilities }, { mode });
-          };
-
-          const abilitiesAllocatorData: AbilityAllocatorData = {
-            t,
-            title: currentStep.label,
-            modeSelector: {
-              label: t.ABILITY_GENERATION_LABEL,
-              helpLabel: t.ABILITY_METHOD_HELP_LABEL,
-              helpText: activeModeHint,
-              isHintVisible,
-              isHintAvailable: hasActiveModeHint,
-              value: selectedAbilityModeValue,
-              options: abilityModes.map((mode) => ({
-                value: mode,
-                label: getModeLabel(mode),
-              })),
-              onMouseEnter: () => {
-                if (!hasActiveModeHint) return;
-                setAbilityMethodHintOpen(true);
-              },
-              onMouseLeave: () => {
-                if (abilityMethodHintPinned) return;
-                const activeElement = document.activeElement as Node | null;
-                if (
-                  activeElement &&
-                  abilityMethodHintRef.current?.contains(activeElement)
-                ) {
-                  return;
+                  onToggleTable: () => setIsPointBuyTableOpen((prev) => !prev),
                 }
-                setAbilityMethodHintOpen(false);
-              },
-              onFocus: () => {
-                if (!hasActiveModeHint) return;
-                setAbilityMethodHintOpen(true);
-              },
-              onBlur: (event) => {
-                if (abilityMethodHintPinned) return;
-                const next = event.relatedTarget as Node | null;
-                if (next && abilityMethodHintRef.current?.contains(next)) return;
-                setAbilityMethodHintOpen(false);
-              },
-              onClick: () => {
-                if (!hasActiveModeHint) return;
-                if (abilityMethodHintPinned) {
-                  setAbilityMethodHintPinned(false);
-                  setAbilityMethodHintOpen(false);
-                } else {
-                  setAbilityMethodHintPinned(true);
-                  setAbilityMethodHintOpen(true);
-                }
-              },
-              onKeyDown: (event) => {
-                if (event.key !== "Escape") return;
-                event.preventDefault();
-                setAbilityMethodHintPinned(false);
-                setAbilityMethodHintOpen(false);
-              },
-              onChange: (value) => {
-                if (!isAbilityMode(value)) return;
-                handleAbilityModeChange(value);
-              },
-              helpRef: abilityMethodHintRef,
-            },
-            pointBuyPanel:
-              selectedAbilityMode === "pointBuy" && abilityStepConfig?.pointBuy
-                ? {
-                    pointCap: selectedPointCap,
-                    pointCapMin: pointCapMin,
-                    pointCapMax: pointCapMax,
-                    pointCapStep: pointCapStep,
-                    pointBuyRemaining,
-                    isTableOpen: isPointBuyTableOpen,
-                    costTable: pointBuyCostTable,
-                    onPointCapChange: (value: number) => {
-                      const clamped = Math.min(
-                        pointCapMax,
-                        Math.max(pointCapMin, value),
-                      );
-                      applyAbilitySelection(
-                        { ...state.abilities },
-                        { pointCap: clamped },
-                      );
-                    },
-                    onToggleTable: () =>
-                      setIsPointBuyTableOpen((prev) => !prev),
-                  }
-                : undefined,
-            rollSetsPanel:
-              selectedAbilityMode === "rollSets" && rollSetsConfig
-                ? {
-                    title: t.ROLL_SET_SELECTION_TITLE,
-                    description: t.ROLL_SET_SELECTION_DESCRIPTION,
-                    rerollLabel: t.ROLL_SET_REROLL_BUTTON,
-                    ariaLabel: t.ROLL_SET_OPTIONS_ARIA_LABEL,
-                    options: generatedRollSets.map((set, index) => ({
-                      id: `roll-set-${index}`,
-                      label: [t.ROLL_SET_OPTION_PREFIX, String(index + 1), t.ROLL_SET_OPTION_SUFFIX]
-                        .filter((part) => part.length > 0)
-                        .join(" "),
-                      scores: set.join(", "),
-                      checked: selectedRollSetIndex === index,
-                      onSelect: () => applySelectedRollSet(set, index),
-                    })),
-                    onReroll: regenerateRollSetOptions,
-                  }
-                : undefined,
-            abilityRows: ABILITY_ORDER.map((key) => {
-              const value = Number(state.abilities[key] ?? 0);
-              const label = localizeAbilityLabel(key);
-              const canEditAbility = !rollSetNeedsSelection;
-              return {
-                id: key,
-                label,
-                value,
-                disabled: !canEditAbility,
-                min: abilityMinScore,
-                max: abilityMaxScore,
-                canDecrease: canEditAbility && value > abilityMinScore,
-                canIncrease: canEditAbility && value < abilityMaxScore,
-                onChange: (nextValue: number) => setAbility(key, nextValue),
-                onBlur: () => clampAbilityOnBlur(key),
-                onDecrease: () => stepAbility(key, -1),
-                onIncrease: () => stepAbility(key, 1),
-              };
-            }),
-            modifierRows: ABILITY_ORDER.map((ability) => {
-              const targetPath = `abilities.${ability}.score`;
-              const records = provenanceByTargetPath.get(targetPath) ?? [];
-              const baseScore = Number(state.abilities[ability] ?? 10);
-              const adjustment = records.reduce(
-                (sum, record) => sum + Number(record.delta ?? 0),
-                0,
-              );
-              const grouped = new Map<
-                string,
-                Array<{ sourceLabel: string; delta: number }>
-              >();
-              for (const record of records) {
-                const delta = Number(record.delta ?? 0);
-                if (!Number.isFinite(delta)) continue;
-                const meta = sourceMetaByEntityKey.get(
-                  `${record.source.packId}:${record.source.entityId}`,
-                );
-                const sourceType = meta?.sourceType ?? "unknown";
-                const sourceLabel =
-                  meta?.sourceLabel ?? t.REVIEW_UNRESOLVED_LABEL;
-                const list = grouped.get(sourceType) ?? [];
-                list.push({ sourceLabel, delta });
-                grouped.set(sourceType, list);
-              }
-              const groupsToRender = Array.from(grouped.entries())
-                .map(([sourceType, items]) => ({
-                  sourceType,
-                  items,
-                  total: items.reduce((sum, item) => sum + item.delta, 0),
-                }))
-                .filter((group) => !hideZeroGroups || group.total !== 0);
-              const finalScore = Number(
-                reviewData.abilities[ability]?.score ?? baseScore,
-              );
-              const finalMod = Number(
-                reviewData.abilities[ability]?.mod ?? 0,
-              );
-
-              return {
-                id: ability,
-                label: localizeAbilityLabel(ability),
-                base: baseScore,
-                adjustment: formatSigned(adjustment),
-                groups: groupsToRender.map((group) => ({
-                  id: `${ability}-${group.sourceType}`,
-                  label: groupLabel(group.sourceType),
-                  total: formatSigned(group.total),
-                  items: group.items.map((item, index) => ({
-                    id: `${ability}-${group.sourceType}-${index}`,
-                    delta: formatSigned(item.delta),
-                    sourceLabel: item.sourceLabel,
+              : undefined,
+          rollSetsPanel:
+            selectedAbilityMode === "rollSets" && rollSetsConfig
+              ? {
+                  title: t.ROLL_SET_SELECTION_TITLE,
+                  description: t.ROLL_SET_SELECTION_DESCRIPTION,
+                  rerollLabel: t.ROLL_SET_REROLL_BUTTON,
+                  ariaLabel: t.ROLL_SET_OPTIONS_ARIA_LABEL,
+                  options: generatedRollSets.map((set, index) => ({
+                    id: `roll-set-${index}`,
+                    label: [
+                      t.ROLL_SET_OPTION_PREFIX,
+                      String(index + 1),
+                      t.ROLL_SET_OPTION_SUFFIX,
+                    ]
+                      .filter((part) => part.length > 0)
+                      .join(" "),
+                    scores: set.join(", "),
+                    checked: selectedRollSetIndex === index,
+                    onSelect: () => applySelectedRollSet(set, index),
                   })),
-                })),
-                final: finalScore,
-                mod: formatSigned(finalMod),
-              };
-            }),
-            showModifierTable,
-          };
+                  onReroll: regenerateRollSetOptions,
+                }
+              : undefined,
+          abilityOrder: ABILITY_ORDER,
+          abilityScores: state.abilities,
+          abilityMinScore,
+          abilityMaxScore,
+          rollSetNeedsSelection,
+          onAbilityChange: setAbility,
+          onAbilityBlur: clampAbilityOnBlur,
+          onAbilityStep: stepAbility,
+          reviewAbilities: reviewData.abilities,
+          provenanceByTargetPath,
+          sourceMetaByEntityKey,
+          localizeAbilityLabel,
+          showModifierTable:
+            abilityPresentation?.showExistingModifiers ?? true,
+          hideZeroGroups:
+            abilityPresentation?.hideZeroEffectGroups ?? true,
+          sourceTypeLabels: abilityPresentation?.sourceTypeLabels ?? {},
+        });
 
           return (
             <PageComposer
@@ -1241,80 +867,28 @@ export function App() {
               }}
             />
           );
-        }
+      }
 
-        if (currentStep.kind === "skills") {
-          const formatSkillValue = (value: number) =>
-            `${Number.isInteger(value) ? value : value.toFixed(1)}`;
-          const skillControlLabel = (
-            action: "increase" | "decrease",
-            skillName: string,
-          ) =>
-            `${action === "increase" ? t.INCREASE_LABEL : t.DECREASE_LABEL} ${skillName}`;
-          const skillBudget = reviewData.skillBudget;
-          const skillsAllocatorData: SkillsAllocatorData = {
-            t,
-            title: currentStep.label,
-            budget: {
-              total: skillBudget.total,
-              spent: skillBudget.spent,
-              remaining: skillBudget.remaining,
-            },
-            rows: skillEntities.map((skill) => {
-              const skillView = skillViewModelById.get(skill.id);
-              const ranks = selectedSkillRanks[skill.id] ?? 0;
-              const classSkill = skillView?.classSkill ?? false;
-              const costPerRank = skillView?.costPerRank ?? 2;
-              const maxRanks = skillView?.maxRanks ?? 0;
-              const racialBonus = skillView?.racialBonus ?? 0;
-              const miscBonus = skillView?.misc ?? 0;
-              const acpPenalty = skillView?.acp ?? 0;
-              const abilityMod = skillView?.abilityMod ?? 0;
-              const total = skillView?.total ?? 0;
-              const rankStep = classSkill ? 1 : 0.5;
-              const costToIncrease = rankStep * costPerRank;
-              const armorCheckPenaltyApplies =
-                skillView?.acpApplied ??
-                Boolean(skill.data?.armorCheckPenaltyApplies);
-              const canDecrease = ranks > 0;
-              const canIncrease =
-                ranks + rankStep <= maxRanks &&
-                skillBudget.remaining + 1e-9 >= costToIncrease;
-
-              const updateRanks = (nextValue: number) => {
-                const nextRanks = {
-                  ...selectedSkillRanks,
-                  [skill.id]: Math.min(maxRanks, Math.max(0, nextValue)),
-                };
-                setState((s) =>
-                  applyChoice(s, STEP_ID_SKILLS, nextRanks, context),
-                );
-              };
-
-              return {
-                id: skill.id,
-                name: skill.displayName,
-                typeLabel: classSkill ? t.SKILLS_CLASS_LABEL : t.SKILLS_CROSS_LABEL,
-                pointsLabel: `${costPerRank}${t.SKILLS_PER_RANK_UNIT}`,
-                ranks: formatSkillValue(ranks),
-                decreaseLabel: skillControlLabel("decrease", skill.displayName),
-                increaseLabel: skillControlLabel("increase", skill.displayName),
-                canDecrease,
-                canIncrease,
-                onDecrease: () => updateRanks(ranks - rankStep),
-                onIncrease: () => updateRanks(ranks + rankStep),
-                breakdown: `${formatSkillValue(ranks)} + ${formatSkillValue(abilityMod)} + ${formatSkillValue(miscBonus)} - ${formatSkillValue(Math.abs(acpPenalty))} = ${formatSkillValue(total)}`,
-                total: formatSkillValue(total),
-                notes: [
-                  `${t.SKILLS_MAX_LABEL} ${formatSkillValue(maxRanks)}`,
-                  `${t.SKILLS_RACIAL_LABEL} ${racialBonus >= 0 ? "+" : ""}${formatSkillValue(racialBonus)}`,
-                  armorCheckPenaltyApplies
-                    ? t.SKILLS_ACP_APPLIES_LABEL
-                    : t.SKILLS_ACP_NOT_APPLICABLE_LABEL,
-                ],
-              };
-            }),
-          };
+      if (currentStep.kind === "skills") {
+        const skillsAllocatorData = buildSkillsAllocatorPageData({
+          t,
+          title: currentStep.label,
+          budget: {
+            total: reviewData.skillBudget.total,
+            spent: reviewData.skillBudget.spent,
+            remaining: reviewData.skillBudget.remaining,
+          },
+          skills: skillEntities,
+          skillViewModelById,
+          selectedSkillRanks,
+          onCommitRanks: (skillId, nextValue, maxRanks) => {
+            const nextRanks = {
+              ...selectedSkillRanks,
+              [skillId]: Math.min(maxRanks, Math.max(0, nextValue)),
+            };
+            setState((s) => applyChoice(s, STEP_ID_SKILLS, nextRanks, context));
+          },
+        });
 
           return (
             <PageComposer
@@ -1326,57 +900,61 @@ export function App() {
               }}
             />
           );
-        }
+      }
 
-        if (currentStep.kind === "metadata") {
+      if (currentStep.kind === "metadata") {
+        const metadataName = buildMetadataNameFieldData({
+          title: currentStep.label,
+          label: t.NAME_LABEL,
+          inputId: "character-name-input",
+          value: state.metadata.name ?? "",
+          placeholder: t.METADATA_PLACEHOLDER,
+          onChange: (value: string) => {
+            setState((s) => applyChoice(s, currentStep.id, value, context));
+          },
+        });
+
+        return (
+          <PageComposer
+            schema={pageSchema}
+            dataRoot={{
+              page: {
+                metadataName,
+              },
+            }}
+          />
+        );
+      }
+
+      if (currentStep.source.type === "entityType") {
+        const stepChoice = choiceMap.get(currentStep.id);
+        const options = stepChoice?.options ?? [];
+        const limit = stepChoice?.limit ?? currentStep.source.limit ?? 1;
+
+        if (limit <= 1 && currentStep.id !== STEP_ID_FEAT) {
+          const currentValue = String(state.selections[currentStep.id] ?? "");
+          const entityChoice = buildEntityTypeSingleSelectData({
+            title: currentStep.label,
+            inputName: currentStep.id,
+            options,
+            value: currentValue,
+            onSelect: (id: string) => {
+              setState((s) => applyChoice(s, currentStep.id, id, context));
+            },
+          });
+
           return (
             <PageComposer
               schema={pageSchema}
               dataRoot={{
                 page: {
-                  metadataName: {
-                    title: currentStep.label,
-                    label: t.NAME_LABEL,
-                    inputId: "character-name-input",
-                    value: state.metadata.name ?? "",
-                    placeholder: t.METADATA_PLACEHOLDER,
-                    onChange: (value: string) => {
-                      setState((s) => applyChoice(s, currentStep.id, value, context));
-                    },
-                  },
+                  entityChoice,
                 },
               }}
             />
-          );
-        }
-
-        if (currentStep.source.type === "entityType") {
-          const stepChoice = choiceMap.get(currentStep.id);
-          const options = stepChoice?.options ?? [];
-          const limit = stepChoice?.limit ?? currentStep.source.limit ?? 1;
-
-          if (limit <= 1 && currentStep.id !== STEP_ID_FEAT) {
-            const currentValue = String(state.selections[currentStep.id] ?? "");
-            return (
-              <PageComposer
-                schema={pageSchema}
-                dataRoot={{
-                  page: {
-                    entityChoice: {
-                      title: currentStep.label,
-                      inputName: currentStep.id,
-                      options,
-                      value: currentValue,
-                      onSelect: (id: string) => {
-                        setState((s) => applyChoice(s, currentStep.id, id, context));
-                      },
-                    },
-                  },
-                }}
-              />
             );
           }
-        }
+      }
     }
 
     if (currentStep.kind === "review") {
