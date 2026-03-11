@@ -446,27 +446,38 @@ function sanitizeStateForComputeOutput(
   let nextState: CharacterState | undefined;
   const assumptions: ComputeResultAssumptionEntry[] = [];
 
-  const toFiniteNumber = (value: unknown): number => {
+  const toSanitizedAbilityScore = (
+    value: unknown
+  ): { valid: true; numeric: number } | { valid: false } => {
+    if (typeof value === "number") {
+      return Number.isFinite(value) ? { valid: true, numeric: value } : { valid: false };
+    }
+    if (typeof value !== "string") return { valid: false };
+
+    const trimmed = value.trim();
+    if (!trimmed) return { valid: false };
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(trimmed)) return { valid: false };
+
     try {
-      const numeric = Number(value);
-      return Number.isFinite(numeric) ? numeric : Number.NaN;
+      const numeric = Number(trimmed);
+      return Number.isFinite(numeric) ? { valid: true, numeric } : { valid: false };
     } catch {
-      return Number.NaN;
+      return { valid: false };
     }
   };
 
   for (const ability of ABILITY_KEYS) {
     const score = state.abilities[ability];
-    const numericScore = toFiniteNumber(score);
+    const sanitizedScore = toSanitizedAbilityScore(score);
 
-    if (Number.isFinite(numericScore)) {
+    if (sanitizedScore.valid) {
       if (typeof score === "number") continue;
 
       nextState ??= {
         ...state,
         abilities: { ...state.abilities }
       };
-      nextState.abilities[ability] = numericScore;
+      nextState.abilities[ability] = sanitizedScore.numeric;
       continue;
     }
 

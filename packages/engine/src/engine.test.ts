@@ -2677,6 +2677,40 @@ describe("compute() contract", () => {
     );
   });
 
+  it("defaults malformed non-numeric ability values instead of silently coercing them", () => {
+    const malformedSpec = {
+      meta: { name: "Hidden Coercion", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: {
+        str: null,
+        dex: false,
+        con: "   ",
+        int: 10,
+        wis: 10,
+        cha: 10
+      },
+      featIds: ["power-attack"],
+      skillRanks: { climb: 4 }
+    } as unknown as Parameters<typeof compute>[0];
+
+    const result = compute(malformedSpec, {
+      resolvedData: context.resolvedData,
+      enabledPackIds: context.enabledPackIds
+    });
+
+    expect(result.sheetViewModel.data.review.abilities.str).toEqual({ score: 10, mod: 0 });
+    expect(result.sheetViewModel.data.review.abilities.dex).toEqual({ score: 10, mod: 0 });
+    expect(result.sheetViewModel.data.review.abilities.con).toEqual({ score: 10, mod: 0 });
+    expect(result.assumptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "SPEC_ABILITY_DEFAULTED", path: "abilities.str" }),
+        expect.objectContaining({ code: "SPEC_ABILITY_DEFAULTED", path: "abilities.dex" }),
+        expect.objectContaining({ code: "SPEC_ABILITY_DEFAULTED", path: "abilities.con" })
+      ])
+    );
+  });
+
   it("defaults malformed ability values that throw on numeric coercion without crashing compute", () => {
     const malformedSpec = {
       meta: { name: "Symbol Ability", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },

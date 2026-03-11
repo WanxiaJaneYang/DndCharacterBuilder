@@ -70,7 +70,7 @@ function normalizeClassSelection(
   if (!value) return undefined;
   const classId = normalizeId(value.classId);
   if (!classId) return undefined;
-  const level = Number(value.level);
+  const level = typeof value.level === "number" ? value.level : Number.NaN;
   return {
     classId,
     level: Number.isFinite(level) && level >= 1 ? Math.floor(level) : 1
@@ -158,8 +158,8 @@ export function validateCharacterSpec(spec: CharacterSpec): CharacterSpecValidat
   }
 
   if (spec.class !== undefined && spec.class !== null && typeof spec.class === "object") {
-    const rawLevel = Number((spec.class as { level?: unknown }).level);
-    if (!Number.isInteger(rawLevel) || rawLevel < 1) {
+    const rawLevel = (spec.class as { level?: unknown }).level;
+    if (typeof rawLevel !== "number" || !Number.isInteger(rawLevel) || rawLevel < 1) {
       issues.push({
         code: "SPEC_CLASS_LEVEL_INVALID",
         message: "class.level must be an integer >= 1.",
