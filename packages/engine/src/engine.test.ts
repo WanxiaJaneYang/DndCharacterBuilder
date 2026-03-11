@@ -2354,6 +2354,35 @@ describe("CharacterSpec v1", () => {
     const issues = validateCharacterSpec(invalidSpec);
     expect(issues.some((issue) => issue.code === "SPEC_META_SOURCEIDS_INVALID")).toBe(true);
   });
+
+  it("reports SPEC_CLASS_LEVEL_INVALID for raw class levels before normalization", () => {
+    for (const level of [0, -1, 1.9]) {
+      const issues = validateCharacterSpec({
+        meta: { rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        class: { classId: "fighter", level },
+        abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
+      });
+
+      expect(issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            code: "SPEC_CLASS_LEVEL_INVALID",
+            path: "class.level"
+          })
+        ])
+      );
+    }
+  });
+
+  it("does not throw when class is null in malformed runtime input", () => {
+    const malformedSpec = {
+      meta: { rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      class: null,
+      abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
+    } as unknown as Parameters<typeof validateCharacterSpec>[0];
+
+    expect(() => validateCharacterSpec(malformedSpec)).not.toThrow();
+  });
 });
 
 describe("compute() contract", () => {
@@ -2564,6 +2593,56 @@ describe("compute() contract", () => {
     });
   });
 
+  it("does not apply flow-default point-buy validation to flow-independent CharacterSpec abilities", () => {
+    const result = compute(
+      {
+        meta: { name: "Rolled Case", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 18, dex: 18, con: 18, int: 8, wis: 8, cha: 8 },
+        featIds: ["power-attack"],
+        skillRanks: { climb: 4 }
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    expect(result.validationIssues.some((issue) => issue.code === "ABILITY_POINTBUY_EXCEEDED")).toBe(false);
+  });
+
+  it("sanitizes non-finite ability inputs before compute output reaches JSON serialization", () => {
+    const result = compute(
+      {
+        meta: { name: "NaN Case", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: Number.NaN, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+        featIds: ["power-attack"],
+        skillRanks: { climb: 4 }
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    const serialized = JSON.parse(JSON.stringify(result));
+    expect(result.validationIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITIES_INVALID",
+          path: "abilities.str"
+        })
+      ])
+    );
+    expect(serialized.sheetViewModel.data.review.abilities.str).toEqual({ score: 10, mod: 0 });
+    expect(result.assumptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITY_DEFAULTED",
+          path: "abilities.str",
+          defaultUsed: 10
+        })
+      ])
+    );
+  });
+
   it("maps validation paths to CharacterSpec fields and records normalization assumptions", () => {
     const result = compute(
       {
@@ -2583,6 +2662,10 @@ describe("compute() contract", () => {
         expect.objectContaining({
           code: "NAME_REQUIRED",
           path: "meta.name"
+        }),
+        expect.objectContaining({
+          code: "SPEC_CLASS_LEVEL_INVALID",
+          path: "class.level"
         })
       ])
     );
