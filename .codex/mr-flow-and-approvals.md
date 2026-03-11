@@ -28,6 +28,13 @@
 9. Merge MR (prefer normal merge; use `--admin` only when required by policy/workflow).
 10. Verify merged state and report merge commit SHA.
 
+## Review Standards
+- Treat authored `ts`/`tsx` modules over `200` lines as non-compliant by default during MR review.
+- Review oversized frontend modules as architecture debt, not just style debt.
+- When a module crosses the limit, split it by responsibility and preserve clear ownership boundaries instead of dumping logic into generic helper files.
+- Prefer config, registry, and composer patterns over growing hardcoded rendering branches when that keeps modules smaller and makes the UI more extendable.
+- If a PR keeps an oversized authored `ts`/`tsx` file, the PR description must justify why the split is deferred and what follow-up will remove the debt.
+
 ## Copilot Review Trigger Rules
 - Use direct reviewer requests, not comments:
   - `gh pr edit <pr-number> --add-reviewer copilot`
@@ -55,6 +62,13 @@
 - Assume user wants end-to-end completion (fix -> resolve -> review -> merge) unless user says otherwise.
 - Surface only hard blockers (policy limitations, failed CI, missing required reviewer approval).
 - Keep user updates brief and action-focused.
+
+## Code Size And Modularity Standard
+- Treat any authored `ts` or `tsx` module over `200` lines as non-compliant by default.
+- Review oversized modules as architecture debt, not just style debt. Split them before merge unless the user explicitly accepts an exception.
+- Split by responsibility and boundary. Do not satisfy the limit with arbitrary helper dumping or mechanical fragmentation.
+- Prefer config, registry, composer, and section-component patterns over hardcoded rendering branches when that keeps files smaller and the UI more extendable.
+- Keep top-level page shells thin: orchestration at the top, domain sections below, and reusable logic in focused modules.
 
 ## Workspace Notes (Current Migration)
 - Local guidance/skill artifacts are being tracked on branch: `chore/agent-guidance-and-local-skills`.

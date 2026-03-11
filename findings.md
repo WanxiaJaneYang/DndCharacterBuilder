@@ -1,19 +1,13 @@
 # Findings
 
-## Repository state
-- Root workspace is dirty with uncommitted draft work related to issues #165/#166; implementation is isolated in `.worktrees/issue-166-compute-result-contract`.
-- `origin/main` at `2a73261` already includes issue #165 via PR #170.
-
-## Relevant files
-- `packages/engine/src/characterSpec.ts`: owns `CharacterSpec`, normalization, validation, and temporary legacy state mapping.
-- `packages/engine/src/index.ts`: owns `SheetViewModel`, engine internals, and is the right place for output contract types and `compute()`.
-- `packages/engine/src/engine.test.ts`: already has CharacterSpec coverage from #165 and is the right place for compute contract tests.
-- `docs/data/README.md`: lists data contract docs.
-
-## Draft assessment
-- Reusable: compute contract shape, basic canonical fixture test idea, initial ComputeResult doc draft.
-- Not reusable verbatim: inlining CharacterSpec types back into `index.ts`, replacing existing #165 tests, weak ordering guarantees in docs.
-
-## Baseline verification
-- `npm install` succeeded in worktree.
-- `npm test` passed in worktree before any issue #166 changes.
+- The user set a new repository expectation: every authored `ts`/`tsx` module should stay at or under 200 lines by default.
+- This is intended as both a coding-style and review-standard rule, not just a cleanup preference.
+- Current violating files in the `#195` branch:
+  - `apps/web/src/App.tsx` at 1416 lines
+  - `apps/web/src/components/ReviewStep.tsx` at 580 lines
+  - `apps/web/src/appHelpers.ts` at 293 lines
+- The user wants the current branch restarted in place rather than abandoned for a fresh branch from `main`.
+- The target architecture remains:
+  - `App.tsx` should trend toward orchestration only
+  - dynamic/config-friendly rendering should be favored over hardcoded branches
+  - modules should be split by responsibility and remain extendable
