@@ -8,7 +8,7 @@ describe("EntityChoiceStep", () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
 
-    render(
+    const { rerender } = render(
       <EntityChoiceStep
         title="Race"
         limit={1}
@@ -24,9 +24,24 @@ describe("EntityChoiceStep", () => {
     await user.click(screen.getByLabelText("Elf"));
 
     expect(onChange).toHaveBeenCalledWith(["elf"]);
+    rerender(
+      <EntityChoiceStep
+        title="Race"
+        limit={1}
+        options={[
+          { id: "human", label: "Human" },
+          { id: "elf", label: "Elf" },
+        ]}
+        selected={["elf"]}
+        onChange={onChange}
+      />,
+    );
+    expect(
+      (screen.getByRole("radio", { name: "Elf" }) as HTMLInputElement).checked,
+    ).toBe(true);
     expect(
       (screen.getByRole("radio", { name: "Human" }) as HTMLInputElement).checked,
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("disables unchecked options when a multi-select step hits its limit", () => {

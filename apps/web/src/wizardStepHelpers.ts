@@ -31,6 +31,7 @@ type SelectionValuesInput = {
   stepId: string;
   selections: Record<string, unknown>;
   featStepId?: string;
+  featSelectionKey?: string;
 };
 
 function hasEntityType(step: StepLike | undefined): step is StepLike & {
@@ -84,9 +85,12 @@ export function getStepSelectionValues({
   stepId,
   selections,
   featStepId = "feat",
+  featSelectionKey = "feats",
 }: SelectionValuesInput): string[] {
   const rawValue =
-    stepId === featStepId ? selections.feats ?? selections[stepId] : selections[stepId];
+    stepId === featStepId
+      ? selections[featSelectionKey] ?? selections[stepId]
+      : selections[stepId];
   if (stepId === featStepId && Array.isArray(rawValue)) {
     return rawValue.map(String);
   }

@@ -32,16 +32,11 @@ import {
   buildSkillBudgetSummary,
   clampAbilityScore,
   derivePointBuyBaseScore,
-  deriveValueFromProvenance,
   generateRollSets,
-  getCarryingCapacityMultiplier,
   getCharacterLevel,
   getClassSkillIds,
-  getEntityDataNumber,
-  getEntityDataString,
   getRacialSkillBonuses,
   getSkillMaxRanksForLevel,
-  getSrdMediumLoadLimits,
   type AbilityMode,
   type AbilityPresentationConfig,
   type AbilityStepConfig,
@@ -332,20 +327,6 @@ export function App() {
     () => getRacialSkillBonuses(selectedRaceEntity),
     [selectedRaceEntity],
   );
-  const selectedEquipmentIds = useMemo(
-    () =>
-      ((state.selections.equipment as string[] | undefined) ?? []).map((itemId) =>
-        String(itemId),
-      ),
-    [state.selections.equipment],
-  );
-  const selectedEquipmentEntities = useMemo(
-    () =>
-      selectedEquipmentIds
-        .map((itemId) => context.resolvedData.entities.items?.[itemId])
-        .filter((item): item is NonNullable<typeof item> => Boolean(item)),
-    [context.resolvedData.entities.items, selectedEquipmentIds],
-  );
   const skillBudget = useMemo(
     () =>
       buildSkillBudgetSummary({
@@ -391,38 +372,6 @@ export function App() {
     skillEntities,
     spec.class,
   ]);
-  const selectedRaceSize = getEntityDataString(selectedRaceEntity, "size") || "medium";
-  const baseSpeed = getEntityDataNumber(
-    selectedRaceEntity,
-    "baseSpeed",
-    DEFAULT_STATS.speed,
-  );
-  const adjustedSpeed = useMemo(
-    () =>
-      deriveValueFromProvenance(
-        provenanceByTargetPath.get("stats.speed") ?? [],
-        baseSpeed,
-      ),
-    [baseSpeed, provenanceByTargetPath],
-  );
-  const totalWeight = useMemo(
-    () =>
-      selectedEquipmentEntities.reduce(
-        (sum, item) => sum + getEntityDataNumber(item, "weight", 0),
-        0,
-      ),
-    [selectedEquipmentEntities],
-  );
-  const loadCategory = useMemo(() => {
-    const strScore = Number(reviewData.abilities.str?.score ?? 10);
-    const carryingMultiplier = getCarryingCapacityMultiplier(selectedRaceSize);
-    const limits = getSrdMediumLoadLimits(strScore);
-    const lightLoadLimit = limits.light * carryingMultiplier;
-    const mediumLoadLimit = limits.medium * carryingMultiplier;
-    if (totalWeight <= lightLoadLimit) return "light";
-    if (totalWeight <= mediumLoadLimit) return "medium";
-    return "heavy";
-  }, [reviewData.abilities.str, selectedRaceSize, totalWeight]);
 
   const selectedStepValues = (stepId: string): string[] =>
     getStepSelectionValues({
@@ -680,19 +629,11 @@ export function App() {
           selectedFeats={selectedFeats}
           selectedRaceEntity={selectedRaceEntity}
           selectedClassEntity={selectedClassEntity}
-          selectedRaceSize={selectedRaceSize}
-          baseSpeed={baseSpeed}
-          adjustedSpeed={adjustedSpeed}
-          totalWeight={totalWeight}
-          loadCategory={loadCategory}
-          skillBudget={skillBudget}
           skillUiDetailById={skillUiDetailById}
           provenanceByTargetPath={provenanceByTargetPath}
           sourceNameByEntityId={sourceNameByEntityId}
           packVersionById={packVersionById}
           enabledPackIds={enabledPackIds}
-          selectedEquipmentIds={selectedEquipmentIds}
-          featSelectionLimit={choiceMap.get(STEP_ID_FEAT)?.limit ?? 0}
           showProv={showProv}
           onToggleProvenance={() => setShowProv((current) => !current)}
           onExportJson={exportJson}

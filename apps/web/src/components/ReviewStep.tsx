@@ -5,9 +5,7 @@ import type { UIText } from "../uiText";
 import {
   deriveValueFromProvenance,
   getEntityDataRecord,
-  getEntityDataString,
   type LocalSkillUiDetail,
-  type SkillBudgetSummary,
 } from "../appHelpers";
 
 type EntityLike = {
@@ -31,19 +29,11 @@ type ReviewStepProps = {
   selectedFeats: string[];
   selectedRaceEntity?: EntityLike;
   selectedClassEntity?: EntityLike;
-  selectedRaceSize: string;
-  baseSpeed: number;
-  adjustedSpeed: number;
-  totalWeight: number;
-  loadCategory: string;
-  skillBudget: SkillBudgetSummary;
   skillUiDetailById: Map<string, LocalSkillUiDetail>;
   provenanceByTargetPath: Map<string, NonNullable<ComputeResult["provenance"]>>;
   sourceNameByEntityId: Map<string, string>;
   packVersionById: Map<string, string>;
   enabledPackIds: string[];
-  selectedEquipmentIds: string[];
-  featSelectionLimit: number;
   showProv: boolean;
   onToggleProvenance: () => void;
   onExportJson: () => void;
@@ -72,19 +62,11 @@ export function ReviewStep({
   selectedFeats,
   selectedRaceEntity,
   selectedClassEntity,
-  selectedRaceSize,
-  baseSpeed,
-  adjustedSpeed,
-  totalWeight,
-  loadCategory,
-  skillBudget,
   skillUiDetailById,
   provenanceByTargetPath,
   sourceNameByEntityId,
   packVersionById,
   enabledPackIds,
-  selectedEquipmentIds,
-  featSelectionLimit,
   showProv,
   onToggleProvenance,
   onExportJson,
@@ -151,7 +133,7 @@ export function ReviewStep({
     hp: reviewData.hp.total,
     ac: combatData.ac.total,
     initiative: reviewData.initiative.total,
-    speed: adjustedSpeed,
+    speed: reviewData.speed.adjusted,
     bab: deriveValueFromProvenance(
       provenanceByTargetPath.get("stats.bab") ?? [],
       DEFAULT_STATS.bab,
@@ -160,7 +142,6 @@ export function ReviewStep({
     ref: reviewData.saves.ref.total,
     will: reviewData.saves.will.total,
   } as const;
-  const favoredClass = getEntityDataString(selectedRaceEntity, "favoredClass");
   const racialTraits = Array.isArray(getEntityDataRecord(selectedRaceEntity).racialTraits)
     ? (getEntityDataRecord(selectedRaceEntity).racialTraits as Array<
         Record<string, unknown>
@@ -209,13 +190,13 @@ export function ReviewStep({
           {text.REVIEW_XP_LABEL}: 0
         </p>
         <p>
-          {text.REVIEW_SIZE_LABEL}: {selectedRaceSize}
+          {text.REVIEW_SIZE_LABEL}: {reviewData.identity.size}
         </p>
         <p>
-          {text.REVIEW_SPEED_BASE_LABEL}: {baseSpeed}
+          {text.REVIEW_SPEED_BASE_LABEL}: {reviewData.identity.speed.base}
         </p>
         <p>
-          {text.REVIEW_SPEED_ADJUSTED_LABEL}: {adjustedSpeed}
+          {text.REVIEW_SPEED_ADJUSTED_LABEL}: {reviewData.identity.speed.adjusted}
         </p>
       </article>
 
@@ -479,8 +460,8 @@ export function ReviewStep({
       <article className="sheet">
         <h3>{text.REVIEW_SKILLS_BREAKDOWN}</h3>
         <p>
-          {text.REVIEW_POINTS_SPENT_LABEL} {skillBudget.spent} / {skillBudget.total} (
-          {skillBudget.remaining} {text.REVIEW_REMAINING_LABEL})
+          {text.REVIEW_POINTS_SPENT_LABEL} {reviewData.skillBudget.spent} / {reviewData.skillBudget.total} (
+          {reviewData.skillBudget.remaining} {text.REVIEW_REMAINING_LABEL})
         </p>
         <table className="review-table">
           <caption className="sr-only">{text.REVIEW_SKILLS_TABLE_CAPTION}</caption>
@@ -527,20 +508,20 @@ export function ReviewStep({
         <h3>{text.REVIEW_EQUIPMENT_LOAD}</h3>
         <p>
           {text.REVIEW_SELECTED_ITEMS_LABEL}:{" "}
-          {selectedEquipmentIds
+          {reviewData.equipmentLoad.selectedItems
             .map((itemId) => localizeEntityText("items", itemId, "name", itemId))
             .join(", ") || "-"}
         </p>
         <p>
-          {text.REVIEW_TOTAL_WEIGHT_LABEL}: {totalWeight}
+          {text.REVIEW_TOTAL_WEIGHT_LABEL}: {reviewData.equipmentLoad.totalWeight}
         </p>
         <p>
-          {text.REVIEW_LOAD_CATEGORY_LABEL}: {localizeLoadCategory(loadCategory as "light" | "medium" | "heavy")}
+          {text.REVIEW_LOAD_CATEGORY_LABEL}: {localizeLoadCategory(reviewData.equipmentLoad.loadCategory)}
         </p>
         <p>
           {text.REVIEW_SPEED_IMPACT_LABEL}:{" "}
           {formatSpeedImpact(
-            adjustedSpeed,
+            reviewData.movement.adjusted,
             reviewData.equipmentLoad.reducesSpeed,
           )}
         </p>
@@ -549,10 +530,10 @@ export function ReviewStep({
       <article className="sheet review-decisions">
         <h3>{text.REVIEW_MOVEMENT_DETAIL}</h3>
         <p>
-          {text.REVIEW_SPEED_BASE_LABEL}: {baseSpeed}
+          {text.REVIEW_SPEED_BASE_LABEL}: {reviewData.movement.base}
         </p>
         <p>
-          {text.REVIEW_SPEED_ADJUSTED_LABEL}: {adjustedSpeed}
+          {text.REVIEW_SPEED_ADJUSTED_LABEL}: {reviewData.movement.adjusted}
         </p>
         <p>
           {text.REVIEW_MOVEMENT_NOTES_LABEL}:{" "}
@@ -566,27 +547,25 @@ export function ReviewStep({
         <h3>{text.REVIEW_RULES_DECISIONS}</h3>
         <p>
           {text.REVIEW_FAVORED_CLASS_LABEL}:{" "}
-          {!favoredClass
+          {!reviewData.rulesDecisions.favoredClass
             ? "-"
-            : favoredClass === "any"
+            : reviewData.rulesDecisions.favoredClass === "any"
               ? text.REVIEW_FAVORED_CLASS_ANY
               : localizeEntityText(
                   "classes",
-                  favoredClass,
+                  reviewData.rulesDecisions.favoredClass,
                   "name",
-                  favoredClass,
+                  reviewData.rulesDecisions.favoredClass,
                 )}
         </p>
         <p>
           {text.REVIEW_MULTICLASS_XP_IGNORED_LABEL}:{" "}
-          {!favoredClass ||
-          favoredClass === "any" ||
-          favoredClass === (spec.class?.classId ?? "")
+          {reviewData.rulesDecisions.ignoresMulticlassXpPenalty
             ? text.REVIEW_YES
             : text.REVIEW_NO}
         </p>
         <p>
-          {text.REVIEW_FEAT_SLOTS_LABEL}: {featSelectionLimit}
+          {text.REVIEW_FEAT_SLOTS_LABEL}: {reviewData.rulesDecisions.featSelectionLimit}
         </p>
       </article>
 

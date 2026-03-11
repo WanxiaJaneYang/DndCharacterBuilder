@@ -93,4 +93,20 @@ describe("wizardStepHelpers", () => {
       }),
     ).toBe("powerAttack");
   });
+
+  it("supports custom feat selection storage keys when the feat step id differs", () => {
+    const selections = {
+      race: "human",
+      talents: ["alertness"],
+    };
+
+    expect(
+      getStepSelectionValues({
+        stepId: "talent",
+        selections,
+        featStepId: "talent",
+        featSelectionKey: "talents",
+      }),
+    ).toEqual(["alertness"]);
+  });
 });
