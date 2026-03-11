@@ -85,7 +85,8 @@ export function getStepSelectionValues({
   selections,
   featStepId = "feat",
 }: SelectionValuesInput): string[] {
-  const rawValue = selections[stepId];
+  const rawValue =
+    stepId === featStepId ? selections.feats ?? selections[stepId] : selections[stepId];
   if (stepId === featStepId && Array.isArray(rawValue)) {
     return rawValue.map(String);
   }

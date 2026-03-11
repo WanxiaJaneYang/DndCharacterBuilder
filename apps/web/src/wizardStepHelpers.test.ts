@@ -65,7 +65,7 @@ describe("wizardStepHelpers", () => {
   it("normalizes feat selections separately from scalar selections", () => {
     const selections = {
       race: "human",
-      feat: ["powerAttack"],
+      feats: ["powerAttack"],
       equipment: ["chainmail", "shield"],
     };
 
