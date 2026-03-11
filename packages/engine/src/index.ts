@@ -448,7 +448,18 @@ function sanitizeStateForComputeOutput(
 
   for (const ability of ABILITY_KEYS) {
     const score = state.abilities[ability];
-    if (Number.isFinite(score)) continue;
+    const numericScore = Number(score);
+
+    if (Number.isFinite(numericScore)) {
+      if (typeof score === "number") continue;
+
+      nextState ??= {
+        ...state,
+        abilities: { ...state.abilities }
+      };
+      nextState.abilities[ability] = numericScore;
+      continue;
+    }
 
     nextState ??= {
       ...state,

@@ -2643,6 +2643,40 @@ describe("compute() contract", () => {
     );
   });
 
+  it("preserves numerically valid string abilities in compute output while still reporting validation", () => {
+    const malformedSpec = {
+      meta: { name: "String Ability", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: { str: "18", dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      featIds: ["power-attack"],
+      skillRanks: { climb: 4 }
+    } as unknown as Parameters<typeof compute>[0];
+
+    const result = compute(malformedSpec, {
+      resolvedData: context.resolvedData,
+      enabledPackIds: context.enabledPackIds
+    });
+
+    expect(result.validationIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITIES_INVALID",
+          path: "abilities.str"
+        })
+      ])
+    );
+    expect(result.sheetViewModel.data.review.abilities.str).toEqual({ score: 18, mod: 4 });
+    expect(result.assumptions).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITY_DEFAULTED",
+          path: "abilities.str"
+        })
+      ])
+    );
+  });
+
   it("maps validation paths to CharacterSpec fields and records normalization assumptions", () => {
     const result = compute(
       {
