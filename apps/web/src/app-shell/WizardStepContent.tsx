@@ -25,7 +25,6 @@ export function WizardStepContent({ controller }: { controller: AppController })
         selectedFeats={appData.selectedFeats}
         selectedRaceEntity={appData.selectedRaceEntity}
         selectedClassEntity={appData.selectedClassEntity}
-        skillUiDetailById={appData.skillUiDetailById}
         provenanceByTargetPath={appData.provenanceByTargetPath}
         sourceNameByEntityId={appData.sourceNameByEntityId}
         packVersionById={appData.packVersionById}

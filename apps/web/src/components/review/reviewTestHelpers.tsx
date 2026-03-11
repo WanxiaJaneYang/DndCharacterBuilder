@@ -170,7 +170,6 @@ export function renderReviewStep() {
       selectedClassEntity={{
         name: "Fighter",
       }}
-      skillUiDetailById={new Map()}
       provenanceByTargetPath={new Map()}
       sourceNameByEntityId={new Map()}
       packVersionById={new Map([["srd-35e-minimal", "1.0.0"]])}

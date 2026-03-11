@@ -1,4 +1,3 @@
-import { DEFAULT_STATS } from "@dcb/engine";
 import { deriveValueFromProvenance, getEntityDataRecord } from "../appHelpers";
 import { ReviewAbilityTable } from "./review/ReviewAbilityTable";
 import { ReviewAttackSection } from "./review/ReviewAttackSection";
@@ -26,7 +25,6 @@ export function ReviewStep({
   selectedFeats,
   selectedRaceEntity,
   selectedClassEntity,
-  skillUiDetailById,
   provenanceByTargetPath,
   sourceNameByEntityId,
   packVersionById,
@@ -62,10 +60,7 @@ export function ReviewStep({
     ? (getEntityDataRecord(selectedRaceEntity).racialTraits as Array<Record<string, unknown>>)
     : [];
   const reviewSkills = computeResult.sheetViewModel.data.skills
-    .filter((skill) => {
-      const detail = skillUiDetailById.get(skill.id);
-      return skill.ranks > 0 || (detail?.racialBonus ?? 0) !== 0;
-    })
+    .filter((skill) => skill.ranks > 0 || skill.racialBonus !== 0)
     .sort((a, b) => {
       const left = localizeEntityText("skills", a.id, "name", a.name);
       const right = localizeEntityText("skills", b.id, "name", b.name);
@@ -76,10 +71,7 @@ export function ReviewStep({
     ac: combatData.ac.total,
     initiative: reviewData.initiative.total,
     speed: reviewData.speed.adjusted,
-    bab: deriveValueFromProvenance(
-      provenanceByTargetPath.get("stats.bab") ?? [],
-      DEFAULT_STATS.bab,
-    ),
+    bab: reviewData.bab,
     fort: reviewData.saves.fort.total,
     ref: reviewData.saves.ref.total,
     will: reviewData.saves.will.total,
@@ -100,7 +92,7 @@ export function ReviewStep({
         onExportJson={onExportJson}
         onToggleProvenance={onToggleProvenance}
       />
-      <ReviewIdentitySection text={text} spec={spec} reviewData={reviewData} />
+      <ReviewIdentitySection text={text} reviewData={reviewData} />
       <ReviewStatCards text={text} reviewData={reviewData} combatData={combatData} />
       <ReviewSaveHpSection text={text} reviewData={reviewData} />
       <ReviewAttackSection text={text} combatData={combatData} />
@@ -128,7 +120,6 @@ export function ReviewStep({
         text={text}
         reviewData={reviewData}
         reviewSkills={reviewSkills}
-        skillUiDetailById={skillUiDetailById}
         localizeEntityText={localizeEntityText}
         localizeAbilityLabel={localizeAbilityLabel}
       />

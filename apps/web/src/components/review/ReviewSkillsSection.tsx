@@ -10,7 +10,6 @@ type ReviewSkillsSectionProps = {
   text: UIText;
   reviewData: ReviewStepProps["reviewData"];
   reviewSkills: ReviewStepProps["computeResult"]["sheetViewModel"]["data"]["skills"];
-  skillUiDetailById: ReviewStepProps["skillUiDetailById"];
   localizeEntityText: LocalizeEntityText;
   localizeAbilityLabel: LocalizeAbilityLabel;
 };
@@ -19,7 +18,6 @@ export function ReviewSkillsSection({
   text,
   reviewData,
   reviewSkills,
-  skillUiDetailById,
   localizeEntityText,
   localizeAbilityLabel,
 }: ReviewSkillsSectionProps) {
@@ -46,29 +44,26 @@ export function ReviewSkillsSection({
           </tr>
         </thead>
         <tbody>
-          {reviewSkills.map((skill) => {
-            const detail = skillUiDetailById.get(skill.id);
-            return (
-              <tr key={skill.id}>
-                <td className="review-cell-key">
-                  {localizeEntityText("skills", skill.id, "name", skill.name)}
-                </td>
-                <td>{skill.ranks}</td>
-                <td>
-                  {formatSigned(skill.abilityMod)} (
-                  {localizeAbilityLabel(skill.abilityKey)})
-                </td>
-                <td>{formatSigned(detail?.racialBonus ?? 0)}</td>
-                <td>{formatSigned(skill.misc)}</td>
-                <td>{formatSigned(skill.acp)}</td>
-                <td>{skill.total}</td>
-                <td>
-                  {detail?.costSpent ?? 0} ({detail?.costPerRank ?? 0}
-                  {text.REVIEW_PER_RANK_UNIT})
-                </td>
-              </tr>
-            );
-          })}
+          {reviewSkills.map((skill) => (
+            <tr key={skill.id}>
+              <td className="review-cell-key">
+                {localizeEntityText("skills", skill.id, "name", skill.name)}
+              </td>
+              <td>{skill.ranks}</td>
+              <td>
+                {formatSigned(skill.abilityMod)} (
+                {localizeAbilityLabel(skill.abilityKey)})
+              </td>
+              <td>{formatSigned(skill.racialBonus)}</td>
+              <td>{formatSigned(skill.misc)}</td>
+              <td>{formatSigned(skill.acp)}</td>
+              <td>{skill.total}</td>
+              <td>
+                {skill.costSpent} ({skill.costPerRank}
+                {text.REVIEW_PER_RANK_UNIT})
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </article>

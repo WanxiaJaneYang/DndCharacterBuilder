@@ -2,7 +2,6 @@ import type { ResolvedPackSet } from "@dcb/datapack";
 import type { CharacterState, ComputeResult } from "@dcb/engine";
 import type { EditionOption } from "../../editions";
 import type { UIText } from "../../uiText";
-import type { LocalSkillUiDetail } from "../../appHelpers";
 
 export type EntityLike = {
   name: string;
@@ -25,7 +24,6 @@ export type ReviewStepProps = {
   selectedFeats: string[];
   selectedRaceEntity?: EntityLike;
   selectedClassEntity?: EntityLike;
-  skillUiDetailById: Map<string, LocalSkillUiDetail>;
   provenanceByTargetPath: Map<string, NonNullable<ComputeResult["provenance"]>>;
   sourceNameByEntityId: Map<string, string>;
   packVersionById: Map<string, string>;
