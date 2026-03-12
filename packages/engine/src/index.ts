@@ -80,7 +80,6 @@ export type {
   CharacterState
 } from "./characterSpec";
 export {
-  characterSpecToState,
   normalizeCharacterSpec,
   validateCharacterSpec
 } from "./characterSpec";
