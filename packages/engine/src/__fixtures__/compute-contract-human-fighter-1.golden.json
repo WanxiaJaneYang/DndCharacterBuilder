@@ -1,0 +1,230 @@
+{
+  "ac": {
+    "components": [
+      {
+        "id": "base",
+        "label": "Base",
+        "value": 10
+      },
+      {
+        "id": "armor",
+        "label": "Armor",
+        "value": 5
+      },
+      {
+        "id": "shield",
+        "label": "Shield",
+        "value": 2
+      },
+      {
+        "id": "dex",
+        "label": "Dex",
+        "value": 1
+      },
+      {
+        "id": "size",
+        "label": "Size",
+        "value": 0
+      },
+      {
+        "id": "natural",
+        "label": "Natural",
+        "value": 0
+      },
+      {
+        "id": "deflection",
+        "label": "Deflection",
+        "value": 0
+      },
+      {
+        "id": "misc",
+        "label": "Misc",
+        "value": 0
+      }
+    ],
+    "flatFooted": 17,
+    "total": 18,
+    "touch": 11
+  },
+  "firstAttack": {
+    "attackBonus": 4,
+    "attackBonusBreakdown": {
+      "ability": 3,
+      "bab": 1,
+      "misc": 0,
+      "size": 0,
+      "total": 4
+    },
+    "category": "melee",
+    "crit": "19-20/x2",
+    "damage": "1d8",
+    "damageLine": "1d8+3",
+    "itemId": "longsword",
+    "name": "Longsword"
+  },
+  "firstThreeSkills": [
+    {
+      "abilityKey": "str",
+      "abilityMod": 3,
+      "acp": -7,
+      "acpApplied": true,
+      "classSkill": true,
+      "costPerRank": 1,
+      "costSpent": 4,
+      "id": "climb",
+      "maxRanks": 4,
+      "misc": 0,
+      "name": "Climb",
+      "racialBonus": 0,
+      "ranks": 4,
+      "total": 0
+    },
+    {
+      "abilityKey": "cha",
+      "abilityMod": -1,
+      "acp": 0,
+      "acpApplied": false,
+      "classSkill": false,
+      "costPerRank": 2,
+      "costSpent": 1,
+      "id": "diplomacy",
+      "maxRanks": 2,
+      "misc": 0,
+      "name": "Diplomacy",
+      "racialBonus": 0,
+      "ranks": 0.5,
+      "total": -0.5
+    },
+    {
+      "abilityKey": "str",
+      "abilityMod": 3,
+      "acp": -7,
+      "acpApplied": true,
+      "classSkill": true,
+      "costPerRank": 1,
+      "costSpent": 3,
+      "id": "jump",
+      "maxRanks": 4,
+      "misc": 0,
+      "name": "Jump",
+      "racialBonus": 0,
+      "ranks": 3,
+      "total": -1
+    }
+  ],
+  "review": {
+    "abilities": {
+      "cha": {
+        "mod": -1,
+        "score": 8
+      },
+      "con": {
+        "mod": 2,
+        "score": 14
+      },
+      "dex": {
+        "mod": 1,
+        "score": 12
+      },
+      "int": {
+        "mod": 0,
+        "score": 10
+      },
+      "str": {
+        "mod": 3,
+        "score": 16
+      },
+      "wis": {
+        "mod": 0,
+        "score": 10
+      }
+    },
+    "bab": 1,
+    "equipmentLoad": {
+      "loadCategory": "light",
+      "reducesSpeed": true,
+      "selectedItems": [
+        "chainmail",
+        "heavy-wooden-shield",
+        "longsword"
+      ],
+      "totalWeight": 54
+    },
+    "grapple": {
+      "bab": 1,
+      "misc": 0,
+      "size": 0,
+      "str": 3,
+      "total": 4
+    },
+    "hp": {
+      "breakdown": {
+        "con": 2,
+        "hitDie": 10,
+        "misc": 0
+      },
+      "total": 12
+    },
+    "identity": {
+      "level": 1,
+      "size": "medium",
+      "speed": {
+        "adjusted": 20,
+        "base": 30
+      },
+      "xp": 0
+    },
+    "initiative": {
+      "dex": 1,
+      "misc": 0,
+      "total": 1
+    },
+    "movement": {
+      "adjusted": 20,
+      "base": 30,
+      "reducedByArmorOrLoad": true
+    },
+    "rulesDecisions": {
+      "favoredClass": "any",
+      "featSelectionLimit": 3,
+      "ignoresMulticlassXpPenalty": true
+    },
+    "saves": {
+      "fort": {
+        "ability": 2,
+        "base": 2,
+        "misc": 0,
+        "total": 4
+      },
+      "ref": {
+        "ability": 1,
+        "base": 0,
+        "misc": 0,
+        "total": 1
+      },
+      "will": {
+        "ability": 0,
+        "base": 0,
+        "misc": 0,
+        "total": 0
+      }
+    },
+    "skillBudget": {
+      "remaining": 4,
+      "spent": 8,
+      "total": 12
+    },
+    "speed": {
+      "adjusted": 20,
+      "base": 30
+    }
+  },
+  "schemaVersion": "0.1",
+  "sheetViewModelSchemaVersion": "0.1",
+  "unresolvedCodes": [
+    "srd-35e-minimal:classes:fighter:fighter-bonus-feat-runtime",
+    "srd-35e-minimal:classes:fighter:fighter-proficiency-automation",
+    "srd-35e-minimal:feats:power-attack:power-attack-benefit"
+  ],
+  "validationIssueCodes": []
+}
