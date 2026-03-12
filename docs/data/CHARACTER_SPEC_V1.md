@@ -71,7 +71,12 @@ Unknown wizard-only step state should not be copied into `CharacterSpec`.
 
 ### `CharacterSpec` -> `CharacterState` (temporary bridge)
 
-The engine exports `characterSpecToState(spec)` to preserve compatibility while `compute(spec, rulepack)` replaces wizard-oriented internals.
+The temporary `characterSpecToState(spec)` bridge remains available from the internal `packages/engine/src/characterSpec.ts` module for engine migration work, but it is not part of the public package surface.
+
+The package surface is now split deliberately:
+
+- `@dcb/engine` exposes the flow-independent contract (`compute(spec, rulepack)`, CharacterSpec validation, and ComputeResult-facing types/constants).
+- `@dcb/engine/legacy` exposes the temporary wizard/state APIs (`initialState`, `applyChoice`, `listChoices`, `validateState`, `finalizeCharacter`, and related state types) for migration work.
 
 - `meta.name` -> `metadata.name`
 - `abilities` -> `abilities`

@@ -4,12 +4,14 @@ import type { Page } from "@dcb/schema";
 import { loadMinimalPack } from "./loadMinimalPack";
 import {
   DEFAULT_STATS,
-  applyChoice,
   compute,
+} from "@dcb/engine";
+import {
+  applyChoice,
   initialState,
   listChoices,
   type CharacterState,
-} from "@dcb/engine";
+} from "@dcb/engine/legacy";
 import {
   EDITIONS,
   FALLBACK_EDITION,

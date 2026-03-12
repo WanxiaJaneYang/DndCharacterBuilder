@@ -4,17 +4,21 @@ import { describe, expect, it } from "vitest";
 import type { LoadedPack } from "@dcb/datapack";
 import { resolveLoadedPacks } from "@dcb/datapack";
 import { resolvePackSet } from "@dcb/datapack/node";
+import * as enginePublicApi from "./public";
+import * as engineLegacyApi from "./legacy";
+import {
+  normalizeCharacterSpec,
+  validateCharacterSpec,
+  compute
+} from "./public";
 import {
   finalizeCharacter,
   initialState,
   applyChoice,
   listChoices,
-  validateState,
-  normalizeCharacterSpec,
-  characterSpecToState,
-  validateCharacterSpec,
-  compute
-} from "./index";
+  validateState
+} from "./legacy";
+import { characterSpecToState } from "./characterSpec";
 
 const resolved = resolvePackSet(path.resolve(process.cwd(), "../../packs"), ["srd-35e-minimal"]);
 const context = { enabledPackIds: ["srd-35e-minimal"], resolvedData: resolved };
@@ -2277,6 +2281,21 @@ describe("engine determinism", () => {
 });
 
 describe("CharacterSpec v1", () => {
+  it("keeps legacy wizard/state APIs off the top-level engine surface and behind the legacy entrypoint", () => {
+    expect("characterSpecToState" in enginePublicApi).toBe(false);
+    expect("initialState" in enginePublicApi).toBe(false);
+    expect("applyChoice" in enginePublicApi).toBe(false);
+    expect("listChoices" in enginePublicApi).toBe(false);
+    expect("validateState" in enginePublicApi).toBe(false);
+    expect("finalizeCharacter" in enginePublicApi).toBe(false);
+
+    expect("initialState" in engineLegacyApi).toBe(true);
+    expect("applyChoice" in engineLegacyApi).toBe(true);
+    expect("listChoices" in engineLegacyApi).toBe(true);
+    expect("validateState" in engineLegacyApi).toBe(true);
+    expect("finalizeCharacter" in engineLegacyApi).toBe(true);
+  });
+
   it("normalizes a minimal flow-independent spec and passes validation", () => {
     const normalized = normalizeCharacterSpec({
       meta: {

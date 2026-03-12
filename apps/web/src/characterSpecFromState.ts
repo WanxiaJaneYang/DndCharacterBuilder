@@ -1,4 +1,5 @@
-import type { CharacterSpec, CharacterState } from "@dcb/engine";
+import type { CharacterSpec } from "@dcb/engine";
+import type { CharacterState } from "@dcb/engine/legacy";
 
 type CharacterSpecFromStateInput = {
   state: CharacterState;

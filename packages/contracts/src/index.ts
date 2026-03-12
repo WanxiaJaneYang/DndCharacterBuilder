@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ContractFixtureSchema } from "@dcb/schema";
 import { resolvePackSet } from "@dcb/datapack/node";
-import { applyChoice, finalizeCharacter, initialState, listChoices, validateState, type CharacterState } from "@dcb/engine";
+import { applyChoice, finalizeCharacter, initialState, listChoices, validateState, type CharacterState } from "@dcb/engine/legacy";
 export { runAuthenticityChecks } from "./authenticity";
 import { assertPackReferenceIntegrity } from "./references";
 
