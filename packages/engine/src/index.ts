@@ -80,7 +80,6 @@ export type {
   CharacterState
 } from "./characterSpec";
 export {
-  characterSpecToState,
   normalizeCharacterSpec,
   validateCharacterSpec
 } from "./characterSpec";
@@ -440,6 +439,66 @@ function mapStepIdToSpecPath(stepId: string): string | undefined {
   return STEP_ID_TO_SPEC_PATH[stepId];
 }
 
+function sanitizeStateForComputeOutput(
+  state: CharacterState
+): { state: CharacterState; assumptions: ComputeResultAssumptionEntry[] } {
+  let nextState: CharacterState | undefined;
+  const assumptions: ComputeResultAssumptionEntry[] = [];
+
+  const toSanitizedAbilityScore = (
+    value: unknown
+  ): { valid: true; numeric: number } | { valid: false } => {
+    if (typeof value === "number") {
+      return Number.isFinite(value) ? { valid: true, numeric: value } : { valid: false };
+    }
+    if (typeof value !== "string") return { valid: false };
+
+    const trimmed = value.trim();
+    if (!trimmed) return { valid: false };
+    if (!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(trimmed)) return { valid: false };
+
+    try {
+      const numeric = Number(trimmed);
+      return Number.isFinite(numeric) ? { valid: true, numeric } : { valid: false };
+    } catch {
+      return { valid: false };
+    }
+  };
+
+  for (const ability of ABILITY_KEYS) {
+    const score = state.abilities[ability];
+    const sanitizedScore = toSanitizedAbilityScore(score);
+
+    if (sanitizedScore.valid) {
+      if (typeof score === "number") continue;
+
+      nextState ??= {
+        ...state,
+        abilities: { ...state.abilities }
+      };
+      nextState.abilities[ability] = sanitizedScore.numeric;
+      continue;
+    }
+
+    nextState ??= {
+      ...state,
+      abilities: { ...state.abilities }
+    };
+    nextState.abilities[ability] = 10;
+    assumptions.push({
+      code: "SPEC_ABILITY_DEFAULTED",
+      message: `${ability.toUpperCase()} was defaulted to 10 for compute output because the input value was not finite.`,
+      path: `abilities.${ability}`,
+      defaultUsed: 10
+    });
+  }
+
+  return {
+    state: nextState ?? state,
+    assumptions
+  };
+}
+
 export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeResult {
   const normalizedSpec = normalizeCharacterSpec(spec);
   const validationIssues: ComputeResultValidationIssue[] = [
@@ -471,9 +530,12 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
     resolvedData: rulepack.resolvedData,
     enabledPackIds: rulepack.enabledPackIds ?? normalizedSpec.meta.sourceIds
   };
+  const sanitized = sanitizeStateForComputeOutput(state);
+
+  assumptions.push(...sanitized.assumptions);
 
   validationIssues.push(
-    ...validateState(state, context).map((issue) => ({
+    ...validateState(sanitized.state, context, { allowFlowDefaultAbilityMode: false }).map((issue) => ({
       code: issue.code,
       severity: "error" as const,
       message: issue.message,
@@ -483,7 +545,7 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
     }))
   );
 
-  const sheet = finalizeCharacter(state, context);
+  const sheet = finalizeCharacter(sanitized.state, context);
   const unresolved: ComputeResultUnresolvedEntry[] = sheet.unresolvedRules.map((entry) => ({
     code: entry.id,
     message: entry.description,
@@ -742,10 +804,16 @@ function getAbilityStepConfig(context: EngineContext): AbilityStepConfig | undef
   return abilityStep.abilitiesConfig as AbilityStepConfig;
 }
 
-function getAbilityModeFromState(state: CharacterState, config?: { defaultMode?: AbilityGenerationMode }): AbilityGenerationMode | undefined {
+function getAbilityModeFromState(
+  state: CharacterState,
+  config?: { defaultMode?: AbilityGenerationMode },
+  options?: { allowFlowDefault?: boolean }
+): AbilityGenerationMode | undefined {
   const meta = state.selections.abilitiesMeta as { mode?: unknown } | undefined;
   const mode = typeof meta?.mode === "string" ? (meta.mode as AbilityGenerationMode) : undefined;
-  return mode ?? config?.defaultMode;
+  if (mode) return mode;
+  if (options?.allowFlowDefault === false) return undefined;
+  return config?.defaultMode;
 }
 
 function getAbilityScoreBounds(
@@ -1279,11 +1347,17 @@ export function applyChoice(state: CharacterState, choiceId: string, selection: 
   return { ...state, selections: { ...state.selections, [choiceId]: selection } };
 }
 
-export function validateState(state: CharacterState, context: EngineContext): ValidationError[] {
+export function validateState(
+  state: CharacterState,
+  context: EngineContext,
+  options?: { allowFlowDefaultAbilityMode?: boolean }
+): ValidationError[] {
   const errors: ValidationError[] = [];
   if (!state.metadata.name) errors.push({ code: "NAME_REQUIRED", message: "Character name is required.", stepId: "name" });
   const abilityConfig = getAbilityStepConfig(context);
-  const abilityMode = getAbilityModeFromState(state, abilityConfig);
+  const abilityMode = getAbilityModeFromState(state, abilityConfig, {
+    allowFlowDefault: options?.allowFlowDefaultAbilityMode ?? true
+  });
   const abilityBounds = getAbilityScoreBounds(state, context, abilityMode);
   for (const ability of ABILITY_KEYS) {
     const score = state.abilities[ability];

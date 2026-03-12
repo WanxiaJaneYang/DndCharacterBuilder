@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react";
-import type { CharacterState, ComputeResult } from "@dcb/engine";
+import type { ComputeResult } from "@dcb/engine";
+import type { CharacterState } from "@dcb/engine/legacy";
 import type { ResolvedPackSet } from "@dcb/datapack";
 import { ReviewStep } from "../ReviewStep";
 import { uiText } from "../../uiText";

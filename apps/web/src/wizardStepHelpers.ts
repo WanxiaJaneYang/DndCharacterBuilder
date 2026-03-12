@@ -13,6 +13,7 @@ type ChoiceLike = {
   stepId: string;
   label: string;
   options: Array<{ id: string; label: string }>;
+  limit?: number;
 };
 
 type LocalizeChoicesInput<TChoice extends ChoiceLike, TStep extends StepLike> = {

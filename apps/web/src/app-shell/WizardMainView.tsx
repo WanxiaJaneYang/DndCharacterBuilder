@@ -1,4 +1,4 @@
-import { initialState } from "@dcb/engine";
+import { initialState } from "@dcb/engine/legacy";
 import { LanguageSwitch } from "./LanguageSwitch";
 import { RoleSelectionGate } from "./RoleSelectionGate";
 import { RulesSetupGate } from "./RulesSetupGate";

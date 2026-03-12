@@ -2,7 +2,11 @@
   "name": "@dcb/engine",
   "version": "0.1.0",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "src/public.ts",
+  "exports": {
+    ".": "./src/public.ts",
+    "./legacy": "./src/legacy.ts"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",

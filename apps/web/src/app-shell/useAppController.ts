@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { initialState, type CharacterState } from "@dcb/engine";
+import { initialState, type CharacterState } from "@dcb/engine/legacy";
 import { defaultEditionId, EDITIONS } from "../editions";
 import { detectDefaultLanguage, type Language } from "../uiText";
 import { DEFAULT_EXPORT_NAME, type Role } from "./constants";

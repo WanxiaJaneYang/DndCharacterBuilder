@@ -1,5 +1,5 @@
 import { useEffect, useMemo, type Dispatch, type RefObject, type SetStateAction } from "react";
-import { applyChoice, initialState, type CharacterState } from "@dcb/engine";
+import { applyChoice, initialState, type CharacterState } from "@dcb/engine/legacy";
 import {
   clampAbilityScore,
   derivePointBuyBaseScore,

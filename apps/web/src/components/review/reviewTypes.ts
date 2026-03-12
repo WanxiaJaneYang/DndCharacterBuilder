@@ -1,5 +1,6 @@
 import type { ResolvedPackSet } from "@dcb/datapack";
-import type { CharacterState, ComputeResult } from "@dcb/engine";
+import type { ComputeResult } from "@dcb/engine";
+import type { CharacterState } from "@dcb/engine/legacy";
 import type { EditionOption } from "../../editions";
 import type { UIText } from "../../uiText";
 

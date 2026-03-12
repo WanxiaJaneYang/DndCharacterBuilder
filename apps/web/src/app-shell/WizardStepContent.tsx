@@ -1,4 +1,4 @@
-import { applyChoice } from "@dcb/engine";
+import { applyChoice } from "@dcb/engine/legacy";
 import type { RefObject } from "react";
 import { createAbilityModeSelectorHandlers } from "../createAbilityModeSelectorHandlers";
 import { resolvePageSchemaForStep } from "../pageSchemaResolver";

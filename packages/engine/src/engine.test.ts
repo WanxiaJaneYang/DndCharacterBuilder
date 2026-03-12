@@ -1,22 +1,31 @@
+import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import type { LoadedPack } from "@dcb/datapack";
 import { resolveLoadedPacks } from "@dcb/datapack";
 import { resolvePackSet } from "@dcb/datapack/node";
+import * as enginePublicApi from "./public";
+import * as engineLegacyApi from "./legacy";
+import {
+  normalizeCharacterSpec,
+  validateCharacterSpec,
+  compute
+} from "./public";
 import {
   finalizeCharacter,
   initialState,
   applyChoice,
   listChoices,
-  validateState,
-  normalizeCharacterSpec,
-  characterSpecToState,
-  validateCharacterSpec,
-  compute
-} from "./index";
+  validateState
+} from "./legacy";
+import { characterSpecToState } from "./characterSpec";
 
 const resolved = resolvePackSet(path.resolve(process.cwd(), "../../packs"), ["srd-35e-minimal"]);
 const context = { enabledPackIds: ["srd-35e-minimal"], resolvedData: resolved };
+const canonicalComputeContractFixture = new URL(
+  "./__fixtures__/compute-contract-human-fighter-1.golden.json",
+  import.meta.url
+);
 
 function makePack(id: string, priority: number, dependencies: string[] = []): LoadedPack {
   return {
@@ -2272,6 +2281,21 @@ describe("engine determinism", () => {
 });
 
 describe("CharacterSpec v1", () => {
+  it("keeps legacy wizard/state APIs off the top-level engine surface and behind the legacy entrypoint", () => {
+    expect("characterSpecToState" in enginePublicApi).toBe(false);
+    expect("initialState" in enginePublicApi).toBe(false);
+    expect("applyChoice" in enginePublicApi).toBe(false);
+    expect("listChoices" in enginePublicApi).toBe(false);
+    expect("validateState" in enginePublicApi).toBe(false);
+    expect("finalizeCharacter" in enginePublicApi).toBe(false);
+
+    expect("initialState" in engineLegacyApi).toBe(true);
+    expect("applyChoice" in engineLegacyApi).toBe(true);
+    expect("listChoices" in engineLegacyApi).toBe(true);
+    expect("validateState" in engineLegacyApi).toBe(true);
+    expect("finalizeCharacter" in engineLegacyApi).toBe(true);
+  });
+
   it("normalizes a minimal flow-independent spec and passes validation", () => {
     const normalized = normalizeCharacterSpec({
       meta: {
@@ -2354,6 +2378,35 @@ describe("CharacterSpec v1", () => {
     const issues = validateCharacterSpec(invalidSpec);
     expect(issues.some((issue) => issue.code === "SPEC_META_SOURCEIDS_INVALID")).toBe(true);
   });
+
+  it("reports SPEC_CLASS_LEVEL_INVALID for raw class levels before normalization", () => {
+    for (const level of [0, -1, 1.9]) {
+      const issues = validateCharacterSpec({
+        meta: { rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        class: { classId: "fighter", level },
+        abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
+      });
+
+      expect(issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            code: "SPEC_CLASS_LEVEL_INVALID",
+            path: "class.level"
+          })
+        ])
+      );
+    }
+  });
+
+  it("does not throw when class is null in malformed runtime input", () => {
+    const malformedSpec = {
+      meta: { rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      class: null,
+      abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 }
+    } as unknown as Parameters<typeof validateCharacterSpec>[0];
+
+    expect(() => validateCharacterSpec(malformedSpec)).not.toThrow();
+  });
 });
 
 describe("compute() contract", () => {
@@ -2376,6 +2429,17 @@ describe("compute() contract", () => {
     expect(schemaVersion).toBe("0.1");
     expect(sheetSchemaVersion).toBe("0.1");
     expect(result.sheetViewModel.data.combat.ac.total).toBe(18);
+    expect(result.sheetViewModel.data.combat.attacks).toEqual([
+      expect.objectContaining({
+        itemId: "longsword",
+        name: "Longsword",
+        category: "melee",
+        attackBonus: 4,
+        damage: "1d8",
+        damageLine: "1d8+3",
+        crit: "19-20/x2"
+      })
+    ]);
     expect(result.sheetViewModel.data.review).toMatchObject({
       identity: {
         level: 1,
@@ -2564,6 +2628,159 @@ describe("compute() contract", () => {
     });
   });
 
+  it("does not apply flow-default point-buy validation to flow-independent CharacterSpec abilities", () => {
+    const result = compute(
+      {
+        meta: { name: "Rolled Case", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 18, dex: 18, con: 18, int: 8, wis: 8, cha: 8 },
+        featIds: ["power-attack"],
+        skillRanks: { climb: 4 }
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    expect(result.validationIssues.some((issue) => issue.code === "ABILITY_POINTBUY_EXCEEDED")).toBe(false);
+  });
+
+  it("sanitizes non-finite ability inputs before compute output reaches JSON serialization", () => {
+    const result = compute(
+      {
+        meta: { name: "NaN Case", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: Number.NaN, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+        featIds: ["power-attack"],
+        skillRanks: { climb: 4 }
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    const serialized = JSON.parse(JSON.stringify(result));
+    expect(result.validationIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITIES_INVALID",
+          path: "abilities.str"
+        })
+      ])
+    );
+    expect(serialized.sheetViewModel.data.review.abilities.str).toEqual({ score: 10, mod: 0 });
+    expect(result.assumptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITY_DEFAULTED",
+          path: "abilities.str",
+          defaultUsed: 10
+        })
+      ])
+    );
+  });
+
+  it("preserves numerically valid string abilities in compute output while still reporting validation", () => {
+    const malformedSpec = {
+      meta: { name: "String Ability", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: { str: "18", dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      featIds: ["power-attack"],
+      skillRanks: { climb: 4 }
+    } as unknown as Parameters<typeof compute>[0];
+
+    const result = compute(malformedSpec, {
+      resolvedData: context.resolvedData,
+      enabledPackIds: context.enabledPackIds
+    });
+
+    expect(result.validationIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITIES_INVALID",
+          path: "abilities.str"
+        })
+      ])
+    );
+    expect(result.sheetViewModel.data.review.abilities.str).toEqual({ score: 18, mod: 4 });
+    expect(result.assumptions).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITY_DEFAULTED",
+          path: "abilities.str"
+        })
+      ])
+    );
+  });
+
+  it("defaults malformed non-numeric ability values instead of silently coercing them", () => {
+    const malformedSpec = {
+      meta: { name: "Hidden Coercion", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: {
+        str: null,
+        dex: false,
+        con: "   ",
+        int: 10,
+        wis: 10,
+        cha: 10
+      },
+      featIds: ["power-attack"],
+      skillRanks: { climb: 4 }
+    } as unknown as Parameters<typeof compute>[0];
+
+    const result = compute(malformedSpec, {
+      resolvedData: context.resolvedData,
+      enabledPackIds: context.enabledPackIds
+    });
+
+    expect(result.sheetViewModel.data.review.abilities.str).toEqual({ score: 10, mod: 0 });
+    expect(result.sheetViewModel.data.review.abilities.dex).toEqual({ score: 10, mod: 0 });
+    expect(result.sheetViewModel.data.review.abilities.con).toEqual({ score: 10, mod: 0 });
+    expect(result.assumptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: "SPEC_ABILITY_DEFAULTED", path: "abilities.str" }),
+        expect.objectContaining({ code: "SPEC_ABILITY_DEFAULTED", path: "abilities.dex" }),
+        expect.objectContaining({ code: "SPEC_ABILITY_DEFAULTED", path: "abilities.con" })
+      ])
+    );
+  });
+
+  it("defaults malformed ability values that throw on numeric coercion without crashing compute", () => {
+    const malformedSpec = {
+      meta: { name: "Symbol Ability", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+      raceId: "human",
+      class: { classId: "fighter", level: 1 },
+      abilities: { str: Symbol("18"), dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
+      featIds: ["power-attack"],
+      skillRanks: { climb: 4 }
+    } as unknown as Parameters<typeof compute>[0];
+
+    const result = compute(malformedSpec, {
+      resolvedData: context.resolvedData,
+      enabledPackIds: context.enabledPackIds
+    });
+
+    expect(result.validationIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITIES_INVALID",
+          path: "abilities.str"
+        })
+      ])
+    );
+    expect(result.sheetViewModel.data.review.abilities.str).toEqual({ score: 10, mod: 0 });
+    expect(result.assumptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_ABILITY_DEFAULTED",
+          path: "abilities.str",
+          defaultUsed: 10
+        })
+      ])
+    );
+  });
+
   it("maps validation paths to CharacterSpec fields and records normalization assumptions", () => {
     const result = compute(
       {
@@ -2583,6 +2800,10 @@ describe("compute() contract", () => {
         expect.objectContaining({
           code: "NAME_REQUIRED",
           path: "meta.name"
+        }),
+        expect.objectContaining({
+          code: "SPEC_CLASS_LEVEL_INVALID",
+          path: "class.level"
         })
       ])
     );
@@ -2627,237 +2848,8 @@ describe("compute() contract", () => {
       unresolvedCodes: one.unresolved.map((entry) => entry.code)
     };
 
-    expect(contractSlice).toMatchInlineSnapshot(`
-      {
-        "ac": {
-          "components": [
-            {
-              "id": "base",
-              "label": "Base",
-              "value": 10,
-            },
-            {
-              "id": "armor",
-              "label": "Armor",
-              "value": 5,
-            },
-            {
-              "id": "shield",
-              "label": "Shield",
-              "value": 2,
-            },
-            {
-              "id": "dex",
-              "label": "Dex",
-              "value": 1,
-            },
-            {
-              "id": "size",
-              "label": "Size",
-              "value": 0,
-            },
-            {
-              "id": "natural",
-              "label": "Natural",
-              "value": 0,
-            },
-            {
-              "id": "deflection",
-              "label": "Deflection",
-              "value": 0,
-            },
-            {
-              "id": "misc",
-              "label": "Misc",
-              "value": 0,
-            },
-          ],
-          "flatFooted": 17,
-          "total": 18,
-          "touch": 11,
-        },
-        "firstAttack": {
-          "attackBonus": 4,
-          "attackBonusBreakdown": {
-            "ability": 3,
-            "bab": 1,
-            "misc": 0,
-            "size": 0,
-            "total": 4,
-          },
-          "category": "melee",
-          "crit": "19-20/x2",
-          "damage": "1d8",
-          "damageLine": "1d8+3",
-          "itemId": "longsword",
-          "name": "Longsword",
-        },
-        "firstThreeSkills": [
-          {
-            "abilityKey": "str",
-            "abilityMod": 3,
-            "acp": -7,
-            "acpApplied": true,
-            "classSkill": true,
-            "costPerRank": 1,
-            "costSpent": 4,
-            "id": "climb",
-            "maxRanks": 4,
-            "misc": 0,
-            "name": "Climb",
-            "racialBonus": 0,
-            "ranks": 4,
-            "total": 0,
-          },
-          {
-            "abilityKey": "cha",
-            "abilityMod": -1,
-            "acp": 0,
-            "acpApplied": false,
-            "classSkill": false,
-            "costPerRank": 2,
-            "costSpent": 1,
-            "id": "diplomacy",
-            "maxRanks": 2,
-            "misc": 0,
-            "name": "Diplomacy",
-            "racialBonus": 0,
-            "ranks": 0.5,
-            "total": -0.5,
-          },
-          {
-            "abilityKey": "str",
-            "abilityMod": 3,
-            "acp": -7,
-            "acpApplied": true,
-            "classSkill": true,
-            "costPerRank": 1,
-            "costSpent": 3,
-            "id": "jump",
-            "maxRanks": 4,
-            "misc": 0,
-            "name": "Jump",
-            "racialBonus": 0,
-            "ranks": 3,
-            "total": -1,
-          },
-        ],
-        "review": {
-          "abilities": {
-            "cha": {
-              "mod": -1,
-              "score": 8,
-            },
-            "con": {
-              "mod": 2,
-              "score": 14,
-            },
-            "dex": {
-              "mod": 1,
-              "score": 12,
-            },
-            "int": {
-              "mod": 0,
-              "score": 10,
-            },
-            "str": {
-              "mod": 3,
-              "score": 16,
-            },
-            "wis": {
-              "mod": 0,
-              "score": 10,
-            },
-          },
-          "bab": 1,
-          "equipmentLoad": {
-            "loadCategory": "light",
-            "reducesSpeed": true,
-            "selectedItems": [
-              "chainmail",
-              "heavy-wooden-shield",
-              "longsword",
-            ],
-            "totalWeight": 54,
-          },
-          "grapple": {
-            "bab": 1,
-            "misc": 0,
-            "size": 0,
-            "str": 3,
-            "total": 4,
-          },
-          "hp": {
-            "breakdown": {
-              "con": 2,
-              "hitDie": 10,
-              "misc": 0,
-            },
-            "total": 12,
-          },
-          "identity": {
-            "level": 1,
-            "size": "medium",
-            "speed": {
-              "adjusted": 20,
-              "base": 30,
-            },
-            "xp": 0,
-          },
-          "initiative": {
-            "dex": 1,
-            "misc": 0,
-            "total": 1,
-          },
-          "movement": {
-            "adjusted": 20,
-            "base": 30,
-            "reducedByArmorOrLoad": true,
-          },
-          "rulesDecisions": {
-            "favoredClass": "any",
-            "featSelectionLimit": 3,
-            "ignoresMulticlassXpPenalty": true,
-          },
-          "saves": {
-            "fort": {
-              "ability": 2,
-              "base": 2,
-              "misc": 0,
-              "total": 4,
-            },
-            "ref": {
-              "ability": 1,
-              "base": 0,
-              "misc": 0,
-              "total": 1,
-            },
-            "will": {
-              "ability": 0,
-              "base": 0,
-              "misc": 0,
-              "total": 0,
-            },
-          },
-          "skillBudget": {
-            "remaining": 4,
-            "spent": 8,
-            "total": 12,
-          },
-          "speed": {
-            "adjusted": 20,
-            "base": 30,
-          },
-        },
-        "schemaVersion": "0.1",
-        "sheetViewModelSchemaVersion": "0.1",
-        "unresolvedCodes": [
-          "srd-35e-minimal:classes:fighter:fighter-bonus-feat-runtime",
-          "srd-35e-minimal:classes:fighter:fighter-proficiency-automation",
-          "srd-35e-minimal:feats:power-attack:power-attack-benefit",
-        ],
-        "validationIssueCodes": [],
-      }
-    `);
+    expect(contractSlice).toEqual(
+      JSON.parse(fs.readFileSync(canonicalComputeContractFixture, "utf8")) as typeof contractSlice
+    );
   });
 });

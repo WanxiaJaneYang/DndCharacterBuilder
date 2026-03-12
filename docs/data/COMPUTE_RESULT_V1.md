@@ -70,7 +70,7 @@ Consumers may rely on array ordering and field presence. Consumers must not rely
 
 For identical `CharacterSpec + RulepackInput`, `compute()` must return deeply equal output.
 
-This is covered by engine tests under `compute() contract`, including a deterministic snapshot for a canonical fixture.
+This is covered by engine tests under `compute() contract`, including a deterministic golden fixture for a canonical equipped fighter path that locks AC totals and the first attack line.
 
 ## Validation and assumptions
 
@@ -84,4 +84,6 @@ This is covered by engine tests under `compute() contract`, including a determin
 
 `compute()` currently bridges into legacy engine internals through `characterSpecToState(spec)`, `validateState()`, and `finalizeCharacter()`.
 
-This preserves current behavior while decoupling the public contract from wizard flow state. A later internal refactor can replace the bridge without changing the `ComputeResult` public shape.
+This preserves current behavior while decoupling the public contract from wizard flow state. The top-level `@dcb/engine` package surface is now reserved for the flow-independent contract; temporary wizard/state APIs live under the explicit `@dcb/engine/legacy` entrypoint.
+
+A later internal refactor can replace the bridge without changing the `ComputeResult` public shape.

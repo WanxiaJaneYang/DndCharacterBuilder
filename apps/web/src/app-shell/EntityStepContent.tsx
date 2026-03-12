@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { applyChoice, type CharacterState } from "@dcb/engine";
+import { applyChoice, type CharacterState } from "@dcb/engine/legacy";
 import { EntityChoiceStep } from "../components/EntityChoiceStep";
 import { getSingleSelectedValue } from "../wizardStepHelpers";
 import { STEP_ID_FEAT } from "./constants";

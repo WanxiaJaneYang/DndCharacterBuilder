@@ -1,4 +1,5 @@
-import type { CharacterState, ComputeResult } from "@dcb/engine";
+import type { ComputeResult } from "@dcb/engine";
+import type { CharacterState } from "@dcb/engine/legacy";
 import type { UIText } from "../../uiText";
 import type {
   LocalizeAbilityLabel,

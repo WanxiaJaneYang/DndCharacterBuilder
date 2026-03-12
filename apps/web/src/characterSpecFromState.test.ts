@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type CharacterState } from "@dcb/engine";
+import { type CharacterState } from "@dcb/engine/legacy";
 import { characterSpecFromState } from "./characterSpecFromState";
 
 describe("characterSpecFromState", () => {

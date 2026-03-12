@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { applyChoice, type CharacterState } from "@dcb/engine";
+import { applyChoice, type CharacterState } from "@dcb/engine/legacy";
 import type { UIText } from "../uiText";
 import { STEP_ID_SKILLS } from "./constants";
 import type { WizardEngineContext } from "./types";

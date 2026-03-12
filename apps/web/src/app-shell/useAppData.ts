@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { resolveLoadedPacks } from "@dcb/datapack";
-import { compute, listChoices, type CharacterState } from "@dcb/engine";
+import { compute } from "@dcb/engine";
+import { listChoices, type CharacterState } from "@dcb/engine/legacy";
 import {
   buildSkillBudgetSummary,
   getCharacterLevel,
