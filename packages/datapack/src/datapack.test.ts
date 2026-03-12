@@ -18,6 +18,7 @@ function makePack(id: string, priority: number, dependencies: string[] = []): Lo
       rules: [{ id: `${id}-rule`, name: `${id}-rule`, entityType: "rules", summary: "Rule summary", description: "Rule description", portraitUrl: "assets/rules/rule-portrait.png", iconUrl: "assets/icons/rules/rule.png", effects: [] }]
     },
     flow: { steps: [{ id: "name", kind: "metadata", label: "Name", source: { type: "manual" } }] },
+    pageSchemas: {},
     patches: [],
     packPath: id
   };
@@ -39,6 +40,89 @@ describe("resolvePackSet", () => {
 
     expect(abilityStep?.abilitiesConfig?.defaultMode).toBe("pointBuy");
     expect(abilityStep?.abilitiesConfig?.modes).toEqual(["pointBuy", "phb", "rollSets"]);
+  });
+
+  it("loads pack-owned page schemas and exposes them on the resolved pack set", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-page-schema-pack-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.mkdirSync(path.join(packDest, "ui", "pages"), { recursive: true });
+    fs.writeFileSync(
+      path.join(packDest, "ui", "pages", "character.metadata.page.json"),
+      JSON.stringify({
+        id: "character.metadata",
+        root: {
+          id: "metadata-root",
+          componentId: "layout.singleColumn",
+          children: [
+            {
+              id: "metadata-name-field",
+              componentId: "metadata.nameField",
+              slot: "main",
+              dataSource: "page.metadata.nameField"
+            }
+          ]
+        }
+      })
+    );
+
+    fs.writeFileSync(
+      path.join(packDest, "flows", "character-creation.flow.json"),
+      JSON.stringify({
+        steps: [
+          {
+            id: "name",
+            kind: "metadata",
+            label: "Identity",
+            source: { type: "manual" },
+            pageSchemaId: "character.metadata"
+          }
+        ]
+      })
+    );
+
+    try {
+      const resolved = resolvePackSet(tempRoot, ["srd-35e-minimal"]);
+
+      expect(resolved.flow.steps[0]?.pageSchemaId).toBe("character.metadata");
+      expect(resolved.pageSchemas["character.metadata"]?.root.componentId).toBe("layout.singleColumn");
+      expect(resolved.pageSchemas["character.metadata"]?.root.children?.[0]?.slot).toBe("main");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("fails pack resolution when a flow step references a missing page schema id", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-missing-page-schema-pack-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.mkdirSync(path.join(packDest, "ui", "pages"), { recursive: true });
+    fs.writeFileSync(
+      path.join(packDest, "flows", "character-creation.flow.json"),
+      JSON.stringify({
+        steps: [
+          {
+            id: "abilities",
+            kind: "abilities",
+            label: "Ability Scores",
+            source: { type: "manual" },
+            pageSchemaId: "character.typoed-abilities"
+          }
+        ]
+      })
+    );
+
+    try {
+      expect(() => resolvePackSet(tempRoot, ["srd-35e-minimal"])).toThrow(
+        /missing page schema/i,
+      );
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
   });
 
   it("loads the finalized phb feat catalog with preserved modeled mechanics", () => {

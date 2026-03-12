@@ -1,10 +1,11 @@
-import { type Entity, type Flow, type Manifest, type PackLocale } from "@dcb/schema";
+import { type Entity, type Flow, type Manifest, type PackLocale, type Page } from "@dcb/schema";
 export type { PackLocale } from "@dcb/schema";
 
 export interface LoadedPack {
   manifest: Manifest;
   entities: Record<string, Entity[]>;
   flow: Flow;
+  pageSchemas?: Record<string, Page>;
   patches: Array<{ op: "mergeEntity"; entityType: string; id: string; value: Partial<Entity> }>;
   locales?: Record<string, PackLocale>;
   packPath: string;
@@ -23,6 +24,7 @@ export interface ResolvedPackSet {
   manifests: Manifest[];
   entities: Record<string, Record<string, ResolvedEntity>>;
   flow: Flow;
+  pageSchemas: Record<string, Page>;
   locales: Record<string, PackLocale>;
   fingerprint: string;
 }
@@ -223,6 +225,7 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
   const entities: Record<string, Record<string, ResolvedEntity>> = {};
   const locales: Record<string, PackLocale> = {};
   let flow: Flow | undefined;
+  let pageSchemas: Record<string, Page> = {};
 
   for (const pack of sorted) {
     for (const [entityType, list] of Object.entries(pack.entities)) {
@@ -287,14 +290,27 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
     }
 
     flow = pack.flow;
+    pageSchemas = {
+      ...pageSchemas,
+      ...(pack.pageSchemas ?? {})
+    };
   }
 
   if (!flow) throw new Error("No flow found while resolving packs");
+  for (const step of flow.steps) {
+    if (!step.pageSchemaId) continue;
+    if (!pageSchemas[step.pageSchemaId]) {
+      throw new Error(
+        `Missing page schema "${step.pageSchemaId}" referenced by flow step "${step.id}"`,
+      );
+    }
+  }
 
   const fingerprintPayload = {
     orderedPackIds: sorted.map((p) => p.manifest.id),
     entities,
-    flow
+    flow,
+    pageSchemas
   };
 
   const fingerprint = fingerprintStableValue(fingerprintPayload);
@@ -304,6 +320,7 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
     manifests: sorted.map((p) => p.manifest),
     entities,
     flow,
+    pageSchemas,
     locales,
     fingerprint
   };

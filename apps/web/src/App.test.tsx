@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { App } from './App';
+import type { Page } from '@dcb/schema';
+import { App, resolvePageSchemaForStep } from './App';
 import uiTextJson from './uiText.json';
 
 const uiText = uiTextJson;
@@ -182,6 +183,78 @@ async function reachReviewStep(
 }
 
 describe('wizard e2e-ish happy path', () => {
+  it('renders schema-driven race, class, and metadata pages when the flow references page schemas', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+
+    await screen.findByLabelText(humanLabelPattern);
+    const racePage = document.querySelector('[data-page-schema-id="character.race"]');
+    expect(racePage).toBeTruthy();
+    expect(screen.getByLabelText(humanLabelPattern)).toBeTruthy();
+
+    await user.click(screen.getByLabelText(humanLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    await screen.findByLabelText(fighterLabelPattern);
+    const classPage = document.querySelector('[data-page-schema-id="character.class"]');
+    expect(classPage).toBeTruthy();
+    expect(screen.getByLabelText(fighterLabelPattern)).toBeTruthy();
+
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    const featFieldset = screen.getByRole('group', { name: /(?:Feat|\u4e13\u957f)/i });
+    const featChoices = within(featFieldset).getAllByRole('checkbox');
+    await user.click(featChoices[0]!);
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    await screen.findByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i'));
+    const namePage = document.querySelector('[data-page-schema-id="character.name"]');
+    expect(namePage).toBeTruthy();
+    expect(screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i'))).toBeTruthy();
+  });
+
+  it('renders the review page through a page schema when the flow references one', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await reachReviewStep(user);
+
+    expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
+    const reviewPage = document.querySelector('[data-page-schema-id="character.review"]');
+    expect(reviewPage).toBeTruthy();
+  });
+
+  it('renders the abilities and skills pages through page schemas when the flow references them', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: playerNamePattern }));
+    await user.click(screen.getByRole('button', { name: startWizardPattern }));
+    await user.click(screen.getByLabelText(humanLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    await user.click(screen.getByLabelText(fighterLabelPattern));
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    const abilitiesPage = document.querySelector('[data-page-schema-id="character.abilities"]');
+    expect(abilitiesPage).toBeTruthy();
+    expect(screen.getByRole('combobox', { name: abilityGenerationPattern })).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+    const featFieldset = screen.getByRole('group', { name: /(?:Feat|\u4e13\u957f)/i });
+    const featChoices = within(featFieldset).getAllByRole('checkbox');
+    await user.click(featChoices[0]!);
+    await user.click(screen.getByRole('button', { name: nextPattern }));
+
+    const skillsPage = document.querySelector('[data-page-schema-id="character.skills"]');
+    expect(skillsPage).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: localizedPattern(en.SKILLS_TYPE_COLUMN, zh.SKILLS_TYPE_COLUMN) })).toBeTruthy();
+  });
   it('lets user complete flow and see final stats', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -482,6 +555,34 @@ describe('wizard e2e-ish happy path', () => {
   });
 });
 
+describe('schema fallback resolution', () => {
+  it('provides built-in abilities and skills schemas when flow steps omit pageSchemaId', () => {
+    const emptySchemas: Record<string, Page> = {};
+
+    const abilitiesSchema = resolvePageSchemaForStep(
+      {
+        id: 'abilities',
+        kind: 'abilities',
+        label: 'Ability Scores',
+        source: { type: 'manual' },
+      },
+      emptySchemas,
+    );
+    const skillsSchema = resolvePageSchemaForStep(
+      {
+        id: 'skills',
+        kind: 'skills',
+        label: 'Skills',
+        source: { type: 'manual' },
+      },
+      emptySchemas,
+    );
+
+    expect(abilitiesSchema?.root.children?.[0]?.componentId).toBe('abilities.allocator');
+    expect(skillsSchema?.root.children?.[0]?.componentId).toBe('skills.allocator');
+  });
+});
+
 describe('role and language behavior', () => {
   it('keeps user in role gate for DM and allows progression after switching to Player', async () => {
     const user = userEvent.setup();
@@ -663,7 +764,6 @@ describe('role and language behavior', () => {
       relatedTarget: null,
     });
     expect(screen.getByText(pointBuyHintPattern)).toBeTruthy();
-
     await user.selectOptions(methodSelect, 'rollSets');
 
     await user.click(helpButton);

@@ -1,5 +1,7 @@
-import { useAppController } from "./app-shell/useAppController";
 import { WizardMainView } from "./app-shell/WizardMainView";
+import { useAppController } from "./app-shell/useAppController";
+
+export { resolvePageSchemaForStep } from "./pageSchemaResolver";
 
 export function App() {
   const controller = useAppController();

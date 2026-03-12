@@ -4,6 +4,7 @@
       "id": "race",
       "kind": "race",
       "label": "Race",
+      "pageSchemaId": "character.race",
       "source": {
         "type": "entityType",
         "entityType": "races",
@@ -14,6 +15,7 @@
       "id": "class",
       "kind": "class",
       "label": "Class",
+      "pageSchemaId": "character.class",
       "source": {
         "type": "entityType",
         "entityType": "classes",
@@ -24,6 +26,7 @@
       "id": "abilities",
       "kind": "abilities",
       "label": "Ability Scores",
+      "pageSchemaId": "character.abilities",
       "source": {
         "type": "manual"
       },
@@ -113,6 +116,7 @@
       "id": "skills",
       "kind": "skills",
       "label": "Skills",
+      "pageSchemaId": "character.skills",
       "source": {
         "type": "manual"
       }
@@ -131,6 +135,7 @@
       "id": "name",
       "kind": "metadata",
       "label": "Name",
+      "pageSchemaId": "character.name",
       "source": {
         "type": "manual"
       }
@@ -139,6 +144,7 @@
       "id": "review",
       "kind": "review",
       "label": "Review",
+      "pageSchemaId": "character.review",
       "source": {
         "type": "manual"
       }

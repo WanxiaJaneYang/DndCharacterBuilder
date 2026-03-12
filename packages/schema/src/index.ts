@@ -137,6 +137,7 @@ const ChoiceStepSchema = z.object({
   kind: ChoiceStepKindSchema,
   label: z.string(),
   source: ChoiceStepSourceSchema,
+  pageSchemaId: z.string().min(1).optional(),
   abilitiesConfig: AbilitiesConfigSchema.optional(),
   abilityPresentation: AbilityPresentationSchema.optional()
 }).superRefine((step, ctx) => {
@@ -293,6 +294,66 @@ const ChoiceStepSchema = z.object({
 });
 
 export const FlowSchema = z.object({ steps: z.array(ChoiceStepSchema) });
+
+const PageBindingPathSegmentSchema = z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/);
+const PageBindingPathSchema = z
+  .string()
+  .min(1)
+  .superRefine((value, ctx) => {
+    const segments = value.split(".");
+    if (segments.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid binding path: must contain at least one segment."
+      });
+      return;
+    }
+
+    for (const segment of segments) {
+      const parsed = PageBindingPathSegmentSchema.safeParse(segment);
+      if (!parsed.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid binding path: ${value}`
+        });
+        return;
+      }
+    }
+  });
+
+const AllowedPageComponentIds = [
+  "layout.singleColumn",
+  "entityType.singleSelect",
+  "metadata.nameField",
+  "abilities.allocator",
+  "skills.allocator",
+  "review.sheet"
+] as const;
+
+const PageComponentIdSchema = z.enum(AllowedPageComponentIds, {
+  errorMap: (issue, ctx) => {
+    if (issue.code === z.ZodIssueCode.invalid_enum_value) {
+      return { message: `Unknown component id: ${String(ctx.data)}` };
+    }
+    return { message: ctx.defaultError };
+  }
+});
+
+const PageNodeSchema: z.ZodType<any> = z.lazy(() =>
+  z.object({
+    id: z.string().min(1),
+    componentId: PageComponentIdSchema,
+    slot: z.string().min(1).optional(),
+    dataSource: PageBindingPathSchema.optional(),
+    props: z.record(z.any()).optional(),
+    children: z.array(PageNodeSchema).optional()
+  }).strict()
+);
+
+export const PageSchema = z.object({
+  id: z.string().min(1),
+  root: PageNodeSchema
+}).strict();
 
 export const ManifestSchema = z.object({
   id: z.string(),
@@ -760,6 +821,7 @@ export const AuthenticityLockSchema = z.object({
 
 export type ChoiceStepId = z.infer<typeof ChoiceStepIdSchema>;
 export type ChoiceStepKind = z.infer<typeof ChoiceStepKindSchema>;
+export type PageSchemaNode = z.infer<typeof PageNodeSchema>;
 export type DeferredMechanicCapabilityId = z.infer<typeof DeferredMechanicCapabilityIdSchema>;
 export type DeferredMechanicImpactId = z.infer<typeof DeferredMechanicImpactIdSchema>;
 export type DeferredMechanic = z.infer<typeof DeferredMechanicSchema>;
@@ -769,6 +831,7 @@ export type Constraint = z.infer<typeof ConstraintSchema>;
 export type Entity = z.infer<typeof EntitySchema>;
 export type Manifest = z.infer<typeof ManifestSchema>;
 export type Flow = z.infer<typeof FlowSchema>;
+export type Page = z.infer<typeof PageSchema>;
 export type Pack = z.infer<typeof PackSchema>;
 export type PackLocale = z.infer<typeof PackLocaleSchema>;
 export type ContractFixture = z.infer<typeof ContractFixtureSchema>;

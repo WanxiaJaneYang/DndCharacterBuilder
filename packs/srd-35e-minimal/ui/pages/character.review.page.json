@@ -1,0 +1,15 @@
+{
+  "id": "character.review",
+  "root": {
+    "id": "review-root",
+    "componentId": "layout.singleColumn",
+    "children": [
+      {
+        "id": "review-sheet",
+        "componentId": "review.sheet",
+        "slot": "main",
+        "dataSource": "page.reviewSheet"
+      }
+    ]
+  }
+}
