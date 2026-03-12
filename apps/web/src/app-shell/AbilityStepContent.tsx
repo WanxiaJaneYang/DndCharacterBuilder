@@ -1,4 +1,3 @@
-import type { RefObject } from "react";
 import { AbilityMethodSelector } from "../components/AbilityMethodSelector";
 import { PointBuyPanel } from "../components/PointBuyPanel";
 import type { UIText } from "../uiText";
@@ -70,7 +69,11 @@ export function AbilityStepContent({
     hideZeroGroups,
     hasPointBuyConfig,
   } = abilityState;
-  const helpRef = abilityMethodHintRef as unknown as RefObject<HTMLDivElement>;
+  const helpRef = abilityMethodHintRef;
+  const shouldKeepHintOpen = (nextTarget: EventTarget | null) =>
+    helpRef.current instanceof HTMLElement &&
+    nextTarget instanceof Node &&
+    helpRef.current.contains(nextTarget);
 
   return (
     <section>
@@ -84,9 +87,21 @@ export function AbilityStepContent({
         value={selectedAbilityModeValue}
         options={abilityModes.map((mode) => ({ value: mode, label: getModeLabel(mode) }))}
         onMouseEnter={() => hasActiveModeHint && setAbilityMethodHintOpen(true)}
-        onMouseLeave={() => !abilityMethodHintPinned && setAbilityMethodHintOpen(false)}
+        onMouseLeave={(event) => {
+          if (abilityMethodHintPinned) return;
+          const relatedTarget = event.relatedTarget as Node | null;
+          const activeElement = document.activeElement as Node | null;
+          if (shouldKeepHintOpen(relatedTarget) || shouldKeepHintOpen(activeElement)) return;
+          setAbilityMethodHintOpen(false);
+        }}
         onFocus={() => hasActiveModeHint && setAbilityMethodHintOpen(true)}
-        onBlur={() => !abilityMethodHintPinned && setAbilityMethodHintOpen(false)}
+        onBlur={(event) => {
+          if (abilityMethodHintPinned) return;
+          const relatedTarget = event.relatedTarget as Node | null;
+          const activeElement = document.activeElement as Node | null;
+          if (shouldKeepHintOpen(relatedTarget) || shouldKeepHintOpen(activeElement)) return;
+          setAbilityMethodHintOpen(false);
+        }}
         onClick={() => {
           if (!hasActiveModeHint) return;
           setAbilityMethodHintPinned(!abilityMethodHintPinned);

@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderReviewStep } from "./review/reviewTestHelpers";
 
@@ -54,5 +54,42 @@ describe("ReviewStep", () => {
         ),
       ),
     ).toBeTruthy();
+  });
+
+  it("uses engine-backed speed values in the combat breakdown even when provenance disagrees", () => {
+    const { text } = renderReviewStep({
+      provenanceByTargetPath: new Map([
+        [
+          "stats.speed",
+          [
+            {
+              targetPath: "stats.speed",
+              setValue: 1234,
+              source: { packId: "test-pack", entityId: "speed-override" },
+            },
+          ],
+        ],
+      ]),
+    });
+
+    const combatSection = screen
+      .getAllByRole("heading", {
+        name: text.REVIEW_COMBAT_BREAKDOWN,
+      })
+      .map((heading) => heading.closest("article"))
+      .find((article) =>
+        article?.textContent?.includes(text.REVIEW_SPEED_LABEL),
+      );
+
+    expect(combatSection).toBeTruthy();
+
+    const speedRow = within(combatSection as HTMLElement)
+      .getByText(text.REVIEW_SPEED_LABEL)
+      .closest("tr");
+
+    expect(speedRow).toBeTruthy();
+    expect(speedRow?.textContent).toContain("30");
+    expect(speedRow?.textContent).toContain("20");
+    expect(speedRow?.textContent).not.toContain("1234");
   });
 });

@@ -1,43 +1,26 @@
 # Task Plan
 
 ## Goal
-
-Restart the `#193/#195` web extraction so every authored `ts`/`tsx` module in the touched scope is at or under 200 lines, while moving the UI toward modular, extensible, config-friendly composition and reducing hardcoded rendering.
-
-## Constraints
-
-- Record the 200-line rule in PR/review standards.
-- Treat the 200-line rule as a hard default for authored `ts`/`tsx` modules.
-- Refactor the current branch in place instead of reopening from `main`.
-- Keep modules split by responsibility, not arbitrary helper dumping.
-- Preserve behavior and keep CI green.
+Implement issue #166 on a clean worktree by defining the public `ComputeResult` output contract, versioned `SheetViewModel` wrapper, explicit stability/ordering guarantees, tests, docs, and an MR.
 
 ## Phases
+- [completed] Design and planning docs
+- [completed] Red: add failing compute() contract tests
+- [completed] Green: implement exported output contract + `compute()` bridge
+- [completed] Docs: add ComputeResult contract doc and data README entry
+- [completed] Verify: run relevant test/type/build commands
+- [pending] Git: commit, push, create MR
 
-| Phase | Status | Notes |
-| --- | --- | --- |
-| Record the new standard in repo guidance | in_progress | Update MR flow + frontend component guidelines |
-| Inventory oversized modules and decide ownership | pending | App, ReviewStep, appHelpers are currently oversized |
-| Dispatch parallel agent team | pending | Use disjoint write scopes |
-| Integrate worker changes and enforce <=200-line modules | pending | Rework until touched modules comply |
-| Verify, review, and update PR state | pending | Tests, typecheck, visual, review loop |
-
-## Ownership Plan
-
-- Standards worker: `.codex/mr-flow-and-approvals.md`, `.trellis/spec/frontend/component-guidelines.md`
-- Review worker: `apps/web/src/components/ReviewStep.tsx` and new review section components/tests
-- App-shell worker: `apps/web/src/App.tsx` and any new app-shell composition modules
-- Helper worker: `apps/web/src/appHelpers.ts`, `apps/web/src/wizardStepHelpers.ts`, plus new helper modules/tests
-
-## Current Inventory
-
-- `apps/web/src/App.tsx`: 1416 lines
-- `apps/web/src/components/ReviewStep.tsx`: 580 lines
-- `apps/web/src/appHelpers.ts`: 293 lines
-- `apps/web/src/wizardStepHelpers.ts`: 98 lines
+## Key Decisions
+- Keep `CharacterSpec` ownership in `packages/engine/src/characterSpec.ts` from issue #165.
+- Add `ComputeResult`/`VersionedSheetViewModel`/`RulepackInput` in `packages/engine/src/index.ts` because they depend on `SheetViewModel` and engine internals.
+- Use the uncommitted draft only as reference; do not transplant its structural regressions.
+- Document array ordering guarantees explicitly; do not promise object key enumeration order.
 
 ## Risks
+- `compute()` can accidentally normalize away validation scenarios if it only inspects normalized values.
+- Contract tests must extend existing #165 coverage instead of replacing it.
+- The bridge must stay deterministic and not mutate `CharacterSpec` input.
 
-- App-shell and review decomposition can overlap if ownership is not enforced.
-- File-count can increase without real architecture improvement if splits are mechanical.
-- Existing PR review state must be preserved while the branch is restarted.
+## Errors Encountered
+- `npm --workspace @dcb/engine run test -- --runInBand` failed because Vitest does not support `--runInBand`; corrected to `npm --workspace @dcb/engine run test`.

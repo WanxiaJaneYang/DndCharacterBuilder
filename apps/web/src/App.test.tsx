@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { App } from './App';
 import uiTextJson from './uiText.json';
@@ -654,6 +654,15 @@ describe('role and language behavior', () => {
     expect(helpButton.getAttribute('aria-expanded')).toBe('true');
     expect(helpButton.getAttribute('aria-controls')).toBe('ability-method-help-panel');
     expect(helpButton.getAttribute('aria-describedby')).toBe('ability-method-help-panel');
+
+    await user.unhover(helpButton);
+    expect(document.activeElement).toBe(helpButton);
+    expect(screen.getByText(pointBuyHintPattern)).toBeTruthy();
+
+    fireEvent.mouseLeave(helpButton.parentElement!, {
+      relatedTarget: null,
+    });
+    expect(screen.getByText(pointBuyHintPattern)).toBeTruthy();
 
     await user.selectOptions(methodSelect, 'rollSets');
 

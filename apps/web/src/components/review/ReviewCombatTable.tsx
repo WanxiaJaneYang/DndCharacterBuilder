@@ -10,6 +10,7 @@ import {
 type ReviewCombatTableProps = {
   text: UIText;
   finalStatValues: Record<(typeof REVIEW_STAT_ORDER)[number], number>;
+  reviewSpeed: ReviewStepProps["reviewData"]["speed"];
   provenanceByTargetPath: ReviewStepProps["provenanceByTargetPath"];
   sourceNameByEntityId: Map<string, string>;
 };
@@ -17,6 +18,7 @@ type ReviewCombatTableProps = {
 export function ReviewCombatTable({
   text,
   finalStatValues,
+  reviewSpeed,
   provenanceByTargetPath,
   sourceNameByEntityId,
 }: ReviewCombatTableProps) {
@@ -57,11 +59,13 @@ export function ReviewCombatTable({
               (record) => record.setValue !== undefined,
             );
             const baseValue =
-              firstSetIndex >= 0
-                ? Number(
-                    records[firstSetIndex]?.setValue ?? statBaseDefaults[statKey],
-                  )
-                : statBaseDefaults[statKey];
+              statKey === "speed"
+                ? reviewSpeed.base
+                : firstSetIndex >= 0
+                  ? Number(
+                      records[firstSetIndex]?.setValue ?? statBaseDefaults[statKey],
+                    )
+                  : statBaseDefaults[statKey];
             const adjustmentRecords = records.filter(
               (_, index) => index !== firstSetIndex,
             );

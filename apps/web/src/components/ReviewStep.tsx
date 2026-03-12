@@ -1,4 +1,4 @@
-import { deriveValueFromProvenance, getEntityDataRecord } from "../appHelpers";
+import { getEntityDataRecord } from "../appHelpers";
 import { ReviewAbilityTable } from "./review/ReviewAbilityTable";
 import { ReviewAttackSection } from "./review/ReviewAttackSection";
 import { ReviewCombatTable } from "./review/ReviewCombatTable";
@@ -113,6 +113,7 @@ export function ReviewStep({
       <ReviewCombatTable
         text={text}
         finalStatValues={finalStatValues}
+        reviewSpeed={reviewData.speed}
         provenanceByTargetPath={provenanceByTargetPath}
         sourceNameByEntityId={sourceNameByEntityId}
       />

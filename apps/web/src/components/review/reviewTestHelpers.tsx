@@ -123,8 +123,13 @@ function createReviewState(): CharacterState {
   } as CharacterState;
 }
 
-export function renderReviewStep() {
-  const computeResult = createReviewComputeResult();
+type RenderReviewStepOptions = {
+  computeResult?: ComputeResult;
+  provenanceByTargetPath?: Map<string, NonNullable<ComputeResult["provenance"]>>;
+};
+
+export function renderReviewStep(options: RenderReviewStepOptions = {}) {
+  const computeResult = options.computeResult ?? createReviewComputeResult();
   const reviewData = computeResult.sheetViewModel.data.review;
   const selectedEdition: EditionOption = {
     id: "dnd-3.5-srd",
@@ -170,7 +175,7 @@ export function renderReviewStep() {
       selectedClassEntity={{
         name: "Fighter",
       }}
-      provenanceByTargetPath={new Map()}
+      provenanceByTargetPath={options.provenanceByTargetPath ?? new Map()}
       sourceNameByEntityId={new Map()}
       packVersionById={new Map([["srd-35e-minimal", "1.0.0"]])}
       enabledPackIds={["srd-35e-minimal"]}
