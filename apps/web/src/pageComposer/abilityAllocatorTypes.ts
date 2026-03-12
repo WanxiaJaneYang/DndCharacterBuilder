@@ -1,4 +1,4 @@
-import type { FocusEvent, KeyboardEvent, RefObject } from "react";
+import type { FocusEvent, KeyboardEvent, MutableRefObject } from "react";
 import type { UIText } from "../uiText";
 
 export type AbilityMode = "pointBuy" | "phb" | "rollSets";
@@ -21,7 +21,7 @@ export interface AbilityAllocatorData {
     onClick: () => void;
     onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
     onChange: (value: string) => void;
-    helpRef: RefObject<HTMLDivElement>;
+    helpRef: MutableRefObject<HTMLDivElement | null>;
   };
   pointBuyPanel?: {
     pointCap: number;

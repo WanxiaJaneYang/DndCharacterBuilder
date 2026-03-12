@@ -1,5 +1,4 @@
 import { applyChoice } from "@dcb/engine/legacy";
-import type { RefObject } from "react";
 import { createAbilityModeSelectorHandlers } from "../createAbilityModeSelectorHandlers";
 import { resolvePageSchemaForStep } from "../pageSchemaResolver";
 import { buildAbilitiesAllocatorPageData } from "../pageComposer/buildAbilitiesAllocatorPageData";
@@ -72,7 +71,7 @@ export function WizardStepContent({ controller }: { controller: AppController })
       const modeSelectorHandlers = createAbilityModeSelectorHandlers({
         hasActiveModeHint: abilityState.activeModeHint.length > 0,
         abilityMethodHintPinned: abilityState.abilityMethodHintPinned,
-        abilityMethodHintRef: abilityState.abilityMethodHintRef as RefObject<HTMLDivElement>,
+        abilityMethodHintRef: abilityState.abilityMethodHintRef,
         setAbilityMethodHintOpen: abilityState.setAbilityMethodHintOpen,
         setAbilityMethodHintPinned: abilityState.setAbilityMethodHintPinned,
         isAbilityMode: abilityState.isAbilityMode,

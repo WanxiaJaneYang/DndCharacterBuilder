@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useEffect, useMemo, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import { applyChoice, initialState, type CharacterState } from "@dcb/engine/legacy";
 import {
   clampAbilityScore,
@@ -19,7 +19,7 @@ type UseAbilityStepStateInput = {
   context: WizardEngineContext;
   currentStep?: { kind?: string };
   wizardSteps: Array<{ id: string; abilitiesConfig?: AbilityStepConfig; abilityPresentation?: AbilityPresentationConfig }>;
-  abilityMethodHintRef: RefObject<HTMLDivElement | null>;
+  abilityMethodHintRef: MutableRefObject<HTMLDivElement | null>;
   abilityMethodHintOpen: boolean;
   setAbilityMethodHintOpen: Dispatch<SetStateAction<boolean>>;
   abilityMethodHintPinned: boolean;

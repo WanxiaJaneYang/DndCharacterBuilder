@@ -37,6 +37,10 @@ export function ReviewCombatTable({
     sourceNameByEntityId,
     text.REVIEW_UNRESOLVED_LABEL,
   );
+  const getFiniteBaseValue = (value: unknown, fallback: number) => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : fallback;
+  };
 
   return (
     <article className="sheet">
@@ -62,8 +66,9 @@ export function ReviewCombatTable({
               statKey === "speed"
                 ? reviewSpeed.base
                 : firstSetIndex >= 0
-                  ? Number(
-                      records[firstSetIndex]?.setValue ?? statBaseDefaults[statKey],
+                  ? getFiniteBaseValue(
+                      records[firstSetIndex]?.setValue,
+                      statBaseDefaults[statKey],
                     )
                   : statBaseDefaults[statKey];
             const adjustmentRecords = records.filter(

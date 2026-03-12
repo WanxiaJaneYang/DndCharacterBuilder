@@ -50,9 +50,7 @@ export function AbilityMethodSelector({
       <div className="ability-method-inline">
         <label htmlFor="ability-generation-mode-select">{label}</label>
         <div
-          ref={(node) => {
-            helpRef.current = node;
-          }}
+          ref={helpRef}
           className="ability-method-help"
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
