@@ -1,3 +1,10 @@
+import type {
+  FocusEvent,
+  KeyboardEvent,
+  MutableRefObject,
+  MouseEvent,
+} from "react";
+
 type AbilityMethodOption = {
   value: string;
   label: string;
@@ -12,13 +19,13 @@ type AbilityMethodSelectorProps = {
   value: string;
   options: AbilityMethodOption[];
   onMouseEnter: () => void;
-  onMouseLeave: () => void;
+  onMouseLeave: (event: MouseEvent<HTMLDivElement>) => void;
   onFocus: () => void;
   onBlur: (event: FocusEvent<HTMLButtonElement>) => void;
   onClick: () => void;
   onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
   onChange: (value: string) => void;
-  helpRef: RefObject<HTMLDivElement>;
+  helpRef: MutableRefObject<HTMLDivElement | null>;
 };
 
 export function AbilityMethodSelector({
@@ -36,7 +43,7 @@ export function AbilityMethodSelector({
   onClick,
   onKeyDown,
   onChange,
-  helpRef
+  helpRef,
 }: AbilityMethodSelectorProps) {
   return (
     <div className="ability-method-row">
@@ -90,4 +97,3 @@ export function AbilityMethodSelector({
     </div>
   );
 }
-import type { FocusEvent, KeyboardEvent, RefObject } from 'react';

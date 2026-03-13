@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Page } from '@dcb/schema';
 import { App, resolvePageSchemaForStep } from './App';
@@ -255,7 +255,6 @@ describe('wizard e2e-ish happy path', () => {
     expect(skillsPage).toBeTruthy();
     expect(screen.getByRole('columnheader', { name: localizedPattern(en.SKILLS_TYPE_COLUMN, zh.SKILLS_TYPE_COLUMN) })).toBeTruthy();
   });
-
   it('lets user complete flow and see final stats', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -757,6 +756,14 @@ describe('role and language behavior', () => {
     expect(helpButton.getAttribute('aria-controls')).toBe('ability-method-help-panel');
     expect(helpButton.getAttribute('aria-describedby')).toBe('ability-method-help-panel');
 
+    await user.unhover(helpButton);
+    expect(document.activeElement).toBe(helpButton);
+    expect(screen.getByText(pointBuyHintPattern)).toBeTruthy();
+
+    fireEvent.mouseLeave(helpButton.parentElement!, {
+      relatedTarget: null,
+    });
+    expect(screen.getByText(pointBuyHintPattern)).toBeTruthy();
     await user.selectOptions(methodSelect, 'rollSets');
 
     await user.click(helpButton);
