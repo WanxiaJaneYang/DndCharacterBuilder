@@ -802,7 +802,10 @@ const LegacyContractFixtureSchema = z.object({
 
 const ComputeContractFixtureSchema = z.object({
   enabledPacks: z.array(z.string()),
-  characterSpec: z.record(z.any()),
+  characterSpec: z.object({
+    meta: z.record(z.any()),
+    abilities: z.record(z.any())
+  }).passthrough(),
   contractClarifications: z.record(z.string()).optional(),
   expected: z.object({
     validationIssueCodes: z.array(z.string()).optional(),
