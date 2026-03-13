@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { ContractFixtureSchema } from "@dcb/schema";
+import { ContractFixtureSchema, type ContractFixture } from "@dcb/schema";
 import { resolvePackSet } from "@dcb/datapack/node";
+import { compute, type CharacterSpec } from "@dcb/engine";
 import { applyChoice, finalizeCharacter, initialState, listChoices, validateState, type CharacterState } from "@dcb/engine/legacy";
 export { runAuthenticityChecks } from "./authenticity";
 import { assertPackReferenceIntegrity } from "./references";
@@ -101,6 +102,17 @@ function contractFailure(packId: string, fixtureFile: string, message: string, e
   ].join("\n"));
 }
 
+type ComputeContractFixture = Extract<ContractFixture, { characterSpec: Record<string, unknown> }>;
+type LegacyContractFixture = Extract<ContractFixture, { initialState: Record<string, unknown> }>;
+
+function isComputeContractFixture(fixture: ContractFixture): fixture is ComputeContractFixture {
+  return "characterSpec" in fixture;
+}
+
+function isLegacyContractFixture(fixture: ContractFixture): fixture is LegacyContractFixture {
+  return "initialState" in fixture;
+}
+
 export function runContracts(packsRoot: string): void {
   assertContractFixturesUseAscii(packsRoot);
   assertPackReferenceIntegrity(packsRoot);
@@ -117,6 +129,25 @@ export function runContracts(packsRoot: string): void {
       const fixture = ContractFixtureSchema.parse(JSON.parse(fs.readFileSync(fixturePath, "utf8")));
       const resolved = resolvePackSet(packsRoot, fixture.enabledPacks);
       const context = { enabledPackIds: fixture.enabledPacks, resolvedData: resolved };
+
+      if (isComputeContractFixture(fixture)) {
+        const result = compute(fixture.characterSpec as unknown as CharacterSpec, context);
+        const validationIssueCodes = result.validationIssues.map((issue) => issue.code);
+        const expectedValidationIssueCodes = fixture.expected.validationIssueCodes;
+        if (expectedValidationIssueCodes && !arraysEqual(validationIssueCodes, expectedValidationIssueCodes)) {
+          contractFailure(packId, file, "Validation issue codes mismatch", expectedValidationIssueCodes, validationIssueCodes);
+        }
+
+        if (fixture.expected.computeResultSubset && !containsSubset(result as unknown as Record<string, unknown>, fixture.expected.computeResultSubset)) {
+          contractFailure(packId, file, "ComputeResult subset mismatch", fixture.expected.computeResultSubset, result);
+        }
+        continue;
+      }
+
+      if (!isLegacyContractFixture(fixture)) {
+        contractFailure(packId, file, "Unsupported contract fixture shape", "legacy or compute fixture", fixture);
+      }
+
       let state: CharacterState = { ...initialState, ...(fixture.initialState as Partial<CharacterState>) };
       for (const action of fixture.actions) {
         state = applyChoice(state, action.choiceId, action.selection, context);

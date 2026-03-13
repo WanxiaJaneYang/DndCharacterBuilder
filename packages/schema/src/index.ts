@@ -788,7 +788,7 @@ export const PackLocaleSchema = z.object({
   entityText: z.record(z.record(z.record(z.string()))).optional()
 });
 
-export const ContractFixtureSchema = z.object({
+const LegacyContractFixtureSchema = z.object({
   enabledPacks: z.array(z.string()),
   initialState: z.record(z.any()),
   actions: z.array(z.object({ choiceId: z.string(), selection: z.any() })),
@@ -799,6 +799,21 @@ export const ContractFixtureSchema = z.object({
     finalSheetSubset: z.record(z.any()).optional()
   })
 });
+
+const ComputeContractFixtureSchema = z.object({
+  enabledPacks: z.array(z.string()),
+  characterSpec: z.record(z.any()),
+  contractClarifications: z.record(z.string()).optional(),
+  expected: z.object({
+    validationIssueCodes: z.array(z.string()).optional(),
+    computeResultSubset: z.record(z.any()).optional()
+  })
+});
+
+export const ContractFixtureSchema = z.union([
+  LegacyContractFixtureSchema,
+  ComputeContractFixtureSchema
+]);
 
 export const OfficialSourceSchema = z.object({
   title: z.string().min(1),

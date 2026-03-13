@@ -1,0 +1,88 @@
+{
+  "enabledPacks": [
+    "srd-35e-minimal"
+  ],
+  "characterSpec": {
+    "meta": {
+      "name": "Aric",
+      "rulesetId": "dnd35e",
+      "sourceIds": ["srd-35e-minimal"]
+    },
+    "raceId": "human",
+    "class": {
+      "classId": "fighter",
+      "level": 1
+    },
+    "abilities": {
+      "str": 16,
+      "dex": 12,
+      "con": 14,
+      "int": 10,
+      "wis": 10,
+      "cha": 8
+    },
+    "skillRanks": {
+      "climb": 4,
+      "jump": 3,
+      "diplomacy": 0.5
+    },
+    "featIds": ["power-attack"],
+    "equipmentIds": ["longsword", "chainmail", "heavy-wooden-shield"]
+  },
+  "contractClarifications": {
+    "goldenPath": "Canonical compute contract fixture using flow-independent CharacterSpec input.",
+    "stats": "Human Fighter 1 via compute(spec, rulepack): hp=12, ac=18, first melee attack bonus=4, speed=20 in chainmail."
+  },
+  "expected": {
+    "validationIssueCodes": [],
+    "computeResultSubset": {
+      "schemaVersion": "0.1",
+      "sheetViewModel": {
+        "schemaVersion": "0.1",
+        "data": {
+          "combat": {
+            "ac": {
+              "total": 18,
+              "touch": 11,
+              "flatFooted": 17
+            },
+            "attacks": [
+              {
+                "itemId": "longsword",
+                "name": "Longsword",
+                "category": "melee",
+                "attackBonus": 4,
+                "damage": "1d8",
+                "damageLine": "1d8+3",
+                "crit": "19-20/x2"
+              }
+            ]
+          },
+          "review": {
+            "hp": {
+              "total": 12
+            },
+            "skillBudget": {
+              "total": 12,
+              "spent": 8,
+              "remaining": 4
+            }
+          }
+        }
+      },
+      "validationIssues": [],
+      "assumptions": [],
+      "unresolved": [
+        {
+          "code": "srd-35e-minimal:classes:fighter:fighter-bonus-feat-runtime"
+        },
+        {
+          "code": "srd-35e-minimal:classes:fighter:fighter-proficiency-automation"
+        },
+        {
+          "code": "srd-35e-minimal:feats:power-attack:power-attack-benefit"
+        }
+      ]
+    }
+  }
+}

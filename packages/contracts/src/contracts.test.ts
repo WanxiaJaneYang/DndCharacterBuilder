@@ -118,6 +118,83 @@ describe("pack contracts", () => {
     });
   });
 
+  it("runs CharacterSpec-based compute fixtures alongside legacy action fixtures", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-compute-contract-"));
+    const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packSource, packDest, { recursive: true });
+    fs.writeFileSync(
+      path.join(packDest, "contracts/human-fighter-1-compute.json"),
+      JSON.stringify(
+        {
+          enabledPacks: ["srd-35e-minimal"],
+          characterSpec: {
+            meta: {
+              name: "Aric",
+              rulesetId: "dnd35e",
+              sourceIds: ["srd-35e-minimal"]
+            },
+            raceId: "human",
+            class: {
+              classId: "fighter",
+              level: 1
+            },
+            abilities: {
+              str: 16,
+              dex: 12,
+              con: 14,
+              int: 10,
+              wis: 10,
+              cha: 8
+            },
+            skillRanks: {
+              climb: 4,
+              jump: 3,
+              diplomacy: 0.5
+            },
+            featIds: ["power-attack"],
+            equipmentIds: ["longsword", "chainmail", "heavy-wooden-shield"]
+          },
+          contractClarifications: {
+            goldenPath: "Canonical compute contract fixture using CharacterSpec input."
+          },
+          expected: {
+            validationIssueCodes: [],
+            computeResultSubset: {
+              schemaVersion: "0.1",
+              sheetViewModel: {
+                schemaVersion: "0.1",
+                data: {
+                  combat: {
+                    ac: {
+                      total: 18
+                    },
+                    attacks: [
+                      {
+                        itemId: "longsword",
+                        attackBonus: 4,
+                        damageLine: "1d8+3"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        null,
+        2
+      )
+    );
+
+    try {
+      expect(() => runContracts(tempRoot)).not.toThrow();
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("fails when a contract fixture contains non-ASCII text", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-contract-ascii-"));
     const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
