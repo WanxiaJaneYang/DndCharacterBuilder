@@ -195,6 +195,45 @@ describe("pack contracts", () => {
     }
   });
 
+  it("rejects compute fixtures missing top-level CharacterSpec fields before compute() runs", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-compute-contract-invalid-"));
+    const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packSource, packDest, { recursive: true });
+    fs.writeFileSync(
+      path.join(packDest, "contracts/invalid-compute.json"),
+      JSON.stringify(
+        {
+          enabledPacks: ["srd-35e-minimal"],
+          characterSpec: {},
+          expected: {
+            validationIssueCodes: []
+          }
+        },
+        null,
+        2
+      )
+    );
+
+    try {
+      let thrown: unknown;
+      try {
+        runContracts(tempRoot);
+      } catch (error) {
+        thrown = error;
+      }
+
+      expect(thrown).toBeDefined();
+      expect(thrown).not.toBeInstanceOf(TypeError);
+      const message = thrown instanceof Error ? thrown.message : String(thrown);
+      expect(message).toMatch(/characterSpec/i);
+      expect(message).toMatch(/meta|abilities/i);
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
   it("fails when a contract fixture contains non-ASCII text", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-contract-ascii-"));
     const packSource = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
