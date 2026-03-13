@@ -1,7 +1,6 @@
 import type { Constraint, Effect, Entity, Expr } from "@dcb/schema";
 import type { ResolvedEntity, ResolvedPackSet } from "@dcb/datapack";
 import {
-  characterSpecToState,
   normalizeCharacterSpec,
   validateCharacterSpec,
   type CharacterSpec,
@@ -439,6 +438,27 @@ function mapStepIdToSpecPath(stepId: string): string | undefined {
   return STEP_ID_TO_SPEC_PATH[stepId];
 }
 
+function buildComputeStateFromSpec(spec: CharacterSpec): CharacterState {
+  const hasSkillRanks = Object.keys(spec.skillRanks ?? {}).length > 0;
+  const classId = spec.class
+    ? spec.class.level > 1
+      ? `${spec.class.classId.replace(/-\d+$/, "")}-${spec.class.level}`
+      : spec.class.classId.replace(/-\d+$/, "")
+    : undefined;
+
+  return {
+    metadata: spec.meta.name?.length ? { name: spec.meta.name } : {},
+    abilities: { ...spec.abilities },
+    selections: {
+      ...(spec.raceId ? { race: spec.raceId } : {}),
+      ...(classId ? { class: classId } : {}),
+      ...(hasSkillRanks ? { skills: spec.skillRanks } : {}),
+      feats: spec.featIds ?? [],
+      equipment: spec.equipmentIds ?? []
+    }
+  };
+}
+
 function sanitizeStateForComputeOutput(
   state: CharacterState
 ): { state: CharacterState; assumptions: ComputeResultAssumptionEntry[] } {
@@ -525,7 +545,7 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
     }
   }
 
-  const state = characterSpecToState(normalizedSpec);
+  const state = buildComputeStateFromSpec(normalizedSpec);
   const context: EngineContext = {
     resolvedData: rulepack.resolvedData,
     enabledPackIds: rulepack.enabledPackIds ?? normalizedSpec.meta.sourceIds
@@ -535,7 +555,7 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
   assumptions.push(...sanitized.assumptions);
 
   validationIssues.push(
-    ...validateState(sanitized.state, context, { allowFlowDefaultAbilityMode: false }).map((issue) => ({
+    ...collectValidationErrorsFromState(sanitized.state, context, { allowFlowDefaultAbilityMode: false }).map((issue) => ({
       code: issue.code,
       severity: "error" as const,
       message: issue.message,
@@ -545,7 +565,7 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
     }))
   );
 
-  const sheet = finalizeCharacter(sanitized.state, context);
+  const sheet = buildCharacterSheetFromState(sanitized.state, context);
   const unresolved: ComputeResultUnresolvedEntry[] = sheet.unresolvedRules.map((entry) => ({
     code: entry.id,
     message: entry.description,
@@ -1347,7 +1367,7 @@ export function applyChoice(state: CharacterState, choiceId: string, selection: 
   return { ...state, selections: { ...state.selections, [choiceId]: selection } };
 }
 
-export function validateState(
+function collectValidationErrorsFromState(
   state: CharacterState,
   context: EngineContext,
   options?: { allowFlowDefaultAbilityMode?: boolean }
@@ -1571,6 +1591,14 @@ export function validateState(
   }
 
   return errors;
+}
+
+export function validateState(
+  state: CharacterState,
+  context: EngineContext,
+  options?: { allowFlowDefaultAbilityMode?: boolean }
+): ValidationError[] {
+  return collectValidationErrorsFromState(state, context, options);
 }
 
 function applyEffect(effect: Effect, sheet: Record<string, any>, provenance: ProvenanceRecord[], source: ProvenanceRecord["source"]): void {
@@ -1947,7 +1975,7 @@ function normalizeCritProfile(rawCrit: string | undefined): string {
   return "20/x2";
 }
 
-export function finalizeCharacter(state: CharacterState, context: EngineContext): CharacterSheet {
+function buildCharacterSheetFromState(state: CharacterState, context: EngineContext): CharacterSheet {
   const abilities = Object.fromEntries(
     Object.entries(state.abilities).map(([k, score]) => [k, { score, mod: abilityMod(score) }])
   );
@@ -2254,6 +2282,10 @@ export function finalizeCharacter(state: CharacterState, context: EngineContext)
     unresolvedRules,
     packSetFingerprint: context.resolvedData.fingerprint
   };
+}
+
+export function finalizeCharacter(state: CharacterState, context: EngineContext): CharacterSheet {
+  return buildCharacterSheetFromState(state, context);
 }
 
 export function buildSheetViewModel(

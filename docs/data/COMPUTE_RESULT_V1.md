@@ -82,8 +82,8 @@ This is covered by engine tests under `compute() contract`, including a determin
 
 ## Migration note
 
-`compute()` currently bridges into legacy engine internals through `characterSpecToState(spec)`, `validateState()`, and `finalizeCharacter()`.
+`compute()` now builds its own internal state from normalized `CharacterSpec` input and calls shared internal validation/finalization helpers instead of routing directly through the exported legacy wizard/state APIs.
 
-This preserves current behavior while decoupling the public contract from wizard flow state. The top-level `@dcb/engine` package surface is now reserved for the flow-independent contract; temporary wizard/state APIs live under the explicit `@dcb/engine/legacy` entrypoint.
+This preserves current behavior while further decoupling the public contract from wizard flow state. The top-level `@dcb/engine` package surface is now reserved for the flow-independent contract; temporary wizard/state APIs live under the explicit `@dcb/engine/legacy` entrypoint as thin compatibility wrappers.
 
 A later internal refactor can replace the bridge without changing the `ComputeResult` public shape.

@@ -2410,6 +2410,19 @@ describe("CharacterSpec v1", () => {
 });
 
 describe("compute() contract", () => {
+  it("keeps compute() off the legacy bridge exports", () => {
+    const engineSource = fs.readFileSync(new URL("./index.ts", import.meta.url), "utf8");
+    const computeStart = engineSource.indexOf("export function compute(");
+    const computeEnd = engineSource.indexOf("type DeferredMechanicRecord =", computeStart);
+    const computeSource = engineSource.slice(computeStart, computeEnd);
+
+    expect(computeStart).toBeGreaterThanOrEqual(0);
+    expect(computeEnd).toBeGreaterThan(computeStart);
+    expect(computeSource).not.toContain("characterSpecToState(");
+    expect(computeSource).not.toContain("validateState(");
+    expect(computeSource).not.toContain("finalizeCharacter(");
+  });
+
   it("returns versioned ComputeResult for a canonical CharacterSpec", () => {
     const result = compute(
       {
