@@ -2410,10 +2410,30 @@ describe("CharacterSpec v1", () => {
 });
 
 describe("compute() contract", () => {
+  it("moves legacy wizard/state runtime behind a dedicated legacy module", () => {
+    const publicSource = fs.readFileSync(new URL("./public.ts", import.meta.url), "utf8");
+    const legacySource = fs.readFileSync(new URL("./legacy.ts", import.meta.url), "utf8");
+    const computeSourcePath = new URL("./compute.ts", import.meta.url);
+    const legacyRuntimeSourcePath = new URL("./legacyRuntime.ts", import.meta.url);
+
+    expect(fs.existsSync(computeSourcePath)).toBe(true);
+    expect(fs.existsSync(legacyRuntimeSourcePath)).toBe(true);
+
+    const computeSource = fs.readFileSync(computeSourcePath, "utf8");
+    const legacyRuntimeSource = fs.readFileSync(legacyRuntimeSourcePath, "utf8");
+
+    expect(publicSource).toContain('from "./compute"');
+    expect(legacySource).toContain('from "./legacyRuntime"');
+    expect(computeSource).toContain("export function compute(");
+    expect(computeSource).not.toContain("export function listChoices(");
+    expect(legacyRuntimeSource).toContain("export function listChoices(");
+    expect(legacyRuntimeSource).toContain("export function finalizeCharacter(");
+  });
+
   it("keeps compute() off the legacy bridge exports", () => {
-    const engineSource = fs.readFileSync(new URL("./index.ts", import.meta.url), "utf8");
+    const engineSource = fs.readFileSync(new URL("./compute.ts", import.meta.url), "utf8");
     const computeStart = engineSource.indexOf("export function compute(");
-    const computeEnd = engineSource.indexOf("type DeferredMechanicRecord =", computeStart);
+    const computeEnd = engineSource.length;
     const computeSource = engineSource.slice(computeStart, computeEnd);
 
     expect(computeStart).toBeGreaterThanOrEqual(0);
