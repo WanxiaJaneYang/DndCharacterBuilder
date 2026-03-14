@@ -255,6 +255,11 @@ describe("resolvePackSet", () => {
       "rope-hempen"
     ]));
 
+    expect(resolved.entities.items?.padded?.data).toMatchObject({
+      category: "armor",
+      armorCheckPenalty: 0
+    });
+
     for (const item of items) {
       expect(item.description).toContain(item.name);
       expect(item.description).toMatch(/\.$/);

@@ -770,7 +770,7 @@
     "data": {
       "category": "armor",
       "weight": 10,
-      "armorCheckPenalty": -5
+      "armorCheckPenalty": 0
     },
     "effects": [
       {
