@@ -32,7 +32,6 @@ const playerNamePattern = new RegExp(`${en.PLAYER_TITLE}|${zh.PLAYER_TITLE}`, 'i
 const dmNamePattern = new RegExp(`${en.DM_TITLE}|${zh.DM_TITLE}`, 'i');
 const nextPattern = new RegExp(`${en.NEXT}|${zh.NEXT}`, 'i');
 const reviewPattern = new RegExp(`${en.REVIEW}|${zh.REVIEW}`, 'i');
-const unresolvedPattern = new RegExp(`${en.REVIEW_UNRESOLVED_LABEL}|${zh.REVIEW_UNRESOLVED_LABEL}`, 'i');
 const startWizardPattern = new RegExp(`${en.START_WIZARD}|${zh.START_WIZARD}`, 'i');
 const rulesSetupTitlePattern = new RegExp(`${en.RULES_SETUP_TITLE}|${zh.RULES_SETUP_TITLE}`, 'i');
 const fighterLabelPattern = /^(?:Fighter(?: \(Level 1\))?|\u6218\u58eb(?:\uff081\u7ea7\uff09)?)$/i;
@@ -923,7 +922,7 @@ describe('role and language behavior', () => {
     expect(screen.queryByText(localizedPattern('Fighter', '\u6218\u58eb'))).toBeNull();
   });
 
-  it('shows unresolved placeholders on review when metadata selections are missing', async () => {
+  it('blocks progression from the race step until a race is selected', async () => {
     const user = userEvent.setup();
     render(<App />);
 
@@ -931,13 +930,14 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: startWizardPattern }));
 
     const nextButton = screen.getByRole('button', { name: nextPattern });
-    for (let i = 0; i < 16; i += 1) {
-      if ((nextButton as HTMLButtonElement).disabled) break;
-      await user.click(nextButton);
-    }
+    expect((nextButton as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByLabelText(humanLabelPattern)).toBeTruthy();
 
-    expect(screen.getByRole('heading', { name: reviewPattern })).toBeTruthy();
-    expect(screen.getAllByText(unresolvedPattern).length).toBeGreaterThanOrEqual(2);
+    await user.click(screen.getByLabelText(humanLabelPattern));
+    expect((nextButton as HTMLButtonElement).disabled).toBe(false);
+    await user.click(nextButton);
+
+    expect(screen.getByLabelText(fighterLabelPattern)).toBeTruthy();
   });
 
   it('supports back navigation from rules setup and from first wizard step', async () => {
@@ -948,6 +948,7 @@ describe('role and language behavior', () => {
     await user.click(screen.getByRole('button', { name: startWizardPattern }));
     expect(screen.getByLabelText(humanLabelPattern)).toBeTruthy();
 
+    await user.click(screen.getByLabelText(humanLabelPattern));
     await user.click(screen.getByRole('button', { name: nextPattern }));
     expect(screen.getByLabelText(fighterLabelPattern)).toBeTruthy();
 
