@@ -1,26 +1,24 @@
 # Task Plan
 
 ## Goal
-Implement issue #166 on a clean worktree by defining the public `ComputeResult` output contract, versioned `SheetViewModel` wrapper, explicit stability/ordering guarantees, tests, docs, and an MR.
+Finish issue `#212` / PR `#213` by keeping the compute-native engine surface separate from the legacy wizard/runtime surface, closing review blockers, and leaving the MR ready to merge.
 
 ## Phases
-- [completed] Design and planning docs
-- [completed] Red: add failing compute() contract tests
-- [completed] Green: implement exported output contract + `compute()` bridge
-- [completed] Docs: add ComputeResult contract doc and data README entry
-- [completed] Verify: run relevant test/type/build commands
-- [pending] Git: commit, push, create MR
+- [completed] Boundary split from `packages/engine/src/index.ts` into `compute.ts`, `legacyRuntime.ts`, and focused `legacyRuntime*.ts` modules
+- [completed] Red/green regression for `levelMin` constraints with `src/legacyRuntimeChoices.test.ts`
+- [completed] Align issue-212 plan and Trellis task records with the actual worktree/PR state
+- [pending] Run verification, commit/push the follow-up, resolve PR review threads, and re-poll checks/review state
 
 ## Key Decisions
-- Keep `CharacterSpec` ownership in `packages/engine/src/characterSpec.ts` from issue #165.
-- Add `ComputeResult`/`VersionedSheetViewModel`/`RulepackInput` in `packages/engine/src/index.ts` because they depend on `SheetViewModel` and engine internals.
-- Use the uncommitted draft only as reference; do not transplant its structural regressions.
-- Document array ordering guarantees explicitly; do not promise object key enumeration order.
+- Keep `@dcb/engine` exporting compute-facing APIs from `packages/engine/src/public.ts`.
+- Keep `@dcb/engine/legacy` as the only public wizard/state runtime surface.
+- Enforce the repo limit of `<=200` lines for authored TypeScript modules by splitting legacy-runtime responsibilities into focused files instead of helper dumping.
+- Limit scope to issue `#212` under `#162/#168`; do not pull `#160` or `#199` work into this MR.
 
 ## Risks
-- `compute()` can accidentally normalize away validation scenarios if it only inspects normalized values.
-- Contract tests must extend existing #165 coverage instead of replacing it.
-- The bridge must stay deterministic and not mutate `CharacterSpec` input.
+- Legacy constraint evaluation can drift from the shared progression helpers if duplicated instead of reused.
+- The large pre-existing `packages/engine/src/engine.test.ts` file remains architecture debt outside this PR's boundary, so new coverage should stay in focused test files.
+- PR readiness depends on both CI and unresolved GitHub review threads, not only local tests.
 
 ## Errors Encountered
-- `npm --workspace @dcb/engine run test -- --runInBand` failed because Vitest does not support `--runInBand`; corrected to `npm --workspace @dcb/engine run test`.
+- The generated Trellis task defaulted its base branch to the current feature branch and had to be corrected back to `main`.

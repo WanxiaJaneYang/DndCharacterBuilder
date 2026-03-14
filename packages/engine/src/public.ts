@@ -2,13 +2,9 @@ export {
   COMPUTE_RESULT_SCHEMA_VERSION,
   compute,
   DEFAULT_STATS
-} from "./index";
+} from "./compute";
 
 export type {
-  CharacterSpec,
-  CharacterSpecClassSelection,
-  CharacterSpecMeta,
-  CharacterSpecValidationIssue,
   ComputeResultValidationIssue,
   ComputeResultUnresolvedEntry,
   ComputeResultAssumptionEntry,
@@ -28,9 +24,16 @@ export type {
   Phase1Sheet,
   Phase2Sheet,
   UnresolvedRule
-} from "./index";
+} from "./compute";
 
 export {
   normalizeCharacterSpec,
   validateCharacterSpec
+} from "./characterSpec";
+
+export type {
+  CharacterSpec,
+  CharacterSpecClassSelection,
+  CharacterSpecMeta,
+  CharacterSpecValidationIssue
 } from "./characterSpec";

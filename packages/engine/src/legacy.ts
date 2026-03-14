@@ -4,12 +4,13 @@ export {
   applyChoice,
   listChoices,
   validateState
-} from "./index";
+} from "./legacyRuntime";
 
 export type {
-  CharacterState,
   EngineContext,
   Choice,
   ValidationError,
   CharacterSheet
-} from "./index";
+} from "./legacyRuntime";
+
+export type { CharacterState } from "./characterSpec";

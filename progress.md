@@ -1,17 +1,9 @@
 # Progress Log
 
-## 2026-03-06
-- Read required workflow skills and repo MR guidance.
-- Confirmed issue #165 is already merged and issue #166 is still open.
-- Inspected local uncommitted draft; decided to use it as reference only.
-- Added `.worktrees` to repo ignore list in the root checkout and committed `chore: ignore local worktrees` to safely create project-local worktrees.
-- Created worktree `.worktrees/issue-166-compute-result-contract` on branch `feat/issue-166-compute-result-contract` from `origin/main`.
-- Ran baseline `npm test` in the worktree: all workspace tests passed.
-- Writing design and implementation plan docs now.
-- Committed design and planning docs in `docs: plan compute result contract`.
-- Added failing `compute()` contract tests in `packages/engine/src/engine.test.ts`.
-- Verified the Red step with `npm --workspace @dcb/engine run test`; failure was `compute is not a function`.
-- Implemented `compute()` and versioned output contract types in `packages/engine/src/index.ts`.
-- Re-ran `npm --workspace @dcb/engine run test`; engine suite passed and wrote the inline snapshot for the deterministic contract test.
-- Added `docs/data/COMPUTE_RESULT_V1.md` and linked it from `docs/data/README.md`.
-- Re-ran `npm run check:contract-fixtures`, `npm run typecheck`, `npm run build`, and `npm test` after the final inline snapshot update; all passed.
+## 2026-03-14
+- Bootstrapped Trellis context in the `issue-212-legacy-runtime-boundary` worktree and created the missing issue-212 task record.
+- Reviewed PR `#213`, identified two unresolved review threads, and verified that one was a real runtime bug in `levelMin` constraint handling.
+- Added `packages/engine/src/legacyRuntimeChoices.test.ts` as a focused regression test and verified the red step: the feat option gated by `levelMin: 2` was incorrectly filtered out for `fighter-3`.
+- Fixed `packages/engine/src/legacyRuntimeExpression.ts` to reuse `getCharacterLevel(state)` for `levelMin` checks and verified the green step with the focused test.
+- Removed agent-only wording from the issue-212 plan doc and rewrote the stale root planning files (`task_plan.md`, `findings.md`, `progress.md`) so they reflect issue `#212`, base commit `67ab5c4`, and PR `#213`.
+- Next: run the full verification set, commit/push the follow-up, resolve the remaining PR threads, and re-poll checks/review state until the MR is ready.
