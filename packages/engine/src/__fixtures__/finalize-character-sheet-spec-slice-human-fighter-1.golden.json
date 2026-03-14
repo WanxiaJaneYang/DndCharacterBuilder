@@ -1,0 +1,1084 @@
+{
+  "metadata": {
+    "name": "Aric"
+  },
+  "identity": {
+    "raceId": "human",
+    "classId": "fighter",
+    "level": 1,
+    "xp": 0,
+    "size": "medium",
+    "speed": {
+      "base": 30,
+      "adjusted": 20
+    }
+  },
+  "abilities": {
+    "str": {
+      "score": 16,
+      "mod": 3
+    },
+    "dex": {
+      "score": 12,
+      "mod": 1
+    },
+    "con": {
+      "score": 14,
+      "mod": 2
+    },
+    "int": {
+      "score": 10,
+      "mod": 0
+    },
+    "wis": {
+      "score": 10,
+      "mod": 0
+    },
+    "cha": {
+      "score": 8,
+      "mod": -1
+    }
+  },
+  "combat": {
+    "ac": {
+      "total": 18,
+      "touch": 11,
+      "flatFooted": 17,
+      "breakdown": {
+        "armor": 5,
+        "shield": 2,
+        "dex": 1,
+        "size": 0,
+        "natural": 0,
+        "deflection": 0,
+        "misc": 0
+      }
+    },
+    "initiative": {
+      "total": 1,
+      "dex": 1,
+      "misc": 0
+    },
+    "grapple": {
+      "total": 4,
+      "bab": 1,
+      "str": 3,
+      "size": 0,
+      "misc": 0
+    },
+    "attacks": {
+      "melee": [
+        {
+          "itemId": "longsword",
+          "name": "Longsword",
+          "attackBonus": 4,
+          "damage": "1d8",
+          "crit": "19-20/x2"
+        }
+      ],
+      "ranged": []
+    },
+    "saves": {
+      "fort": {
+        "total": 4,
+        "base": 2,
+        "ability": 2,
+        "misc": 0
+      },
+      "ref": {
+        "total": 1,
+        "base": 0,
+        "ability": 1,
+        "misc": 0
+      },
+      "will": {
+        "total": 0,
+        "base": 0,
+        "ability": 0,
+        "misc": 0
+      }
+    },
+    "hp": {
+      "total": 12,
+      "breakdown": {
+        "hitDie": 10,
+        "con": 2,
+        "misc": 0
+      }
+    }
+  },
+  "skills": [
+    {
+      "id": "appraise",
+      "name": "Appraise",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "balance",
+      "name": "Balance",
+      "ability": "dex",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -6
+    },
+    {
+      "id": "bluff",
+      "name": "Bluff",
+      "ability": "cha",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": -1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": -1
+    },
+    {
+      "id": "climb",
+      "name": "Climb",
+      "ability": "str",
+      "classSkill": true,
+      "ranks": 4,
+      "maxRanks": 4,
+      "costPerRank": 1,
+      "costSpent": 4,
+      "breakdown": {
+        "abilityMod": 3,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": 0
+    },
+    {
+      "id": "concentration",
+      "name": "Concentration",
+      "ability": "con",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 2,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 2
+    },
+    {
+      "id": "craft",
+      "name": "Craft",
+      "ability": "int",
+      "classSkill": true,
+      "ranks": 0,
+      "maxRanks": 4,
+      "costPerRank": 1,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "decipher-script",
+      "name": "Decipher Script",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "diplomacy",
+      "name": "Diplomacy",
+      "ability": "cha",
+      "classSkill": false,
+      "ranks": 0.5,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 1,
+      "breakdown": {
+        "abilityMod": -1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": -0.5
+    },
+    {
+      "id": "disable-device",
+      "name": "Disable Device",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "disguise",
+      "name": "Disguise",
+      "ability": "cha",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": -1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": -1
+    },
+    {
+      "id": "escape-artist",
+      "name": "Escape Artist",
+      "ability": "dex",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -6
+    },
+    {
+      "id": "forgery",
+      "name": "Forgery",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "gather-information",
+      "name": "Gather Information",
+      "ability": "cha",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": -1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": -1
+    },
+    {
+      "id": "handle-animal",
+      "name": "Handle Animal",
+      "ability": "cha",
+      "classSkill": true,
+      "ranks": 0,
+      "maxRanks": 4,
+      "costPerRank": 1,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": -1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": -1
+    },
+    {
+      "id": "heal",
+      "name": "Heal",
+      "ability": "wis",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "hide",
+      "name": "Hide",
+      "ability": "dex",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -6
+    },
+    {
+      "id": "intimidate",
+      "name": "Intimidate",
+      "ability": "cha",
+      "classSkill": true,
+      "ranks": 0,
+      "maxRanks": 4,
+      "costPerRank": 1,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": -1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": -1
+    },
+    {
+      "id": "jump",
+      "name": "Jump",
+      "ability": "str",
+      "classSkill": true,
+      "ranks": 3,
+      "maxRanks": 4,
+      "costPerRank": 1,
+      "costSpent": 3,
+      "breakdown": {
+        "abilityMod": 3,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -1
+    },
+    {
+      "id": "knowledge-arcana",
+      "name": "Knowledge (Arcana)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-architecture-and-engineering",
+      "name": "Knowledge (Architecture and Engineering)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-dungeoneering",
+      "name": "Knowledge (Dungeoneering)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-geography",
+      "name": "Knowledge (Geography)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-history",
+      "name": "Knowledge (History)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-local",
+      "name": "Knowledge (Local)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-nature",
+      "name": "Knowledge (Nature)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-nobility-and-royalty",
+      "name": "Knowledge (Nobility and Royalty)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-religion",
+      "name": "Knowledge (Religion)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "knowledge-the-planes",
+      "name": "Knowledge (The Planes)",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "listen",
+      "name": "Listen",
+      "ability": "wis",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "move-silently",
+      "name": "Move Silently",
+      "ability": "dex",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -6
+    },
+    {
+      "id": "open-lock",
+      "name": "Open Lock",
+      "ability": "dex",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 1
+    },
+    {
+      "id": "perform",
+      "name": "Perform",
+      "ability": "cha",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": -1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": -1
+    },
+    {
+      "id": "profession",
+      "name": "Profession",
+      "ability": "wis",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "ride",
+      "name": "Ride",
+      "ability": "dex",
+      "classSkill": true,
+      "ranks": 0,
+      "maxRanks": 4,
+      "costPerRank": 1,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -6
+    },
+    {
+      "id": "search",
+      "name": "Search",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "sense-motive",
+      "name": "Sense Motive",
+      "ability": "wis",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "sleight-of-hand",
+      "name": "Sleight of Hand",
+      "ability": "dex",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -6
+    },
+    {
+      "id": "speak-language",
+      "name": "Speak Language",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "spellcraft",
+      "name": "Spellcraft",
+      "ability": "int",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "spot",
+      "name": "Spot",
+      "ability": "wis",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "survival",
+      "name": "Survival",
+      "ability": "wis",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 0,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 0
+    },
+    {
+      "id": "swim",
+      "name": "Swim",
+      "ability": "str",
+      "classSkill": true,
+      "ranks": 0,
+      "maxRanks": 4,
+      "costPerRank": 1,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 3,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -4
+    },
+    {
+      "id": "tumble",
+      "name": "Tumble",
+      "ability": "dex",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": -7
+      },
+      "total": -6
+    },
+    {
+      "id": "use-magic-device",
+      "name": "Use Magic Device",
+      "ability": "cha",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": -1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": -1
+    },
+    {
+      "id": "use-rope",
+      "name": "Use Rope",
+      "ability": "dex",
+      "classSkill": false,
+      "ranks": 0,
+      "maxRanks": 2,
+      "costPerRank": 2,
+      "costSpent": 0,
+      "breakdown": {
+        "abilityMod": 1,
+        "racial": 0,
+        "misc": 0,
+        "acp": 0
+      },
+      "total": 1
+    }
+  ],
+  "feats": [
+    {
+      "id": "power-attack",
+      "name": "Power Attack",
+      "summary": "You can make exceptionally powerful melee attacks."
+    }
+  ],
+  "rules": {
+    "decisions": {
+      "featSelectionLimit": 3,
+      "favoredClass": "any",
+      "ignoresMulticlassXpPenalty": true,
+      "classSkills": [
+        "climb",
+        "craft",
+        "handle-animal",
+        "intimidate",
+        "jump",
+        "ride",
+        "swim"
+      ],
+      "ancestryTags": [],
+      "sizeModifiers": {
+        "ac": 0,
+        "attack": 0,
+        "hide": 0,
+        "carryingCapacityMultiplier": 1
+      },
+      "movementOverrides": {
+        "ignoreArmorSpeedReduction": false
+      },
+      "racialSaveBonuses": [],
+      "racialAttackBonuses": [],
+      "racialAcBonuses": [],
+      "racialSpellDcBonuses": [],
+      "racialInnateSpellLikeAbilities": [],
+      "skillPoints": {
+        "basePerLevel": 2,
+        "racialBonusAtLevel1": 4,
+        "racialBonusPerLevel": 1,
+        "firstLevelMultiplier": 4,
+        "total": 12,
+        "spent": 8,
+        "remaining": 4
+      }
+    },
+    "provenance": [
+      {
+        "targetPath": "stats.ac",
+        "setValue": 11,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "base-ac"
+        }
+      },
+      {
+        "targetPath": "stats.initiative",
+        "setValue": 1,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "initiative"
+        }
+      },
+      {
+        "targetPath": "stats.speed",
+        "setValue": 30,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "human"
+        }
+      },
+      {
+        "targetPath": "stats.hp",
+        "setValue": 12,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "fighter",
+          "choiceStepId": "class-level-1"
+        }
+      },
+      {
+        "targetPath": "stats.bab",
+        "setValue": 1,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "fighter",
+          "choiceStepId": "class-level-1"
+        }
+      },
+      {
+        "targetPath": "stats.fort",
+        "setValue": 2,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "fighter",
+          "choiceStepId": "class-level-1"
+        }
+      },
+      {
+        "targetPath": "stats.ref",
+        "setValue": 0,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "fighter",
+          "choiceStepId": "class-level-1"
+        }
+      },
+      {
+        "targetPath": "stats.will",
+        "setValue": 0,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "fighter",
+          "choiceStepId": "class-level-1"
+        }
+      },
+      {
+        "targetPath": "stats.ac",
+        "delta": 5,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "chainmail"
+        }
+      },
+      {
+        "targetPath": "stats.speed",
+        "setValue": 20,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "chainmail"
+        }
+      },
+      {
+        "targetPath": "stats.ac",
+        "delta": 2,
+        "source": {
+          "packId": "srd-35e-minimal",
+          "entityId": "heavy-wooden-shield"
+        }
+      }
+    ],
+    "packSetFingerprint": "0cfe94eaf0dc425ce65d3bb451257cd293af9d2474bb6227fbc20e89526a3ac9"
+  },
+  "unresolved": [
+    {
+      "id": "srd-35e-minimal:classes:fighter:fighter-bonus-feat-runtime",
+      "category": "class-feature",
+      "description": "Recurring fighter bonus feat slots at higher levels are recorded but not auto-issued yet.",
+      "dependsOn": [
+        "cap:level-progression",
+        "cap:feat-slot-progression"
+      ],
+      "impacts": [
+        "feat:bonus-selection"
+      ],
+      "source": {
+        "entityType": "classes",
+        "entityId": "fighter",
+        "packId": "srd-35e-minimal",
+        "sourceRefs": [
+          "basic-rules-and-legal/character-classes-i.html#fighter",
+          "basic-rules-and-legal/character-classes-i.html#fighter--class-skills"
+        ]
+      }
+    },
+    {
+      "id": "srd-35e-minimal:classes:fighter:fighter-proficiency-automation",
+      "category": "proficiency",
+      "description": "Fighter proficiencies are recorded but not yet consumed by weapon/armor validation.",
+      "dependsOn": [
+        "cap:equipment-rules",
+        "cap:proficiency-runtime"
+      ],
+      "impacts": [
+        "proficiency:armor",
+        "proficiency:weapon"
+      ],
+      "source": {
+        "entityType": "classes",
+        "entityId": "fighter",
+        "packId": "srd-35e-minimal",
+        "sourceRefs": [
+          "basic-rules-and-legal/character-classes-i.html#fighter",
+          "basic-rules-and-legal/character-classes-i.html#fighter--class-skills"
+        ]
+      }
+    },
+    {
+      "id": "srd-35e-minimal:feats:power-attack:power-attack-benefit",
+      "category": "feat-benefit",
+      "description": "GENERAL feat benefit is preserved from source text but not yet enforced by the current engine. On your action, before making attack rolls for a round, you may choose to subtract a number from all melee attack rolls and add the same number to all melee damage rolls. This number may not exceed your base attack bonus. The penalty on attacks and bonus on damage apply until your next turn.",
+      "dependsOn": [
+        "cap:feat-effect-runtime",
+        "cap:character-sheet-feat-benefits"
+      ],
+      "impacts": [
+        "combat:attack-roll",
+        "combat:melee-attack-roll",
+        "combat:damage"
+      ],
+      "source": {
+        "entityType": "feats",
+        "entityId": "power-attack",
+        "packId": "srd-35e-minimal"
+      }
+    }
+  ]
+}
