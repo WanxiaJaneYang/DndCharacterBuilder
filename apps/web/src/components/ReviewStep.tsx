@@ -1,4 +1,5 @@
 import { getEntityDataRecord } from "../appHelpers";
+import { isVisibleReviewSkill } from "../pageComposer/reviewSheetSelectors";
 import { ReviewAbilityTable } from "./review/ReviewAbilityTable";
 import { ReviewAttackSection } from "./review/ReviewAttackSection";
 import { ReviewCombatTable } from "./review/ReviewCombatTable";
@@ -60,7 +61,7 @@ export function ReviewStep({
     ? (getEntityDataRecord(selectedRaceEntity).racialTraits as Array<Record<string, unknown>>)
     : [];
   const reviewSkills = computeResult.sheetViewModel.data.skills
-    .filter((skill) => skill.ranks > 0 || skill.racialBonus !== 0)
+    .filter(isVisibleReviewSkill)
     .sort((a, b) => {
       const left = localizeEntityText("skills", a.id, "name", a.name);
       const right = localizeEntityText("skills", b.id, "name", b.name);

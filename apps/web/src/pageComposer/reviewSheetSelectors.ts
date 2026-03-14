@@ -16,10 +16,22 @@ const REVIEW_ABILITY_ORDER = ["str", "dex", "con", "int", "wis", "cha"] as const
 const REVIEW_STAT_ORDER = ["hp", "ac", "initiative", "bab", "fort", "ref", "will"] as const;
 type ReviewCombatStatKey = (typeof REVIEW_STAT_ORDER)[number];
 type ProvenanceRecord = { delta?: number; setValue?: number; source: { packId: string; entityId: string } };
+type ReviewSkillVisibilityRecord = {
+  ranks: number;
+  total: number;
+  abilityMod: number;
+  racialBonus: number;
+  misc: number;
+  acp: number;
+};
 
 const REVIEW_STAT_DEFAULTS: Record<ReviewCombatStatKey, number> = { hp: DEFAULT_STATS.hp, ac: DEFAULT_STATS.ac, initiative: DEFAULT_STATS.initiative, bab: DEFAULT_STATS.bab, fort: DEFAULT_STATS.fort, ref: DEFAULT_STATS.ref, will: DEFAULT_STATS.will };
 const formatSigned = (value: number) => `${value >= 0 ? "+" : ""}${value}`;
 const formatSkillValue = (value: number) => `${Number.isInteger(value) ? value : value.toFixed(1)}`;
+
+export function isVisibleReviewSkill(skill: ReviewSkillVisibilityRecord): boolean {
+  return skill.ranks > 0 || skill.total !== 0 || skill.abilityMod !== 0 || skill.racialBonus !== 0 || skill.misc !== 0 || skill.acp !== 0;
+}
 
 export function selectReviewHeaderData(args: BuildReviewSheetDataArgs): ReviewHeaderData {
   return { title: args.t.REVIEW, characterName: args.characterName || args.t.UNNAMED_CHARACTER, raceLabel: args.t.RACE_LABEL, selectedRaceName: args.selectedRaceName, classLabel: args.t.CLASS_LABEL, selectedClassName: args.selectedClassName, exportLabel: args.t.EXPORT_JSON, provenanceLabel: args.t.TOGGLE_PROVENANCE, onExportJson: args.onExportJson, onToggleProvenance: args.onToggleProvenance };
@@ -58,7 +70,7 @@ export function selectReviewCombatRows(args: BuildReviewSheetDataArgs): ReviewCo
 }
 
 export function selectReviewSkillsRows(args: Pick<BuildReviewSheetDataArgs, "localizeAbilityLabel" | "localizeEntityText" | "skills" | "t">): ReviewSkillRow[] {
-  return [...args.skills].filter((skill) => skill.ranks > 0 || skill.total !== 0 || skill.abilityMod !== 0 || skill.racialBonus !== 0 || skill.misc !== 0 || skill.acp !== 0).sort((left, right) => right.total - left.total || args.localizeEntityText("skills", left.id, "name", left.name).localeCompare(args.localizeEntityText("skills", right.id, "name", right.name))).map((skill) => ({ id: skill.id, name: args.localizeEntityText("skills", skill.id, "name", skill.name), ranks: formatSkillValue(skill.ranks), ability: `${formatSigned(skill.abilityMod)} (${args.localizeAbilityLabel(skill.abilityKey)})`, racial: formatSigned(skill.racialBonus), misc: formatSigned(skill.misc), acp: formatSigned(skill.acp), total: formatSkillValue(skill.total), pointCost: `${formatSkillValue(skill.costSpent)} (${skill.costPerRank}${args.t.REVIEW_PER_RANK_UNIT})` }));
+  return [...args.skills].filter(isVisibleReviewSkill).sort((left, right) => right.total - left.total || args.localizeEntityText("skills", left.id, "name", left.name).localeCompare(args.localizeEntityText("skills", right.id, "name", right.name))).map((skill) => ({ id: skill.id, name: args.localizeEntityText("skills", skill.id, "name", skill.name), ranks: formatSkillValue(skill.ranks), ability: `${formatSigned(skill.abilityMod)} (${args.localizeAbilityLabel(skill.abilityKey)})`, racial: formatSigned(skill.racialBonus), misc: formatSigned(skill.misc), acp: formatSigned(skill.acp), total: formatSkillValue(skill.total), pointCost: `${formatSkillValue(skill.costSpent)} (${skill.costPerRank}${args.t.REVIEW_PER_RANK_UNIT})` }));
 }
 
 export function selectReviewEquipmentRows(args: BuildReviewSheetDataArgs): ReviewLabelValueRow[] {
