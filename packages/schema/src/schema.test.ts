@@ -1310,6 +1310,27 @@ describe("feat entity schema", () => {
 });
 
 describe("item entity schema", () => {
+  const makeItemEntity = (
+    data: Record<string, unknown>,
+    overrides: Partial<Record<"id" | "name" | "summary" | "description", string>> = {}
+  ) => ({
+    id: overrides.id ?? "test-item",
+    name: overrides.name ?? "Test Item",
+    entityType: "items",
+    summary: overrides.summary ?? "Test item summary.",
+    description: overrides.description ?? "Test item description.",
+    portraitUrl: null,
+    iconUrl: null,
+    data
+  });
+
+  const expectInvalidItemData = (
+    data: Record<string, unknown>,
+    overrides: Partial<Record<"id" | "name" | "summary" | "description", string>> = {}
+  ) => {
+    expect(() => EntitySchema.parse(makeItemEntity(data, overrides))).toThrow(/invalid items\.data/i);
+  };
+
   it("accepts structured item data for weapon, armor, shield, and gear categories", () => {
     const weapon = EntitySchema.parse({
       id: "longsword",
@@ -1375,6 +1396,122 @@ describe("item entity schema", () => {
       }
     });
     expect(gear.id).toBe("rope");
+  });
+
+  it("accepts ranged weapon range text, fractional gear weights, and zero ACP armor entries", () => {
+    const rangedWeapon = EntitySchema.parse({
+      id: "dart",
+      name: "Dart",
+      entityType: "items",
+      summary: "Simple thrown weapon.",
+      description: "Small ranged weapon with a short range increment.",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        category: "weapon",
+        weaponType: "ranged",
+        damage: "1d4",
+        crit: "20/x2",
+        range: "20 ft.",
+        weight: 0.5
+      }
+    });
+    expect(rangedWeapon.id).toBe("dart");
+
+    const armor = EntitySchema.parse({
+      id: "leather",
+      name: "Leather Armor",
+      entityType: "items",
+      summary: "Light armor.",
+      description: "Flexible leather protection.",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        category: "armor",
+        weight: 15,
+        armorCheckPenalty: 0
+      }
+    });
+    expect(armor.id).toBe("leather");
+
+    const gear = EntitySchema.parse({
+      id: "belt-pouch",
+      name: "Belt Pouch",
+      entityType: "items",
+      summary: "Compact storage.",
+      description: "A small pouch sized for coins and small tools.",
+      portraitUrl: null,
+      iconUrl: null,
+      data: {
+        category: "gear",
+        weight: 0.5
+      }
+    });
+    expect(gear.id).toBe("belt-pouch");
+  });
+
+  it("rejects non-weapon categories that leak weapon-only combat fields", () => {
+    expectInvalidItemData({
+      category: "armor",
+      weight: 25,
+      weaponType: "melee"
+    }, { id: "armor-with-weapon-type", name: "Armor With Weapon Type" });
+
+    expectInvalidItemData({
+      category: "shield",
+      weight: 10,
+      damage: "1d6"
+    }, { id: "shield-with-damage", name: "Shield With Damage" });
+
+    expectInvalidItemData({
+      category: "gear",
+      weight: 2,
+      crit: "20/x2"
+    }, { id: "gear-with-crit", name: "Gear With Crit" });
+  });
+
+  it("rejects malformed weapon formatting invariants", () => {
+    expectInvalidItemData({
+      category: "weapon",
+      weaponType: "melee",
+      damage: "d8",
+      crit: "19-20/x2",
+      weight: 4
+    }, { id: "weapon-invalid-damage", name: "Weapon Invalid Damage" });
+
+    expectInvalidItemData({
+      category: "weapon",
+      weaponType: "melee",
+      damage: "1d8",
+      crit: "19-20x2",
+      weight: 4
+    }, { id: "weapon-invalid-crit", name: "Weapon Invalid Crit" });
+
+    expectInvalidItemData({
+      category: "weapon",
+      weaponType: "ranged",
+      damage: "1d8",
+      crit: "20/x3",
+      range: "",
+      weight: 3
+    }, { id: "weapon-invalid-range", name: "Weapon Invalid Range" });
+  });
+
+  it("rejects negative weights and missing required armor or shield weights", () => {
+    expectInvalidItemData({
+      category: "gear",
+      weight: -0.5
+    }, { id: "gear-negative-weight", name: "Gear Negative Weight" });
+
+    expectInvalidItemData({
+      category: "armor",
+      armorCheckPenalty: -4
+    }, { id: "armor-missing-weight", name: "Armor Missing Weight" });
+
+    expectInvalidItemData({
+      category: "shield",
+      armorCheckPenalty: -2
+    }, { id: "shield-missing-weight", name: "Shield Missing Weight" });
   });
 
   it("rejects items with unknown categories", () => {

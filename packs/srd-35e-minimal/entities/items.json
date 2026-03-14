@@ -1,5 +1,407 @@
 [
   {
+    "id": "club",
+    "name": "Club",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "20/x2",
+      "range": "10 ft.",
+      "weight": 3
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Club.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "dagger",
+    "name": "Dagger",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d4",
+      "crit": "19-20/x2",
+      "range": "10 ft.",
+      "weight": 1
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Dagger.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "heavy-mace",
+    "name": "Heavy Mace",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x2",
+      "weight": 8
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Heavy Mace.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "light-mace",
+    "name": "Light Mace",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "20/x2",
+      "weight": 4
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Light Mace.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "morningstar",
+    "name": "Morningstar",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x2",
+      "weight": 6
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Morningstar.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "shortspear",
+    "name": "Shortspear",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "20/x2",
+      "range": "20 ft.",
+      "weight": 3
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Shortspear.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "longspear",
+    "name": "Longspear",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x3",
+      "weight": 9
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Longspear.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "quarterstaff",
+    "name": "Quarterstaff",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "20/x2",
+      "weight": 4
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Quarterstaff.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "spear",
+    "name": "Spear",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x3",
+      "range": "20 ft.",
+      "weight": 6
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Spear.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "heavy-crossbow",
+    "name": "Heavy Crossbow",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d10",
+      "crit": "19-20/x2",
+      "range": "120 ft.",
+      "weight": 8
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Heavy Crossbow.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "light-crossbow",
+    "name": "Light Crossbow",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d8",
+      "crit": "19-20/x2",
+      "range": "80 ft.",
+      "weight": 4
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Light Crossbow.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "dart",
+    "name": "Dart",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d4",
+      "crit": "20/x2",
+      "range": "20 ft.",
+      "weight": 0.5
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Dart.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "javelin",
+    "name": "Javelin",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d6",
+      "crit": "20/x2",
+      "range": "30 ft.",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Javelin.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "sling",
+    "name": "Sling",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d4",
+      "crit": "20/x2",
+      "range": "50 ft.",
+      "weight": 0
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Sling.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "throwing-axe",
+    "name": "Throwing Axe",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "20/x2",
+      "range": "10 ft.",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Throwing Axe.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "light-hammer",
+    "name": "Light Hammer",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d4",
+      "crit": "20/x2",
+      "range": "20 ft.",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Light Hammer.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "handaxe",
+    "name": "Handaxe",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "20/x3",
+      "weight": 3
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Handaxe.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "kukri",
+    "name": "Kukri",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d4",
+      "crit": "18-20/x2",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Kukri.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "light-pick",
+    "name": "Light Pick",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d4",
+      "crit": "20/x4",
+      "weight": 3
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Light Pick.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "sap",
+    "name": "Sap",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "20/x2",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Sap.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "shortsword",
+    "name": "Shortsword",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "19-20/x2",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Shortsword.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "battleaxe",
+    "name": "Battleaxe",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x3",
+      "weight": 6
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Battleaxe.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "flail",
+    "name": "Flail",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x2",
+      "weight": 5
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Flail.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
     "id": "longsword",
     "name": "Longsword",
     "entityType": "items",
@@ -11,8 +413,505 @@
       "weight": 4
     },
     "effects": [],
-    "summary": "Longsword (item) option.",
-    "description": "Detailed reference entry for Longsword in the items dataset.",
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Longsword.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "heavy-pick",
+    "name": "Heavy Pick",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "20/x4",
+      "weight": 6
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Heavy Pick.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "rapier",
+    "name": "Rapier",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "18-20/x2",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Rapier.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "scimitar",
+    "name": "Scimitar",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d6",
+      "crit": "18-20/x2",
+      "weight": 4
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Scimitar.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "trident",
+    "name": "Trident",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x2",
+      "range": "10 ft.",
+      "weight": 4
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Trident.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "warhammer",
+    "name": "Warhammer",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x3",
+      "weight": 5
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Warhammer.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "falchion",
+    "name": "Falchion",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "2d4",
+      "crit": "18-20/x2",
+      "weight": 8
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Falchion.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "glaive",
+    "name": "Glaive",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d10",
+      "crit": "20/x3",
+      "weight": 10
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Glaive.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "greataxe",
+    "name": "Greataxe",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d12",
+      "crit": "20/x3",
+      "weight": 12
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Greataxe.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "greatclub",
+    "name": "Greatclub",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d10",
+      "crit": "20/x2",
+      "weight": 8
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Greatclub.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "heavy-flail",
+    "name": "Heavy Flail",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d10",
+      "crit": "19-20/x2",
+      "weight": 10
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Heavy Flail.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "greatsword",
+    "name": "Greatsword",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "2d6",
+      "crit": "19-20/x2",
+      "weight": 8
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Greatsword.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "guisarme",
+    "name": "Guisarme",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "2d4",
+      "crit": "20/x3",
+      "weight": 12
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Guisarme.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "halberd",
+    "name": "Halberd",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d10",
+      "crit": "20/x3",
+      "weight": 12
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Halberd.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "lance",
+    "name": "Lance",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "1d8",
+      "crit": "20/x3",
+      "weight": 10
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Lance.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "ranseur",
+    "name": "Ranseur",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "2d4",
+      "crit": "20/x3",
+      "weight": 12
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Ranseur.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "scythe",
+    "name": "Scythe",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "melee",
+      "damage": "2d4",
+      "crit": "20/x4",
+      "weight": 10
+    },
+    "effects": [],
+    "summary": "Melee weapon.",
+    "description": "Core SRD equipment entry for Scythe.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "longbow",
+    "name": "Longbow",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d8",
+      "crit": "20/x3",
+      "range": "100 ft.",
+      "weight": 3
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Longbow.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "composite-longbow",
+    "name": "Composite Longbow",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d8",
+      "crit": "20/x3",
+      "range": "110 ft.",
+      "weight": 3
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Composite Longbow.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "shortbow",
+    "name": "Shortbow",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d6",
+      "crit": "20/x3",
+      "range": "60 ft.",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Shortbow.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "composite-shortbow",
+    "name": "Composite Shortbow",
+    "entityType": "items",
+    "data": {
+      "category": "weapon",
+      "weaponType": "ranged",
+      "damage": "1d6",
+      "crit": "20/x3",
+      "range": "70 ft.",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Ranged weapon.",
+    "description": "Core SRD equipment entry for Composite Shortbow.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "padded",
+    "name": "Padded Armor",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 10,
+      "armorCheckPenalty": -5
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 1
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Padded Armor.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "leather",
+    "name": "Leather Armor",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 15,
+      "armorCheckPenalty": 0
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Leather Armor.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "studded-leather",
+    "name": "Studded Leather Armor",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 20,
+      "armorCheckPenalty": -1
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 3
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Studded Leather Armor.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "chain-shirt",
+    "name": "Chain Shirt",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 25,
+      "armorCheckPenalty": -2
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 4
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Chain Shirt.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "hide",
+    "name": "Hide Armor",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 25,
+      "armorCheckPenalty": -3
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 3
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Hide Armor.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "scale-mail",
+    "name": "Scale Mail",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 30,
+      "armorCheckPenalty": -4
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 4
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Scale Mail.",
     "portraitUrl": null,
     "iconUrl": null
   },
@@ -41,8 +940,227 @@
         }
       }
     ],
-    "summary": "Chainmail (item) option.",
-    "description": "Detailed reference entry for Chainmail in the items dataset.",
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Chainmail.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "breastplate",
+    "name": "Breastplate",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 30,
+      "armorCheckPenalty": -4
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 5
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Breastplate.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "splint-mail",
+    "name": "Splint Mail",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 45,
+      "armorCheckPenalty": -7
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 6
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Splint Mail.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "banded-mail",
+    "name": "Banded Mail",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 35,
+      "armorCheckPenalty": -6
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 6
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Banded Mail.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "half-plate",
+    "name": "Half-Plate",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 50,
+      "armorCheckPenalty": -7
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 7
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Half-Plate.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "full-plate",
+    "name": "Full Plate",
+    "entityType": "items",
+    "data": {
+      "category": "armor",
+      "weight": 50,
+      "armorCheckPenalty": -6
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 8
+        }
+      },
+      {
+        "kind": "set",
+        "targetPath": "stats.speed",
+        "value": {
+          "const": 20
+        }
+      }
+    ],
+    "summary": "Armor entry.",
+    "description": "Core SRD equipment entry for Full Plate.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "buckler",
+    "name": "Buckler",
+    "entityType": "items",
+    "data": {
+      "category": "shield",
+      "weight": 5,
+      "armorCheckPenalty": -1
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 1
+        }
+      }
+    ],
+    "summary": "Shield entry.",
+    "description": "Core SRD equipment entry for Buckler.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "light-wooden-shield",
+    "name": "Light Wooden Shield",
+    "entityType": "items",
+    "data": {
+      "category": "shield",
+      "weight": 5,
+      "armorCheckPenalty": -1
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 1
+        }
+      }
+    ],
+    "summary": "Shield entry.",
+    "description": "Core SRD equipment entry for Light Wooden Shield.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "light-steel-shield",
+    "name": "Light Steel Shield",
+    "entityType": "items",
+    "data": {
+      "category": "shield",
+      "weight": 6,
+      "armorCheckPenalty": -1
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 1
+        }
+      }
+    ],
+    "summary": "Shield entry.",
+    "description": "Core SRD equipment entry for Light Steel Shield.",
     "portraitUrl": null,
     "iconUrl": null
   },
@@ -64,8 +1182,306 @@
         }
       }
     ],
-    "summary": "Heavy Wooden Shield (item) option.",
-    "description": "Detailed reference entry for Heavy Wooden Shield in the items dataset.",
+    "summary": "Shield entry.",
+    "description": "Core SRD equipment entry for Heavy Wooden Shield.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "heavy-steel-shield",
+    "name": "Heavy Steel Shield",
+    "entityType": "items",
+    "data": {
+      "category": "shield",
+      "weight": 15,
+      "armorCheckPenalty": -2
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 2
+        }
+      }
+    ],
+    "summary": "Shield entry.",
+    "description": "Core SRD equipment entry for Heavy Steel Shield.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "tower-shield",
+    "name": "Tower Shield",
+    "entityType": "items",
+    "data": {
+      "category": "shield",
+      "weight": 45,
+      "armorCheckPenalty": -10
+    },
+    "effects": [
+      {
+        "kind": "add",
+        "targetPath": "stats.ac",
+        "value": {
+          "const": 4
+        }
+      }
+    ],
+    "summary": "Shield entry.",
+    "description": "Core SRD equipment entry for Tower Shield.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "backpack",
+    "name": "Backpack",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Backpack.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "bedroll",
+    "name": "Bedroll",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 5
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Bedroll.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "blanket-winter",
+    "name": "Winter Blanket",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 3
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Winter Blanket.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "crowbar",
+    "name": "Crowbar",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 5
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Crowbar.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "flint-and-steel",
+    "name": "Flint and Steel",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 0
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Flint and Steel.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "grappling-hook",
+    "name": "Grappling Hook",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 4
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Grappling Hook.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "lamp-common",
+    "name": "Lamp",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 1
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Lamp.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "lantern-bullseye",
+    "name": "Bullseye Lantern",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 3
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Bullseye Lantern.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "lantern-hooded",
+    "name": "Hooded Lantern",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 2
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Hooded Lantern.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "oil-flask",
+    "name": "Oil (1 pint)",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 1
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Oil (1 pint).",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "pouch-belt",
+    "name": "Belt Pouch",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 0.5
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Belt Pouch.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "ram-portable",
+    "name": "Portable Ram",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 20
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Portable Ram.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "rations-trail",
+    "name": "Trail Rations (per day)",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 1
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Trail Rations (per day).",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "rope-hempen",
+    "name": "Hempen Rope (50 ft.)",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 10
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Hempen Rope (50 ft.).",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "rope-silk",
+    "name": "Silk Rope (50 ft.)",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 5
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Silk Rope (50 ft.).",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "sack",
+    "name": "Sack",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 0.5
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Sack.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "torch",
+    "name": "Torch",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 1
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Torch.",
+    "portraitUrl": null,
+    "iconUrl": null
+  },
+  {
+    "id": "waterskin",
+    "name": "Waterskin",
+    "entityType": "items",
+    "data": {
+      "category": "gear",
+      "weight": 4
+    },
+    "effects": [],
+    "summary": "Adventuring gear.",
+    "description": "Core SRD equipment entry for Waterskin.",
     "portraitUrl": null,
     "iconUrl": null
   }
