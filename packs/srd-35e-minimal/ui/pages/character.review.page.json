@@ -5,10 +5,88 @@
     "componentId": "layout.singleColumn",
     "children": [
       {
-        "id": "review-sheet",
-        "componentId": "review.sheet",
+        "id": "review-header",
+        "componentId": "review.header",
         "slot": "main",
-        "dataSource": "page.reviewSheet"
+        "dataSource": "page.reviewSheet.header"
+      },
+      {
+        "id": "review-identity",
+        "componentId": "review.identity",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.identity"
+      },
+      {
+        "id": "review-stat-cards",
+        "componentId": "review.statCards",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.statCards"
+      },
+      {
+        "id": "review-save-hp",
+        "componentId": "review.saveHp",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.saveHp"
+      },
+      {
+        "id": "review-attacks",
+        "componentId": "review.attacks",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.attacks"
+      },
+      {
+        "id": "review-features",
+        "componentId": "review.features",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.features"
+      },
+      {
+        "id": "review-abilities",
+        "componentId": "review.abilities",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.abilities"
+      },
+      {
+        "id": "review-combat",
+        "componentId": "review.combat",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.combat"
+      },
+      {
+        "id": "review-skills",
+        "componentId": "review.skills",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.skills"
+      },
+      {
+        "id": "review-equipment",
+        "componentId": "review.equipment",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.equipment"
+      },
+      {
+        "id": "review-movement",
+        "componentId": "review.movement",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.movement"
+      },
+      {
+        "id": "review-decisions",
+        "componentId": "review.decisions",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.decisions"
+      },
+      {
+        "id": "review-pack-info",
+        "componentId": "review.packInfo",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.packInfo"
+      },
+      {
+        "id": "review-provenance",
+        "componentId": "review.provenance",
+        "slot": "main",
+        "dataSource": "page.reviewSheet.provenance"
       }
     ]
   }

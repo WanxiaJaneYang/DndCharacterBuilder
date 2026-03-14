@@ -5,6 +5,36 @@ import { buildReviewSheetPageData } from "./buildReviewSheetPageData";
 const t = uiTextJson.en;
 
 describe("buildReviewSheetPageData", () => {
+  it("exports a stable selector for entity-backed review inputs", async () => {
+    const module = await import("./buildReviewSheetPageData");
+
+    expect(typeof module.selectReviewSheetEntityData).toBe("function");
+
+    const result = module.selectReviewSheetEntityData({
+      t,
+      selectedRaceId: "human",
+      selectedClassId: "fighter",
+      selectedRaceEntity: {
+        name: "Human",
+        data: {
+          racialTraits: [
+            { name: "Bonus Feat", description: "Humans gain one extra feat." },
+          ],
+        },
+      },
+      selectedClassEntity: { name: "Fighter", data: {} },
+      localizeEntityText: (_entityType, _entityId, _path, fallback) => fallback,
+    });
+
+    expect(result).toMatchObject({
+      selectedRaceName: "Human",
+      selectedClassName: "Fighter",
+    });
+    expect(result.racialTraits).toEqual([
+      { name: "Bonus Feat", description: "Humans gain one extra feat." },
+    ]);
+  });
+
   it("reads racial traits from selectedRaceEntity.data", () => {
     const result = buildReviewSheetPageData({
       t,
@@ -63,9 +93,9 @@ describe("buildReviewSheetPageData", () => {
       onToggleProvenance: vi.fn(),
     });
 
-    expect(result.selectedRaceName).toBe("Human");
-    expect(result.traitSummary).toHaveLength(1);
-    expect(result.traitSummary[0]).toMatchObject({
+    expect(result.header.selectedRaceName).toBe("Human");
+    expect(result.features.traitSummary).toHaveLength(1);
+    expect(result.features.traitSummary[0]).toMatchObject({
       name: "Bonus Feat",
       description: "Humans gain one extra feat.",
     });

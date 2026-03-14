@@ -43,7 +43,7 @@ describe("page schema", () => {
     expect(parsed.root.children?.[0]?.componentId).toBe("entityType.singleSelect");
   });
 
-  it("accepts review sheet blocks in the closed component registry", () => {
+  it("accepts decomposed review blocks in the closed component registry", () => {
     const parsed = PageSchema.parse({
       id: "character.review",
       root: {
@@ -51,16 +51,23 @@ describe("page schema", () => {
         componentId: "layout.singleColumn",
         children: [
           {
-            id: "review-sheet",
-            componentId: "review.sheet",
+            id: "review-header",
+            componentId: "review.header",
             slot: "main",
-            dataSource: "page.reviewSheet"
+            dataSource: "page.reviewSheet.header"
+          },
+          {
+            id: "review-skills",
+            componentId: "review.skills",
+            slot: "main",
+            dataSource: "page.reviewSheet.skills"
           }
         ]
       }
     });
 
-    expect(parsed.root.children?.[0]?.componentId).toBe("review.sheet");
+    expect(parsed.root.children?.[0]?.componentId).toBe("review.header");
+    expect(parsed.root.children?.[1]?.componentId).toBe("review.skills");
   });
 
   it("accepts abilities and skills allocator blocks in the closed component registry", () => {

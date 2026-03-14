@@ -1,33 +1,79 @@
 import type { AbilityCode, UIText } from "../uiText";
 
-export interface ReviewSheetAdjustmentData {
-  value: string;
-  source: string;
-}
+export type ReviewSheetAdjustmentData = { value: string; source: string };
+export type ReviewLabelValueRow = { label: string; value: string | number };
+export type ReviewSummaryItem = { id: string; name: string; description: string };
+export type ReviewStatCard = { label: string; value: string | number };
+export type ReviewTableColumn = { key: string; label: string };
 
-export interface ReviewSheetData {
-  t: UIText;
+export type ReviewHeaderData = {
+  title: string;
   characterName: string;
+  raceLabel: string;
   selectedRaceName: string;
+  classLabel: string;
   selectedClassName: string;
-  identityRows: Array<{ label: string; value: string | number }>;
-  statCards: Array<{ label: string; value: string | number }>;
-  saveHpRows: Array<{ label: string; base: number; ability: number; adjustments: number; final: number }>;
-  attackRows: Array<{ id: string; typeLabel: string; name: string; attackBonus: string; damage: string; crit: string; range: string }>;
-  featSummary: Array<{ id: string; name: string; description: string }>;
-  traitSummary: Array<{ id: string; name: string; description: string }>;
-  abilityRows: Array<{ id: string; label: string; base: number; adjustments: ReviewSheetAdjustmentData[]; final: number; mod: string }>;
-  combatRows: Array<{ id: string; label: string; base: number; adjustments: ReviewSheetAdjustmentData[]; final: string | number }>;
-  skillsSummary: { spent: number; total: number; remaining: number };
-  skillsRows: Array<{ id: string; name: string; ranks: string; ability: string; racial: string; misc: string; acp: string; total: string; pointCost: string }>;
-  equipmentLoad: { selectedItems: string; totalWeight: number; loadCategory: string; speedImpact: string };
-  movementDetail: { base: number; adjusted: number; notes: string };
-  rulesDecisions: { favoredClass: string; ignoresMulticlassXpPenalty: string; featSelectionLimit: number };
-  packInfo: { selectedEdition: string; enabledPacks: Array<{ packId: string; version: string }>; fingerprint: string };
-  showProvenance: boolean;
-  provenanceJson: string;
+  exportLabel: string;
+  provenanceLabel: string;
   onExportJson: () => void;
   onToggleProvenance: () => void;
+};
+
+export type ReviewIdentitySectionData = { title: string; rows: ReviewLabelValueRow[] };
+export type ReviewStatCardsSectionData = { cards: ReviewStatCard[] };
+export type ReviewSaveHpRow = { id: string; label: string; base: number; ability: number; adjustments: number; final: number };
+export type ReviewAttackRow = { id: string; typeLabel: string; name: string; attackBonus: string; damage: string; crit: string; range: string };
+export type ReviewAbilityRow = { id: string; label: string; base: number; adjustments: ReviewSheetAdjustmentData[]; final: number; mod: string };
+export type ReviewCombatRow = { id: string; label: string; base: number; adjustments: ReviewSheetAdjustmentData[]; final: string | number };
+export type ReviewSkillRow = { id: string; name: string; ranks: string; ability: string; racial: string; misc: string; acp: string; total: string; pointCost: string };
+
+export type ReviewTableSectionData<Row> = {
+  title: string;
+  caption?: string;
+  columns: ReviewTableColumn[];
+  rows: Row[];
+};
+
+export type ReviewFeaturesSectionData = {
+  featTitle: string;
+  featSummary: ReviewSummaryItem[];
+  traitTitle: string;
+  traitSummary: ReviewSummaryItem[];
+  emptyLabel: string;
+};
+
+export type ReviewSkillsSectionData = ReviewTableSectionData<ReviewSkillRow> & {
+  summaryLabel: string;
+};
+
+export type ReviewTextSectionData = { title: string; rows: ReviewLabelValueRow[] };
+export type ReviewPackInfoSectionData = {
+  title: string;
+  selectedEditionLabel: string;
+  enabledPacksLabel: string;
+  fingerprintLabel: string;
+  selectedEdition: string;
+  enabledPacks: Array<{ packId: string; version: string }>;
+  fingerprint: string;
+};
+
+export type ReviewProvenanceSectionData = { title: string; json: string };
+
+export interface ReviewSheetData {
+  header: ReviewHeaderData;
+  identity: ReviewIdentitySectionData;
+  statCards: ReviewStatCardsSectionData;
+  saveHp: ReviewTableSectionData<ReviewSaveHpRow>;
+  attacks: ReviewTableSectionData<ReviewAttackRow>;
+  features: ReviewFeaturesSectionData;
+  abilities: ReviewTableSectionData<ReviewAbilityRow>;
+  combat: ReviewTableSectionData<ReviewCombatRow>;
+  skills: ReviewSkillsSectionData;
+  equipment: ReviewTextSectionData;
+  movement: ReviewTextSectionData;
+  decisions: ReviewTextSectionData;
+  packInfo: ReviewPackInfoSectionData;
+  provenance?: ReviewProvenanceSectionData;
 }
 
 export type BuildReviewSheetDataArgs = {
