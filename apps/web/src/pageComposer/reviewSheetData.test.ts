@@ -5,6 +5,52 @@ import { buildReviewSheetData } from "./pageDataBuilders";
 const t = uiTextJson.en;
 
 describe("review sheet data builder", () => {
+  it("exports a stable selector for review skills rows", async () => {
+    const module = await import("./reviewSheetData");
+
+    expect(typeof module.selectReviewSkillsRows).toBe("function");
+
+    const rows = module.selectReviewSkillsRows({
+      t,
+      skills: [
+        {
+          id: "listen",
+          name: "Listen",
+          ranks: 0,
+          racialBonus: 2,
+          total: 2,
+          abilityMod: 0,
+          abilityKey: "wis",
+          misc: 0,
+          acp: 0,
+          costSpent: 0,
+          costPerRank: 1,
+        },
+        {
+          id: "climb",
+          name: "Climb",
+          ranks: 2,
+          racialBonus: 0,
+          total: 5,
+          abilityMod: 3,
+          abilityKey: "str",
+          misc: 0,
+          acp: 0,
+          costSpent: 2,
+          costPerRank: 1,
+        },
+      ],
+      localizeAbilityLabel: (ability) => ability.toUpperCase(),
+      localizeEntityText: (_entityType, _entityId, _path, fallback) => fallback,
+    });
+
+    expect(rows.map((row) => row.name)).toEqual(["Climb", "Listen"]);
+    expect(rows[1]).toMatchObject({
+      racial: "+2",
+      pointCost: `0 (1${t.REVIEW_PER_RANK_UNIT})`,
+    });
+  });
+
   it("builds review sheet data from pre-shaped review inputs", () => {
     const onExportJson = vi.fn();
     const onToggleProvenance = vi.fn();
@@ -51,11 +97,11 @@ describe("review sheet data builder", () => {
       onToggleProvenance,
     });
 
-    expect(result.characterName).toBe("Aric");
-    expect(result.skillsRows[0]?.name).toBe("Climb");
-    expect(result.skillsRows).toHaveLength(1);
-    expect(result.combatRows.find((row) => row.id === "bab")?.final).toBe("1");
-    expect(result.onExportJson).toBe(onExportJson);
-    expect(result.onToggleProvenance).toBe(onToggleProvenance);
+    expect(result.header.characterName).toBe("Aric");
+    expect(result.header.onExportJson).toBe(onExportJson);
+    expect(result.header.onToggleProvenance).toBe(onToggleProvenance);
+    expect(result.skills.rows[0]?.name).toBe("Climb");
+    expect(result.skills.rows).toHaveLength(1);
+    expect(result.combat.rows.find((row) => row.id === "bab")?.final).toBe("1");
   });
 });

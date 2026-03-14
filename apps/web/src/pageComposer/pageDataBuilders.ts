@@ -22,6 +22,15 @@ export {
 } from "./reviewSheetData";
 export type {
   BuildReviewSheetDataArgs,
+  ReviewFeaturesSectionData,
+  ReviewHeaderData,
+  ReviewIdentitySectionData,
+  ReviewPackInfoSectionData,
+  ReviewProvenanceSectionData,
   ReviewSheetAdjustmentData,
   ReviewSheetData,
+  ReviewSkillsSectionData,
+  ReviewStatCardsSectionData,
+  ReviewTableSectionData,
+  ReviewTextSectionData,
 } from "./reviewSheetTypes";

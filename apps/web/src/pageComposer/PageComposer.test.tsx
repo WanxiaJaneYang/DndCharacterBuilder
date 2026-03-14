@@ -257,7 +257,7 @@ describe("PageComposer", () => {
     expect(onIncrease).toHaveBeenCalledTimes(1);
   });
 
-  it("renders a review sheet block from prepared review data", async () => {
+  it("renders decomposed review blocks from prepared review data", async () => {
     const user = userEvent.setup();
     const onExportJson = vi.fn();
     const onToggleProvenance = vi.fn();
@@ -268,10 +268,28 @@ describe("PageComposer", () => {
         componentId: "layout.singleColumn",
         children: [
           {
-            id: "review-sheet",
-            componentId: "review.sheet",
+            id: "review-header",
+            componentId: "review.header",
             slot: "main",
-            dataSource: "page.reviewSheet"
+            dataSource: "page.reviewSheet.header"
+          },
+          {
+            id: "review-stat-cards",
+            componentId: "review.statCards",
+            slot: "main",
+            dataSource: "page.reviewSheet.statCards"
+          },
+          {
+            id: "review-skills",
+            componentId: "review.skills",
+            slot: "main",
+            dataSource: "page.reviewSheet.skills"
+          },
+          {
+            id: "review-pack-info",
+            componentId: "review.packInfo",
+            slot: "main",
+            dataSource: "page.reviewSheet.packInfo"
           }
         ]
       }
@@ -283,82 +301,56 @@ describe("PageComposer", () => {
         dataRoot={{
           page: {
             reviewSheet: {
-              t,
-              characterName: "Aric",
-              selectedRaceName: "Human",
-              selectedClassName: "Fighter",
-              identityRows: [{ label: t.REVIEW_LEVEL_LABEL, value: 1 }],
-              statCards: [{ label: t.REVIEW_AC_LABEL, value: 16 }],
-              saveHpRows: [{
-                label: t.REVIEW_FORT_LABEL,
-                base: 2,
-                ability: 2,
-                adjustments: 0,
-                final: 4
-              }],
-              attackRows: [{
-                id: "melee-longsword",
-                typeLabel: t.REVIEW_ATTACK_MELEE_LABEL,
-                name: "Longsword",
-                attackBonus: "+4",
-                damage: "1d8+3",
-                crit: "19-20/x2",
-                range: "-"
-              }],
-              featSummary: [{ id: "power-attack", name: "Power Attack", description: "Trade attack for damage." }],
-              traitSummary: [{ id: "bonus-feat", name: "Bonus Feat", description: "Humans gain one extra feat." }],
-              abilityRows: [{
-                id: "str",
-                label: "STR",
-                base: 16,
-                adjustments: [],
-                final: 16,
-                mod: "+3"
-              }],
-              combatRows: [{
-                id: "bab",
-                label: t.REVIEW_BAB_LABEL,
-                base: 1,
-                adjustments: [],
-                final: "1"
-              }],
-              skillsSummary: { spent: 4, total: 8, remaining: 4 },
-              skillsRows: [{
-                id: "climb",
-                name: "Climb",
-                ranks: "4",
-                ability: "+3 (STR)",
-                racial: "+0",
-                misc: "+0",
-                acp: "-0",
-                total: "7",
-                pointCost: "4 (1/rank)"
-              }],
-              equipmentLoad: {
-                selectedItems: "Chainmail",
-                totalWeight: 40,
-                loadCategory: "Medium",
-                speedImpact: "Reduced to 20"
+              header: {
+                title: t.REVIEW,
+                characterName: "Aric",
+                raceLabel: t.RACE_LABEL,
+                selectedRaceName: "Human",
+                classLabel: t.CLASS_LABEL,
+                selectedClassName: "Fighter",
+                exportLabel: t.EXPORT_JSON,
+                provenanceLabel: t.TOGGLE_PROVENANCE,
+                onExportJson,
+                onToggleProvenance
               },
-              movementDetail: {
-                base: 30,
-                adjusted: 20,
-                notes: "Reduced by armor or load"
+              statCards: {
+                cards: [{ label: t.REVIEW_AC_LABEL, value: 16 }]
               },
-              rulesDecisions: {
-                favoredClass: "Any",
-                ignoresMulticlassXpPenalty: "Yes",
-                featSelectionLimit: 2
+              skills: {
+                title: t.REVIEW_SKILLS_BREAKDOWN,
+                caption: t.REVIEW_SKILLS_TABLE_CAPTION,
+                summaryLabel: `${t.REVIEW_POINTS_SPENT_LABEL} 4 / 8 (4 ${t.REVIEW_REMAINING_LABEL})`,
+                columns: [
+                  { key: "name", label: t.REVIEW_SKILL_COLUMN },
+                  { key: "ranks", label: t.REVIEW_RANKS_COLUMN },
+                  { key: "ability", label: t.REVIEW_ABILITY_COLUMN },
+                  { key: "racial", label: t.REVIEW_RACIAL_COLUMN },
+                  { key: "misc", label: t.REVIEW_MISC_COLUMN },
+                  { key: "acp", label: t.REVIEW_ACP_COLUMN },
+                  { key: "total", label: t.REVIEW_TOTAL_COLUMN },
+                  { key: "pointCost", label: t.REVIEW_POINT_COST_COLUMN }
+                ],
+                rows: [{
+                  id: "climb",
+                  name: "Climb",
+                  ranks: "4",
+                  ability: "+3 (STR)",
+                  racial: "+0",
+                  misc: "+0",
+                  acp: "-0",
+                  total: "7",
+                  pointCost: "4 (1/rank)"
+                }]
               },
               packInfo: {
+                title: t.REVIEW_PACK_INFO,
+                selectedEditionLabel: t.REVIEW_SELECTED_EDITION_LABEL,
+                enabledPacksLabel: t.REVIEW_ENABLED_PACKS_LABEL,
+                fingerprintLabel: t.REVIEW_FINGERPRINT_LABEL,
                 selectedEdition: "D&D 3.5e SRD",
                 enabledPacks: [{ packId: "srd-35e-minimal", version: "1.0.0" }],
                 fingerprint: "abc123"
-              },
-              showProvenance: false,
-              provenanceJson: "[]",
-              onExportJson,
-              onToggleProvenance
+              }
             }
           }
         }}
@@ -367,6 +359,10 @@ describe("PageComposer", () => {
 
     expect(screen.getByRole("heading", { name: t.REVIEW })).toBeTruthy();
     expect(screen.getByText("Aric")).toBeTruthy();
+    expect(
+      screen.getAllByRole("columnheader", { name: t.REVIEW_SKILL_COLUMN }).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getByText(/srd-35e-minimal \(1.0.0\)/)).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: t.EXPORT_JSON }));
     await user.click(screen.getByRole("button", { name: t.TOGGLE_PROVENANCE }));

@@ -46,6 +46,14 @@ describe("loadMinimalPack", () => {
     expect(
       pageSchemas?.["character.review"]?.root.children?.[0]
         ?.componentId,
-    ).toBe("review.sheet");
+    ).toBe("review.header");
+    expect(
+      pageSchemas?.["character.review"]?.root.children?.[1]
+        ?.componentId,
+    ).toBe("review.identity");
+    expect(
+      pageSchemas?.["character.review"]?.root.children?.at(-1)
+        ?.componentId,
+    ).toBe("review.provenance");
   });
 });

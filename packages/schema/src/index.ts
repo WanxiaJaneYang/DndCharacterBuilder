@@ -327,7 +327,21 @@ const AllowedPageComponentIds = [
   "metadata.nameField",
   "abilities.allocator",
   "skills.allocator",
-  "review.sheet"
+  "review.sheet",
+  "review.header",
+  "review.identity",
+  "review.statCards",
+  "review.saveHp",
+  "review.attacks",
+  "review.features",
+  "review.abilities",
+  "review.combat",
+  "review.skills",
+  "review.equipment",
+  "review.movement",
+  "review.decisions",
+  "review.packInfo",
+  "review.provenance"
 ] as const;
 
 const PageComponentIdSchema = z.enum(AllowedPageComponentIds, {

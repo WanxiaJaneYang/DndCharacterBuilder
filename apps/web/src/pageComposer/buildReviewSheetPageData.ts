@@ -9,6 +9,12 @@ type EntityWithData = {
   data?: unknown;
 };
 
+export type ReviewSheetEntityData = {
+  selectedRaceName: string;
+  selectedClassName: string;
+  racialTraits: Array<Record<string, unknown>>;
+};
+
 type ReviewDataInput = Parameters<typeof buildReviewSheetData>[0]["reviewData"];
 type ReviewCombatInput = Parameters<typeof buildReviewSheetData>[0]["reviewCombat"];
 type ReviewSkillsInput = Parameters<typeof buildReviewSheetData>[0]["skills"];
@@ -57,7 +63,12 @@ function getEntityDataRecord(data: unknown): Record<string, unknown> {
   return data as Record<string, unknown>;
 }
 
-export function buildReviewSheetPageData(args: Args): ReviewSheetData {
+export function selectReviewSheetEntityData(
+  args: Pick<
+    Args,
+    "localizeEntityText" | "selectedClassEntity" | "selectedClassId" | "selectedRaceEntity" | "selectedRaceId" | "t"
+  >,
+): ReviewSheetEntityData {
   const selectedRaceName = args.selectedRaceId
     ? args.localizeEntityText(
         "races",
@@ -82,16 +93,22 @@ export function buildReviewSheetPageData(args: Args): ReviewSheetData {
       >)
     : [];
 
+  return { selectedRaceName, selectedClassName, racialTraits };
+}
+
+export function buildReviewSheetPageData(args: Args): ReviewSheetData {
+  const entityData = selectReviewSheetEntityData(args);
+
   return buildReviewSheetData({
     t: args.t,
     characterName: args.characterName,
-    selectedRaceName,
-    selectedClassName,
+    selectedRaceName: entityData.selectedRaceName,
+    selectedClassName: entityData.selectedClassName,
     reviewData: args.reviewData,
     reviewCombat: args.reviewCombat,
     selectedFeats: args.selectedFeats,
     featsById: args.featsById,
-    racialTraits,
+    racialTraits: entityData.racialTraits,
     skills: args.skills,
     baseAbilityScores: args.baseAbilityScores,
     provenanceByTargetPath: args.provenanceByTargetPath,
