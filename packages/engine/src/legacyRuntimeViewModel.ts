@@ -123,6 +123,7 @@ export function buildSheetViewModel(
         maxRanks: detail?.maxRanks ?? skill.ranks,
         racialBonus: detail?.racialBonus ?? skill.racial,
         misc: skill.misc,
+        miscBreakdown: detail?.miscBreakdown ?? [],
         acp: skill.acp,
         acpApplied: skill.acpApplied,
         total: skill.total

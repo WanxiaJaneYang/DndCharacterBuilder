@@ -84,6 +84,85 @@ describe("compute() contract", () => {
     });
   });
 
+  it("surfaces engine-owned skill misc breakdown entries for effect and conditional sources", () => {
+    const result = compute(
+      {
+        meta: { name: "Balance Case", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 10, dex: 12, con: 10, int: 10, wis: 10, cha: 10 },
+        skillRanks: { tumble: 5 },
+        featIds: ["agile"]
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    const balance = result.sheetViewModel.data.skills.find((skill) => skill.id === "balance");
+
+    expect(balance).toMatchObject({
+      misc: 4,
+      total: 5
+    });
+    expect(balance?.miscBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceType: "effect",
+          bonus: 2,
+          applies: true,
+          source: expect.objectContaining({
+            packId: "srd-35e-minimal",
+            entityId: "agile"
+          })
+        }),
+        expect.objectContaining({
+          id: "synergy-tumble-balance",
+          sourceType: "skillSynergy",
+          bonus: 2,
+          applies: true
+        })
+      ])
+    );
+  });
+
+  it("keeps non-applying conditional skill sources visible without changing totals", () => {
+    const result = compute(
+      {
+        meta: { name: "Inactive Synergy Case", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 10, dex: 12, con: 10, int: 10, wis: 10, cha: 10 },
+        skillRanks: { tumble: 4.5 },
+        featIds: ["agile"]
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    const balance = result.sheetViewModel.data.skills.find((skill) => skill.id === "balance");
+
+    expect(balance).toMatchObject({
+      misc: 2,
+      total: 3
+    });
+    expect(balance?.miscBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceType: "effect",
+          bonus: 2,
+          applies: true,
+          source: expect.objectContaining({
+            entityId: "agile"
+          })
+        }),
+        expect.objectContaining({
+          id: "synergy-tumble-balance",
+          sourceType: "skillSynergy",
+          bonus: 2,
+          applies: false
+        })
+      ])
+    );
+  });
+
   it("does not apply flow-default point-buy validation to flow-independent CharacterSpec abilities", () => {
     const result = compute(
       {

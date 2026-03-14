@@ -36,13 +36,19 @@ export function buildConditionalSkillBonusData(
   for (const modifier of context.resolvedData.conditionalSkillModifiers ?? []) {
     const sourceKey = `${modifier.source.packId}:${modifier.source.entityType}:${modifier.source.entityId}`;
     if (modifier.source.entityType !== "rules" && !activeEntityKeys.has(sourceKey)) continue;
-    if (!evaluateConditionalModifierPredicate(modifier.when, evaluationContext)) continue;
+    const applies = evaluateConditionalModifierPredicate(modifier.when, evaluationContext);
     const skillId = modifier.apply.targetSkillId;
-    totals[skillId] = (totals[skillId] ?? 0) + modifier.apply.bonus;
+    if (applies) totals[skillId] = (totals[skillId] ?? 0) + modifier.apply.bonus;
     (breakdown[skillId] ??= []).push({
       id: modifier.id,
       sourceType: modifier.sourceType,
       bonus: modifier.apply.bonus,
+      applies,
+      source: {
+        packId: modifier.source.packId,
+        entityId: modifier.source.entityId,
+        entityType: modifier.source.entityType
+      },
       ...(modifier.apply.bonusType ? { bonusType: modifier.apply.bonusType } : {}),
       ...(modifier.apply.note ? { note: modifier.apply.note } : {})
     });

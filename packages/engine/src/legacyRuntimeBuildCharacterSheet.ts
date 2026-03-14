@@ -79,7 +79,7 @@ export function buildCharacterSheetFromState(state: CharacterState, context: Eng
     finalAbilities,
     decisions,
     combinedSkillBonuses,
-    mergeSkillBonusBreakdownMaps(buildEffectSkillBonusBreakdown(effectSkillBonuses), conditionalSkillBonusData.breakdown),
+    mergeSkillBonusBreakdownMaps(buildEffectSkillBonusBreakdown(provenance), conditionalSkillBonusData.breakdown),
     buildRacialSkillBonusMap(state, context)
   );
   const phase2 = buildPhase2Sheet({ state, selectedRace, selectedEquipmentEntities, finalAbilities, decisions, skills, entityBuckets, sheet });

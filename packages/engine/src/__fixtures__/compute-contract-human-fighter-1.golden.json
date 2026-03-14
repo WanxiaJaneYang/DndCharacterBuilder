@@ -74,6 +74,7 @@
       "id": "climb",
       "maxRanks": 4,
       "misc": 0,
+      "miscBreakdown": [],
       "name": "Climb",
       "racialBonus": 0,
       "ranks": 4,
@@ -90,6 +91,47 @@
       "id": "diplomacy",
       "maxRanks": 2,
       "misc": 0,
+      "miscBreakdown": [
+        {
+          "applies": false,
+          "bonus": 2,
+          "bonusType": "untyped",
+          "id": "synergy-bluff-diplomacy",
+          "note": "PHB 3.5 Table 4-5: 5 ranks in Bluff grants +2 on Diplomacy checks.",
+          "source": {
+            "entityId": "skill-synergy-core",
+            "entityType": "rules",
+            "packId": "srd-35e-minimal"
+          },
+          "sourceType": "skillSynergy"
+        },
+        {
+          "applies": false,
+          "bonus": 2,
+          "bonusType": "untyped",
+          "id": "synergy-knowledge-nobility-and-royalty-diplomacy",
+          "note": "PHB 3.5 Table 4-5: 5 ranks in Knowledge (Nobility and Royalty) grants +2 on Diplomacy checks.",
+          "source": {
+            "entityId": "skill-synergy-core",
+            "entityType": "rules",
+            "packId": "srd-35e-minimal"
+          },
+          "sourceType": "skillSynergy"
+        },
+        {
+          "applies": false,
+          "bonus": 2,
+          "bonusType": "untyped",
+          "id": "synergy-sense-motive-diplomacy",
+          "note": "PHB 3.5 Table 4-5: 5 ranks in Sense Motive grants +2 on Diplomacy checks.",
+          "source": {
+            "entityId": "skill-synergy-core",
+            "entityType": "rules",
+            "packId": "srd-35e-minimal"
+          },
+          "sourceType": "skillSynergy"
+        }
+      ],
       "name": "Diplomacy",
       "racialBonus": 0,
       "ranks": 0.5,
@@ -106,6 +148,21 @@
       "id": "jump",
       "maxRanks": 4,
       "misc": 0,
+      "miscBreakdown": [
+        {
+          "applies": false,
+          "bonus": 2,
+          "bonusType": "untyped",
+          "id": "synergy-tumble-jump",
+          "note": "PHB 3.5 Table 4-5: 5 ranks in Tumble grants +2 on Jump checks.",
+          "source": {
+            "entityId": "skill-synergy-core",
+            "entityType": "rules",
+            "packId": "srd-35e-minimal"
+          },
+          "sourceType": "skillSynergy"
+        }
+      ],
       "name": "Jump",
       "racialBonus": 0,
       "ranks": 3,
