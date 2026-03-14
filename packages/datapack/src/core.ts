@@ -19,10 +19,35 @@ export interface EntitySourceMetadata {
 
 export type ResolvedEntity = Entity & { _source: EntitySourceMetadata };
 
+export type ResolvedConditionalModifierPredicate =
+  | { op: "gte"; left: { kind: "skillRanks"; id: string }; right: number }
+  | { op: "and" | "or"; args: ResolvedConditionalModifierPredicate[] }
+  | { op: "hasFeat"; id: string }
+  | { op: "hasFeature"; id: string }
+  | { op: "isClassSkill"; target: { kind: "skill"; id: string } };
+
+export interface ResolvedConditionalSkillModifier {
+  id: string;
+  sourceType: string;
+  source: {
+    packId: string;
+    entityType: string;
+    entityId: string;
+  };
+  when: ResolvedConditionalModifierPredicate;
+  apply: {
+    targetSkillId: string;
+    bonus: number;
+    bonusType?: string;
+    note?: string;
+  };
+}
+
 export interface ResolvedPackSet {
   orderedPackIds: string[];
   manifests: Manifest[];
   entities: Record<string, Record<string, ResolvedEntity>>;
+  conditionalSkillModifiers?: ResolvedConditionalSkillModifier[];
   flow: Flow;
   pageSchemas: Record<string, Page>;
   locales: Record<string, PackLocale>;
@@ -125,6 +150,113 @@ function rotr(value: number, bits: number): number {
   return (value >>> bits) | (value << (32 - bits));
 }
 
+function normalizeModifierId(id: string): string {
+  return id.trim().toLowerCase();
+}
+
+function getEntityDataRecord(entity: ResolvedEntity): Record<string, unknown> {
+  if (!entity.data || typeof entity.data !== "object" || Array.isArray(entity.data)) return {};
+  return entity.data as Record<string, unknown>;
+}
+
+function parseConditionalModifierPredicate(value: unknown): ResolvedConditionalModifierPredicate | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  const op = String(record.op ?? "").trim().toLowerCase();
+
+  if (op === "gte") {
+    const leftRaw = record.left;
+    const rightRaw = Number(record.right);
+    if (!leftRaw || typeof leftRaw !== "object" || Array.isArray(leftRaw) || !Number.isFinite(rightRaw)) return undefined;
+    const leftRecord = leftRaw as Record<string, unknown>;
+    if (String(leftRecord.kind ?? "").trim().toLowerCase() !== "skillranks") return undefined;
+    const skillId = normalizeModifierId(String(leftRecord.id ?? ""));
+    if (!skillId) return undefined;
+    return { op: "gte", left: { kind: "skillRanks", id: skillId }, right: rightRaw };
+  }
+
+  if (op === "and" || op === "or") {
+    if (!Array.isArray(record.args)) return undefined;
+    const parsedArgs = record.args.map((entry) => parseConditionalModifierPredicate(entry));
+    if (parsedArgs.length === 0 || parsedArgs.some((entry) => entry === undefined)) return undefined;
+    return { op, args: parsedArgs as ResolvedConditionalModifierPredicate[] };
+  }
+
+  if (op === "hasfeat") {
+    const featId = normalizeModifierId(String(record.id ?? ""));
+    return featId ? { op: "hasFeat", id: featId } : undefined;
+  }
+
+  if (op === "hasfeature") {
+    const featureId = normalizeModifierId(String(record.id ?? ""));
+    return featureId ? { op: "hasFeature", id: featureId } : undefined;
+  }
+
+  if (op === "isclassskill" || op === "isproficient") {
+    const targetRaw = record.target;
+    if (!targetRaw || typeof targetRaw !== "object" || Array.isArray(targetRaw)) return undefined;
+    const target = targetRaw as Record<string, unknown>;
+    if (String(target.kind ?? "").trim().toLowerCase() !== "skill") return undefined;
+    const skillId = normalizeModifierId(String(target.id ?? ""));
+    return skillId ? { op: "isClassSkill", target: { kind: "skill", id: skillId } } : undefined;
+  }
+
+  return undefined;
+}
+
+function buildConditionalSkillModifierIndex(
+  entities: Record<string, Record<string, ResolvedEntity>>
+): ResolvedConditionalSkillModifier[] {
+  const index: ResolvedConditionalSkillModifier[] = [];
+
+  for (const entityBucket of Object.values(entities)) {
+    for (const entity of Object.values(entityBucket)) {
+      const conditionalModifiers = getEntityDataRecord(entity).conditionalModifiers;
+      if (!Array.isArray(conditionalModifiers)) continue;
+
+      for (const entry of conditionalModifiers) {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+        const record = entry as Record<string, unknown>;
+        const applyRaw = record.apply as Record<string, unknown> | undefined;
+        const targetRaw = applyRaw?.target as Record<string, unknown> | undefined;
+        const when = parseConditionalModifierPredicate(record.when);
+        const targetKind = String(targetRaw?.kind ?? "").trim().toLowerCase();
+        const targetSkillId = normalizeModifierId(String(targetRaw?.id ?? ""));
+        const bonus = Number(applyRaw?.bonus ?? 0);
+
+        if (!String(record.id ?? "").trim() || !when || targetKind !== "skill" || !targetSkillId || !Number.isFinite(bonus)) {
+          continue;
+        }
+
+        index.push({
+          id: String(record.id).trim(),
+          sourceType: String((record.source as Record<string, unknown> | undefined)?.type ?? "misc").trim(),
+          source: {
+            packId: entity._source.packId,
+            entityType: entity.entityType,
+            entityId: entity.id
+          },
+          when,
+          apply: {
+            targetSkillId,
+            bonus,
+            bonusType: typeof applyRaw?.bonusType === "string" && applyRaw.bonusType.trim() ? applyRaw.bonusType.trim() : undefined,
+            note: typeof applyRaw?.note === "string" && applyRaw.note.trim() ? applyRaw.note.trim() : undefined
+          }
+        });
+      }
+    }
+  }
+
+  index.sort((left, right) =>
+    left.source.packId.localeCompare(right.source.packId)
+    || left.source.entityType.localeCompare(right.source.entityType)
+    || left.source.entityId.localeCompare(right.source.entityId)
+    || left.id.localeCompare(right.id)
+  );
+
+  return index;
+}
 
 function getDefined(values: ReadonlyArray<number> | Uint32Array, index: number, label: string): number {
   const value = values[index];
@@ -306,6 +438,7 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
     }
   }
 
+  const conditionalSkillModifiers = buildConditionalSkillModifierIndex(entities);
   const fingerprintPayload = {
     orderedPackIds: sorted.map((p) => p.manifest.id),
     entities,
@@ -319,6 +452,7 @@ export function resolveLoadedPacks(loaded: LoadedPack[], enabledPackIds: string[
     orderedPackIds: sorted.map((p) => p.manifest.id),
     manifests: sorted.map((p) => p.manifest),
     entities,
+    conditionalSkillModifiers,
     flow,
     pageSchemas,
     locales,

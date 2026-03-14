@@ -2,7 +2,6 @@ import type { CharacterState } from "./characterSpec";
 import type { EngineContext, SkillMiscBreakdownEntry, UnresolvedRule } from "./legacyRuntimeTypes";
 import {
   evaluateConditionalModifierPredicate,
-  parseConditionalSkillModifiers,
   type ConditionalPredicateEvaluationContext
 } from "./legacyRuntimeConditionalModifiers";
 import { getEntityDataRecord, parseDeferredMechanics } from "./legacyRuntimeEntityData";
@@ -24,9 +23,9 @@ export function buildConditionalSkillBonusData(
   const selectedFeatureIds = getSelectedFeatureIds(state, context);
   const classSkillIds = getClassSkills(state, context);
   const skillRanks = getDerivedSkillRanks(state, context);
-  const entities = [...Object.values(context.resolvedData.entities.rules ?? {}), ...getSelectedEntities(state, context)]
-    .filter((entity) => Array.isArray(getEntityDataRecord(entity).conditionalModifiers));
-  const seenEntities = new Set<string>();
+  const activeEntityKeys = new Set(
+    getSelectedEntities(state, context).map((entity) => `${entity._source.packId}:${entity.entityType}:${entity.id}`)
+  );
   const evaluationContext: ConditionalPredicateEvaluationContext = {
     skillRanks,
     selectedFeatIds,
@@ -34,23 +33,19 @@ export function buildConditionalSkillBonusData(
     classSkillIds
   };
 
-  for (const entity of entities) {
-    const entityKey = `${entity._source.packId}:${entity.entityType}:${entity.id}`;
-    if (seenEntities.has(entityKey)) continue;
-    seenEntities.add(entityKey);
-
-    for (const modifier of parseConditionalSkillModifiers(getEntityDataRecord(entity).conditionalModifiers)) {
-      if (!evaluateConditionalModifierPredicate(modifier.when, evaluationContext)) continue;
-      const skillId = modifier.apply.targetSkillId;
-      totals[skillId] = (totals[skillId] ?? 0) + modifier.apply.bonus;
-      (breakdown[skillId] ??= []).push({
-        id: modifier.id,
-        sourceType: modifier.sourceType,
-        bonus: modifier.apply.bonus,
-        ...(modifier.apply.bonusType ? { bonusType: modifier.apply.bonusType } : {}),
-        ...(modifier.apply.note ? { note: modifier.apply.note } : {})
-      });
-    }
+  for (const modifier of context.resolvedData.conditionalSkillModifiers ?? []) {
+    const sourceKey = `${modifier.source.packId}:${modifier.source.entityType}:${modifier.source.entityId}`;
+    if (modifier.source.entityType !== "rules" && !activeEntityKeys.has(sourceKey)) continue;
+    if (!evaluateConditionalModifierPredicate(modifier.when, evaluationContext)) continue;
+    const skillId = modifier.apply.targetSkillId;
+    totals[skillId] = (totals[skillId] ?? 0) + modifier.apply.bonus;
+    (breakdown[skillId] ??= []).push({
+      id: modifier.id,
+      sourceType: modifier.sourceType,
+      bonus: modifier.apply.bonus,
+      ...(modifier.apply.bonusType ? { bonusType: modifier.apply.bonusType } : {}),
+      ...(modifier.apply.note ? { note: modifier.apply.note } : {})
+    });
   }
 
   return { totals, breakdown };
