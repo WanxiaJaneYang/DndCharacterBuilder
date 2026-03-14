@@ -20,6 +20,7 @@ export function WizardMainView({ controller }: { controller: AppController }) {
     stepIndex,
     setStepIndex,
     setShowProv,
+    canGoNext,
     appData,
     setState,
   } = controller;
@@ -97,7 +98,7 @@ export function WizardMainView({ controller }: { controller: AppController }) {
           {appData.text.BACK}
         </button>
         <button
-          disabled={stepIndex === appData.wizardSteps.length - 1}
+          disabled={!canGoNext}
           onClick={() => setStepIndex((current) => current + 1)}
         >
           {appData.text.NEXT}

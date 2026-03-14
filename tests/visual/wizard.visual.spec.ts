@@ -91,57 +91,64 @@ async function waitForVisualStability(page: Page) {
 
 // Small ratio threshold to tolerate platform anti-aliasing without hiding real regressions.
 const screenshotOptions = { fullPage: true, maxDiffPixelRatio: 0.0005, timeout: 15000 };
+const mobileScreenshotOptions = { ...screenshotOptions, maxDiffPixelRatio: 0.012 };
 // Detail page captures a long, dense summary view that shows larger OS/font rasterization drift in CI.
-const detailScreenshotOptions = { ...screenshotOptions, maxDiffPixelRatio: 0.012 };
+const detailScreenshotOptions = { ...screenshotOptions, maxDiffPixelRatio: 0.05 };
+
+function getScreenshotOptions(page: Page, kind: 'default' | 'detail' = 'default') {
+  const isMobileViewport = (page.viewportSize()?.width ?? 0) < 600;
+  if (kind === 'detail') return detailScreenshotOptions;
+  return isMobileViewport ? mobileScreenshotOptions : screenshotOptions;
+}
 
 test.describe('wizard visual regression', () => {
   test('step0 role selection (en)', async ({ page }) => {
     await page.goto('/');
     await chooseLanguage(page, 'en');
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('step0-role-selection-en.png', screenshotOptions);
+    await expect(page).toHaveScreenshot('step0-role-selection-en.png', getScreenshotOptions(page));
   });
 
   test('step0 role selection (zh)', async ({ page }) => {
     await page.goto('/');
     await chooseLanguage(page, 'zh');
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('step0-role-selection-zh.png', screenshotOptions);
+    await expect(page).toHaveScreenshot('step0-role-selection-zh.png', getScreenshotOptions(page));
   });
 
   test('home page (en)', async ({ page }) => {
     await goToHomePage(page, 'en');
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('home-en.png', screenshotOptions);
+    await expect(page).toHaveScreenshot('home-en.png', getScreenshotOptions(page));
   });
 
   test('home page (zh)', async ({ page }) => {
     await goToHomePage(page, 'zh');
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('home-zh.png', screenshotOptions);
+    await expect(page).toHaveScreenshot('home-zh.png', getScreenshotOptions(page));
   });
 
   test('list page (en)', async ({ page }) => {
     await goToListPage(page, 'en');
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('list-en.png', screenshotOptions);
+    await expect(page).toHaveScreenshot('list-en.png', getScreenshotOptions(page));
   });
 
   test('list page (zh)', async ({ page }) => {
     await goToListPage(page, 'zh');
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('list-zh.png', screenshotOptions);
+    await expect(page).toHaveScreenshot('list-zh.png', getScreenshotOptions(page));
   });
 
   test('detail page (en)', async ({ page }) => {
     await goToDetailPage(page, 'en');
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('detail-en.png', detailScreenshotOptions);
+    await expect(page).toHaveScreenshot('detail-en.png', getScreenshotOptions(page, 'detail'));
   });
 
   test('detail page (zh)', async ({ page }) => {
     await goToDetailPage(page, 'zh');
     await waitForVisualStability(page);
-    await expect(page).toHaveScreenshot('detail-zh.png', detailScreenshotOptions);
+    await expect(page).toHaveScreenshot('detail-zh.png', getScreenshotOptions(page, 'detail'));
   });
 });

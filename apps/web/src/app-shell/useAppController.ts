@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { initialState, type CharacterState } from "@dcb/engine/legacy";
 import { defaultEditionId, EDITIONS } from "../editions";
 import { detectDefaultLanguage, type Language } from "../uiText";
+import { canMoveToNextStep } from "./canMoveToNextStep";
 import { DEFAULT_EXPORT_NAME, type Role } from "./constants";
 import { useAbilityStepState } from "./useAbilityStepState";
 import { useAppData } from "./useAppData";
@@ -81,6 +82,13 @@ export function useAppController() {
     link.click();
     URL.revokeObjectURL(url);
   };
+  const canGoNext = canMoveToNextStep({
+    stepIndex,
+    wizardStepCount: appData.wizardSteps.length,
+    currentStep: appData.currentStep,
+    choiceLimit: appData.choiceMap.get(appData.currentStep?.id ?? "")?.limit,
+    state,
+  });
 
   return {
     state,
@@ -101,6 +109,7 @@ export function useAppController() {
     setRulesReady,
     appData,
     abilityState,
+    canGoNext,
     exportJson,
   };
 }
