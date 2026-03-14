@@ -6,6 +6,7 @@ import {
   SingleColumnLayout,
   type RegistryComponentProps,
 } from "./baseBlocks";
+import { ReviewSheetBlock } from "./legacyReviewSheetBlock";
 import {
   ReviewCombatBlock,
   ReviewSaveHpBlock,
@@ -34,7 +35,7 @@ export const componentRegistry: Record<
   "metadata.nameField": MetadataNameFieldBlock,
   "abilities.allocator": AbilityAllocatorBlock,
   "skills.allocator": SkillsAllocatorBlock,
-  "review.sheet": ReviewHeaderBlock,
+  "review.sheet": ReviewSheetBlock,
   "review.header": ReviewHeaderBlock,
   "review.identity": ReviewIdentityBlock,
   "review.statCards": ReviewStatCardsBlock,

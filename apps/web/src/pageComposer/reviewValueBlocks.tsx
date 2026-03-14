@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type {
   ReviewFeaturesSectionData,
   ReviewHeaderData,
@@ -17,6 +18,20 @@ function renderValueRows(rows: ReviewTextSectionData["rows"]) {
   ));
 }
 
+function ReviewPageSection({
+  nodeId,
+  children,
+}: {
+  nodeId: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="review-page" data-node-id={nodeId}>
+      {children}
+    </section>
+  );
+}
+
 export function ReviewHeaderBlock({ node, data }: RegistryComponentProps) {
   const review = data as ReviewHeaderData | undefined;
   if (!review) {
@@ -24,7 +39,7 @@ export function ReviewHeaderBlock({ node, data }: RegistryComponentProps) {
   }
 
   return (
-    <section className="review-page" data-node-id={node.id}>
+    <ReviewPageSection nodeId={node.id}>
       <h2>{review.title}</h2>
       <header className="review-hero">
         <div>
@@ -38,7 +53,7 @@ export function ReviewHeaderBlock({ node, data }: RegistryComponentProps) {
           <button onClick={review.onToggleProvenance}>{review.provenanceLabel}</button>
         </div>
       </header>
-    </section>
+    </ReviewPageSection>
   );
 }
 
@@ -47,7 +62,7 @@ export function ReviewIdentityBlock({ node, data }: RegistryComponentProps) {
   if (!section) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
-  return <article className="sheet review-decisions" data-node-id={node.id}><h3>{section.title}</h3>{renderValueRows(section.rows)}</article>;
+  return <ReviewPageSection nodeId={node.id}><article className="sheet review-decisions"><h3>{section.title}</h3>{renderValueRows(section.rows)}</article></ReviewPageSection>;
 }
 
 export function ReviewStatCardsBlock({ node, data }: RegistryComponentProps) {
@@ -56,14 +71,16 @@ export function ReviewStatCardsBlock({ node, data }: RegistryComponentProps) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
   return (
-    <section className="review-stat-cards" data-node-id={node.id}>
-      {section.cards.map((card) => (
-        <article className="review-card" key={card.label}>
-          <h3>{card.label}</h3>
-          <p>{String(card.value)}</p>
-        </article>
-      ))}
-    </section>
+    <ReviewPageSection nodeId={node.id}>
+      <section className="review-stat-cards">
+        {section.cards.map((card) => (
+          <article className="review-card" key={card.label}>
+            <h3>{card.label}</h3>
+            <p>{String(card.value)}</p>
+          </article>
+        ))}
+      </section>
+    </ReviewPageSection>
   );
 }
 
@@ -73,7 +90,7 @@ export function ReviewFeaturesBlock({ node, data }: RegistryComponentProps) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
   return (
-    <section data-node-id={node.id}>
+    <ReviewPageSection nodeId={node.id}>
       <article className="sheet">
         <h3>{section.featTitle}</h3>
         {section.featSummary.length === 0 ? <p className="review-muted">{section.emptyLabel}</p> : <ul className="calc-list">{section.featSummary.map((feat) => <li key={feat.id}><strong>{feat.name}</strong>: {feat.description}</li>)}</ul>}
@@ -82,7 +99,7 @@ export function ReviewFeaturesBlock({ node, data }: RegistryComponentProps) {
         <h3>{section.traitTitle}</h3>
         {section.traitSummary.length === 0 ? <p className="review-muted">{section.emptyLabel}</p> : <ul className="calc-list">{section.traitSummary.map((trait) => <li key={trait.id}><strong>{trait.name}</strong>: {trait.description}</li>)}</ul>}
       </article>
-    </section>
+    </ReviewPageSection>
   );
 }
 
@@ -90,7 +107,7 @@ function TextSectionBlock({ node, data }: RegistryComponentProps, section: Revie
   if (!section) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
-  return <article className="sheet review-decisions" data-node-id={node.id}><h3>{section.title}</h3>{renderValueRows(section.rows)}</article>;
+  return <ReviewPageSection nodeId={node.id}><article className="sheet review-decisions"><h3>{section.title}</h3>{renderValueRows(section.rows)}</article></ReviewPageSection>;
 }
 
 export function ReviewEquipmentBlock(props: RegistryComponentProps) {
@@ -111,13 +128,15 @@ export function ReviewPackInfoBlock({ node, data }: RegistryComponentProps) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
   return (
-    <article className="sheet review-decisions" data-node-id={node.id}>
-      <h3>{section.title}</h3>
-      <p>{section.selectedEditionLabel}: {section.selectedEdition}</p>
-      <p>{section.enabledPacksLabel}:</p>
-      <ul>{section.enabledPacks.map((pack) => <li key={pack.packId}>{pack.packId} ({pack.version})</li>)}</ul>
-      <p>{section.fingerprintLabel}: <code>{section.fingerprint}</code></p>
-    </article>
+    <ReviewPageSection nodeId={node.id}>
+      <article className="sheet review-decisions">
+        <h3>{section.title}</h3>
+        <p>{section.selectedEditionLabel}: {section.selectedEdition}</p>
+        <p>{section.enabledPacksLabel}:</p>
+        <ul>{section.enabledPacks.map((pack) => <li key={pack.packId}>{pack.packId} ({pack.version})</li>)}</ul>
+        <p>{section.fingerprintLabel}: <code>{section.fingerprint}</code></p>
+      </article>
+    </ReviewPageSection>
   );
 }
 
@@ -126,5 +145,5 @@ export function ReviewProvenanceBlock({ node, data }: RegistryComponentProps) {
   if (!section) {
     return null;
   }
-  return <article className="sheet" data-node-id={node.id}><h3>{section.title}</h3><pre>{section.json}</pre></article>;
+  return <ReviewPageSection nodeId={node.id}><article className="sheet"><h3>{section.title}</h3><pre>{section.json}</pre></article></ReviewPageSection>;
 }

@@ -357,17 +357,83 @@ describe("PageComposer", () => {
       />
     );
 
-    expect(screen.getByRole("heading", { name: t.REVIEW })).toBeTruthy();
+    expect(screen.getAllByRole("heading", { name: t.REVIEW }).length).toBeGreaterThan(0);
     expect(screen.getByText("Aric")).toBeTruthy();
     expect(
       screen.getAllByRole("columnheader", { name: t.REVIEW_SKILL_COLUMN }).length,
     ).toBeGreaterThan(0);
     expect(screen.getByText(/srd-35e-minimal \(1.0.0\)/)).toBeTruthy();
+    expect(document.querySelectorAll(".review-page .sheet").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("button", { name: t.EXPORT_JSON }));
     await user.click(screen.getByRole("button", { name: t.TOGGLE_PROVENANCE }));
 
     expect(onExportJson).toHaveBeenCalledTimes(1);
     expect(onToggleProvenance).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps legacy review.sheet schemas rendering the full review surface", () => {
+    const schema: Page = {
+      id: "character.review.legacy",
+      root: {
+        id: "review-root",
+        componentId: "layout.singleColumn",
+        children: [
+          {
+            id: "review-sheet",
+            componentId: "review.sheet",
+            slot: "main",
+            dataSource: "page.reviewSheet"
+          }
+        ]
+      }
+    };
+
+    render(
+      <PageComposer
+        schema={schema}
+        dataRoot={{
+          page: {
+            reviewSheet: {
+              header: {
+                title: t.REVIEW,
+                characterName: "Aric",
+                raceLabel: t.RACE_LABEL,
+                selectedRaceName: "Human",
+                classLabel: t.CLASS_LABEL,
+                selectedClassName: "Fighter",
+                exportLabel: t.EXPORT_JSON,
+                provenanceLabel: t.TOGGLE_PROVENANCE,
+                onExportJson: vi.fn(),
+                onToggleProvenance: vi.fn()
+              },
+              identity: { title: t.REVIEW_IDENTITY_PROGRESSION, rows: [{ label: t.REVIEW_LEVEL_LABEL, value: 1 }] },
+              statCards: { cards: [{ label: t.REVIEW_AC_LABEL, value: 16 }] },
+              saveHp: { title: t.REVIEW_SAVE_HP_BREAKDOWN, columns: [], rows: [] },
+              attacks: { title: t.REVIEW_ATTACK_LINES, columns: [], rows: [] },
+              features: { featTitle: t.REVIEW_FEAT_SUMMARY, featSummary: [], traitTitle: t.REVIEW_TRAIT_SUMMARY, traitSummary: [], emptyLabel: "-" },
+              abilities: { title: t.REVIEW_ABILITY_BREAKDOWN, columns: [], rows: [] },
+              combat: { title: t.REVIEW_COMBAT_BREAKDOWN, columns: [], rows: [] },
+              skills: { title: t.REVIEW_SKILLS_BREAKDOWN, summaryLabel: "summary", columns: [], rows: [] },
+              equipment: { title: t.REVIEW_EQUIPMENT_LOAD, rows: [] },
+              movement: { title: t.REVIEW_MOVEMENT_DETAIL, rows: [] },
+              decisions: { title: t.REVIEW_RULES_DECISIONS, rows: [] },
+              packInfo: {
+                title: t.REVIEW_PACK_INFO,
+                selectedEditionLabel: t.REVIEW_SELECTED_EDITION_LABEL,
+                enabledPacksLabel: t.REVIEW_ENABLED_PACKS_LABEL,
+                fingerprintLabel: t.REVIEW_FINGERPRINT_LABEL,
+                selectedEdition: "D&D 3.5e SRD",
+                enabledPacks: [{ packId: "srd-35e-minimal", version: "1.0.0" }],
+                fingerprint: "abc123"
+              }
+            }
+          }
+        }}
+      />
+    );
+
+    expect(screen.getAllByRole("heading", { name: t.REVIEW }).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(t.REVIEW_PACK_INFO).length).toBeGreaterThan(0);
   });
 });

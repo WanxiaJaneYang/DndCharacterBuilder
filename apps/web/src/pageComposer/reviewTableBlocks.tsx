@@ -27,16 +27,18 @@ function renderTable<Row extends { id: string }>(
   renderRow: (row: Row) => JSX.Element,
 ) {
   return (
-    <article className="sheet" data-node-id={nodeId}>
-      <h3>{section.title}</h3>
-      <table className="review-table">
-        {section.caption && <caption className="sr-only">{section.caption}</caption>}
-        <thead>
-          <tr>{section.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
-        </thead>
-        <tbody>{section.rows.map(renderRow)}</tbody>
-      </table>
-    </article>
+    <section className="review-page" data-node-id={nodeId}>
+      <article className="sheet">
+        <h3>{section.title}</h3>
+        <table className="review-table">
+          {section.caption && <caption className="sr-only">{section.caption}</caption>}
+          <thead>
+            <tr>{section.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
+          </thead>
+          <tbody>{section.rows.map(renderRow)}</tbody>
+        </table>
+      </article>
+    </section>
   );
 }
 
@@ -78,29 +80,31 @@ export function ReviewSkillsBlock({ node, data }: RegistryComponentProps) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
   return (
-    <article className="sheet" data-node-id={node.id}>
-      <h3>{section.title}</h3>
-      <p className="review-skills-summary">{section.summaryLabel}</p>
-      <table className="review-table">
-        {section.caption && <caption className="sr-only">{section.caption}</caption>}
-        <thead>
-          <tr>{section.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
-        </thead>
-        <tbody>
-          {section.rows.map((row) => (
-            <tr key={row.id}>
-              <td className="review-cell-key">{row.name}</td>
-              <td>{row.ranks}</td>
-              <td>{row.ability}</td>
-              <td>{row.racial}</td>
-              <td>{row.misc}</td>
-              <td>{row.acp}</td>
-              <td>{row.total}</td>
-              <td>{row.pointCost}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </article>
+    <section className="review-page" data-node-id={node.id}>
+      <article className="sheet">
+        <h3>{section.title}</h3>
+        <p className="review-skills-summary">{section.summaryLabel}</p>
+        <table className="review-table">
+          {section.caption && <caption className="sr-only">{section.caption}</caption>}
+          <thead>
+            <tr>{section.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
+          </thead>
+          <tbody>
+            {section.rows.map((row) => (
+              <tr key={row.id}>
+                <td className="review-cell-key">{row.name}</td>
+                <td>{row.ranks}</td>
+                <td>{row.ability}</td>
+                <td>{row.racial}</td>
+                <td>{row.misc}</td>
+                <td>{row.acp}</td>
+                <td>{row.total}</td>
+                <td>{row.pointCost}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </article>
+    </section>
   );
 }
