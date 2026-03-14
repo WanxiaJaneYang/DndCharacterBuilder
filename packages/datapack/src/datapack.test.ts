@@ -215,6 +215,127 @@ describe("resolvePackSet", () => {
     ]);
   });
 
+  it("loads an expanded SRD core equipment catalog with category-specific invariants", () => {
+    const root = path.resolve(process.cwd(), "../../packs");
+    const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
+    const items = Object.values(resolved.entities.items ?? {});
+    const byCategory = {
+      weapon: items.filter((item) => item.data?.category === "weapon"),
+      armor: items.filter((item) => item.data?.category === "armor"),
+      shield: items.filter((item) => item.data?.category === "shield"),
+      gear: items.filter((item) => item.data?.category === "gear")
+    };
+    const canonicalDamagePattern = /^\d+d\d+(?:[+-]\d+)?$/;
+    const canonicalCritPattern = /^\d{1,2}(?:-\d{1,2})?\/x\d+$/;
+    const rangePattern = /^\d+\s*ft\.$/;
+
+    expect(items).toHaveLength(80);
+    expect(byCategory.weapon.length).toBeGreaterThanOrEqual(40);
+    expect(byCategory.armor.length).toBeGreaterThanOrEqual(10);
+    expect(byCategory.shield.length).toBeGreaterThanOrEqual(6);
+    expect(byCategory.gear.length).toBeGreaterThanOrEqual(15);
+
+    expect(byCategory.weapon.map((item) => item.id)).toEqual(expect.arrayContaining([
+      "dagger",
+      "heavy-crossbow",
+      "greatsword",
+      "composite-longbow"
+    ]));
+    expect(byCategory.armor.map((item) => item.id)).toEqual(expect.arrayContaining([
+      "padded",
+      "full-plate"
+    ]));
+    expect(byCategory.shield.map((item) => item.id)).toEqual(expect.arrayContaining([
+      "buckler",
+      "tower-shield"
+    ]));
+    expect(byCategory.gear.map((item) => item.id)).toEqual(expect.arrayContaining([
+      "backpack",
+      "pouch-belt",
+      "rope-hempen"
+    ]));
+
+    expect(resolved.entities.items?.padded?.data).toMatchObject({
+      category: "armor",
+      armorCheckPenalty: 0
+    });
+
+    for (const item of items) {
+      expect(item.description).toContain(item.name);
+      expect(item.description).toMatch(/\.$/);
+      const data = item.data ?? {};
+      const speedEffects = (item.effects ?? []).filter(
+        (effect) => effect.kind === "set" && effect.targetPath === "stats.speed"
+      );
+      const acEffects = (item.effects ?? []).filter(
+        (effect) => effect.kind === "add" && effect.targetPath === "stats.ac"
+      );
+
+      switch (data.category) {
+        case "weapon":
+          expect(["melee", "ranged"]).toContain(data.weaponType);
+          expect(data.damage).toMatch(canonicalDamagePattern);
+          expect(data.crit).toMatch(canonicalCritPattern);
+          expect(data.armorCheckPenalty).toBeUndefined();
+          expect(speedEffects).toEqual([]);
+          if (data.range !== undefined) {
+            expect(data.range).toMatch(rangePattern);
+          }
+          if (data.weaponType === "ranged") {
+            expect(data.range).toMatch(rangePattern);
+          }
+          break;
+        case "armor":
+          expect(data.weaponType).toBeUndefined();
+          expect(data.damage).toBeUndefined();
+          expect(data.crit).toBeUndefined();
+          expect(data.weight).toEqual(expect.any(Number));
+          expect(data.armorCheckPenalty).toBeLessThanOrEqual(0);
+          expect(acEffects).toHaveLength(1);
+          expect(acEffects[0]).toMatchObject({
+            kind: "add",
+            targetPath: "stats.ac",
+            value: { const: expect.any(Number) }
+          });
+          expect(acEffects[0]?.value.const).toBeGreaterThan(0);
+          for (const effect of speedEffects) {
+            expect(effect).toMatchObject({
+              kind: "set",
+              targetPath: "stats.speed",
+              value: { const: 20 }
+            });
+          }
+          break;
+        case "shield":
+          expect(data.weaponType).toBeUndefined();
+          expect(data.damage).toBeUndefined();
+          expect(data.crit).toBeUndefined();
+          expect(data.range).toBeUndefined();
+          expect(data.weight).toEqual(expect.any(Number));
+          expect(data.armorCheckPenalty).toBeLessThanOrEqual(0);
+          expect(acEffects).toHaveLength(1);
+          expect(acEffects[0]).toMatchObject({
+            kind: "add",
+            targetPath: "stats.ac",
+            value: { const: expect.any(Number) }
+          });
+          expect(acEffects[0]?.value.const).toBeGreaterThan(0);
+          expect(speedEffects).toEqual([]);
+          break;
+        case "gear":
+          expect(data.weaponType).toBeUndefined();
+          expect(data.damage).toBeUndefined();
+          expect(data.crit).toBeUndefined();
+          expect(data.range).toBeUndefined();
+          expect(data.armorCheckPenalty).toBeUndefined();
+          expect(item.effects ?? []).toEqual([]);
+          break;
+        default:
+          throw new Error(`Unexpected item category for ${item.id}: ${String(data.category)}`);
+      }
+    }
+  });
+
   it("loads normalized deferred mechanics metadata from the SRD pack", () => {
     const root = path.resolve(process.cwd(), "../../packs");
     const resolved = resolvePackSet(root, ["srd-35e-minimal"]);
