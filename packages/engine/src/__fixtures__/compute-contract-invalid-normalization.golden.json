@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "0.1",
+  "validationIssues": [
+    {
+      "code": "SPEC_CLASS_LEVEL_INVALID",
+      "severity": "error",
+      "message": "class.level must be an integer >= 1.",
+      "path": "class.level"
+    },
+    {
+      "code": "NAME_REQUIRED",
+      "severity": "error",
+      "message": "Character name is required.",
+      "path": "meta.name"
+    }
+  ],
+  "assumptions": [
+    {
+      "code": "SPEC_CLASS_LEVEL_CLAMPED",
+      "message": "Class level was adjusted during normalization (set to 1).",
+      "path": "class.level",
+      "defaultUsed": 1
+    }
+  ]
+}
