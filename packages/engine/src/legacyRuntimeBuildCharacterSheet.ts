@@ -4,11 +4,11 @@ import { buildDecisionSummary, buildSkillBreakdown } from "./legacyRuntimeDecisi
 import { abilityMod } from "./legacyRuntimeExpression";
 import { buildPhase1Sheet } from "./legacyRuntimePhase1";
 import { buildPhase2Sheet } from "./legacyRuntimePhase2";
-import { parseClassProgressionGains } from "./legacyRuntimeProgression";
+import { getCharacterLevel, parseClassProgressionGains } from "./legacyRuntimeProgression";
 import { buildConditionalSkillBonusData, collectUnresolvedRules } from "./legacyRuntimeRuleSurface";
 import { DEFAULT_STATS, type CharacterSheet } from "./legacyRuntimeSheetTypes";
 import { buildRacialSkillBonusMap, buildEffectSkillBonusBreakdown, buildEffectSkillBonusMap, mergeSkillBonusBreakdownMaps } from "./legacyRuntimeSkillBonusMaps";
-import { getSelectedFeatIds, getSelectedRace } from "./legacyRuntimeSelectors";
+import { getSelectedClass, getSelectedFeatIds, getSelectedRace } from "./legacyRuntimeSelectors";
 import type { EngineContext, ProvenanceRecord } from "./legacyRuntimeTypes";
 import { buildSheetViewModel } from "./legacyRuntimeViewModel";
 import { applyEffect } from "./legacyRuntimeCombatUtils";
@@ -25,7 +25,7 @@ export function buildCharacterSheetFromState(state: CharacterState, context: Eng
   const raceId = state.selections.race as string | undefined;
   const classId = state.selections.class as string | undefined;
   const selectedRace = getSelectedRace(state, context);
-  const selectedClass = classId ? entityBuckets.classes?.[classId] : undefined;
+  const selectedClass = getSelectedClass(state, context);
 
   const applyEntity = (entity: ResolvedEntity | undefined): void => {
     if (!entity?.effects) return;
@@ -35,7 +35,7 @@ export function buildCharacterSheetFromState(state: CharacterState, context: Eng
 
   const applyClassProgressionEffects = (entity: ResolvedEntity | undefined): boolean => {
     if (!entity) return false;
-    const gains = parseClassProgressionGains(entity).filter((gain) => gain.level <= Number((classId?.match(/-(\d+)$/)?.[1] ?? 1)));
+    const gains = parseClassProgressionGains(entity).filter((gain) => gain.level <= getCharacterLevel(state));
     let appliedAny = false;
     for (const gain of gains) {
       if (gain.effects.length === 0) continue;

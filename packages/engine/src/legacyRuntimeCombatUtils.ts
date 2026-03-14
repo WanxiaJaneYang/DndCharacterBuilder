@@ -28,12 +28,12 @@ export function applyEffect(effect: Effect, sheet: Record<string, any>, provenan
       provenance.push({ targetPath: effect.targetPath, setValue: previousValue * nextValue, source });
       break;
     case "min":
-      setPath(sheet, effect.targetPath, Math.max(previousValue, nextValue));
-      provenance.push({ targetPath: effect.targetPath, setValue: Math.max(previousValue, nextValue), source });
-      break;
-    case "max":
       setPath(sheet, effect.targetPath, Math.min(previousValue, nextValue));
       provenance.push({ targetPath: effect.targetPath, setValue: Math.min(previousValue, nextValue), source });
+      break;
+    case "max":
+      setPath(sheet, effect.targetPath, Math.max(previousValue, nextValue));
+      provenance.push({ targetPath: effect.targetPath, setValue: Math.max(previousValue, nextValue), source });
       break;
   }
 }

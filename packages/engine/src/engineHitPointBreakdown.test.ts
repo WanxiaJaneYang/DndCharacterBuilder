@@ -39,18 +39,24 @@ describe("engine determinism", () => {
           }
         }],
         classes: [{
-          id: "fighter-3",
-          name: "Fighter 3",
+          id: "fighter",
+          name: "Fighter",
           entityType: "classes",
-          summary: "Level 3 fighter",
-          description: "Level 3 fighter",
+          summary: "Fighter",
+          description: "Fighter",
           portraitUrl: null,
           iconUrl: null,
-          effects: [{ kind: "set", targetPath: "stats.hp", value: { const: 25 } }],
           data: {
             hitDie: 10,
             skillPointsPerLevel: 2,
-            classSkills: []
+            classSkills: [],
+            progression: {
+              levelGains: [
+                { level: 1, effects: [{ kind: "add", targetPath: "stats.hp", value: { const: 10 } }] },
+                { level: 2, effects: [{ kind: "add", targetPath: "stats.hp", value: { const: 5 } }] },
+                { level: 3, effects: [{ kind: "add", targetPath: "stats.hp", value: { const: 4 } }] }
+              ]
+            }
           }
         }],
         feats: [],
@@ -79,9 +85,10 @@ describe("engine determinism", () => {
 
     const sheet = finalizeCharacter(state, localContext);
     expect(sheet.phase1.identity.level).toBe(3);
-    expect(sheet.phase1.combat.hp.total).toBe(25);
+    expect(sheet.phase1.combat.hp.total).toBe(19);
     expect(sheet.phase1.combat.hp.breakdown.con).toBe(6);
-    expect(sheet.phase1.combat.hp.breakdown.hitDie).toBe(19);
+    expect(sheet.phase1.combat.hp.breakdown.hitDie).toBe(13);
     expect(sheet.phase1.combat.hp.breakdown.misc).toBe(0);
+    expect(sheet.decisions.skillPoints.total).toBe(12);
   });
 });

@@ -18,7 +18,9 @@ export function getSelectedRace(state: CharacterState, context: EngineContext): 
 
 export function getSelectedClass(state: CharacterState, context: EngineContext): ResolvedEntity | undefined {
   const classId = state.selections.class as string | undefined;
-  return classId ? context.resolvedData.entities.classes?.[classId] : undefined;
+  if (!classId) return undefined;
+  return context.resolvedData.entities.classes?.[classId]
+    ?? context.resolvedData.entities.classes?.[classId.replace(/-\d+$/, "")];
 }
 
 export function getRacialTraits(state: CharacterState, context: EngineContext): string[] {
