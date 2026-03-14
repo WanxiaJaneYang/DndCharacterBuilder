@@ -10,7 +10,7 @@
     },
     {
       "choiceId": "class",
-      "selection": "fighter"
+      "selection": "wizard"
     },
     {
       "choiceId": "abilities",
@@ -26,7 +26,7 @@
     {
       "choiceId": "feat",
       "selection": [
-        "acrobatic"
+        "alertness"
       ]
     },
     {
@@ -34,34 +34,46 @@
       "selection": "Durgan"
     }
   ],
+  "contractClarifications": {
+    "unresolvedCoverage": "This fixture intentionally spans race, class, and feat deferred-mechanics surfaces so unresolved-rules ordering and source/category mappings stay regression-tested."
+  },
   "expected": {
     "validationErrorCodes": [],
     "finalSheetSubset": {
       "unresolvedRules": [
         {
-          "id": "srd-35e-minimal:classes:fighter:fighter-bonus-feat-runtime",
+          "id": "srd-35e-minimal:classes:wizard:wizard-bonus-feat-runtime",
           "category": "class-feature",
           "source": {
             "entityType": "classes",
-            "entityId": "fighter",
+            "entityId": "wizard",
             "packId": "srd-35e-minimal"
           }
         },
         {
-          "id": "srd-35e-minimal:classes:fighter:fighter-proficiency-automation",
-          "category": "proficiency",
+          "id": "srd-35e-minimal:classes:wizard:wizard-familiar-runtime",
+          "category": "class-feature",
           "source": {
             "entityType": "classes",
-            "entityId": "fighter",
+            "entityId": "wizard",
             "packId": "srd-35e-minimal"
           }
         },
         {
-          "id": "srd-35e-minimal:feats:acrobatic:acrobatic-benefit",
+          "id": "srd-35e-minimal:classes:wizard:wizard-spellbook-runtime",
+          "category": "spellcasting",
+          "source": {
+            "entityType": "classes",
+            "entityId": "wizard",
+            "packId": "srd-35e-minimal"
+          }
+        },
+        {
+          "id": "srd-35e-minimal:feats:alertness:alertness-benefit",
           "category": "feat-benefit",
           "source": {
             "entityType": "feats",
-            "entityId": "acrobatic",
+            "entityId": "alertness",
             "packId": "srd-35e-minimal"
           }
         },
