@@ -14,23 +14,11 @@
   "branch": "feat/issue-212-legacy-runtime-boundary",
   "base_branch": "main",
   "worktree_path": "C:\\Users\\Lenovo\\.config\\superpowers\\worktrees\\DndCharacterBuilder\\issue-212-legacy-runtime-boundary",
-  "current_phase": 2,
+  "current_phase": 4,
   "next_action": [
     {
-      "phase": 1,
-      "action": "implement"
-    },
-    {
-      "phase": 2,
-      "action": "check"
-    },
-    {
-      "phase": 3,
-      "action": "finish"
-    },
-    {
       "phase": 4,
-      "action": "create-pr"
+      "action": "await-review"
     }
   ],
   "commit": null,
