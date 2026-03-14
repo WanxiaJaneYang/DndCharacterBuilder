@@ -1,0 +1,60 @@
+{
+  "enabledPacks": [
+    "srd-35e-minimal"
+  ],
+  "characterSpec": {
+    "meta": {
+      "name": "Aric III",
+      "rulesetId": "dnd35e",
+      "sourceIds": ["srd-35e-minimal"]
+    },
+    "raceId": "human",
+    "class": {
+      "classId": "fighter",
+      "level": 3
+    },
+    "abilities": {
+      "str": 16,
+      "dex": 12,
+      "con": 14,
+      "int": 12,
+      "wis": 10,
+      "cha": 8
+    },
+    "skillRanks": {
+      "climb": 6,
+      "listen": 3
+    },
+    "featIds": [
+      "power-attack"
+    ],
+    "equipmentIds": [
+      "longsword",
+      "chainmail",
+      "heavy-wooden-shield"
+    ]
+  },
+  "contractClarifications": {
+    "skillBudget": "This fixture locks level-scaled skill budget totals plus class/cross-class spend invariants for compute(spec, rulepack)."
+  },
+  "expected": {
+    "validationIssueCodes": [],
+    "computeResultSubset": {
+      "schemaVersion": "0.1",
+      "sheetViewModel": {
+        "schemaVersion": "0.1",
+        "data": {
+          "review": {
+            "skillBudget": {
+              "total": 24,
+              "spent": 12,
+              "remaining": 12
+            }
+          }
+        }
+      },
+      "validationIssues": [],
+      "assumptions": []
+    }
+  }
+}
