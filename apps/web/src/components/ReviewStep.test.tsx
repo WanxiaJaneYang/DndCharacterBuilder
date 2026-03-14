@@ -1,6 +1,9 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { renderReviewStep } from "./review/reviewTestHelpers";
+import {
+  createReviewComputeResult,
+  renderReviewStep,
+} from "./review/reviewTestHelpers";
 
 describe("ReviewStep", () => {
   it("renders engine-backed review summaries instead of conflicting UI props", () => {
@@ -91,5 +94,41 @@ describe("ReviewStep", () => {
     expect(speedRow?.textContent).toContain("30");
     expect(speedRow?.textContent).toContain("20");
     expect(speedRow?.textContent).not.toContain("1234");
+  });
+
+  it("keeps derived zero-rank skills visible in the legacy fallback review step", () => {
+    const computeResult = createReviewComputeResult();
+    computeResult.sheetViewModel.data.skills = [
+      {
+        id: "listen",
+        name: "Listen",
+        abilityKey: "wis",
+        abilityMod: 0,
+        racialBonus: 0,
+        misc: 2,
+        acp: 0,
+        total: 2,
+        ranks: 0,
+        costSpent: 0,
+        costPerRank: 2,
+        maxRanks: 2,
+        classSkill: false,
+        acpApplied: false,
+      },
+    ];
+
+    renderReviewStep({ computeResult });
+
+    const skillsTable = screen
+      .getAllByRole("table", { name: /Skills and point-spending table/i })
+      .find((table) => within(table).queryByRole("cell", { name: "Listen" }));
+
+    expect(skillsTable).toBeTruthy();
+    expect(
+      within(skillsTable as HTMLElement).getByRole("cell", { name: "Listen" }),
+    ).toBeTruthy();
+    expect(
+      within(skillsTable as HTMLElement).getByRole("cell", { name: "+2" }),
+    ).toBeTruthy();
   });
 });

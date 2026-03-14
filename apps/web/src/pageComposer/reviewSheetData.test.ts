@@ -51,6 +51,56 @@ describe("review sheet data builder", () => {
     });
   });
 
+  it("keeps zero-rank skills visible when derived review modifiers are non-zero", async () => {
+    const module = await import("./reviewSheetData");
+
+    const rows = module.selectReviewSkillsRows({
+      t,
+      skills: [
+        {
+          id: "spot",
+          name: "Spot",
+          ranks: 0,
+          racialBonus: 0,
+          total: 3,
+          abilityMod: 3,
+          abilityKey: "wis",
+          misc: 0,
+          acp: 0,
+          costSpent: 0,
+          costPerRank: 1,
+        },
+        {
+          id: "hide",
+          name: "Hide",
+          ranks: 0,
+          racialBonus: 0,
+          total: 0,
+          abilityMod: 0,
+          abilityKey: "dex",
+          misc: 2,
+          acp: -2,
+          costSpent: 0,
+          costPerRank: 1,
+        },
+      ],
+      localizeAbilityLabel: (ability) => ability.toUpperCase(),
+      localizeEntityText: (_entityType, _entityId, _path, fallback) => fallback,
+    });
+
+    expect(rows).toHaveLength(2);
+    expect(rows.map((row) => row.name)).toEqual(["Spot", "Hide"]);
+    expect(rows[0]).toMatchObject({
+      ability: "+3 (WIS)",
+      total: "3",
+    });
+    expect(rows[1]).toMatchObject({
+      misc: "+2",
+      acp: "-2",
+      total: "0",
+    });
+  });
+
   it("builds review sheet data from pre-shaped review inputs", () => {
     const onExportJson = vi.fn();
     const onToggleProvenance = vi.fn();
