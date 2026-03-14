@@ -716,6 +716,123 @@ const ItemDataSchema = z.discriminatedUnion("category", [
   }).strict()
 ]);
 
+const ConditionalModifierSkillTargetSchema = z.object({
+  kind: z.literal("skill"),
+  id: z.string().min(1)
+}).strict();
+
+function normalizeConditionalModifierPredicateInput(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+
+  const record = { ...(value as Record<string, unknown>) };
+  const op = typeof record.op === "string" ? record.op.trim().toLowerCase() : "";
+
+  if (op === "gte") {
+    const left = record.left;
+    if (left && typeof left === "object" && !Array.isArray(left)) {
+      const leftRecord = { ...(left as Record<string, unknown>) };
+      if (typeof leftRecord.kind === "string" && leftRecord.kind.trim().toLowerCase() === "skillranks") {
+        leftRecord.kind = "skillRanks";
+      }
+      record.left = leftRecord;
+    }
+    record.op = "gte";
+    return record;
+  }
+
+  if (op === "and" || op === "or") {
+    record.op = op;
+    if (Array.isArray(record.args)) {
+      record.args = record.args.map((entry) => normalizeConditionalModifierPredicateInput(entry));
+    }
+    return record;
+  }
+
+  if (op === "hasfeat") {
+    record.op = "hasFeat";
+    return record;
+  }
+
+  if (op === "hasfeature") {
+    record.op = "hasFeature";
+    return record;
+  }
+
+  if (op === "isclassskill" || op === "isproficient") {
+    const target = record.target;
+    if (target && typeof target === "object" && !Array.isArray(target)) {
+      const targetRecord = { ...(target as Record<string, unknown>) };
+      if (typeof targetRecord.kind === "string" && targetRecord.kind.trim().toLowerCase() === "skill") {
+        targetRecord.kind = "skill";
+      }
+      record.target = targetRecord;
+    }
+    record.op = op === "isproficient" ? "isProficient" : "isClassSkill";
+    return record;
+  }
+
+  return record;
+}
+
+const ConditionalModifierPredicateSchema: z.ZodType<any> = z.lazy(() =>
+  z.preprocess(
+    (value) => normalizeConditionalModifierPredicateInput(value),
+    z.discriminatedUnion("op", [
+      z.object({
+        op: z.literal("gte"),
+        left: z.object({
+          kind: z.literal("skillRanks"),
+          id: z.string().min(1)
+        }).strict(),
+        right: z.number()
+      }).strict(),
+      z.object({
+        op: z.literal("and"),
+        args: z.array(ConditionalModifierPredicateSchema).min(1)
+      }).strict(),
+      z.object({
+        op: z.literal("or"),
+        args: z.array(ConditionalModifierPredicateSchema).min(1)
+      }).strict(),
+      z.object({
+        op: z.literal("hasFeat"),
+        id: z.string().min(1)
+      }).strict(),
+      z.object({
+        op: z.literal("hasFeature"),
+        id: z.string().min(1)
+      }).strict(),
+      z.object({
+        op: z.literal("isClassSkill"),
+        target: ConditionalModifierSkillTargetSchema
+      }).strict(),
+      z.object({
+        op: z.literal("isProficient"),
+        target: ConditionalModifierSkillTargetSchema
+      }).strict()
+    ])
+  )
+);
+
+const ConditionalModifierSchema = z.object({
+  id: z.string().min(1),
+  source: z.object({
+    type: z.string().min(1),
+    ref: z.string().min(1).optional()
+  }).strict().optional(),
+  when: ConditionalModifierPredicateSchema,
+  apply: z.object({
+    target: ConditionalModifierSkillTargetSchema,
+    bonus: z.number(),
+    bonusType: z.string().min(1).optional(),
+    note: z.string().min(1).optional()
+  }).strict()
+}).strict();
+
+const RulesDataSchema = z.object({
+  conditionalModifiers: z.array(ConditionalModifierSchema).optional()
+}).passthrough();
+
 export const EntitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -782,6 +899,19 @@ export const EntitySchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Invalid items.data: ${issue.message}`,
+          path: ["data", ...issue.path]
+        });
+      });
+    }
+  }
+
+  if (entity.entityType === "rules" && entity.data !== undefined) {
+    const result = RulesDataSchema.safeParse(entity.data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid rules.data: ${issue.message}`,
           path: ["data", ...issue.path]
         });
       });

@@ -10,7 +10,22 @@ function parseEntityList(filePath: string, entityType: string): Entity[] {
 
   try {
     const raw = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    const parsed = EntitySchema.array().parse(raw);
+    if (!Array.isArray(raw)) {
+      return EntitySchema.array().parse(raw);
+    }
+
+    const parsed = raw.map((entry, index) => {
+      try {
+        return EntitySchema.parse(entry);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const entityId =
+          entry && typeof entry === "object" && !Array.isArray(entry) && typeof (entry as { id?: unknown }).id === "string"
+            ? (entry as { id: string }).id
+            : `index ${index}`;
+        throw new Error(`Invalid entity ${entityId}: ${message}`);
+      }
+    });
 
     for (const entity of parsed) {
       if (entity.entityType !== entityType) {
