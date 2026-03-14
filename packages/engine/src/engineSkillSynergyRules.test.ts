@@ -123,4 +123,26 @@ describe("engine determinism", () => {
       total: 3
     });
   });
+
+  it("applies additional unconditional PHB 3.5 synergy mappings from pack data", () => {
+    let state = applyChoice(initialState, "name", "ExpandedSynergySet");
+    state = applyChoice(state, "abilities", { str: 10, dex: 12, con: 10, int: 12, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", {
+      "handle-animal": 5,
+      "knowledge-arcana": 5,
+      "knowledge-local": 5,
+      "knowledge-nobility-and-royalty": 5,
+      survival: 5
+    }, context);
+
+    const sheet = finalizeCharacter(state, context);
+
+    expect(sheet.skills.ride?.miscBonus).toBe(2);
+    expect(sheet.skills.spellcraft?.miscBonus).toBe(2);
+    expect(sheet.skills["gather-information"]?.miscBonus).toBe(2);
+    expect(sheet.skills.diplomacy?.miscBonus).toBe(2);
+    expect(sheet.skills["knowledge-nature"]?.miscBonus).toBe(2);
+  });
 });

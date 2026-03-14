@@ -216,6 +216,126 @@
             "bonusType": "untyped",
             "note": "PHB 3.5 Table 4-5: 5 ranks in Sense Motive grants +2 on Diplomacy checks."
           }
+        },
+        {
+          "id": "synergy-handle-animal-ride",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "handle-animal"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "handle-animal"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "ride"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Handle Animal grants +2 on Ride checks."
+          }
+        },
+        {
+          "id": "synergy-knowledge-arcana-spellcraft",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "knowledge-arcana"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "knowledge-arcana"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "spellcraft"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Knowledge (Arcana) grants +2 on Spellcraft checks."
+          }
+        },
+        {
+          "id": "synergy-knowledge-local-gather-information",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "knowledge-local"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "knowledge-local"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "gather-information"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Knowledge (Local) grants +2 on Gather Information checks."
+          }
+        },
+        {
+          "id": "synergy-knowledge-nobility-and-royalty-diplomacy",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "knowledge-nobility-and-royalty"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "knowledge-nobility-and-royalty"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "diplomacy"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Knowledge (Nobility and Royalty) grants +2 on Diplomacy checks."
+          }
+        },
+        {
+          "id": "synergy-survival-knowledge-nature",
+          "source": {
+            "type": "skillSynergy",
+            "ref": "survival"
+          },
+          "when": {
+            "op": "gte",
+            "left": {
+              "kind": "skillRanks",
+              "id": "survival"
+            },
+            "right": 5
+          },
+          "apply": {
+            "target": {
+              "kind": "skill",
+              "id": "knowledge-nature"
+            },
+            "bonus": 2,
+            "bonusType": "untyped",
+            "note": "PHB 3.5 Table 4-5: 5 ranks in Survival grants +2 on Knowledge (Nature) checks."
+          }
         }
       ]
     },
