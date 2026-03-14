@@ -1,4 +1,4 @@
-import type { AbilityKey } from "./legacyRuntimeTypes";
+import type { AbilityKey, SkillMiscBreakdownEntry } from "./legacyRuntimeTypes";
 
 export interface AttackLine {
   itemId: string;
@@ -102,6 +102,7 @@ export interface SheetViewModel {
     maxRanks: number;
     racialBonus: number;
     misc: number;
+    miscBreakdown: SkillMiscBreakdownEntry[];
     acp: number;
     acpApplied: boolean;
     total: number;

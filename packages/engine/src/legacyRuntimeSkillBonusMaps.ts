@@ -1,5 +1,5 @@
 import type { CharacterState } from "./characterSpec";
-import type { EngineContext, SkillMiscBreakdownEntry } from "./legacyRuntimeTypes";
+import type { EngineContext, ProvenanceRecord, SkillMiscBreakdownEntry } from "./legacyRuntimeTypes";
 import { normalizeSkillId } from "./legacyRuntimeIds";
 import { getSelectedRace } from "./legacyRuntimeSelectors";
 
@@ -27,15 +27,37 @@ export function buildEffectSkillBonusMap(sheet: Record<string, unknown>): Record
   }, {});
 }
 
-export function buildEffectSkillBonusBreakdown(effectBonuses: Record<string, number>): Record<string, SkillMiscBreakdownEntry[]> {
+export function buildEffectSkillBonusBreakdown(provenance: ProvenanceRecord[]): Record<string, SkillMiscBreakdownEntry[]> {
   const breakdown: Record<string, SkillMiscBreakdownEntry[]> = {};
-  for (const [skillId, bonus] of Object.entries(effectBonuses)) {
+  const entryCounts = new Map<string, number>();
+
+  for (const record of provenance) {
+    if (!record.targetPath.startsWith("skillBonuses.")) continue;
+    const skillId = normalizeSkillId(record.targetPath.slice("skillBonuses.".length));
+    const bonus = Number(record.delta ?? record.setValue ?? Number.NaN);
     if (!Number.isFinite(bonus) || bonus === 0) continue;
-    breakdown[skillId] = [{
-      id: `effect:${skillId}`,
+    if (!skillId) continue;
+
+    const sourceKey = [
+      record.source.packId,
+      record.source.entityId,
+      record.source.choiceStepId ?? "static",
+      skillId
+    ].join(":");
+    const nextCount = (entryCounts.get(sourceKey) ?? 0) + 1;
+    entryCounts.set(sourceKey, nextCount);
+
+    (breakdown[skillId] ??= []).push({
+      id: `effect:${sourceKey}:${nextCount}`,
       sourceType: "effect",
-      bonus
-    }];
+      bonus,
+      applies: true,
+      source: {
+        packId: record.source.packId,
+        entityId: record.source.entityId,
+        ...(record.source.choiceStepId ? { choiceStepId: record.source.choiceStepId } : {})
+      }
+    });
   }
   return breakdown;
 }

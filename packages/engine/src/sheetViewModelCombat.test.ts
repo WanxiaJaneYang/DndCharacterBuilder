@@ -63,7 +63,7 @@ describe("sheetViewModel", () => {
     ]);
     expect(sheet.sheetViewModel.skills).toEqual(
       expect.arrayContaining([
-        {
+        expect.objectContaining({
           id: "climb",
           name: "Climb",
           classSkill: true,
@@ -75,10 +75,11 @@ describe("sheetViewModel", () => {
           abilityMod: 3,
           racialBonus: 0,
           misc: 0,
+          miscBreakdown: [],
           acp: -7,
           acpApplied: true,
           total: -3
-        },
+        }),
         expect.objectContaining({
           id: "listen",
           name: "Listen",
@@ -87,6 +88,7 @@ describe("sheetViewModel", () => {
           costPerRank: 2,
           racialBonus: 0,
           abilityMod: 0,
+          miscBreakdown: [],
           acp: 0,
           acpApplied: false
         })

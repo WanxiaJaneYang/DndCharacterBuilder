@@ -74,6 +74,13 @@ export interface SkillMiscBreakdownEntry {
   id: string;
   sourceType: string;
   bonus: number;
+  applies: boolean;
+  source?: {
+    packId: string;
+    entityId: string;
+    entityType?: string;
+    choiceStepId?: string;
+  };
   bonusType?: string;
   note?: string;
 }
