@@ -716,6 +716,67 @@ const ItemDataSchema = z.discriminatedUnion("category", [
   }).strict()
 ]);
 
+const ConditionalModifierSkillTargetSchema = z.object({
+  kind: z.literal("skill"),
+  id: z.string().min(1)
+}).strict();
+
+const ConditionalModifierPredicateSchema: z.ZodType<any> = z.lazy(() =>
+  z.discriminatedUnion("op", [
+    z.object({
+      op: z.literal("gte"),
+      left: z.object({
+        kind: z.literal("skillRanks"),
+        id: z.string().min(1)
+      }).strict(),
+      right: z.number()
+    }).strict(),
+    z.object({
+      op: z.literal("and"),
+      args: z.array(ConditionalModifierPredicateSchema).min(1)
+    }).strict(),
+    z.object({
+      op: z.literal("or"),
+      args: z.array(ConditionalModifierPredicateSchema).min(1)
+    }).strict(),
+    z.object({
+      op: z.literal("hasFeat"),
+      id: z.string().min(1)
+    }).strict(),
+    z.object({
+      op: z.literal("hasFeature"),
+      id: z.string().min(1)
+    }).strict(),
+    z.object({
+      op: z.literal("isClassSkill"),
+      target: ConditionalModifierSkillTargetSchema
+    }).strict(),
+    z.object({
+      op: z.literal("isProficient"),
+      target: ConditionalModifierSkillTargetSchema
+    }).strict()
+  ])
+);
+
+const ConditionalModifierSchema = z.object({
+  id: z.string().min(1),
+  source: z.object({
+    type: z.string().min(1),
+    ref: z.string().min(1).optional()
+  }).strict().optional(),
+  when: ConditionalModifierPredicateSchema,
+  apply: z.object({
+    target: ConditionalModifierSkillTargetSchema,
+    bonus: z.number(),
+    bonusType: z.string().min(1).optional(),
+    note: z.string().min(1).optional()
+  }).strict()
+}).strict();
+
+const RulesDataSchema = z.object({
+  conditionalModifiers: z.array(ConditionalModifierSchema).optional()
+}).passthrough();
+
 export const EntitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -782,6 +843,19 @@ export const EntitySchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Invalid items.data: ${issue.message}`,
+          path: ["data", ...issue.path]
+        });
+      });
+    }
+  }
+
+  if (entity.entityType === "rules" && entity.data !== undefined) {
+    const result = RulesDataSchema.safeParse(entity.data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid rules.data: ${issue.message}`,
           path: ["data", ...issue.path]
         });
       });
