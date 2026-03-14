@@ -1465,6 +1465,47 @@ describe("item entity schema", () => {
 });
 
 describe("rule entity schema", () => {
+  it("accepts legacy mixed-case conditional modifier predicates", () => {
+    const parsed = EntitySchema.parse({
+      id: "legacy-conditional-rule",
+      name: "Legacy Conditional Rule",
+      entityType: "rules",
+      summary: "Legacy",
+      description: "Legacy",
+      portraitUrl: null,
+      iconUrl: null,
+      effects: [],
+      data: {
+        conditionalModifiers: [
+          {
+            id: "legacy-acrobatic",
+            source: { type: "skillSynergy", ref: "tumble" },
+            when: {
+              op: "Or",
+              args: [
+                {
+                  op: "GTE",
+                  left: { kind: "SKILLRANKS", id: "tumble" },
+                  right: 5
+                },
+                {
+                  op: "isProficient",
+                  target: { kind: "SkIlL", id: "balance" }
+                }
+              ]
+            },
+            apply: {
+              target: { kind: "skill", id: "balance" },
+              bonus: 2
+            }
+          }
+        ]
+      }
+    });
+
+    expect(parsed.data?.conditionalModifiers).toHaveLength(1);
+  });
+
   it("rejects malformed conditional modifiers in rules data", () => {
     expect(() =>
       EntitySchema.parse({

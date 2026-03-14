@@ -371,6 +371,59 @@ describe("resolvePackSet", () => {
     }
   });
 
+  it("accepts legacy mixed-case conditional modifiers during pack resolution", () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-legacy-rule-conditional-pack-"));
+    const packsSrc = path.resolve(process.cwd(), "../../packs/srd-35e-minimal");
+    const packDest = path.join(tempRoot, "srd-35e-minimal");
+
+    fs.cpSync(packsSrc, packDest, { recursive: true });
+    fs.writeFileSync(path.join(packDest, "entities", "rules.json"), JSON.stringify([
+      {
+        id: "legacy-conditional-rule",
+        name: "Legacy Conditional Rule",
+        entityType: "rules",
+        summary: "Legacy",
+        description: "Legacy",
+        portraitUrl: null,
+        iconUrl: null,
+        effects: [],
+        data: {
+          conditionalModifiers: [
+            {
+              id: "legacy-skill-synergy",
+              source: { type: "skillSynergy", ref: "tumble" },
+              when: {
+                op: "Or",
+                args: [
+                  {
+                    op: "GTE",
+                    left: { kind: "SKILLRANKS", id: "tumble" },
+                    right: 5
+                  },
+                  {
+                    op: "isProficient",
+                    target: { kind: "SkIlL", id: "balance" }
+                  }
+                ]
+              },
+              apply: {
+                target: { kind: "skill", id: "balance" },
+                bonus: 2
+              }
+            }
+          ]
+        }
+      }
+    ]));
+
+    try {
+      const resolved = resolvePackSet(tempRoot, ["srd-35e-minimal"]);
+      expect(resolved.entities.rules?.["legacy-conditional-rule"]?.id).toBe("legacy-conditional-rule");
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
+
 
   it("fails when entityType does not match entity file bucket", () => {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "dcb-entitytype-pack-"));
