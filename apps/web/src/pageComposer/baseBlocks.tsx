@@ -13,7 +13,18 @@ export interface RegistryComponentProps {
   slots: SlotChildren;
 }
 
+function shouldWrapReviewChildren(node: PageSchemaNode) {
+  const mainChildren = (node.children ?? []).filter(
+    (child: PageSchemaNode) => (child.slot ?? "default") === "main",
+  );
+  if (mainChildren.length === 0) {
+    return false;
+  }
+  return mainChildren.every((child: PageSchemaNode) => child.componentId.startsWith("review."));
+}
+
 export function SingleColumnLayout({ node, slots }: RegistryComponentProps) {
+  const mainChildren = slots.main ?? slots.default;
   return (
     <section
       className="schema-layout schema-layout-single-column"
@@ -21,7 +32,13 @@ export function SingleColumnLayout({ node, slots }: RegistryComponentProps) {
       data-page-composer-root={node.componentId}
     >
       {slots.header}
-      <div className="schema-layout-main">{slots.main ?? slots.default}</div>
+      <div className="schema-layout-main">
+        {shouldWrapReviewChildren(node) ? (
+          <section className="review-page">{mainChildren}</section>
+        ) : (
+          mainChildren
+        )}
+      </div>
       {slots.footer}
     </section>
   );

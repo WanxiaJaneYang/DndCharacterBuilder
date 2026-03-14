@@ -22,23 +22,20 @@ function renderAdjustments(adjustments: ReviewSheetAdjustmentData[]) {
 }
 
 function renderTable<Row extends { id: string }>(
-  nodeId: string,
   section: ReviewTableSectionData<Row>,
   renderRow: (row: Row) => JSX.Element,
 ) {
   return (
-    <section className="review-page" data-node-id={nodeId}>
-      <article className="sheet">
-        <h3>{section.title}</h3>
-        <table className="review-table">
-          {section.caption && <caption className="sr-only">{section.caption}</caption>}
-          <thead>
-            <tr>{section.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
-          </thead>
-          <tbody>{section.rows.map(renderRow)}</tbody>
-        </table>
-      </article>
-    </section>
+    <article className="sheet">
+      <h3>{section.title}</h3>
+      <table className="review-table">
+        {section.caption && <caption className="sr-only">{section.caption}</caption>}
+        <thead>
+          <tr>{section.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
+        </thead>
+        <tbody>{section.rows.map(renderRow)}</tbody>
+      </table>
+    </article>
   );
 }
 
@@ -47,7 +44,7 @@ export function ReviewSaveHpBlock({ node, data }: RegistryComponentProps) {
   if (!section) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
-  return renderTable(node.id, section, (row) => <tr key={row.id}><td className="review-cell-key">{row.label}</td><td>{row.base}</td><td>{row.ability}</td><td>{row.adjustments}</td><td>{row.final}</td></tr>);
+  return renderTable(section, (row) => <tr key={row.id}><td className="review-cell-key">{row.label}</td><td>{row.base}</td><td>{row.ability}</td><td>{row.adjustments}</td><td>{row.final}</td></tr>);
 }
 
 export function ReviewTableAttacksBlock({ node, data }: RegistryComponentProps) {
@@ -55,7 +52,7 @@ export function ReviewTableAttacksBlock({ node, data }: RegistryComponentProps) 
   if (!section) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
-  return renderTable(node.id, section, (row) => <tr key={row.id}><td className="review-cell-key">{row.typeLabel}</td><td>{row.name}</td><td>{row.attackBonus}</td><td>{row.damage}</td><td>{row.crit}</td><td>{row.range}</td></tr>);
+  return renderTable(section, (row) => <tr key={row.id}><td className="review-cell-key">{row.typeLabel}</td><td>{row.name}</td><td>{row.attackBonus}</td><td>{row.damage}</td><td>{row.crit}</td><td>{row.range}</td></tr>);
 }
 
 export function ReviewTableAbilitiesBlock({ node, data }: RegistryComponentProps) {
@@ -63,7 +60,7 @@ export function ReviewTableAbilitiesBlock({ node, data }: RegistryComponentProps
   if (!section) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
-  return renderTable(node.id, section, (row) => <tr key={row.id}><td className="review-cell-key">{row.label}</td><td>{row.base}</td><td>{renderAdjustments(row.adjustments)}</td><td>{row.final}</td><td>{row.mod}</td></tr>);
+  return renderTable(section, (row) => <tr key={row.id}><td className="review-cell-key">{row.label}</td><td>{row.base}</td><td>{renderAdjustments(row.adjustments)}</td><td>{row.final}</td><td>{row.mod}</td></tr>);
 }
 
 export function ReviewCombatBlock({ node, data }: RegistryComponentProps) {
@@ -71,7 +68,7 @@ export function ReviewCombatBlock({ node, data }: RegistryComponentProps) {
   if (!section) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
-  return renderTable(node.id, section, (row) => <tr key={row.id}><td className="review-cell-key">{row.label}</td><td>{row.base}</td><td>{renderAdjustments(row.adjustments)}</td><td>{row.final}</td></tr>);
+  return renderTable(section, (row) => <tr key={row.id}><td className="review-cell-key">{row.label}</td><td>{row.base}</td><td>{renderAdjustments(row.adjustments)}</td><td>{row.final}</td></tr>);
 }
 
 export function ReviewSkillsBlock({ node, data }: RegistryComponentProps) {
@@ -80,31 +77,29 @@ export function ReviewSkillsBlock({ node, data }: RegistryComponentProps) {
     throw new Error(`Missing data for component ${node.componentId} at node ${node.id}`);
   }
   return (
-    <section className="review-page" data-node-id={node.id}>
-      <article className="sheet">
-        <h3>{section.title}</h3>
-        <p className="review-skills-summary">{section.summaryLabel}</p>
-        <table className="review-table">
-          {section.caption && <caption className="sr-only">{section.caption}</caption>}
-          <thead>
-            <tr>{section.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
-          </thead>
-          <tbody>
-            {section.rows.map((row) => (
-              <tr key={row.id}>
-                <td className="review-cell-key">{row.name}</td>
-                <td>{row.ranks}</td>
-                <td>{row.ability}</td>
-                <td>{row.racial}</td>
-                <td>{row.misc}</td>
-                <td>{row.acp}</td>
-                <td>{row.total}</td>
-                <td>{row.pointCost}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </article>
-    </section>
+    <article className="sheet">
+      <h3>{section.title}</h3>
+      <p className="review-skills-summary">{section.summaryLabel}</p>
+      <table className="review-table">
+        {section.caption && <caption className="sr-only">{section.caption}</caption>}
+        <thead>
+          <tr>{section.columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
+        </thead>
+        <tbody>
+          {section.rows.map((row) => (
+            <tr key={row.id}>
+              <td className="review-cell-key">{row.name}</td>
+              <td>{row.ranks}</td>
+              <td>{row.ability}</td>
+              <td>{row.racial}</td>
+              <td>{row.misc}</td>
+              <td>{row.acp}</td>
+              <td>{row.total}</td>
+              <td>{row.pointCost}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </article>
   );
 }

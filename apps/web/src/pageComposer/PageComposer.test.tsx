@@ -364,6 +364,11 @@ describe("PageComposer", () => {
     ).toBeGreaterThan(0);
     expect(screen.getByText(/srd-35e-minimal \(1.0.0\)/)).toBeTruthy();
     expect(document.querySelectorAll(".review-page .sheet").length).toBeGreaterThan(0);
+    expect(
+      document.querySelector(
+        '[data-page-composer-root="layout.singleColumn"] > .schema-layout-main > .review-page',
+      ),
+    ).toBeTruthy();
 
     await user.click(screen.getByRole("button", { name: t.EXPORT_JSON }));
     await user.click(screen.getByRole("button", { name: t.TOGGLE_PROVENANCE }));
