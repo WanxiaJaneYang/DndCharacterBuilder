@@ -1,10 +1,8 @@
 # Issue 212 Legacy Runtime Boundary Implementation Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
-
 **Goal:** Move legacy wizard/state runtime implementation behind an explicit internal legacy module while keeping the public compute contract and `@dcb/engine/legacy` behavior unchanged.
 
-**Architecture:** Treat the current `packages/engine/src/index.ts` implementation as the source for a new `legacyRuntime.ts` module, move `compute()` into a dedicated `compute.ts` core module, and replace `index.ts` with a narrow internal barrel. This keeps the package surface stable while making the implementation boundary explicit.
+**Architecture:** Split the old `packages/engine/src/index.ts` implementation into a dedicated `compute.ts` core module plus a `legacyRuntime.ts` legacy entry barrel backed by focused `legacyRuntime*.ts` modules, then keep `index.ts` as a narrow internal barrel. This keeps the package surface stable while making the implementation boundary explicit.
 
 **Tech Stack:** TypeScript, Vitest, npm workspaces
 
@@ -13,13 +11,13 @@
 ### Task 1: Add a failing boundary test
 
 **Files:**
-- Modify: `packages/engine/src/engine.test.ts`
+- Modify: `packages/engine/src/computeContract.test.ts`
 
 **Step 1: Write the failing test**
 
 Add a source-structure test that expects:
 - `packages/engine/src/compute.ts` to exist and contain `export function compute`
-- `packages/engine/src/legacyRuntime.ts` to exist and contain `export function listChoices`
+- `packages/engine/src/legacyRuntime.ts` to exist as the dedicated legacy runtime entry barrel
 - `packages/engine/src/public.ts` to export from `./compute`
 - `packages/engine/src/legacy.ts` to export from `./legacyRuntime`
 
@@ -40,7 +38,7 @@ Expected: FAIL because `compute.ts` / `legacyRuntime.ts` do not exist yet and th
 
 **Step 1: Move the current implementation module**
 
-Move the existing `packages/engine/src/index.ts` implementation body into `packages/engine/src/legacyRuntime.ts`.
+Move the existing `packages/engine/src/index.ts` implementation body behind `packages/engine/src/legacyRuntime.ts`, extracting focused `legacyRuntime*.ts` modules where that keeps authored files under the repo's size limit.
 
 **Step 2: Create compute core module**
 
@@ -68,11 +66,12 @@ Update:
 ### Task 3: Verify green and boundary safety
 
 **Files:**
-- Modify if needed: `packages/engine/src/engine.test.ts`
+- Modify if needed: `packages/engine/src/computeContract.test.ts`
+- Create if needed: `packages/engine/src/legacyRuntimeChoices.test.ts`
 
 **Step 1: Run focused engine test**
 
-Run: `npm --workspace @dcb/engine run test -- src/engine.test.ts`
+Run: `npm --workspace @dcb/engine run test -- src/computeContract.test.ts`
 
 Expected: PASS
 
@@ -91,7 +90,7 @@ Expected: PASS
 ### Task 4: Sync task/workflow records
 
 **Files:**
-- Modify: `.trellis/tasks/03-13-03-13-issue-212-legacy-runtime-boundary/task.json`
+- Modify: `.trellis/tasks/03-14-issue-212-legacy-runtime-boundary/task.json`
 - Modify: `task_plan.md`
 - Modify: `findings.md`
 - Modify: `progress.md`
