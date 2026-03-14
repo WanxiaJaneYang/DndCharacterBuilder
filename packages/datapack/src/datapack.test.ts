@@ -484,4 +484,77 @@ describe("resolvePackSet", () => {
     expect(resolved.entities.rules?.shared?._source.packId).toBe("override");
     expect(resolved.entities.rules?.shared?._source.entityId).toBe("shared");
   });
+
+  it("builds conditional skill modifier indexes from patched resolved entities", () => {
+    const base = makePack("base", 1);
+    base.entities.rules = [{
+      id: "shared-conditional-rule",
+      name: "Shared Conditional Rule",
+      entityType: "rules",
+      summary: "Shared conditional rule",
+      description: "Shared conditional rule desc",
+      portraitUrl: "assets/rules/shared-conditional-rule-portrait.png",
+      iconUrl: "assets/icons/rules/shared-conditional-rule.png",
+      effects: [],
+      data: {
+        conditionalModifiers: [{
+          id: "climb-to-balance",
+          source: { type: "skillSynergy", ref: "climb" },
+          when: {
+            op: "gte",
+            left: { kind: "skillRanks", id: "climb" },
+            right: 5
+          },
+          apply: {
+            target: { kind: "skill", id: "balance" },
+            bonus: 2
+          }
+        }]
+      }
+    }];
+
+    const override = makePack("override", 2, ["base"]);
+    override.patches = [{
+      op: "mergeEntity",
+      entityType: "rules",
+      id: "shared-conditional-rule",
+      value: {
+        data: {
+          conditionalModifiers: [{
+            id: "climb-to-balance",
+            source: { type: "skillSynergy", ref: "climb" },
+            when: {
+              op: "gte",
+              left: { kind: "skillRanks", id: "climb" },
+              right: 5
+            },
+            apply: {
+              target: { kind: "skill", id: "balance" },
+              bonus: 4,
+              note: "patched"
+            }
+          }]
+        }
+      }
+    }];
+
+    const resolved = resolveLoadedPacks([base, override], ["override"]);
+
+    expect(resolved.conditionalSkillModifiers).toEqual([
+      expect.objectContaining({
+        id: "climb-to-balance",
+        sourceType: "skillSynergy",
+        source: {
+          packId: "override",
+          entityType: "rules",
+          entityId: "shared-conditional-rule"
+        },
+        apply: expect.objectContaining({
+          targetSkillId: "balance",
+          bonus: 4,
+          note: "patched"
+        })
+      })
+    ]);
+  });
 });

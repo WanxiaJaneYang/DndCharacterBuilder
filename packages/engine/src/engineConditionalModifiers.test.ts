@@ -14,6 +14,113 @@ import {
 } from "./engineTestSupport";
 
 describe("engine determinism", () => {
+  it("consumes pre-indexed conditional modifiers even when raw entity payloads are absent", () => {
+    const indexedConditionalPack: LoadedPack = {
+      manifest: { id: "indexed-conditional-pack", name: "IndexedConditionalPack", version: "1.0.0", priority: 5, dependencies: [] },
+      entities: {
+        races: [{
+          id: "human",
+          name: "Human",
+          entityType: "races",
+          summary: "Human",
+          description: "Human",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            size: "medium",
+            baseSpeed: 30,
+            abilityModifiers: {},
+            vision: { lowLight: false, darkvisionFeet: 0 },
+            automaticLanguages: ["Common"],
+            bonusLanguages: ["Any"],
+            favoredClass: "any",
+            racialTraits: []
+          }
+        }],
+        classes: [{
+          id: "fighter",
+          name: "Fighter",
+          entityType: "classes",
+          summary: "Fighter",
+          description: "Fighter",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: { hitDie: 10, skillPointsPerLevel: 2, classSkills: ["climb"] }
+        }],
+        feats: [],
+        items: [],
+        skills: [
+          { id: "climb", name: "Climb", entityType: "skills", summary: "Climb", description: "Climb", portraitUrl: null, iconUrl: null, data: { ability: "str", armorCheckPenaltyApplies: true } },
+          { id: "balance", name: "Balance", entityType: "skills", summary: "Balance", description: "Balance", portraitUrl: null, iconUrl: null, data: { ability: "dex", armorCheckPenaltyApplies: true } }
+        ],
+        rules: [{
+          id: "base-ac",
+          name: "Base AC",
+          entityType: "rules",
+          summary: "Base AC",
+          description: "Base AC",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }]
+        }, {
+          id: "indexed-conditional",
+          name: "Indexed Conditional",
+          entityType: "rules",
+          summary: "Indexed Conditional",
+          description: "Should use the resolved conditional modifier index",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            conditionalModifiers: [{
+              id: "climb-to-balance",
+              source: { type: "skillSynergy", ref: "climb" },
+              when: {
+                op: "gte",
+                left: { kind: "skillRanks", id: "climb" },
+                right: 5
+              },
+              apply: {
+                target: { kind: "skill", id: "balance" },
+                bonus: 2
+              }
+            }]
+          }
+        }]
+      },
+      flow: {
+        steps: [
+          { id: "name", kind: "metadata", label: "Name", source: { type: "manual" } },
+          { id: "abilities", kind: "abilities", label: "Ability Scores", source: { type: "manual" } },
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType", entityType: "races", limit: 1 } },
+          { id: "class", kind: "class", label: "Class", source: { type: "entityType", entityType: "classes", limit: 1 } }
+        ]
+      },
+      patches: [],
+      packPath: "indexed-conditional-pack"
+    };
+    const resolvedData = resolveLoadedPacks([makePack("base", 1), indexedConditionalPack], ["indexed-conditional-pack"]);
+    const indexedRule = resolvedData.entities.rules?.["indexed-conditional"];
+    if (!indexedRule) throw new Error("Expected indexed conditional rule to resolve");
+    indexedRule.data = {};
+
+    const indexedConditionalContext = {
+      enabledPackIds: ["indexed-conditional-pack"],
+      resolvedData
+    };
+
+    let state = applyChoice(initialState, "name", "IndexedConditional");
+    state = applyChoice(state, "abilities", { str: 12, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "skills", { climb: 5 }, indexedConditionalContext);
+
+    const sheet = finalizeCharacter(state, indexedConditionalContext);
+    expect(sheet.skills.balance?.miscBonus).toBe(2);
+  });
+
   it("treats malformed composite conditional predicates as invalid and applies no bonus", () => {
     const malformedConditionalPack: LoadedPack = {
       manifest: { id: "malformed-conditional-pack", name: "MalformedConditionalPack", version: "1.0.0", priority: 5, dependencies: [] },
@@ -116,5 +223,120 @@ describe("engine determinism", () => {
 
     const sheet = finalizeCharacter(state, malformedContext);
     expect(sheet.skills.balance?.miscBonus).toBe(0);
+  });
+
+  it("keeps feat-sourced conditional modifiers gated by selection when using the resolved index", () => {
+    const indexedFeatPack: LoadedPack = {
+      manifest: { id: "indexed-feat-pack", name: "IndexedFeatPack", version: "1.0.0", priority: 5, dependencies: [] },
+      entities: {
+        races: [{
+          id: "human",
+          name: "Human",
+          entityType: "races",
+          summary: "Human",
+          description: "Human",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            size: "medium",
+            baseSpeed: 30,
+            abilityModifiers: {},
+            vision: { lowLight: false, darkvisionFeet: 0 },
+            automaticLanguages: ["Common"],
+            bonusLanguages: ["Any"],
+            favoredClass: "any",
+            racialTraits: []
+          }
+        }],
+        classes: [{
+          id: "fighter",
+          name: "Fighter",
+          entityType: "classes",
+          summary: "Fighter",
+          description: "Fighter",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: { hitDie: 10, skillPointsPerLevel: 2, classSkills: ["climb"] }
+        }],
+        feats: [{
+          id: "acrobatic",
+          name: "Acrobatic",
+          entityType: "feats",
+          summary: "Acrobatic",
+          description: "Acrobatic",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            conditionalModifiers: [{
+              id: "acrobatic-balance",
+              source: { type: "feat", ref: "acrobatic" },
+              when: {
+                op: "gte",
+                left: { kind: "skillRanks", id: "climb" },
+                right: 1
+              },
+              apply: {
+                target: { kind: "skill", id: "balance" },
+                bonus: 2
+              }
+            }]
+          }
+        }],
+        items: [],
+        skills: [
+          { id: "climb", name: "Climb", entityType: "skills", summary: "Climb", description: "Climb", portraitUrl: null, iconUrl: null, data: { ability: "str", armorCheckPenaltyApplies: true } },
+          { id: "balance", name: "Balance", entityType: "skills", summary: "Balance", description: "Balance", portraitUrl: null, iconUrl: null, data: { ability: "dex", armorCheckPenaltyApplies: true } }
+        ],
+        rules: [{
+          id: "base-ac",
+          name: "Base AC",
+          entityType: "rules",
+          summary: "Base AC",
+          description: "Base AC",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }]
+        }]
+      },
+      flow: {
+        steps: [
+          { id: "name", kind: "metadata", label: "Name", source: { type: "manual" } },
+          { id: "abilities", kind: "abilities", label: "Ability Scores", source: { type: "manual" } },
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType", entityType: "races", limit: 1 } },
+          { id: "class", kind: "class", label: "Class", source: { type: "entityType", entityType: "classes", limit: 1 } },
+          { id: "feat", kind: "feat", label: "Feat", source: { type: "entityType", entityType: "feats", limit: 1 } }
+        ]
+      },
+      patches: [],
+      packPath: "indexed-feat-pack"
+    };
+    const resolvedData = resolveLoadedPacks([makePack("base", 1), indexedFeatPack], ["indexed-feat-pack"]);
+    const indexedFeat = resolvedData.entities.feats?.acrobatic;
+    if (!indexedFeat) throw new Error("Expected indexed feat to resolve");
+    indexedFeat.data = {};
+
+    const indexedFeatContext = {
+      enabledPackIds: ["indexed-feat-pack"],
+      resolvedData
+    };
+
+    let unselectedState = applyChoice(initialState, "name", "UnselectedFeat");
+    unselectedState = applyChoice(unselectedState, "abilities", { str: 12, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    unselectedState = applyChoice(unselectedState, "race", "human");
+    unselectedState = applyChoice(unselectedState, "class", "fighter");
+    unselectedState = applyChoice(unselectedState, "skills", { climb: 1 }, indexedFeatContext);
+
+    let selectedState = applyChoice(initialState, "name", "SelectedFeat");
+    selectedState = applyChoice(selectedState, "abilities", { str: 12, dex: 12, con: 10, int: 10, wis: 10, cha: 10 });
+    selectedState = applyChoice(selectedState, "race", "human");
+    selectedState = applyChoice(selectedState, "class", "fighter");
+    selectedState = applyChoice(selectedState, "feat", "acrobatic");
+    selectedState = applyChoice(selectedState, "skills", { climb: 1 }, indexedFeatContext);
+
+    expect(finalizeCharacter(unselectedState, indexedFeatContext).skills.balance?.miscBonus).toBe(0);
+    expect(finalizeCharacter(selectedState, indexedFeatContext).skills.balance?.miscBonus).toBe(2);
   });
 });
