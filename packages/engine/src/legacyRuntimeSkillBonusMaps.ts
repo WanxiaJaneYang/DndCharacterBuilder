@@ -47,7 +47,7 @@ export function buildEffectSkillBonusBreakdown(provenance: ProvenanceRecord[]): 
     const nextCount = (entryCounts.get(sourceKey) ?? 0) + 1;
     entryCounts.set(sourceKey, nextCount);
 
-    breakdown[skillId] = [{
+    (breakdown[skillId] ??= []).push({
       id: `effect:${sourceKey}:${nextCount}`,
       sourceType: "effect",
       bonus,
@@ -57,7 +57,7 @@ export function buildEffectSkillBonusBreakdown(provenance: ProvenanceRecord[]): 
         entityId: record.source.entityId,
         ...(record.source.choiceStepId ? { choiceStepId: record.source.choiceStepId } : {})
       }
-    }];
+    });
   }
   return breakdown;
 }
