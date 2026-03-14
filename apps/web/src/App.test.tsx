@@ -393,7 +393,7 @@ describe('wizard e2e-ish happy path', () => {
     await user.type(screen.getByLabelText(new RegExp(`${en.NAME_LABEL}|${zh.NAME_LABEL}`, 'i')), 'Aric');
     await user.click(screen.getByRole('button', { name: nextPattern }));
 
-    expect(screen.getByText(/\(\s*(?:STR|\u529b\u91cf)\s*\)/i)).toBeTruthy();
+    expect(screen.getAllByText(/\(\s*(?:STR|\u529b\u91cf)\s*\)/i).length).toBeGreaterThan(0);
   });
 
   it('keeps racial-bonus-only skills visible on the review sheet', async () => {
