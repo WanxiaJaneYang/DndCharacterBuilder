@@ -6,6 +6,25 @@ import type { CharacterSheet } from "./legacyRuntimeSheetTypes";
 import type { SheetViewModel } from "./legacyRuntimeViewModelTypes";
 import { formatDamageWithModifier } from "./legacyRuntimeFormatting";
 
+function appendAttackLineMetadata<T extends { itemId: string }>(
+  category: "melee" | "ranged",
+  attacks: T[]
+): Array<T & { id: string; sequence: number }> {
+  const counts = new Map<string, number>();
+
+  return attacks.map((attack) => {
+    const key = `${category}:${attack.itemId}`;
+    const sequence = (counts.get(key) ?? 0) + 1;
+    counts.set(key, sequence);
+
+    return {
+      ...attack,
+      id: `${key}:${sequence}`,
+      sequence
+    };
+  });
+}
+
 export function buildSheetViewModel(
   characterSheet: Pick<CharacterSheet, "abilities" | "phase1" | "phase2" | "skills" | "decisions">
 ): SheetViewModel {
@@ -42,7 +61,7 @@ export function buildSheetViewModel(
         flatFooted: ac.flatFooted
       },
       attacks: [
-        ...characterSheet.phase1.combat.attacks.melee.map((attack) => {
+        ...appendAttackLineMetadata("melee", characterSheet.phase1.combat.attacks.melee).map((attack) => {
           const misc = attack.attackBonus - bab - meleeAbility - attackSizeModifier;
           return {
             ...attack,
@@ -59,7 +78,7 @@ export function buildSheetViewModel(
               : formatDamageWithModifier(attack.damage, meleeAbility)
           };
         }),
-        ...characterSheet.phase1.combat.attacks.ranged.map((attack) => {
+        ...appendAttackLineMetadata("ranged", characterSheet.phase1.combat.attacks.ranged).map((attack) => {
           const misc = attack.attackBonus - bab - rangedAbility - attackSizeModifier;
           return {
             ...attack,
