@@ -157,7 +157,40 @@ describe("compute() contract", () => {
           id: "synergy-tumble-balance",
           sourceType: "skillSynergy",
           bonus: 2,
-          applies: false
+          applies: false,
+          note: expect.stringContaining("Suppressed: requires tumble ranks >= 5; current ranks 4.5.")
+        })
+      ])
+    );
+  });
+
+  it("surfaces skill-targeted unresolved references and normalization assumptions", () => {
+    const result = compute(
+      {
+        meta: { name: "Skill Semantics Case", rulesetId: "dnd35e", sourceIds: ["srd-35e-minimal"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 16, dex: 12, con: 14, int: 10, wis: 10, cha: 8 },
+        skillRanks: { jump: Number.NaN, tumble: 1 },
+        featIds: ["acrobatic"]
+      },
+      { resolvedData: context.resolvedData, enabledPackIds: context.enabledPackIds }
+    );
+
+    expect(result.assumptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "SPEC_SKILL_RANK_DROPPED",
+          path: "skillRanks.jump",
+          defaultUsed: 0
+        })
+      ])
+    );
+    expect(result.unresolved).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "srd-35e-minimal:feats:acrobatic:acrobatic-benefit",
+          relatedIds: expect.arrayContaining(["acrobatic", "skills:jump", "skills:tumble"])
         })
       ])
     );
@@ -233,12 +266,27 @@ describe("compute() contract", () => {
 
     const one = compute(spec, rulepack);
     const two = compute(spec, rulepack);
+    const normalizeSuppressedNotes = <T extends { miscBreakdown?: Array<{ note?: string }> }>(skill: T | undefined) =>
+      skill
+        ? {
+            ...skill,
+            miscBreakdown: skill.miscBreakdown?.map((entry) => ({
+              ...entry,
+              ...(entry.note
+                ? { note: entry.note.replace(/ Suppressed: .*$/, "") }
+                : {})
+            }))
+          }
+        : skill;
+
     const contractSlice = {
       schemaVersion: one.schemaVersion,
       sheetViewModelSchemaVersion: one.sheetViewModel.schemaVersion,
       ac: one.sheetViewModel.data.combat.ac,
       firstAttack: one.sheetViewModel.data.combat.attacks[0],
-      firstThreeSkills: ["climb", "diplomacy", "jump"].map((id) => one.sheetViewModel.data.skills.find((skill) => skill.id === id)).filter(Boolean),
+      firstThreeSkills: ["climb", "diplomacy", "jump"]
+        .map((id) => normalizeSuppressedNotes(one.sheetViewModel.data.skills.find((skill) => skill.id === id)))
+        .filter(Boolean),
       review: one.sheetViewModel.data.review,
       validationIssueCodes: one.validationIssues.map((issue) => issue.code),
       unresolvedCodes: one.unresolved.map((entry) => entry.code)

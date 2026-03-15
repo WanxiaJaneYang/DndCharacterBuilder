@@ -10,6 +10,44 @@ import { getClassSkills, getDerivedSkillRanks } from "./legacyRuntimeProgression
 import { getSelectedFeatIds } from "./legacyRuntimeSelectors";
 import { getSelectedEntities, getSelectedFeatureIds } from "./legacyRuntimeSelectedEntities";
 
+type ConditionalPredicate = Parameters<typeof evaluateConditionalModifierPredicate>[0];
+
+function describeSuppressionReason(
+  predicate: ConditionalPredicate,
+  context: ConditionalPredicateEvaluationContext
+): string | undefined {
+  if (predicate.op === "gte") {
+    return `requires ${predicate.left.id} ranks >= ${predicate.right}; current ranks ${context.skillRanks[predicate.left.id] ?? 0}.`;
+  }
+
+  if (predicate.op === "hasFeat") {
+    return `requires feat ${predicate.id}.`;
+  }
+
+  if (predicate.op === "hasFeature") {
+    return `requires feature ${predicate.id}.`;
+  }
+
+  if (predicate.op === "isClassSkill") {
+    return `${predicate.target.id} must currently be a class skill.`;
+  }
+
+  if (predicate.op === "and") {
+    return predicate.args
+      .map((entry) => describeSuppressionReason(entry, context))
+      .find((reason) => Boolean(reason));
+  }
+
+  if (predicate.op === "or") {
+    const reasons = predicate.args
+      .map((entry) => describeSuppressionReason(entry, context))
+      .filter((reason): reason is string => Boolean(reason));
+    return reasons.length > 0 ? `none of the alternative conditions were met: ${reasons.join(" or ")}` : undefined;
+  }
+
+  return undefined;
+}
+
 export function buildConditionalSkillBonusData(
   state: CharacterState,
   context: EngineContext
@@ -38,6 +76,13 @@ export function buildConditionalSkillBonusData(
     if (modifier.source.entityType !== "rules" && !activeEntityKeys.has(sourceKey)) continue;
     const applies = evaluateConditionalModifierPredicate(modifier.when, evaluationContext);
     const skillId = modifier.apply.targetSkillId;
+    const suppressionReason = applies ? undefined : describeSuppressionReason(modifier.when, evaluationContext);
+    const note = suppressionReason
+      ? modifier.apply.note
+        ? `${modifier.apply.note} Suppressed: ${suppressionReason}`
+        : `Suppressed: ${suppressionReason}`
+      : modifier.apply.note;
+
     if (applies) totals[skillId] = (totals[skillId] ?? 0) + modifier.apply.bonus;
     (breakdown[skillId] ??= []).push({
       id: modifier.id,
@@ -50,7 +95,7 @@ export function buildConditionalSkillBonusData(
         entityType: modifier.source.entityType
       },
       ...(modifier.apply.bonusType ? { bonusType: modifier.apply.bonusType } : {}),
-      ...(modifier.apply.note ? { note: modifier.apply.note } : {})
+      ...(note ? { note } : {})
     });
   }
 
