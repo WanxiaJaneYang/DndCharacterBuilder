@@ -6,6 +6,7 @@ import {
 } from "./legacyRuntimeConditionalModifiers";
 import { getEntityDataRecord, parseDeferredMechanics } from "./legacyRuntimeEntityData";
 import { normalizeSkillId } from "./legacyRuntimeIds";
+import { buildLegacyProficiencyState } from "./legacyRuntimeProficiencyState";
 import { getClassSkills, getDerivedSkillRanks } from "./legacyRuntimeProgression";
 import { getSelectedFeatIds } from "./legacyRuntimeSelectors";
 import { getSelectedEntities, getSelectedFeatureIds } from "./legacyRuntimeSelectedEntities";
@@ -65,6 +66,7 @@ export function buildConditionalSkillBonusData(
   const selectedFeatIds = new Set(getSelectedFeatIds(state).map((id) => normalizeSkillId(id)).filter(Boolean));
   const selectedFeatureIds = getSelectedFeatureIds(state, context);
   const classSkillIds = getClassSkills(state, context);
+  const proficiencyState = buildLegacyProficiencyState(state, context);
   const skillRanks = getDerivedSkillRanks(state, context);
   const activeEntityKeys = new Set(
     getSelectedEntities(state, context).map((entity) => `${entity._source.packId}:${entity.entityType}:${entity.id}`)
@@ -73,7 +75,8 @@ export function buildConditionalSkillBonusData(
     skillRanks,
     selectedFeatIds,
     selectedFeatureIds,
-    classSkillIds
+    classSkillIds,
+    proficiencyState
   };
 
   for (const modifier of context.resolvedData.conditionalSkillModifiers ?? []) {

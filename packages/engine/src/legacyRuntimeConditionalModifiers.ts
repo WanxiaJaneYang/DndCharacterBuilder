@@ -1,11 +1,13 @@
 import { normalizeSkillId } from "./legacyRuntimeIds";
+import { hasSkillProficiency, type LegacyProficiencyState } from "./legacyRuntimeProficiencyState";
 
 type ConditionalModifierPredicate =
   | { op: "gte"; left: { kind: "skillRanks"; id: string }; right: number }
   | { op: "and" | "or"; args: ConditionalModifierPredicate[] }
   | { op: "hasFeat"; id: string }
   | { op: "hasFeature"; id: string }
-  | { op: "isClassSkill"; target: { kind: "skill"; id: string } };
+  | { op: "isClassSkill"; target: { kind: "skill"; id: string } }
+  | { op: "isProficient"; target: { kind: "skill"; id: string } };
 
 type ParsedConditionalSkillModifier = {
   id: string;
@@ -24,6 +26,7 @@ export type ConditionalPredicateEvaluationContext = {
   selectedFeatIds: Set<string>;
   selectedFeatureIds: Set<string>;
   classSkillIds: Set<string>;
+  proficiencyState?: LegacyProficiencyState;
 };
 
 function parseConditionalModifierPredicate(value: unknown): ConditionalModifierPredicate | undefined {
@@ -65,7 +68,10 @@ function parseConditionalModifierPredicate(value: unknown): ConditionalModifierP
     const target = targetRaw as Record<string, unknown>;
     if (String(target.kind ?? "").trim().toLowerCase() !== "skill") return undefined;
     const skillId = normalizeSkillId(String(target.id ?? ""));
-    return skillId ? { op: "isClassSkill", target: { kind: "skill", id: skillId } } : undefined;
+    if (!skillId) return undefined;
+    return op === "isproficient"
+      ? { op: "isProficient", target: { kind: "skill", id: skillId } }
+      : { op: "isClassSkill", target: { kind: "skill", id: skillId } };
   }
 
   return undefined;
@@ -115,5 +121,10 @@ export function evaluateConditionalModifierPredicate(
   if (predicate.op === "hasFeat") return context.selectedFeatIds.has(predicate.id);
   if (predicate.op === "hasFeature") return context.selectedFeatureIds.has(predicate.id);
   if (predicate.op === "isClassSkill") return context.classSkillIds.has(predicate.target.id);
+  if (predicate.op === "isProficient") {
+    return context.proficiencyState
+      ? hasSkillProficiency(context.proficiencyState, predicate.target.id)
+      : context.classSkillIds.has(predicate.target.id);
+  }
   return false;
 }

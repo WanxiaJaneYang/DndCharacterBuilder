@@ -1,7 +1,11 @@
 import type { ResolvedEntity } from "@dcb/datapack";
 import type { CharacterState } from "./characterSpec";
-import { getItemArmorCheckPenalty, getItemWeight, skillIsAffectedByArmorCheckPenalty } from "./legacyRuntimeEntityData";
+import { getItemArmorCheckPenalty, getItemWeight } from "./legacyRuntimeEntityData";
 import { getSrdMediumLoadLimits } from "./legacyRuntimeCombatUtils";
+import {
+  buildLegacyProficiencyStateFromClassSkills,
+  resolveSkillArmorCheckPenalty
+} from "./legacyRuntimeProficiencyState";
 import type { Phase2Sheet } from "./legacyRuntimeSheetTypes";
 import type { DecisionSummary, SkillBreakdown } from "./legacyRuntimeTypes";
 
@@ -25,6 +29,7 @@ export function buildPhase2Sheet(args: {
   const lightLoadLimit = srdLimits.light * carryingMultiplier;
   const mediumLoadLimit = srdLimits.medium * carryingMultiplier;
   const acpPenalty = selectedEquipmentEntities.reduce((sum, item) => sum + getItemArmorCheckPenalty(item), 0);
+  const proficiencyState = buildLegacyProficiencyStateFromClassSkills(decisions.classSkills);
   const adjustedSpeed = Number(sheet.stats.speed ?? 30);
   const baseSpeed = Number(selectedRace?.data?.baseSpeed ?? 30);
 
@@ -44,8 +49,7 @@ export function buildPhase2Sheet(args: {
       .sort((left, right) => left[0].localeCompare(right[0]))
       .map(([skillId, skill]) => {
         const skillEntity = entityBuckets.skills?.[skillId];
-        const acpApplied = skillIsAffectedByArmorCheckPenalty(skillEntity);
-        const acp = acpApplied ? acpPenalty : 0;
+        const { acpApplied, acp } = resolveSkillArmorCheckPenalty(skillEntity, acpPenalty, proficiencyState);
         return {
           id: skillId,
           name: skill.name,
