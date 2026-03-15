@@ -106,6 +106,7 @@ describe("ReviewStep", () => {
         abilityMod: 0,
         racialBonus: 0,
         misc: 2,
+        miscBreakdown: [],
         acp: 0,
         total: 2,
         ranks: 0,
