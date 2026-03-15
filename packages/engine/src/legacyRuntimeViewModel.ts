@@ -17,19 +17,11 @@ function appendAttackLineMetadata<T extends { itemId: string }>(
     const sequence = (counts.get(key) ?? 0) + 1;
     counts.set(key, sequence);
 
-    const attackLine = { ...attack } as T & { id: string; sequence: number };
-    Object.defineProperties(attackLine, {
-      id: {
-        value: `${key}:${sequence}`,
-        enumerable: false
-      },
-      sequence: {
-        value: sequence,
-        enumerable: false
-      }
-    });
-
-    return attackLine;
+    return {
+      ...attack,
+      id: `${key}:${sequence}`,
+      sequence
+    };
   });
 }
 

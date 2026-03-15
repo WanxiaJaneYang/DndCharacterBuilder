@@ -136,7 +136,7 @@ describe("attack-line identity and sequencing", () => {
     ]);
   });
 
-  it("keeps attack metadata off the serialized attack contract shape", () => {
+  it("includes attack metadata in the serialized attack contract shape", () => {
     let state = applyChoice(initialState, "name", "Aric");
     state = applyChoice(state, "abilities", {
       str: 16,
@@ -155,7 +155,7 @@ describe("attack-line identity and sequencing", () => {
 
     expect(firstAttack?.id).toBe("melee:longsword:1");
     expect(firstAttack?.sequence).toBe(1);
-    expect(Object.keys(firstAttack ?? {})).not.toContain("id");
-    expect(Object.keys(firstAttack ?? {})).not.toContain("sequence");
+    expect(Object.keys(firstAttack ?? {})).toContain("id");
+    expect(Object.keys(firstAttack ?? {})).toContain("sequence");
   });
 });
