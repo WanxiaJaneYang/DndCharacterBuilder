@@ -47,6 +47,33 @@ export type {
   VersionedSheetViewModel
 } from "./computeTypes";
 
+function buildSkillRankNormalizationAssumptions(
+  spec: CharacterSpec
+): ComputeResultAssumptionEntry[] {
+  if (!spec.skillRanks || typeof spec.skillRanks !== "object" || Array.isArray(spec.skillRanks)) {
+    return [];
+  }
+
+  return Object.entries(spec.skillRanks).flatMap(([skillId, rawRank]) => {
+    const numericRank = Number(rawRank);
+    if (Number.isFinite(numericRank) && numericRank >= 0) {
+      return [];
+    }
+
+    const normalizedSkillId = String(skillId).trim().toLowerCase();
+    if (!normalizedSkillId) {
+      return [];
+    }
+
+    return [{
+      code: "SPEC_SKILL_RANK_DROPPED",
+      message: `Skill rank for ${normalizedSkillId} was removed during normalization.`,
+      path: `skillRanks.${normalizedSkillId}`,
+      defaultUsed: 0
+    }];
+  });
+}
+
 export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeResult {
   const normalizedSpec = normalizeCharacterSpec(spec);
   const validationIssues: ComputeResultValidationIssue[] = [
@@ -73,6 +100,8 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
     }
   }
 
+  assumptions.push(...buildSkillRankNormalizationAssumptions(spec));
+
   const state = buildComputeStateFromSpec(normalizedSpec);
   const context: EngineContext = {
     resolvedData: rulepack.resolvedData,
@@ -97,8 +126,16 @@ export function compute(spec: CharacterSpec, rulepack: RulepackInput): ComputeRe
   const unresolved: ComputeResultUnresolvedEntry[] = sheet.unresolvedRules.map((entry) => ({
     code: entry.id,
     message: entry.description,
-    ...(entry.dependsOn.length || entry.source.entityId
-      ? { relatedIds: [entry.source.entityId, ...entry.dependsOn] }
+    ...(entry.dependsOn.length || entry.source.entityId || (entry.impacts?.length ?? 0) > 0
+      ? {
+          relatedIds: Array.from(
+            new Set([
+              entry.source.entityId,
+              ...entry.dependsOn,
+              ...(entry.impacts ?? [])
+            ].filter((value): value is string => Boolean(value)))
+          )
+        }
       : {})
   }));
 
