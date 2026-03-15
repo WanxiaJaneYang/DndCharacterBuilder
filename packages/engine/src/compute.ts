@@ -60,7 +60,7 @@ function buildSkillRankNormalizationAssumptions(
       return [];
     }
 
-    const normalizedSkillId = String(skillId).trim();
+    const normalizedSkillId = String(skillId).trim().toLowerCase();
     if (!normalizedSkillId) {
       return [];
     }

@@ -16,6 +16,11 @@ function describeSuppressionReason(
   predicate: ConditionalPredicate,
   context: ConditionalPredicateEvaluationContext
 ): string | undefined {
+  const describeIfFailed = (entry: ConditionalPredicate): string | undefined =>
+    evaluateConditionalModifierPredicate(entry, context)
+      ? undefined
+      : describeSuppressionReason(entry, context);
+
   if (predicate.op === "gte") {
     return `requires ${predicate.left.id} ranks >= ${predicate.right}; current ranks ${context.skillRanks[predicate.left.id] ?? 0}.`;
   }
@@ -34,13 +39,13 @@ function describeSuppressionReason(
 
   if (predicate.op === "and") {
     return predicate.args
-      .map((entry) => describeSuppressionReason(entry, context))
+      .map((entry) => describeIfFailed(entry))
       .find((reason) => Boolean(reason));
   }
 
   if (predicate.op === "or") {
     const reasons = predicate.args
-      .map((entry) => describeSuppressionReason(entry, context))
+      .map((entry) => describeIfFailed(entry))
       .filter((reason): reason is string => Boolean(reason));
     return reasons.length > 0 ? `none of the alternative conditions were met: ${reasons.join(" or ")}` : undefined;
   }

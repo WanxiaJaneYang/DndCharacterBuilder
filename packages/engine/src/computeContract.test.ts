@@ -1,3 +1,4 @@
+import type { LoadedPack } from "@dcb/datapack";
 import {
   canonicalComputeContractFixture,
   compute,
@@ -5,7 +6,9 @@ import {
   describe,
   expect,
   fs,
-  it
+  it,
+  makePack,
+  resolveLoadedPacks
 } from "./engineTestSupport";
 
 describe("compute() contract", () => {
@@ -196,6 +199,149 @@ describe("compute() contract", () => {
     );
   });
 
+  it("reports the failing branch reason for AND-based suppressed skill modifiers", () => {
+    const indexedFeatPack: LoadedPack = {
+      manifest: { id: "indexed-feat-pack", name: "IndexedFeatPack", version: "1.0.0", priority: 5, dependencies: [] },
+      entities: {
+        races: [{
+          id: "human",
+          name: "Human",
+          entityType: "races",
+          summary: "Human",
+          description: "Human",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            size: "medium",
+            baseSpeed: 30,
+            abilityModifiers: {},
+            vision: { lowLight: false, darkvisionFeet: 0 },
+            automaticLanguages: ["Common"],
+            bonusLanguages: ["Any"],
+            favoredClass: "any",
+            racialTraits: []
+          }
+        }],
+        classes: [{
+          id: "fighter",
+          name: "Fighter",
+          entityType: "classes",
+          summary: "Fighter",
+          description: "Fighter",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: { hitDie: 10, skillPointsPerLevel: 2, classSkills: ["tumble"] }
+        }],
+        feats: [{
+          id: "acrobatic",
+          name: "Acrobatic",
+          entityType: "feats",
+          summary: "Acrobatic",
+          description: "Acrobatic",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [],
+          data: {
+            conditionalModifiers: [{
+              id: "acrobatic-balance-and",
+              source: { type: "feat", ref: "acrobatic" },
+              when: {
+                op: "and",
+                args: [
+                  { op: "hasFeat", id: "acrobatic" },
+                  {
+                    op: "gte",
+                    left: { kind: "skillRanks", id: "tumble" },
+                    right: 5
+                  }
+                ]
+              },
+              apply: {
+                target: { kind: "skill", id: "balance" },
+                bonus: 2
+              }
+            }]
+          }
+        }],
+        items: [],
+        skills: [
+          {
+            id: "tumble",
+            name: "Tumble",
+            entityType: "skills",
+            summary: "Tumble",
+            description: "Tumble",
+            portraitUrl: null,
+            iconUrl: null,
+            data: { ability: "dex", armorCheckPenaltyApplies: true }
+          },
+          {
+            id: "balance",
+            name: "Balance",
+            entityType: "skills",
+            summary: "Balance",
+            description: "Balance",
+            portraitUrl: null,
+            iconUrl: null,
+            data: { ability: "dex", armorCheckPenaltyApplies: true }
+          }
+        ],
+        rules: [{
+          id: "base-ac",
+          name: "Base AC",
+          entityType: "rules",
+          summary: "Base AC",
+          description: "Base AC",
+          portraitUrl: null,
+          iconUrl: null,
+          effects: [{ kind: "set", targetPath: "stats.ac", value: { const: 10 } }]
+        }]
+      },
+      flow: {
+        steps: [
+          { id: "name", kind: "metadata", label: "Name", source: { type: "manual" } },
+          { id: "abilities", kind: "abilities", label: "Ability Scores", source: { type: "manual" } },
+          { id: "race", kind: "race", label: "Race", source: { type: "entityType", entityType: "races", limit: 1 } },
+          { id: "class", kind: "class", label: "Class", source: { type: "entityType", entityType: "classes", limit: 1 } },
+          { id: "feat", kind: "feat", label: "Feat", source: { type: "entityType", entityType: "feats", limit: 1 } }
+        ]
+      },
+      patches: [],
+      packPath: "indexed-feat-pack"
+    };
+    const resolvedData = resolveLoadedPacks([makePack("base", 1), indexedFeatPack], ["indexed-feat-pack"]);
+    const indexedFeat = resolvedData.entities.feats?.acrobatic;
+
+    if (!indexedFeat) {
+      throw new Error("Expected indexed feat to resolve");
+    }
+
+    indexedFeat.data = {};
+
+    const result = compute(
+      {
+        meta: { name: "And Predicate Case", rulesetId: "dnd35e", sourceIds: ["indexed-feat-pack"] },
+        raceId: "human",
+        class: { classId: "fighter", level: 1 },
+        abilities: { str: 10, dex: 12, con: 10, int: 10, wis: 10, cha: 10 },
+        skillRanks: { tumble: 4.5 },
+        featIds: ["acrobatic"]
+      },
+      { resolvedData, enabledPackIds: ["indexed-feat-pack"] }
+    );
+
+    const balance = result.sheetViewModel.data.skills.find((skill) => skill.id === "balance");
+    const andEntry = balance?.miscBreakdown.find((entry) => entry.id === "acrobatic-balance-and");
+
+    expect(andEntry).toMatchObject({
+      applies: false,
+      note: expect.stringContaining("requires tumble ranks >= 5;")
+    });
+    expect(andEntry?.note).not.toContain("requires feat acrobatic");
+  });
+
   it("does not apply flow-default point-buy validation to flow-independent CharacterSpec abilities", () => {
     const result = compute(
       {
@@ -273,7 +419,13 @@ describe("compute() contract", () => {
             miscBreakdown: skill.miscBreakdown?.map((entry) => ({
               ...entry,
               ...(entry.note
-                ? { note: entry.note.replace(/ Suppressed: .*$/, "") }
+                ? (() => {
+                    const normalizedNote = entry.note
+                      .replace(/^Suppressed: .*$/, "")
+                      .replace(/ Suppressed: .*$/, "")
+                      .trim();
+                    return normalizedNote ? { note: normalizedNote } : {};
+                  })()
                 : {})
             }))
           }
