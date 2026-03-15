@@ -1,6 +1,8 @@
 import type { AbilityKey, SkillMiscBreakdownEntry } from "./legacyRuntimeTypes";
 
 export interface AttackLine {
+  id?: string;
+  sequence?: number;
   itemId: string;
   name: string;
   attackBonus: number;

@@ -59,8 +59,10 @@
     "crit": "19-20/x2",
     "damage": "1d8",
     "damageLine": "1d8+3",
+    "id": "melee:longsword:1",
     "itemId": "longsword",
-    "name": "Longsword"
+    "name": "Longsword",
+    "sequence": 1
   },
   "firstThreeSkills": [
     {
