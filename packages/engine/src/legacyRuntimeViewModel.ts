@@ -17,11 +17,19 @@ function appendAttackLineMetadata<T extends { itemId: string }>(
     const sequence = (counts.get(key) ?? 0) + 1;
     counts.set(key, sequence);
 
-    return {
-      ...attack,
-      id: `${key}:${sequence}`,
-      sequence
-    };
+    const attackLine = { ...attack } as T & { id: string; sequence: number };
+    Object.defineProperties(attackLine, {
+      id: {
+        value: `${key}:${sequence}`,
+        enumerable: false
+      },
+      sequence: {
+        value: sequence,
+        enumerable: false
+      }
+    });
+
+    return attackLine;
   });
 }
 
@@ -61,7 +69,7 @@ export function buildSheetViewModel(
         flatFooted: ac.flatFooted
       },
       attacks: [
-        ...appendAttackLineMetadata("melee", characterSheet.phase1.combat.attacks.melee).map((attack) => {
+        ...appendAttackLineMetadata("melee", characterSheet.phase1.combat.attacks.melee.map((attack) => {
           const misc = attack.attackBonus - bab - meleeAbility - attackSizeModifier;
           return {
             ...attack,
@@ -77,8 +85,8 @@ export function buildSheetViewModel(
               ? attack.damage
               : formatDamageWithModifier(attack.damage, meleeAbility)
           };
-        }),
-        ...appendAttackLineMetadata("ranged", characterSheet.phase1.combat.attacks.ranged).map((attack) => {
+        })),
+        ...appendAttackLineMetadata("ranged", characterSheet.phase1.combat.attacks.ranged.map((attack) => {
           const misc = attack.attackBonus - bab - rangedAbility - attackSizeModifier;
           return {
             ...attack,
@@ -92,7 +100,7 @@ export function buildSheetViewModel(
             },
             damageLine: attack.damage
           };
-        })
+        }))
       ]
     },
     review: {

@@ -25,11 +25,10 @@ describe("attack-line identity and sequencing", () => {
     state = applyChoice(state, "equipment", ["longsword"]);
 
     const sheet = finalizeCharacter(state, context);
+    const firstAttack = sheet.sheetViewModel.combat.attacks[0];
 
-    expect(sheet.sheetViewModel.combat.attacks[0]).toMatchObject({
-      id: "melee:longsword:1",
-      sequence: 1
-    });
+    expect(firstAttack?.id).toBe("melee:longsword:1");
+    expect(firstAttack?.sequence).toBe(1);
   });
 
   it("increments sequence metadata when the same attack source appears multiple times", () => {
@@ -135,5 +134,28 @@ describe("attack-line identity and sequencing", () => {
       { id: "melee:longsword:1", sequence: 1 },
       { id: "melee:longsword:2", sequence: 2 }
     ]);
+  });
+
+  it("keeps attack metadata off the serialized attack contract shape", () => {
+    let state = applyChoice(initialState, "name", "Aric");
+    state = applyChoice(state, "abilities", {
+      str: 16,
+      dex: 12,
+      con: 14,
+      int: 10,
+      wis: 10,
+      cha: 8
+    });
+    state = applyChoice(state, "race", "human");
+    state = applyChoice(state, "class", "fighter");
+    state = applyChoice(state, "equipment", ["longsword"]);
+
+    const sheet = finalizeCharacter(state, context);
+    const firstAttack = sheet.sheetViewModel.combat.attacks[0];
+
+    expect(firstAttack?.id).toBe("melee:longsword:1");
+    expect(firstAttack?.sequence).toBe(1);
+    expect(Object.keys(firstAttack ?? {})).not.toContain("id");
+    expect(Object.keys(firstAttack ?? {})).not.toContain("sequence");
   });
 });
