@@ -16,6 +16,7 @@ import {
   RuntimeConstraintStateKeySchema,
   RuntimeEntityStateKeySchema,
   RuntimeFactIdSchema,
+  RuntimeIntentSchema,
   RuntimeInputIdSchema,
   RuntimeInputSchema,
   RuntimeJsonSchemaSchema,
@@ -45,6 +46,7 @@ export type {
   RuntimeInput,
   RuntimeInputId,
   RuntimeInputStateKey,
+  RuntimeIntent,
   RuntimeJsonSchema,
   RuntimeMetricFieldId,
   RuntimeNamespacedId,
@@ -64,7 +66,7 @@ export {
   ConstraintEvaluationPhase,
   RegistryInstructionKind,
   RuntimeInvokePhase,
-  RuntimeRequestItemKind
+  RuntimeIntentKind
 } from "./engineRuntimeTypes";
 
 export const AbilityIdSchema = z.enum(["str", "dex", "con", "int", "wis", "cha"]);
@@ -1074,6 +1076,7 @@ export {
   RuntimeConstraintStateKeySchema,
   RuntimeEntityStateKeySchema,
   RuntimeFactIdSchema,
+  RuntimeIntentSchema,
   RuntimeInputIdSchema,
   RuntimeInputSchema,
   RuntimeJsonSchemaSchema,

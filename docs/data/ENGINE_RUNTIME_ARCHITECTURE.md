@@ -16,10 +16,10 @@ The engine redesign separates four representations:
    - Static engine execution input.
    - Character-agnostic, cacheable, and reusable across requests.
 4. RuntimeRequest
-   - Per-character evaluation request.
-   - Carries selections, raw inputs, and acquire intents.
+   - Per-character intent envelope.
+   - Carries normalized user intents that seed runtime change propagation.
 
-The engine executes `CompiledRuntimeBundle + RuntimeRequest`. It does not execute raw authored entity fields, and it does not keep per-character copies of a rules bundle.
+The engine executes `CompiledRuntimeBundle + RuntimeRequest`. It does not execute raw authored entity fields, it does not keep per-character copies of a rules bundle, and it must not collapse into a flow runner or a snapshot calculator. The runtime stance is event-driven intent intake followed by deterministic holding-change propagation to fixed-point convergence.
 
 ## Compiled Runtime Bundle
 
@@ -61,23 +61,27 @@ The bundle must not contain:
 
 ## RuntimeRequest
 
-`RuntimeRequest` is the dynamic evaluation envelope:
+`RuntimeRequest` is the dynamic intent envelope:
 
 ```ts
 type RuntimeRequest = {
-  selections: RuntimeSelection[];
-  inputs?: RuntimeInput[];
-  acquireIntents?: AcquireIntent[];
+  intents: RuntimeIntent[];
 };
 ```
 
+`RuntimeIntent` is a discriminated union over:
+
+- selection intents
+- raw input intents
+- acquire intents
+
 ### Namespace rules
 
-Request-side identifiers:
+Request-side identifiers and intent payloads:
 
 - `sel:*` for selection schema IDs
 - `input:*` for request inputs
-- acquire intent records in `acquireIntents`
+- acquire intent records in `RuntimeIntent`
 
 Runtime-state and published-surface identifiers:
 
@@ -114,8 +118,8 @@ type InvokeSpec = {
   version: string;
   argsSchema: JsonSchema;
   phase: RuntimeInvokePhase;
-  reads: StateKey[];
-  writes: StateKey[];
+  consumes: StateKey[];
+  emits: StateKey[];
   publishes?: FactId[];
   idempotent: boolean;
   mayActivateEntities?: boolean;
@@ -128,7 +132,7 @@ type ConstraintSpec = {
   op: string;
   version: string;
   argsSchema: JsonSchema;
-  reads: StateKey[];
+  watches: StateKey[];
   requiresFacts?: FactId[];
   requiresInputs?: InputId[];
   requiresResources?: ResourceId[];
@@ -138,7 +142,7 @@ type ConstraintSpec = {
 };
 ```
 
-`ConstraintSpec` is first-class, but it is not a generic state-mutating invoke entry.
+`InvokeSpec` describes propagation behavior, not generic snapshot reads/writes. `ConstraintSpec` is first-class, but it is not a generic state-mutating invoke entry.
 
 ## Shared Condition DSL
 
@@ -170,13 +174,25 @@ Published facts are a narrow public interface for cross-capability reads. Intern
 
 ## Execution Model
 
-Execution is a deterministic global fixed-point:
+Execution is a deterministic global fixed-point over held changes:
 
 1. Activation
 2. Invoke execution
 3. Acquire resolution
 
-These three phases repeat as a super-cycle until there are no new observable writes across owned entities, published facts, resources, and unresolved acquire outcomes.
+These three phases repeat as a super-cycle until there are no new observable changes across owned entities, published facts, resources, capability-owned propagation surfaces, and unresolved acquire outcomes.
+
+The runtime is therefore:
+
+- intent-driven at the boundary
+- change-propagating in the core
+- fixed-point convergent by contract
+
+It is not:
+
+- a UI flow runner
+- a one-pass phase script
+- a pure snapshot calculator
 
 Only after convergence does the engine run:
 
