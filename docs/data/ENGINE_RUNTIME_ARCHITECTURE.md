@@ -81,9 +81,11 @@ Request-side identifiers:
 
 Runtime-state and published-surface identifiers:
 
-- `fact:*`
+- `entity:*`
 - `resource:*`
-- `entity:*` or other namespaced entity references
+- `private:*`
+- `constraint:*`
+- `fact:*`
 
 `RuntimeRequest` must not inject `fact:*` directly. Inputs are normalized before facts are published.
 
@@ -111,7 +113,7 @@ type InvokeSpec = {
   op: string;
   version: string;
   argsSchema: JsonSchema;
-  phase: PhaseId;
+  phase: RuntimeInvokePhase;
   reads: StateKey[];
   writes: StateKey[];
   publishes?: FactId[];

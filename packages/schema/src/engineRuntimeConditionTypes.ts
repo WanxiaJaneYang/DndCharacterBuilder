@@ -1,7 +1,7 @@
 import type {
   RuntimeFactId,
+  RuntimeMetricFieldId,
   RuntimeNamespacedId,
-  RuntimeOperationId,
   RuntimeSelectionSchemaId
 } from "./engineRuntimePrimitiveTypes";
 
@@ -30,7 +30,7 @@ export type ConditionOperand =
       kind: ConditionOperandKind.SelectionMetric;
       schemaId: RuntimeSelectionSchemaId;
       refId: RuntimeNamespacedId;
-      field: RuntimeOperationId;
+      field: RuntimeMetricFieldId;
     }
   | {
       kind: ConditionOperandKind.PublishedFact;

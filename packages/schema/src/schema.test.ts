@@ -5,6 +5,7 @@ import {
   ConditionOperandKind,
   type ConditionExpr
 } from "./engineRuntimeConditionTypes";
+import { RuntimeInvokePhase } from "./engineRuntimeTypes";
 import { AuthenticityLockSchema, EntitySchema, FlowSchema, ManifestSchema } from "./index";
 
 const validTypedConditionExpr: ConditionExpr = {
@@ -1941,8 +1942,8 @@ describe("engine runtime architecture contracts", () => {
       op: "assign-category",
       version: "1",
       argsSchema: { type: "object" },
-      phase: "invoke",
-      reads: ["selection:progression"],
+      phase: RuntimeInvokePhase.Invoke,
+      reads: ["input:progression:selected-levels"],
       writes: ["resource:skill-points"],
       publishes: ["fact:skills:class-category"],
       idempotent: true
@@ -1971,8 +1972,8 @@ describe("engine runtime architecture contracts", () => {
       op: "assign-category",
       version: "1",
       argsSchema: true,
-      phase: "invoke",
-      reads: ["selection:progression"],
+      phase: RuntimeInvokePhase.Invoke,
+      reads: ["input:progression:selected-levels"],
       writes: ["resource:skill-points"],
       idempotent: true
     });
@@ -2004,6 +2005,38 @@ describe("engine runtime architecture contracts", () => {
         writes: ["resource:skill-points"],
         evaluationPhase: "constraints",
         deferredWhenMissing: true
+      })
+    ).toThrow();
+  });
+
+  it("rejects selection-prefixed state keys in registry specs", () => {
+    expect(() =>
+      schema.InvokeSpecSchema.parse({
+        kind: "invoke",
+        capability: "cap:skills",
+        op: "assign-category",
+        version: "1",
+        argsSchema: { type: "object" },
+        phase: RuntimeInvokePhase.Invoke,
+        reads: ["selection:progression"],
+        writes: ["resource:skill-points"],
+        idempotent: true
+      })
+    ).toThrow();
+  });
+
+  it("rejects unknown invoke phase values", () => {
+    expect(() =>
+      schema.InvokeSpecSchema.parse({
+        kind: "invoke",
+        capability: "cap:skills",
+        op: "assign-category",
+        version: "1",
+        argsSchema: { type: "object" },
+        phase: "resolution",
+        reads: ["input:progression:selected-levels"],
+        writes: ["resource:skill-points"],
+        idempotent: true
       })
     ).toThrow();
   });

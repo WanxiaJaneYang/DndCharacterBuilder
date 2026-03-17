@@ -5,7 +5,7 @@ import type {
   RuntimeJsonSchema,
   RuntimeNamespacedId,
   RuntimeOperationId,
-  RuntimePhaseId,
+  RuntimeInvokePhase,
   RuntimeStateKey
 } from "./engineRuntimePrimitiveTypes";
 
@@ -24,7 +24,7 @@ export type InvokeSpec = {
   op: RuntimeOperationId;
   version: string;
   argsSchema: RuntimeJsonSchema;
-  phase: RuntimePhaseId;
+  phase: RuntimeInvokePhase;
   reads: RuntimeStateKey[];
   writes: RuntimeStateKey[];
   publishes?: RuntimeFactId[];

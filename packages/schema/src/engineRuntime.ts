@@ -5,6 +5,7 @@ import {
   ConditionOperandKind,
   ConstraintEvaluationPhase,
   RegistryInstructionKind,
+  RuntimeInvokePhase,
   RuntimeRequestItemKind
 } from "./engineRuntimeTypes";
 import type {
@@ -25,6 +26,10 @@ const INPUT_ID_PATTERN = /^input:[a-z0-9]+(?:[-:][a-z0-9]+)*$/;
 const FACT_ID_PATTERN = /^fact:[a-z0-9]+(?:[-:][a-z0-9]+)*$/;
 const SELECTION_SCHEMA_ID_PATTERN = /^sel:[a-z0-9]+(?:[-:][a-z0-9]+)*$/;
 const OPERATION_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const ENTITY_STATE_KEY_PATTERN = /^entity:[a-z0-9]+(?:[-:][a-z0-9]+)*$/;
+const RESOURCE_STATE_KEY_PATTERN = /^resource:[a-z0-9]+(?:[-:][a-z0-9]+)*$/;
+const PRIVATE_STATE_KEY_PATTERN = /^private:[a-z0-9]+(?:[-:][a-z0-9]+)*$/;
+const CONSTRAINT_STATE_KEY_PATTERN = /^constraint:[a-z0-9]+(?:[-:][a-z0-9]+)*$/;
 
 export const RuntimeNamespacedIdSchema = z
   .string()
@@ -50,9 +55,36 @@ export const RuntimeOperationIdSchema = z
   .string()
   .regex(OPERATION_ID_PATTERN, "Runtime operation IDs must use kebab-case.");
 
-export const RuntimeStateKeySchema = RuntimeNamespacedIdSchema;
+export const RuntimeMetricFieldIdSchema = z
+  .string()
+  .regex(OPERATION_ID_PATTERN, "Runtime metric field IDs must use kebab-case.");
+
+export const RuntimeEntityStateKeySchema = z
+  .string()
+  .regex(ENTITY_STATE_KEY_PATTERN, "Entity state keys must use entity: namespace.");
+
+export const RuntimeResourceStateKeySchema = z
+  .string()
+  .regex(RESOURCE_STATE_KEY_PATTERN, "Resource state keys must use resource: namespace.");
+
+export const RuntimePrivateStateKeySchema = z
+  .string()
+  .regex(PRIVATE_STATE_KEY_PATTERN, "Private state keys must use private: namespace.");
+
+export const RuntimeConstraintStateKeySchema = z
+  .string()
+  .regex(CONSTRAINT_STATE_KEY_PATTERN, "Constraint state keys must use constraint: namespace.");
+
+export const RuntimeStateKeySchema = z.union([
+  RuntimeInputIdSchema,
+  RuntimeFactIdSchema,
+  RuntimeEntityStateKeySchema,
+  RuntimeResourceStateKeySchema,
+  RuntimePrivateStateKeySchema,
+  RuntimeConstraintStateKeySchema
+]);
 export const RuntimeJsonSchemaSchema = z.union([z.boolean(), z.record(z.unknown())]);
-export const RuntimePhaseIdSchema = RuntimeOperationIdSchema;
+export const RuntimePhaseIdSchema = z.nativeEnum(RuntimeInvokePhase);
 
 export const RuntimeSelectionSchema = z
   .object({
@@ -132,7 +164,7 @@ export const ConditionOperandSchema: z.ZodType<ConditionOperand> = z.discriminat
       kind: z.literal(ConditionOperandKind.SelectionMetric),
       schemaId: RuntimeSelectionSchemaIdSchema,
       refId: RuntimeNamespacedIdSchema,
-      field: RuntimeOperationIdSchema
+      field: RuntimeMetricFieldIdSchema
     })
     .strict(),
   z

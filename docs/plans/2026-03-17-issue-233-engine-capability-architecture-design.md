@@ -100,10 +100,10 @@ type RuntimeRequest = {
 ```
 
 Namespace boundaries are strict:
-- `selection:*` belongs to request selections
+- `sel:*` belongs to selection schema identifiers referenced by request selections
 - `input:*` belongs to request inputs
 - `acquire:*` or acquire intent records belong to request-side transactions
-- `fact:*`, `resource:*`, and `entity:*` belong to runtime state and published output surfaces
+- `fact:*`, `entity:*`, `resource:*`, `private:*`, and `constraint:*` belong to runtime state and published output surfaces
 
 `RuntimeRequest` must not inject `fact:*` records directly.
 
@@ -130,7 +130,7 @@ type InvokeSpec = {
   op: string;
   version: string;
   argsSchema: JsonSchema;
-  phase: PhaseId;
+  phase: RuntimeInvokePhase;
   reads: StateKey[];
   writes: StateKey[];
   publishes?: FactId[];
