@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import * as schema from "./index";
+import type { ConditionExpr } from "./engineRuntimeTypes";
 import { AuthenticityLockSchema, EntitySchema, FlowSchema, ManifestSchema } from "./index";
 
-const validTypedConditionExpr: schema.ConditionExpr = {
+const validTypedConditionExpr: ConditionExpr = {
   op: "numeric-gte",
   left: {
     kind: "selection-metric",
@@ -16,7 +17,7 @@ const validTypedConditionExpr: schema.ConditionExpr = {
 void validTypedConditionExpr;
 
 // @ts-expect-error unsupported engine-level primitive must remain outside the typed DSL
-const invalidTypedConditionExpr: schema.ConditionExpr = { op: "min-level", value: 4 };
+const invalidTypedConditionExpr: ConditionExpr = { op: "min-level", value: 4 };
 
 void invalidTypedConditionExpr;
 

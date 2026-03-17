@@ -1,4 +1,14 @@
 import { z } from "zod";
+import type {
+  AcquireIntent,
+  BundleStatement,
+  ConditionExpr,
+  ConditionOperand,
+  ConstraintSpec,
+  InvokeSpec,
+  RuntimeRequest,
+  RuntimeSelection
+} from "./engineRuntimeTypes";
 
 const ID_SEGMENT_PATTERN = "[a-z0-9]+(?:-[a-z0-9]+)*";
 const NAMESPACED_ID_PATTERN = new RegExp(`^[a-z][a-z0-9-]*(?::${ID_SEGMENT_PATTERN})+$`);
@@ -101,60 +111,6 @@ export const RuntimeRequestSchema = z
     acquireIntents: z.array(AcquireIntentSchema).optional()
   })
   .strict();
-
-export type ConditionOperand =
-  | {
-      kind: "const";
-      value: number;
-    }
-  | {
-      kind: "selection-metric";
-      schemaId: z.infer<typeof RuntimeSelectionSchemaIdSchema>;
-      refId: z.infer<typeof RuntimeNamespacedIdSchema>;
-      field: z.infer<typeof RuntimeOperationIdSchema>;
-    }
-  | {
-      kind: "published-fact";
-      factId: z.infer<typeof RuntimeFactIdSchema>;
-    }
-  | {
-      kind: "resource-amount";
-      resourceId: z.infer<typeof RuntimeNamespacedIdSchema>;
-    };
-
-export type ConditionExpr =
-  | {
-      op: "all-of";
-      args: ConditionExpr[];
-    }
-  | {
-      op: "any-of";
-      args: ConditionExpr[];
-    }
-  | {
-      op: "not";
-      arg: ConditionExpr;
-    }
-  | {
-      op: "numeric-gte";
-      left: ConditionOperand;
-      right: ConditionOperand;
-    }
-  | {
-      op: "has-fact";
-      fact: {
-        kind: "published-fact";
-        factId: z.infer<typeof RuntimeFactIdSchema>;
-      };
-    }
-  | {
-      op: "resource-at-least";
-      resource: {
-        kind: "resource-amount";
-        resourceId: z.infer<typeof RuntimeNamespacedIdSchema>;
-      };
-      amount: ConditionOperand;
-    };
 
 export const ConditionOperandSchema: z.ZodType<ConditionOperand> = z.discriminatedUnion("kind", [
   z
@@ -261,20 +217,3 @@ export const ConstraintSpecSchema = z
     deferredWhenMissing: z.boolean()
   })
   .strict();
-
-export type RuntimeNamespacedId = z.infer<typeof RuntimeNamespacedIdSchema>;
-export type RuntimeCapabilityId = z.infer<typeof RuntimeCapabilityIdSchema>;
-export type RuntimeInputId = z.infer<typeof RuntimeInputIdSchema>;
-export type RuntimeFactId = z.infer<typeof RuntimeFactIdSchema>;
-export type RuntimeSelectionSchemaId = z.infer<typeof RuntimeSelectionSchemaIdSchema>;
-export type RuntimeOperationId = z.infer<typeof RuntimeOperationIdSchema>;
-export type RuntimeStateKey = z.infer<typeof RuntimeStateKeySchema>;
-export type RuntimeJsonSchema = z.infer<typeof RuntimeJsonSchemaSchema>;
-export type RuntimePhaseId = z.infer<typeof RuntimePhaseIdSchema>;
-export type RuntimeSelection = z.infer<typeof RuntimeSelectionSchema>;
-export type RuntimeInput = z.infer<typeof RuntimeInputSchema>;
-export type AcquireIntent = z.infer<typeof AcquireIntentSchema>;
-export type BundleStatement = z.infer<typeof BundleStatementSchema>;
-export type RuntimeRequest = z.infer<typeof RuntimeRequestSchema>;
-export type InvokeSpec = z.infer<typeof InvokeSpecSchema>;
-export type ConstraintSpec = z.infer<typeof ConstraintSpecSchema>;
