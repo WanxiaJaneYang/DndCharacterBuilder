@@ -16,10 +16,10 @@ The engine redesign separates four representations:
    - Static engine execution input.
    - Character-agnostic, cacheable, and reusable across requests.
 4. RuntimeRequest
-   - Per-character evaluation request.
-   - Carries selections, raw inputs, and acquire intents.
+   - Per-character normalized change request.
+   - Carries selections, raw inputs, and acquire intents that seed runtime change propagation.
 
-The engine executes `CompiledRuntimeBundle + RuntimeRequest`. It does not execute raw authored entity fields, and it does not keep per-character copies of a rules bundle.
+The engine executes `CompiledRuntimeBundle + RuntimeRequest`. It does not execute raw authored entity fields, and it does not keep per-character copies of a rules bundle. The architectural stance is change-driven: the runtime holds normalized changes, propagates them deterministically, and converges to fixed point. It is not a UI flow runner, and fixed-point convergence is not an implementation detail.
 
 ## Compiled Runtime Bundle
 
@@ -61,7 +61,7 @@ The bundle must not contain:
 
 ## RuntimeRequest
 
-`RuntimeRequest` is the dynamic evaluation envelope:
+`RuntimeRequest` is the dynamic change-request envelope:
 
 ```ts
 type RuntimeRequest = {
@@ -170,13 +170,25 @@ Published facts are a narrow public interface for cross-capability reads. Intern
 
 ## Execution Model
 
-Execution is a deterministic global fixed-point:
+Execution is a deterministic global fixed-point over held changes:
 
 1. Activation
 2. Invoke execution
 3. Acquire resolution
 
-These three phases repeat as a super-cycle until there are no new observable writes across owned entities, published facts, resources, and unresolved acquire outcomes.
+These three phases repeat as a super-cycle until there are no new observable changes across owned entities, published facts, resources, and unresolved acquire outcomes.
+
+This means the runtime is:
+
+- change-driven at the boundary
+- propagation-oriented in the core
+- convergence-bound by contract
+
+It is not:
+
+- a flow runner
+- a one-pass phase script
+- a pure snapshot calculator
 
 Only after convergence does the engine run:
 

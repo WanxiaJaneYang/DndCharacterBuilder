@@ -4,7 +4,7 @@
 
 **Goal:** Codify the approved issue #233 engine architecture as schema-level contracts and documentation without widening current engine execution work beyond the existing `#232` boundary.
 
-**Architecture:** Keep runtime-boundary code work separate from architecture-contract work. Add explicit schema contracts for `BundleStatement`, `RuntimeRequest`, `ConditionExpr`, `InvokeSpec`, and `ConstraintSpec` in `@dcb/schema`, document the boundaries in `docs/data/`, and keep engine execution changes blocked behind the approved issue chain `#232 -> #233 -> #235 -> #236 -> #122`.
+**Architecture:** Keep runtime-boundary code work separate from architecture-contract work. Add explicit schema contracts for `BundleStatement`, `RuntimeRequest`, `ConditionExpr`, `InvokeSpec`, and `ConstraintSpec` in `@dcb/schema`, document the change-driven fixed-point boundary in `docs/data/`, and keep engine execution changes blocked behind the approved issue chain `#232 -> #233 -> #235 -> #236 -> #122`.
 
 **Tech Stack:** TypeScript, Zod, Vitest, npm workspaces, Markdown docs
 

@@ -16,7 +16,7 @@ Keep the runtime architecture centered on four distinct layers:
 - compiled runtime bundle
 - per-character `RuntimeRequest`
 
-The engine executes a compiled bundle plus a request. It does not execute raw authored pack fields, and it does not store a character-specific copy of the rules bundle. Runtime instructions are validated through a typed registry, constraints are first-class registry entries, and execution is a deterministic fixed-point over activation, invoke, and acquire phases before constraints are evaluated.
+The engine executes a compiled bundle plus a request. It does not execute raw authored pack fields, and it does not store a character-specific copy of the rules bundle. Runtime instructions are validated through a typed registry, constraints are first-class registry entries, and execution is a deterministic fixed-point over change propagation. This engine is change-driven, not a flow runner and not merely a snapshot calculator.
 
 ## Alternatives considered
 1. Put selections and acquire operations directly into the compiled bundle.
@@ -89,7 +89,7 @@ Notably absent from bundle statements:
 - direct user input payloads
 
 ### 3. RuntimeRequest contract
-`RuntimeRequest` is the per-evaluation envelope:
+`RuntimeRequest` is the per-evaluation change envelope:
 
 ```ts
 type RuntimeRequest = {
@@ -209,7 +209,7 @@ The engine repeatedly runs:
 2. Invoke execution
 3. Acquire resolution
 
-until no new observable writes are produced across:
+until no new observable changes are produced across:
 - owned entities
 - published facts
 - resources
@@ -230,6 +230,8 @@ The registry must declare idempotence, and the runtime must define:
 - maximum iteration count
 - cycle detection policy
 - failure behavior for non-convergence
+
+Fixed-point convergence is therefore a first-class architectural invariant. The runtime accepts normalized changes and user intent through `RuntimeRequest`, holds those changes in runtime state surfaces, and propagates them until convergence.
 
 ### 9. Imported state invariant
 Imported state is treated as input that still needs interpretation. It may enter only through `RuntimeRequest` and must pass through an engine entry normalizer or a capability-owned adapter.
