@@ -20,7 +20,7 @@
 Add a focused `describe("engine runtime architecture contracts")` block that asserts:
 - bundle statements accept only `invoke`, `grant`, and `constraint`
 - bundle statements reject request-side instructions such as `selection` and `acquire`
-- runtime requests accept `selections`, `inputs`, and `acquireIntents`
+- runtime requests accept normalized change records
 - runtime requests reject direct `fact:*` injection in request input identifiers
 
 **Step 2: Run test to verify it fails**
@@ -43,6 +43,7 @@ Leave the tests failing until the new schema module is added.
 
 Add Zod schemas and exported types for:
 - `BundleStatementSchema`
+- `RuntimeChangeSchema`
 - `RuntimeRequestSchema`
 - `RuntimeSelectionSchema`
 - `RuntimeInputSchema`
@@ -51,7 +52,7 @@ Add Zod schemas and exported types for:
 Implementation requirements:
 - bundle statements must not include request-side kinds
 - request input IDs must use `input:*` rather than `fact:*`
-- request selections and acquire intents must have stable identifier formats
+- request change records must have stable identifier formats
 - exported types must round-trip from the schemas
 
 **Step 2: Run tests to verify they pass**
@@ -94,8 +95,8 @@ Extend `engineRuntime.ts` with:
 - shared identifier schemas for facts, inputs, entities, and resources where needed
 
 Constraints:
-- `ConstraintSpec` is registry-owned but must not allow generic runtime writes
-- `InvokeSpec` must carry phase and idempotence metadata
+- `ConstraintSpec` is registry-owned but must not allow generic state mutation
+- `InvokeSpec` must carry phase and idempotence metadata plus explicit change-consumption and change-production surfaces
 - no engine execution behavior changes in this task
 
 **Step 4: Run tests and typecheck**

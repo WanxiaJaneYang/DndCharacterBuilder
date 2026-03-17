@@ -12,6 +12,7 @@ import {
   ConditionOperandSchema,
   ConstraintSpecSchema,
   InvokeSpecSchema,
+  RuntimeChangeSchema,
   RuntimeCapabilityIdSchema,
   RuntimeConstraintStateKeySchema,
   RuntimeEntityStateKeySchema,
@@ -38,6 +39,7 @@ export type {
   ConstraintSpec,
   InvokeSpec,
   RuntimeCapabilityId,
+  RuntimeChange,
   RuntimeConstraintStateKey,
   RuntimeEntityStateKey,
   RuntimeFactId,
@@ -63,8 +65,8 @@ export {
   ConditionOperandKind,
   ConstraintEvaluationPhase,
   RegistryInstructionKind,
+  RuntimeChangeKind,
   RuntimeInvokePhase,
-  RuntimeRequestItemKind
 } from "./engineRuntimeTypes";
 
 export const AbilityIdSchema = z.enum(["str", "dex", "con", "int", "wis", "cha"]);
@@ -1070,6 +1072,7 @@ export {
   DeferredMechanicImpactIdSchema,
   DeferredMechanicSchema,
   InvokeSpecSchema,
+  RuntimeChangeSchema,
   RuntimeCapabilityIdSchema,
   RuntimeConstraintStateKeySchema,
   RuntimeEntityStateKeySchema,

@@ -17,7 +17,7 @@ The engine redesign separates four representations:
    - Character-agnostic, cacheable, and reusable across requests.
 4. RuntimeRequest
    - Per-character normalized change request.
-   - Carries selections, raw inputs, and acquire intents that seed runtime change propagation.
+   - Carries normalized change records that seed runtime change propagation.
 
 The engine executes `CompiledRuntimeBundle + RuntimeRequest`. It does not execute raw authored entity fields, and it does not keep per-character copies of a rules bundle. The architectural stance is change-driven: the runtime holds normalized changes, propagates them deterministically, and converges to fixed point. It is not a UI flow runner, and fixed-point convergence is not an implementation detail.
 
@@ -54,8 +54,8 @@ type BundleStatement =
 
 The bundle must not contain:
 
-- request-side selections
-- acquire intents
+- request-side changes
+- acquire changes
 - direct user inputs
 - character-private runtime state
 
@@ -65,11 +65,15 @@ The bundle must not contain:
 
 ```ts
 type RuntimeRequest = {
-  selections: RuntimeSelection[];
-  inputs?: RuntimeInput[];
-  acquireIntents?: AcquireIntent[];
+  changes: RuntimeChange[];
 };
 ```
+
+`RuntimeChange` is a discriminated union over:
+
+- selection changes
+- raw input changes
+- acquire changes
 
 ### Namespace rules
 
@@ -77,7 +81,7 @@ Request-side identifiers:
 
 - `sel:*` for selection schema IDs
 - `input:*` for request inputs
-- acquire intent records in `acquireIntents`
+- acquire change records in `RuntimeChange`
 
 Runtime-state and published-surface identifiers:
 
@@ -114,8 +118,8 @@ type InvokeSpec = {
   version: string;
   argsSchema: JsonSchema;
   phase: RuntimeInvokePhase;
-  reads: StateKey[];
-  writes: StateKey[];
+  consumes: StateKey[];
+  produces: StateKey[];
   publishes?: FactId[];
   idempotent: boolean;
   mayActivateEntities?: boolean;
@@ -128,7 +132,7 @@ type ConstraintSpec = {
   op: string;
   version: string;
   argsSchema: JsonSchema;
-  reads: StateKey[];
+  watches: StateKey[];
   requiresFacts?: FactId[];
   requiresInputs?: InputId[];
   requiresResources?: ResourceId[];
@@ -138,7 +142,7 @@ type ConstraintSpec = {
 };
 ```
 
-`ConstraintSpec` is first-class, but it is not a generic state-mutating invoke entry.
+`InvokeSpec` declares change-consumption and change-production surfaces, not generic snapshot reads/writes. `ConstraintSpec` is first-class, but it is not a generic state-mutating invoke entry.
 
 ## Shared Condition DSL
 

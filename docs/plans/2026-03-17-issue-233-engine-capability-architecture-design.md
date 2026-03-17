@@ -43,14 +43,14 @@ The engine consumes:
 
 The bundle is static and character-agnostic. It may contain compiled entities, selection schemas, grants, invoke statements, constraints, capability-owned runtime fragments, and migration diagnostics. It must not contain:
 - current character selections
-- acquire intents
+- acquire changes
 - character-private state
 - intermediate runtime caches
 
 `RuntimeRequest` is dynamic and character-specific. It is the only place that may carry:
 - selections
 - user-provided inputs
-- acquire intents
+- acquire changes
 - imported raw input fragments that still require interpretation
 
 ### 2. Bundle statement contract
@@ -93,16 +93,14 @@ Notably absent from bundle statements:
 
 ```ts
 type RuntimeRequest = {
-  selections: RuntimeSelection[];
-  inputs?: RuntimeInput[];
-  acquireIntents?: AcquireIntent[];
+  changes: RuntimeChange[];
 };
 ```
 
 Namespace boundaries are strict:
-- `sel:*` belongs to selection schema identifiers referenced by request selections
-- `input:*` belongs to request inputs
-- `acquire:*` or acquire intent records belong to request-side transactions
+- `sel:*` belongs to selection schema identifiers referenced by request changes
+- `input:*` belongs to input changes
+- `acquire:*` or acquire change records belong to request-side transactions
 - `fact:*`, `entity:*`, `resource:*`, `private:*`, and `constraint:*` belong to runtime state and published output surfaces
 
 `RuntimeRequest` must not inject `fact:*` records directly.
@@ -131,8 +129,8 @@ type InvokeSpec = {
   version: string;
   argsSchema: JsonSchema;
   phase: RuntimeInvokePhase;
-  reads: StateKey[];
-  writes: StateKey[];
+  consumes: StateKey[];
+  produces: StateKey[];
   publishes?: FactId[];
   idempotent: boolean;
   mayActivateEntities?: boolean;
@@ -145,7 +143,7 @@ type ConstraintSpec = {
   op: string;
   version: string;
   argsSchema: JsonSchema;
-  reads: StateKey[];
+  watches: StateKey[];
   requiresFacts?: FactId[];
   requiresInputs?: InputId[];
   requiresResources?: ResourceId[];
@@ -155,7 +153,7 @@ type ConstraintSpec = {
 };
 ```
 
-`ConstraintSpec` is first-class and registry-owned, but it is not modeled as a generic state-mutating invoke entry.
+`InvokeSpec` encodes change-consumption and change-production contracts over normalized state surfaces. `ConstraintSpec` is first-class and registry-owned, but it is not modeled as a generic state-mutating invoke entry.
 
 ### 6. Shared condition DSL
 `when` uses a shared condition DSL with typed operands rather than engine-special-case concepts such as bare level checks.

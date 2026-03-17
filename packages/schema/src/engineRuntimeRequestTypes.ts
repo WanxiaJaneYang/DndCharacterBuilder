@@ -5,34 +5,34 @@ import type {
   RuntimeSelectionSchemaId
 } from "./engineRuntimePrimitiveTypes";
 
-export enum RuntimeRequestItemKind {
+export enum RuntimeChangeKind {
   Selection = "selection",
   Input = "input",
   Acquire = "acquire"
 }
 
 export type RuntimeSelection = {
-  kind: RuntimeRequestItemKind.Selection;
+  kind: RuntimeChangeKind.Selection;
   schemaId: RuntimeSelectionSchemaId;
   refId: RuntimeNamespacedId;
   amount: number;
 };
 
 export type RuntimeInput = {
-  kind: RuntimeRequestItemKind.Input;
+  kind: RuntimeChangeKind.Input;
   inputId: RuntimeInputId;
   value: unknown;
 };
 
 export type AcquireIntent = {
-  kind: RuntimeRequestItemKind.Acquire;
+  kind: RuntimeChangeKind.Acquire;
   capability: RuntimeCapabilityId;
   target: RuntimeNamespacedId;
   amount: number;
 };
 
+export type RuntimeChange = RuntimeSelection | RuntimeInput | AcquireIntent;
+
 export type RuntimeRequest = {
-  selections: RuntimeSelection[];
-  inputs?: RuntimeInput[];
-  acquireIntents?: AcquireIntent[];
+  changes: RuntimeChange[];
 };
