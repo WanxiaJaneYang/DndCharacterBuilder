@@ -5,6 +5,26 @@ import {
   DeferredMechanicImpactIdSchema,
   DeferredMechanicSchema
 } from "./deferredMechanics";
+import {
+  AcquireIntentSchema,
+  BundleStatementSchema,
+  ConditionExprSchema,
+  ConditionOperandSchema,
+  ConstraintSpecSchema,
+  InvokeSpecSchema,
+  RuntimeCapabilityIdSchema,
+  RuntimeFactIdSchema,
+  RuntimeInputIdSchema,
+  RuntimeInputSchema,
+  RuntimeJsonSchemaSchema,
+  RuntimeNamespacedIdSchema,
+  RuntimeOperationIdSchema,
+  RuntimePhaseIdSchema,
+  RuntimeRequestSchema,
+  RuntimeStateKeySchema,
+  RuntimeSelectionSchema,
+  RuntimeSelectionSchemaIdSchema
+} from "./engineRuntime";
 
 export const AbilityIdSchema = z.enum(["str", "dex", "con", "int", "wis", "cha"]);
 export type AbilityId = z.infer<typeof AbilityIdSchema>;
@@ -987,6 +1007,24 @@ export type PageSchemaNode = z.infer<typeof PageNodeSchema>;
 export type DeferredMechanicCapabilityId = z.infer<typeof DeferredMechanicCapabilityIdSchema>;
 export type DeferredMechanicImpactId = z.infer<typeof DeferredMechanicImpactIdSchema>;
 export type DeferredMechanic = z.infer<typeof DeferredMechanicSchema>;
+export type RuntimeNamespacedId = z.infer<typeof RuntimeNamespacedIdSchema>;
+export type RuntimeCapabilityId = z.infer<typeof RuntimeCapabilityIdSchema>;
+export type RuntimeInputId = z.infer<typeof RuntimeInputIdSchema>;
+export type RuntimeFactId = z.infer<typeof RuntimeFactIdSchema>;
+export type RuntimeSelectionSchemaId = z.infer<typeof RuntimeSelectionSchemaIdSchema>;
+export type RuntimeOperationId = z.infer<typeof RuntimeOperationIdSchema>;
+export type RuntimeStateKey = z.infer<typeof RuntimeStateKeySchema>;
+export type RuntimeJsonSchema = z.infer<typeof RuntimeJsonSchemaSchema>;
+export type RuntimePhaseId = z.infer<typeof RuntimePhaseIdSchema>;
+export type RuntimeSelection = z.infer<typeof RuntimeSelectionSchema>;
+export type RuntimeInput = z.infer<typeof RuntimeInputSchema>;
+export type AcquireIntent = z.infer<typeof AcquireIntentSchema>;
+export type BundleStatement = z.infer<typeof BundleStatementSchema>;
+export type RuntimeRequest = z.infer<typeof RuntimeRequestSchema>;
+export type ConditionOperand = z.infer<typeof ConditionOperandSchema>;
+export type ConditionExpr = z.infer<typeof ConditionExprSchema>;
+export type InvokeSpec = z.infer<typeof InvokeSpecSchema>;
+export type ConstraintSpec = z.infer<typeof ConstraintSpecSchema>;
 export type Expr = z.infer<typeof ExprSchema>;
 export type Effect = z.infer<typeof EffectSchema>;
 export type Constraint = z.infer<typeof ConstraintSchema>;
@@ -1000,7 +1038,25 @@ export type ContractFixture = z.infer<typeof ContractFixtureSchema>;
 export type AuthenticityLock = z.infer<typeof AuthenticityLockSchema>;
 export {
   DEFERRED_MECHANIC_CAPABILITIES,
+  AcquireIntentSchema,
+  BundleStatementSchema,
+  ConditionExprSchema,
+  ConditionOperandSchema,
+  ConstraintSpecSchema,
   DeferredMechanicCapabilityIdSchema,
   DeferredMechanicImpactIdSchema,
-  DeferredMechanicSchema
+  DeferredMechanicSchema,
+  InvokeSpecSchema,
+  RuntimeCapabilityIdSchema,
+  RuntimeFactIdSchema,
+  RuntimeInputIdSchema,
+  RuntimeInputSchema,
+  RuntimeJsonSchemaSchema,
+  RuntimeNamespacedIdSchema,
+  RuntimeOperationIdSchema,
+  RuntimePhaseIdSchema,
+  RuntimeRequestSchema,
+  RuntimeStateKeySchema,
+  RuntimeSelectionSchema,
+  RuntimeSelectionSchemaIdSchema
 };
