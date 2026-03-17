@@ -102,7 +102,61 @@ export const RuntimeRequestSchema = z
   })
   .strict();
 
-export const ConditionOperandSchema = z.discriminatedUnion("kind", [
+export type ConditionOperand =
+  | {
+      kind: "const";
+      value: number;
+    }
+  | {
+      kind: "selection-metric";
+      schemaId: z.infer<typeof RuntimeSelectionSchemaIdSchema>;
+      refId: z.infer<typeof RuntimeNamespacedIdSchema>;
+      field: z.infer<typeof RuntimeOperationIdSchema>;
+    }
+  | {
+      kind: "published-fact";
+      factId: z.infer<typeof RuntimeFactIdSchema>;
+    }
+  | {
+      kind: "resource-amount";
+      resourceId: z.infer<typeof RuntimeNamespacedIdSchema>;
+    };
+
+export type ConditionExpr =
+  | {
+      op: "all-of";
+      args: ConditionExpr[];
+    }
+  | {
+      op: "any-of";
+      args: ConditionExpr[];
+    }
+  | {
+      op: "not";
+      arg: ConditionExpr;
+    }
+  | {
+      op: "numeric-gte";
+      left: ConditionOperand;
+      right: ConditionOperand;
+    }
+  | {
+      op: "has-fact";
+      fact: {
+        kind: "published-fact";
+        factId: z.infer<typeof RuntimeFactIdSchema>;
+      };
+    }
+  | {
+      op: "resource-at-least";
+      resource: {
+        kind: "resource-amount";
+        resourceId: z.infer<typeof RuntimeNamespacedIdSchema>;
+      };
+      amount: ConditionOperand;
+    };
+
+export const ConditionOperandSchema: z.ZodType<ConditionOperand> = z.discriminatedUnion("kind", [
   z
     .object({
       kind: z.literal("const"),
@@ -131,7 +185,7 @@ export const ConditionOperandSchema = z.discriminatedUnion("kind", [
     .strict()
 ]);
 
-export const ConditionExprSchema: z.ZodType = z.lazy(() =>
+export const ConditionExprSchema: z.ZodType<ConditionExpr> = z.lazy(() =>
   z.discriminatedUnion("op", [
     z
       .object({
@@ -222,7 +276,5 @@ export type RuntimeInput = z.infer<typeof RuntimeInputSchema>;
 export type AcquireIntent = z.infer<typeof AcquireIntentSchema>;
 export type BundleStatement = z.infer<typeof BundleStatementSchema>;
 export type RuntimeRequest = z.infer<typeof RuntimeRequestSchema>;
-export type ConditionOperand = z.infer<typeof ConditionOperandSchema>;
-export type ConditionExpr = z.infer<typeof ConditionExprSchema>;
 export type InvokeSpec = z.infer<typeof InvokeSpecSchema>;
 export type ConstraintSpec = z.infer<typeof ConstraintSpecSchema>;

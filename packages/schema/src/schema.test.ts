@@ -2,6 +2,24 @@ import { describe, expect, it } from "vitest";
 import * as schema from "./index";
 import { AuthenticityLockSchema, EntitySchema, FlowSchema, ManifestSchema } from "./index";
 
+const validTypedConditionExpr: schema.ConditionExpr = {
+  op: "numeric-gte",
+  left: {
+    kind: "selection-metric",
+    schemaId: "sel:progression-track",
+    refId: "class:paladin",
+    field: "amount"
+  },
+  right: { kind: "const", value: 4 }
+};
+
+void validTypedConditionExpr;
+
+// @ts-expect-error unsupported engine-level primitive must remain outside the typed DSL
+const invalidTypedConditionExpr: schema.ConditionExpr = { op: "min-level", value: 4 };
+
+void invalidTypedConditionExpr;
+
 describe("manifest schema", () => {
   it("validates minimal manifest", () => {
     const parsed = ManifestSchema.parse({
