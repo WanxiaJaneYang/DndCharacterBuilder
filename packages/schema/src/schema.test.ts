@@ -1,5 +1,30 @@
 import { describe, expect, it } from "vitest";
+import * as schema from "./index";
+import {
+  ConditionExprOp,
+  ConditionOperandKind,
+  type ConditionExpr
+} from "./engineRuntimeConditionTypes";
+import { RuntimeInvokePhase } from "./engineRuntimeTypes";
 import { AuthenticityLockSchema, EntitySchema, FlowSchema, ManifestSchema } from "./index";
+
+const validTypedConditionExpr: ConditionExpr = {
+  op: ConditionExprOp.NumericGte,
+  left: {
+    kind: ConditionOperandKind.SelectionMetric,
+    schemaId: "sel:progression-track",
+    refId: "class:paladin",
+    field: "amount"
+  },
+  right: { kind: ConditionOperandKind.Const, value: 4 }
+};
+
+void validTypedConditionExpr;
+
+// @ts-expect-error unsupported engine-level primitive must remain outside the typed DSL
+const invalidTypedConditionExpr: ConditionExpr = { op: "min-level", value: 4 };
+
+void invalidTypedConditionExpr;
 
 describe("manifest schema", () => {
   it("validates minimal manifest", () => {
@@ -1748,6 +1773,328 @@ describe("authenticity lock schema", () => {
         generatedBy: "unit-test",
         sourceAuthorities: [{ title: "SRD", url: "https://www.d20srd.org/" }],
         artifacts: [{ path: "entities/races.json", sha256: "not-a-real-hash" }]
+      })
+    ).toThrow();
+  });
+});
+
+describe("engine runtime architecture contracts", () => {
+  it("accepts runtime change records for selection, input, and acquire", () => {
+    const selection = schema.RuntimeChangeSchema.parse({
+      kind: "selection",
+      schemaId: "sel:progression-track",
+      refId: "class:paladin",
+      amount: 4
+    });
+
+    const input = schema.RuntimeChangeSchema.parse({
+      kind: "input",
+      inputId: "input:identity:alignment",
+      value: ["alignment:lawful", "alignment:good"]
+    });
+
+    const acquire = schema.RuntimeChangeSchema.parse({
+      kind: "acquire",
+      capability: "cap:skills",
+      target: "rank:skill:ride",
+      amount: 2
+    });
+
+    expect(selection.kind).toBe("selection");
+    expect(input.kind).toBe("input");
+    expect(acquire.kind).toBe("acquire");
+  });
+
+  it("accepts bundle statements for invoke, grant, and constraint", () => {
+    const invoke = schema.BundleStatementSchema.parse({
+      kind: "invoke",
+      capability: "cap:skills",
+      op: "assign-category",
+      args: {
+        target: "skill:ride",
+        categoryId: "skill-category:class"
+      }
+    });
+
+    const grant = schema.BundleStatementSchema.parse({
+      kind: "grant",
+      entity: "feature:paladin:divine-health"
+    });
+
+    const constraint = schema.BundleStatementSchema.parse({
+      kind: "constraint",
+      capability: "cap:eligibility",
+      op: "requires-tags",
+      args: {
+        subjectFact: "fact:identity:alignment",
+        allOf: ["alignment:lawful", "alignment:good"]
+      },
+      requiresFacts: ["fact:identity:alignment"]
+    });
+
+    expect(invoke.kind).toBe("invoke");
+    expect(grant.kind).toBe("grant");
+    expect(constraint.kind).toBe("constraint");
+  });
+
+  it("rejects request-side statements from bundle schemas", () => {
+    expect(() =>
+      schema.BundleStatementSchema.parse({
+        kind: "selection",
+        schemaId: "sel:progression-track",
+        refId: "class:paladin",
+        amount: 4
+      })
+    ).toThrow();
+
+    expect(() =>
+      schema.BundleStatementSchema.parse({
+        kind: "acquire",
+        capability: "cap:skills",
+        target: "rank:skill:ride",
+        amount: 2
+      })
+    ).toThrow();
+  });
+
+  it("rejects malformed bundle when expressions", () => {
+    expect(() =>
+      schema.BundleStatementSchema.parse({
+        kind: "grant",
+        entity: "feature:paladin:divine-health",
+        when: {
+          op: "min-level",
+          value: 4
+        }
+      })
+    ).toThrow();
+  });
+
+  it("accepts runtime requests as normalized change envelopes", () => {
+    const parsed = schema.RuntimeRequestSchema.parse({
+      changes: [
+        {
+          kind: "selection",
+          schemaId: "sel:progression-track",
+          refId: "class:paladin",
+          amount: 4
+        },
+        {
+          kind: "input",
+          inputId: "input:identity:alignment",
+          value: ["alignment:lawful", "alignment:good"]
+        },
+        {
+          kind: "acquire",
+          capability: "cap:skills",
+          target: "rank:skill:ride",
+          amount: 2
+        }
+      ]
+    });
+
+    expect(parsed.changes).toHaveLength(3);
+  });
+
+  it("accepts open-ended projection fragments instead of a closed final result shape", () => {
+    const parsed = schema.RuntimeProjectionResultSchema.parse({
+      projections: [
+        {
+          projectionId: "projection:sheet:summary",
+          schemaId: "schema:projection:sheet-summary:v1",
+          data: {
+            totals: { hp: 42 },
+            customExpansionBlock: {
+              auraRadius: 10,
+              tags: ["holy", "mounted"]
+            }
+          }
+        },
+        {
+          projectionId: "projection:pack:custom:dragonmarks",
+          schemaId: "schema:projection:dragonmarks:v1",
+          data: {
+            marks: [
+              { id: "mark:storm", tier: "least" }
+            ]
+          }
+        }
+      ]
+    });
+
+    expect(parsed.projections).toHaveLength(2);
+  });
+
+  it("rejects direct fact injection in runtime request inputs", () => {
+    expect(() =>
+      schema.RuntimeRequestSchema.parse({
+        changes: [
+          {
+            kind: "input",
+            inputId: "fact:identity:alignment",
+            value: ["alignment:lawful", "alignment:good"]
+          }
+        ]
+      })
+    ).toThrow();
+  });
+
+  it("rejects legacy bucketed runtime request fields", () => {
+    expect(() =>
+      schema.RuntimeRequestSchema.parse({
+        selections: [],
+        inputs: [],
+        acquireIntents: []
+      })
+    ).toThrow();
+  });
+
+  it("accepts typed condition expressions for selection metrics, facts, resources, and constants", () => {
+    const parsed = schema.ConditionExprSchema.parse({
+      op: "all-of",
+      args: [
+        {
+          op: "numeric-gte",
+          left: {
+            kind: "selection-metric",
+            schemaId: "sel:progression-track",
+            refId: "class:paladin",
+            field: "amount"
+          },
+          right: { kind: "const", value: 4 }
+        },
+        {
+          op: "has-fact",
+          fact: {
+            kind: "published-fact",
+            factId: "fact:identity:alignment"
+          }
+        },
+        {
+          op: "resource-at-least",
+          resource: {
+            kind: "resource-amount",
+            resourceId: "budget:skill-points"
+          },
+          amount: { kind: "const", value: 1 }
+        }
+      ]
+    });
+
+    expect(parsed.op).toBe("all-of");
+  });
+
+  it("rejects bare min-level condition nodes", () => {
+    expect(() =>
+      schema.ConditionExprSchema.parse({
+        op: "min-level",
+        value: 4
+      })
+    ).toThrow();
+  });
+
+  it("accepts invoke and constraint specs as distinct registry entries", () => {
+    const invoke = schema.InvokeSpecSchema.parse({
+      kind: "invoke",
+      capability: "cap:skills",
+      op: "assign-category",
+      version: "1",
+      argsSchema: { type: "object" },
+      phase: RuntimeInvokePhase.Invoke,
+      consumes: ["input:progression:selected-levels"],
+      produces: ["resource:skill-points"],
+      publishes: ["fact:skills:class-category"],
+      idempotent: true
+    });
+
+    const constraint = schema.ConstraintSpecSchema.parse({
+      kind: "constraint",
+      capability: "cap:eligibility",
+      op: "requires-tags",
+      version: "1",
+      argsSchema: { type: "object" },
+      watches: ["fact:identity:alignment"],
+      requiresFacts: ["fact:identity:alignment"],
+      evaluationPhase: "constraints",
+      deferredWhenMissing: true
+    });
+
+    expect(invoke.kind).toBe("invoke");
+    expect(constraint.kind).toBe("constraint");
+  });
+
+  it("accepts boolean argsSchema values in registry specs", () => {
+    const invoke = schema.InvokeSpecSchema.parse({
+      kind: "invoke",
+      capability: "cap:skills",
+      op: "assign-category",
+      version: "1",
+      argsSchema: true,
+      phase: RuntimeInvokePhase.Invoke,
+      consumes: ["input:progression:selected-levels"],
+      produces: ["resource:skill-points"],
+      idempotent: true
+    });
+
+    const constraint = schema.ConstraintSpecSchema.parse({
+      kind: "constraint",
+      capability: "cap:eligibility",
+      op: "requires-tags",
+      version: "1",
+      argsSchema: false,
+      watches: ["fact:identity:alignment"],
+      evaluationPhase: "constraints",
+      deferredWhenMissing: true
+    });
+
+    expect(invoke.argsSchema).toBe(true);
+    expect(constraint.argsSchema).toBe(false);
+  });
+
+  it("rejects write-capable fields on constraint specs", () => {
+    expect(() =>
+      schema.ConstraintSpecSchema.parse({
+        kind: "constraint",
+        capability: "cap:eligibility",
+        op: "requires-tags",
+        version: "1",
+        argsSchema: { type: "object" },
+        watches: ["fact:identity:alignment"],
+        produces: ["resource:skill-points"],
+        evaluationPhase: "constraints",
+        deferredWhenMissing: true
+      })
+    ).toThrow();
+  });
+
+  it("rejects selection-prefixed state keys in registry specs", () => {
+    expect(() =>
+      schema.InvokeSpecSchema.parse({
+        kind: "invoke",
+        capability: "cap:skills",
+        op: "assign-category",
+        version: "1",
+        argsSchema: { type: "object" },
+        phase: RuntimeInvokePhase.Invoke,
+        consumes: ["selection:progression"],
+        produces: ["resource:skill-points"],
+        idempotent: true
+      })
+    ).toThrow();
+  });
+
+  it("rejects unknown invoke phase values", () => {
+    expect(() =>
+      schema.InvokeSpecSchema.parse({
+        kind: "invoke",
+        capability: "cap:skills",
+        op: "assign-category",
+        version: "1",
+        argsSchema: { type: "object" },
+        phase: "resolution",
+        consumes: ["input:progression:selected-levels"],
+        produces: ["resource:skill-points"],
+        idempotent: true
       })
     ).toThrow();
   });
