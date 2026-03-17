@@ -1,0 +1,9 @@
+export type RuntimeNamespacedId = string;
+export type RuntimeCapabilityId = string;
+export type RuntimeInputId = string;
+export type RuntimeFactId = string;
+export type RuntimeSelectionSchemaId = string;
+export type RuntimeOperationId = string;
+export type RuntimeStateKey = RuntimeNamespacedId;
+export type RuntimeJsonSchema = boolean | Record<string, unknown>;
+export type RuntimePhaseId = RuntimeOperationId;

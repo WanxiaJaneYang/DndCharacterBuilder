@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as schema from "./index";
-import type { ConditionExpr } from "./engineRuntimeTypes";
+import type { ConditionExpr } from "./engineRuntimeConditionTypes";
 import { AuthenticityLockSchema, EntitySchema, FlowSchema, ManifestSchema } from "./index";
 
 const validTypedConditionExpr: ConditionExpr = {
