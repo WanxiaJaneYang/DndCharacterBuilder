@@ -16,6 +16,8 @@ import type {
   ConstraintSpec,
   InvokeSpec,
   RuntimeChange,
+  RuntimeProjectionFragment,
+  RuntimeProjectionResult,
   RuntimeRequest,
   RuntimeSelection
 } from "./engineRuntimeTypes";
@@ -55,6 +57,9 @@ export const RuntimeSelectionSchemaIdSchema = z
 export const RuntimeOperationIdSchema = z
   .string()
   .regex(OPERATION_ID_PATTERN, "Runtime operation IDs must use kebab-case.");
+
+export const RuntimeProjectionIdSchema = RuntimeNamespacedIdSchema;
+export const RuntimeProjectionSchemaIdSchema = RuntimeNamespacedIdSchema;
 
 export const RuntimeMetricFieldIdSchema = z
   .string()
@@ -154,6 +159,20 @@ export const BundleStatementSchema = z.discriminatedUnion("kind", [
 export const RuntimeRequestSchema = z
   .object({
     changes: z.array(RuntimeChangeSchema)
+  })
+  .strict();
+
+export const RuntimeProjectionFragmentSchema: z.ZodType<RuntimeProjectionFragment> = z
+  .object({
+    projectionId: RuntimeProjectionIdSchema,
+    schemaId: RuntimeProjectionSchemaIdSchema,
+    data: z.record(z.unknown())
+  })
+  .strict();
+
+export const RuntimeProjectionResultSchema: z.ZodType<RuntimeProjectionResult> = z
+  .object({
+    projections: z.array(RuntimeProjectionFragmentSchema)
   })
   .strict();
 

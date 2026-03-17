@@ -199,6 +199,20 @@ Only after convergence does the engine run:
 4. Constraint evaluation
 5. Projection
 
+Projection is intentionally open-ended. The runtime contract should expose projection fragments such as:
+
+```ts
+type RuntimeProjectionResult = {
+  projections: Array<{
+    projectionId: string;
+    schemaId: string;
+    data: Record<string, unknown>;
+  }>;
+};
+```
+
+This keeps runtime outputs extensible for rulesets and expansion packs. The engine must not imply one closed final result schema at this architecture layer, and new output semantics should not have to leak back into UI adapters just to exist.
+
 Execution order must be stable by:
 
 1. phase

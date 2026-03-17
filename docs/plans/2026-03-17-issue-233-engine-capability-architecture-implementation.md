@@ -123,6 +123,7 @@ Document:
 - typed registry split between invoke and constraint specs
 - shared condition DSL rules
 - fixed-point execution invariants
+- open-ended projection fragment outputs
 - imported-state restrictions
 
 **Step 2: Link the contract doc**

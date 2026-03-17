@@ -21,6 +21,12 @@ export type { ConditionExpr, ConditionOperand } from "./engineRuntimeConditionTy
 export { ConditionExprOp, ConditionOperandKind } from "./engineRuntimeConditionTypes";
 export type { AcquireIntent, RuntimeChange, RuntimeInput, RuntimeRequest, RuntimeSelection } from "./engineRuntimeRequestTypes";
 export { RuntimeChangeKind } from "./engineRuntimeRequestTypes";
+export type {
+  RuntimeProjectionFragment,
+  RuntimeProjectionId,
+  RuntimeProjectionResult,
+  RuntimeProjectionSchemaId
+} from "./engineRuntimeProjectionTypes";
 export type { BundleStatement } from "./engineRuntimeBundleTypes";
 export { BundleStatementKind } from "./engineRuntimeBundleTypes";
 export type { ConstraintSpec, InvokeSpec } from "./engineRuntimeRegistryTypes";

@@ -218,6 +218,20 @@ Only after convergence does the engine run:
 4. Constraint evaluation
 5. Projection
 
+Projection remains open-ended at this layer. The runtime may emit typed projection fragments:
+
+```ts
+type RuntimeProjectionResult = {
+  projections: Array<{
+    projectionId: string;
+    schemaId: string;
+    data: Record<string, unknown>;
+  }>;
+};
+```
+
+This avoids implying that issue `#233` approves one closed final result schema. Rulesets and expansion packs must be able to introduce new output structures without pushing semantics back into UI code or request adapters.
+
 Ordering must be stable and derived from:
 1. phase
 2. capability

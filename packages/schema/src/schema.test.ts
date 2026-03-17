@@ -1896,6 +1896,35 @@ describe("engine runtime architecture contracts", () => {
     expect(parsed.changes).toHaveLength(3);
   });
 
+  it("accepts open-ended projection fragments instead of a closed final result shape", () => {
+    const parsed = schema.RuntimeProjectionResultSchema.parse({
+      projections: [
+        {
+          projectionId: "projection:sheet:summary",
+          schemaId: "schema:projection:sheet-summary:v1",
+          data: {
+            totals: { hp: 42 },
+            customExpansionBlock: {
+              auraRadius: 10,
+              tags: ["holy", "mounted"]
+            }
+          }
+        },
+        {
+          projectionId: "projection:pack:custom:dragonmarks",
+          schemaId: "schema:projection:dragonmarks:v1",
+          data: {
+            marks: [
+              { id: "mark:storm", tier: "least" }
+            ]
+          }
+        }
+      ]
+    });
+
+    expect(parsed.projections).toHaveLength(2);
+  });
+
   it("rejects direct fact injection in runtime request inputs", () => {
     expect(() =>
       schema.RuntimeRequestSchema.parse({
