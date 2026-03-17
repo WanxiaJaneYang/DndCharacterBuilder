@@ -4,7 +4,7 @@
 
 **Goal:** Codify the approved issue #233 engine architecture as schema-level contracts and documentation without widening current engine execution work beyond the existing `#232` boundary.
 
-**Architecture:** Keep runtime-boundary code work separate from architecture-contract work. Add explicit schema contracts for `BundleStatement`, intent-driven `RuntimeRequest`, `ConditionExpr`, `InvokeSpec`, and `ConstraintSpec` in `@dcb/schema`, document the event-driven fixed-point propagation boundary in `docs/data/`, and keep engine execution changes blocked behind the approved issue chain `#232 -> #233 -> #235 -> #236 -> #122`.
+**Architecture:** Keep runtime-boundary code work separate from architecture-contract work. Add explicit schema contracts for `BundleStatement`, `RuntimeRequest`, `ConditionExpr`, `InvokeSpec`, and `ConstraintSpec` in `@dcb/schema`, document the boundaries in `docs/data/`, and keep engine execution changes blocked behind the approved issue chain `#232 -> #233 -> #235 -> #236 -> #122`.
 
 **Tech Stack:** TypeScript, Zod, Vitest, npm workspaces, Markdown docs
 
@@ -20,7 +20,7 @@
 Add a focused `describe("engine runtime architecture contracts")` block that asserts:
 - bundle statements accept only `invoke`, `grant`, and `constraint`
 - bundle statements reject request-side instructions such as `selection` and `acquire`
-- runtime requests accept intent records rather than bucketed snapshot fields
+- runtime requests accept `selections`, `inputs`, and `acquireIntents`
 - runtime requests reject direct `fact:*` injection in request input identifiers
 
 **Step 2: Run test to verify it fails**
@@ -44,7 +44,6 @@ Leave the tests failing until the new schema module is added.
 Add Zod schemas and exported types for:
 - `BundleStatementSchema`
 - `RuntimeRequestSchema`
-- `RuntimeIntentSchema`
 - `RuntimeSelectionSchema`
 - `RuntimeInputSchema`
 - `AcquireIntentSchema`
@@ -96,7 +95,7 @@ Extend `engineRuntime.ts` with:
 
 Constraints:
 - `ConstraintSpec` is registry-owned but must not allow generic runtime writes
-- `InvokeSpec` must carry phase and idempotence metadata plus propagation surface declarations
+- `InvokeSpec` must carry phase and idempotence metadata
 - no engine execution behavior changes in this task
 
 **Step 4: Run tests and typecheck**

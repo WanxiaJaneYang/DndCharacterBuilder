@@ -6,7 +6,7 @@ import {
   ConstraintEvaluationPhase,
   RegistryInstructionKind,
   RuntimeInvokePhase,
-  RuntimeIntentKind
+  RuntimeRequestItemKind
 } from "./engineRuntimeTypes";
 import type {
   AcquireIntent,
@@ -15,7 +15,6 @@ import type {
   ConditionOperand,
   ConstraintSpec,
   InvokeSpec,
-  RuntimeIntent,
   RuntimeRequest,
   RuntimeSelection
 } from "./engineRuntimeTypes";
@@ -89,7 +88,7 @@ export const RuntimePhaseIdSchema = z.nativeEnum(RuntimeInvokePhase);
 
 export const RuntimeSelectionSchema = z
   .object({
-    kind: z.literal(RuntimeIntentKind.Selection),
+    kind: z.literal(RuntimeRequestItemKind.Selection),
     schemaId: RuntimeSelectionSchemaIdSchema,
     refId: RuntimeNamespacedIdSchema,
     amount: z.number().int().positive()
@@ -98,7 +97,7 @@ export const RuntimeSelectionSchema = z
 
 export const RuntimeInputSchema = z
   .object({
-    kind: z.literal(RuntimeIntentKind.Input),
+    kind: z.literal(RuntimeRequestItemKind.Input),
     inputId: RuntimeInputIdSchema,
     value: z.unknown()
   })
@@ -106,18 +105,12 @@ export const RuntimeInputSchema = z
 
 export const AcquireIntentSchema = z
   .object({
-    kind: z.literal(RuntimeIntentKind.Acquire),
+    kind: z.literal(RuntimeRequestItemKind.Acquire),
     capability: RuntimeCapabilityIdSchema,
     target: RuntimeNamespacedIdSchema,
     amount: z.number().int().positive()
   })
   .strict();
-
-export const RuntimeIntentSchema = z.discriminatedUnion("kind", [
-  RuntimeSelectionSchema,
-  RuntimeInputSchema,
-  AcquireIntentSchema
-]);
 
 export const BundleStatementSchema = z.discriminatedUnion("kind", [
   z
@@ -153,7 +146,9 @@ export const BundleStatementSchema = z.discriminatedUnion("kind", [
 
 export const RuntimeRequestSchema = z
   .object({
-    intents: z.array(RuntimeIntentSchema)
+    selections: z.array(RuntimeSelectionSchema),
+    inputs: z.array(RuntimeInputSchema).optional(),
+    acquireIntents: z.array(AcquireIntentSchema).optional()
   })
   .strict();
 
@@ -237,8 +232,8 @@ export const InvokeSpecSchema = z
     version: z.string().min(1),
     argsSchema: RuntimeJsonSchemaSchema,
     phase: RuntimePhaseIdSchema,
-    consumes: z.array(RuntimeStateKeySchema),
-    emits: z.array(RuntimeStateKeySchema),
+    reads: z.array(RuntimeStateKeySchema),
+    writes: z.array(RuntimeStateKeySchema),
     publishes: z.array(RuntimeFactIdSchema).optional(),
     idempotent: z.boolean(),
     mayActivateEntities: z.boolean().optional(),
@@ -253,7 +248,7 @@ export const ConstraintSpecSchema = z
     op: RuntimeOperationIdSchema,
     version: z.string().min(1),
     argsSchema: RuntimeJsonSchemaSchema,
-    watches: z.array(RuntimeStateKeySchema),
+    reads: z.array(RuntimeStateKeySchema),
     requiresFacts: z.array(RuntimeFactIdSchema).optional(),
     requiresInputs: z.array(RuntimeInputIdSchema).optional(),
     requiresResources: z.array(RuntimeNamespacedIdSchema).optional(),

@@ -25,8 +25,8 @@ export type InvokeSpec = {
   version: string;
   argsSchema: RuntimeJsonSchema;
   phase: RuntimeInvokePhase;
-  consumes: RuntimeStateKey[];
-  emits: RuntimeStateKey[];
+  reads: RuntimeStateKey[];
+  writes: RuntimeStateKey[];
   publishes?: RuntimeFactId[];
   idempotent: boolean;
   mayActivateEntities?: boolean;
@@ -39,7 +39,7 @@ export type ConstraintSpec = {
   op: RuntimeOperationId;
   version: string;
   argsSchema: RuntimeJsonSchema;
-  watches: RuntimeStateKey[];
+  reads: RuntimeStateKey[];
   requiresFacts?: RuntimeFactId[];
   requiresInputs?: RuntimeInputId[];
   requiresResources?: RuntimeNamespacedId[];

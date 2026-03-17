@@ -1779,32 +1779,6 @@ describe("authenticity lock schema", () => {
 });
 
 describe("engine runtime architecture contracts", () => {
-  it("accepts runtime intent records for selection, input, and acquire", () => {
-    const selection = schema.RuntimeIntentSchema.parse({
-      kind: "selection",
-      schemaId: "sel:progression-track",
-      refId: "class:paladin",
-      amount: 4
-    });
-
-    const input = schema.RuntimeIntentSchema.parse({
-      kind: "input",
-      inputId: "input:identity:alignment",
-      value: ["alignment:lawful", "alignment:good"]
-    });
-
-    const acquire = schema.RuntimeIntentSchema.parse({
-      kind: "acquire",
-      capability: "cap:skills",
-      target: "rank:skill:ride",
-      amount: 2
-    });
-
-    expect(selection.kind).toBe("selection");
-    expect(input.kind).toBe("input");
-    expect(acquire.kind).toBe("acquire");
-  });
-
   it("accepts bundle statements for invoke, grant, and constraint", () => {
     const invoke = schema.BundleStatementSchema.parse({
       kind: "invoke",
@@ -1870,20 +1844,24 @@ describe("engine runtime architecture contracts", () => {
     ).toThrow();
   });
 
-  it("accepts runtime requests as intent envelopes", () => {
+  it("accepts runtime requests with selections, inputs, and acquire intents", () => {
     const parsed = schema.RuntimeRequestSchema.parse({
-      intents: [
+      selections: [
         {
           kind: "selection",
           schemaId: "sel:progression-track",
           refId: "class:paladin",
           amount: 4
-        },
+        }
+      ],
+      inputs: [
         {
           kind: "input",
           inputId: "input:identity:alignment",
           value: ["alignment:lawful", "alignment:good"]
-        },
+        }
+      ],
+      acquireIntents: [
         {
           kind: "acquire",
           capability: "cap:skills",
@@ -1893,29 +1871,22 @@ describe("engine runtime architecture contracts", () => {
       ]
     });
 
-    expect(parsed.intents).toHaveLength(3);
+    expect(parsed.selections).toHaveLength(1);
+    expect(parsed.inputs).toHaveLength(1);
+    expect(parsed.acquireIntents).toHaveLength(1);
   });
 
   it("rejects direct fact injection in runtime request inputs", () => {
     expect(() =>
       schema.RuntimeRequestSchema.parse({
-        intents: [
+        selections: [],
+        inputs: [
           {
             kind: "input",
             inputId: "fact:identity:alignment",
             value: ["alignment:lawful", "alignment:good"]
           }
         ]
-      })
-    ).toThrow();
-  });
-
-  it("rejects legacy bucketed runtime requests", () => {
-    expect(() =>
-      schema.RuntimeRequestSchema.parse({
-        selections: [],
-        inputs: [],
-        acquireIntents: []
       })
     ).toThrow();
   });
@@ -1972,8 +1943,8 @@ describe("engine runtime architecture contracts", () => {
       version: "1",
       argsSchema: { type: "object" },
       phase: RuntimeInvokePhase.Invoke,
-      consumes: ["input:progression:selected-levels"],
-      emits: ["resource:skill-points"],
+      reads: ["input:progression:selected-levels"],
+      writes: ["resource:skill-points"],
       publishes: ["fact:skills:class-category"],
       idempotent: true
     });
@@ -1984,7 +1955,7 @@ describe("engine runtime architecture contracts", () => {
       op: "requires-tags",
       version: "1",
       argsSchema: { type: "object" },
-      watches: ["fact:identity:alignment"],
+      reads: ["fact:identity:alignment"],
       requiresFacts: ["fact:identity:alignment"],
       evaluationPhase: "constraints",
       deferredWhenMissing: true
@@ -2002,8 +1973,8 @@ describe("engine runtime architecture contracts", () => {
       version: "1",
       argsSchema: true,
       phase: RuntimeInvokePhase.Invoke,
-      consumes: ["input:progression:selected-levels"],
-      emits: ["resource:skill-points"],
+      reads: ["input:progression:selected-levels"],
+      writes: ["resource:skill-points"],
       idempotent: true
     });
 
@@ -2013,7 +1984,7 @@ describe("engine runtime architecture contracts", () => {
       op: "requires-tags",
       version: "1",
       argsSchema: false,
-      watches: ["fact:identity:alignment"],
+      reads: ["fact:identity:alignment"],
       evaluationPhase: "constraints",
       deferredWhenMissing: true
     });
@@ -2030,8 +2001,8 @@ describe("engine runtime architecture contracts", () => {
         op: "requires-tags",
         version: "1",
         argsSchema: { type: "object" },
-        watches: ["fact:identity:alignment"],
-        emits: ["resource:skill-points"],
+        reads: ["fact:identity:alignment"],
+        writes: ["resource:skill-points"],
         evaluationPhase: "constraints",
         deferredWhenMissing: true
       })
@@ -2047,8 +2018,8 @@ describe("engine runtime architecture contracts", () => {
         version: "1",
         argsSchema: { type: "object" },
         phase: RuntimeInvokePhase.Invoke,
-        consumes: ["selection:progression"],
-        emits: ["resource:skill-points"],
+        reads: ["selection:progression"],
+        writes: ["resource:skill-points"],
         idempotent: true
       })
     ).toThrow();
@@ -2063,8 +2034,8 @@ describe("engine runtime architecture contracts", () => {
         version: "1",
         argsSchema: { type: "object" },
         phase: "resolution",
-        consumes: ["input:progression:selected-levels"],
-        emits: ["resource:skill-points"],
+        reads: ["input:progression:selected-levels"],
+        writes: ["resource:skill-points"],
         idempotent: true
       })
     ).toThrow();
