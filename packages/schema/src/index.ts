@@ -45,6 +45,14 @@ export type {
   RuntimeSelectionSchemaId,
   RuntimeStateKey
 } from "./engineRuntimeTypes";
+export {
+  BundleStatementKind,
+  ConditionExprOp,
+  ConditionOperandKind,
+  ConstraintEvaluationPhase,
+  RegistryInstructionKind,
+  RuntimeRequestItemKind
+} from "./engineRuntimeTypes";
 
 export const AbilityIdSchema = z.enum(["str", "dex", "con", "int", "wis", "cha"]);
 export type AbilityId = z.infer<typeof AbilityIdSchema>;

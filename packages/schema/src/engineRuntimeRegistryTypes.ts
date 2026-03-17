@@ -9,8 +9,17 @@ import type {
   RuntimeStateKey
 } from "./engineRuntimePrimitiveTypes";
 
+export enum RegistryInstructionKind {
+  Invoke = "invoke",
+  Constraint = "constraint"
+}
+
+export enum ConstraintEvaluationPhase {
+  Constraints = "constraints"
+}
+
 export type InvokeSpec = {
-  kind: "invoke";
+  kind: RegistryInstructionKind.Invoke;
   capability: RuntimeCapabilityId;
   op: RuntimeOperationId;
   version: string;
@@ -25,7 +34,7 @@ export type InvokeSpec = {
 };
 
 export type ConstraintSpec = {
-  kind: "constraint";
+  kind: RegistryInstructionKind.Constraint;
   capability: RuntimeCapabilityId;
   op: RuntimeOperationId;
   version: string;
@@ -35,6 +44,6 @@ export type ConstraintSpec = {
   requiresInputs?: RuntimeInputId[];
   requiresResources?: RuntimeNamespacedId[];
   requiresEntities?: RuntimeNamespacedId[];
-  evaluationPhase: "constraints";
+  evaluationPhase: ConstraintEvaluationPhase.Constraints;
   deferredWhenMissing: boolean;
 };

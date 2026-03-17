@@ -7,21 +7,27 @@ import type {
   RuntimeOperationId
 } from "./engineRuntimePrimitiveTypes";
 
+export enum BundleStatementKind {
+  Invoke = "invoke",
+  Grant = "grant",
+  Constraint = "constraint"
+}
+
 export type BundleStatement =
   | {
-      kind: "invoke";
+      kind: BundleStatementKind.Invoke;
       capability: RuntimeCapabilityId;
       op: RuntimeOperationId;
       args: Record<string, unknown>;
       when?: ConditionExpr;
     }
   | {
-      kind: "grant";
+      kind: BundleStatementKind.Grant;
       entity: RuntimeNamespacedId;
       when?: ConditionExpr;
     }
   | {
-      kind: "constraint";
+      kind: BundleStatementKind.Constraint;
       capability: RuntimeCapabilityId;
       op: RuntimeOperationId;
       args: Record<string, unknown>;

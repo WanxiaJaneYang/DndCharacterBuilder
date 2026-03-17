@@ -5,55 +5,71 @@ import type {
   RuntimeSelectionSchemaId
 } from "./engineRuntimePrimitiveTypes";
 
+export enum ConditionOperandKind {
+  Const = "const",
+  SelectionMetric = "selection-metric",
+  PublishedFact = "published-fact",
+  ResourceAmount = "resource-amount"
+}
+
+export enum ConditionExprOp {
+  AllOf = "all-of",
+  AnyOf = "any-of",
+  Not = "not",
+  NumericGte = "numeric-gte",
+  HasFact = "has-fact",
+  ResourceAtLeast = "resource-at-least"
+}
+
 export type ConditionOperand =
   | {
-      kind: "const";
+      kind: ConditionOperandKind.Const;
       value: number;
     }
   | {
-      kind: "selection-metric";
+      kind: ConditionOperandKind.SelectionMetric;
       schemaId: RuntimeSelectionSchemaId;
       refId: RuntimeNamespacedId;
       field: RuntimeOperationId;
     }
   | {
-      kind: "published-fact";
+      kind: ConditionOperandKind.PublishedFact;
       factId: RuntimeFactId;
     }
   | {
-      kind: "resource-amount";
+      kind: ConditionOperandKind.ResourceAmount;
       resourceId: RuntimeNamespacedId;
     };
 
 export type ConditionExpr =
   | {
-      op: "all-of";
+      op: ConditionExprOp.AllOf;
       args: ConditionExpr[];
     }
   | {
-      op: "any-of";
+      op: ConditionExprOp.AnyOf;
       args: ConditionExpr[];
     }
   | {
-      op: "not";
+      op: ConditionExprOp.Not;
       arg: ConditionExpr;
     }
   | {
-      op: "numeric-gte";
+      op: ConditionExprOp.NumericGte;
       left: ConditionOperand;
       right: ConditionOperand;
     }
   | {
-      op: "has-fact";
+      op: ConditionExprOp.HasFact;
       fact: {
-        kind: "published-fact";
+        kind: ConditionOperandKind.PublishedFact;
         factId: RuntimeFactId;
       };
     }
   | {
-      op: "resource-at-least";
+      op: ConditionExprOp.ResourceAtLeast;
       resource: {
-        kind: "resource-amount";
+        kind: ConditionOperandKind.ResourceAmount;
         resourceId: RuntimeNamespacedId;
       };
       amount: ConditionOperand;

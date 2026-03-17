@@ -1,4 +1,12 @@
 import { z } from "zod";
+import {
+  BundleStatementKind,
+  ConditionExprOp,
+  ConditionOperandKind,
+  ConstraintEvaluationPhase,
+  RegistryInstructionKind,
+  RuntimeRequestItemKind
+} from "./engineRuntimeTypes";
 import type {
   AcquireIntent,
   BundleStatement,
@@ -48,7 +56,7 @@ export const RuntimePhaseIdSchema = RuntimeOperationIdSchema;
 
 export const RuntimeSelectionSchema = z
   .object({
-    kind: z.literal("selection"),
+    kind: z.literal(RuntimeRequestItemKind.Selection),
     schemaId: RuntimeSelectionSchemaIdSchema,
     refId: RuntimeNamespacedIdSchema,
     amount: z.number().int().positive()
@@ -57,7 +65,7 @@ export const RuntimeSelectionSchema = z
 
 export const RuntimeInputSchema = z
   .object({
-    kind: z.literal("input"),
+    kind: z.literal(RuntimeRequestItemKind.Input),
     inputId: RuntimeInputIdSchema,
     value: z.unknown()
   })
@@ -65,7 +73,7 @@ export const RuntimeInputSchema = z
 
 export const AcquireIntentSchema = z
   .object({
-    kind: z.literal("acquire"),
+    kind: z.literal(RuntimeRequestItemKind.Acquire),
     capability: RuntimeCapabilityIdSchema,
     target: RuntimeNamespacedIdSchema,
     amount: z.number().int().positive()
@@ -75,7 +83,7 @@ export const AcquireIntentSchema = z
 export const BundleStatementSchema = z.discriminatedUnion("kind", [
   z
     .object({
-      kind: z.literal("invoke"),
+      kind: z.literal(BundleStatementKind.Invoke),
       capability: RuntimeCapabilityIdSchema,
       op: RuntimeOperationIdSchema,
       args: z.record(z.unknown()),
@@ -84,14 +92,14 @@ export const BundleStatementSchema = z.discriminatedUnion("kind", [
     .strict(),
   z
     .object({
-      kind: z.literal("grant"),
+      kind: z.literal(BundleStatementKind.Grant),
       entity: RuntimeNamespacedIdSchema,
       when: z.lazy(() => ConditionExprSchema).optional()
     })
     .strict(),
   z
     .object({
-      kind: z.literal("constraint"),
+      kind: z.literal(BundleStatementKind.Constraint),
       capability: RuntimeCapabilityIdSchema,
       op: RuntimeOperationIdSchema,
       args: z.record(z.unknown()),
@@ -115,13 +123,13 @@ export const RuntimeRequestSchema = z
 export const ConditionOperandSchema: z.ZodType<ConditionOperand> = z.discriminatedUnion("kind", [
   z
     .object({
-      kind: z.literal("const"),
+      kind: z.literal(ConditionOperandKind.Const),
       value: z.number()
     })
     .strict(),
   z
     .object({
-      kind: z.literal("selection-metric"),
+      kind: z.literal(ConditionOperandKind.SelectionMetric),
       schemaId: RuntimeSelectionSchemaIdSchema,
       refId: RuntimeNamespacedIdSchema,
       field: RuntimeOperationIdSchema
@@ -129,13 +137,13 @@ export const ConditionOperandSchema: z.ZodType<ConditionOperand> = z.discriminat
     .strict(),
   z
     .object({
-      kind: z.literal("published-fact"),
+      kind: z.literal(ConditionOperandKind.PublishedFact),
       factId: RuntimeFactIdSchema
     })
     .strict(),
   z
     .object({
-      kind: z.literal("resource-amount"),
+      kind: z.literal(ConditionOperandKind.ResourceAmount),
       resourceId: RuntimeNamespacedIdSchema
     })
     .strict()
@@ -145,39 +153,39 @@ export const ConditionExprSchema: z.ZodType<ConditionExpr> = z.lazy(() =>
   z.discriminatedUnion("op", [
     z
       .object({
-        op: z.literal("all-of"),
+        op: z.literal(ConditionExprOp.AllOf),
         args: z.array(ConditionExprSchema).min(1)
       })
       .strict(),
     z
       .object({
-        op: z.literal("any-of"),
+        op: z.literal(ConditionExprOp.AnyOf),
         args: z.array(ConditionExprSchema).min(1)
       })
       .strict(),
     z
       .object({
-        op: z.literal("not"),
+        op: z.literal(ConditionExprOp.Not),
         arg: ConditionExprSchema
       })
       .strict(),
     z
       .object({
-        op: z.literal("numeric-gte"),
+        op: z.literal(ConditionExprOp.NumericGte),
         left: ConditionOperandSchema,
         right: ConditionOperandSchema
       })
       .strict(),
     z
       .object({
-        op: z.literal("has-fact"),
-        fact: z.object({ kind: z.literal("published-fact"), factId: RuntimeFactIdSchema }).strict()
+        op: z.literal(ConditionExprOp.HasFact),
+        fact: z.object({ kind: z.literal(ConditionOperandKind.PublishedFact), factId: RuntimeFactIdSchema }).strict()
       })
       .strict(),
     z
       .object({
-        op: z.literal("resource-at-least"),
-        resource: z.object({ kind: z.literal("resource-amount"), resourceId: RuntimeNamespacedIdSchema }).strict(),
+        op: z.literal(ConditionExprOp.ResourceAtLeast),
+        resource: z.object({ kind: z.literal(ConditionOperandKind.ResourceAmount), resourceId: RuntimeNamespacedIdSchema }).strict(),
         amount: ConditionOperandSchema
       })
       .strict()
@@ -186,7 +194,7 @@ export const ConditionExprSchema: z.ZodType<ConditionExpr> = z.lazy(() =>
 
 export const InvokeSpecSchema = z
   .object({
-    kind: z.literal("invoke"),
+    kind: z.literal(RegistryInstructionKind.Invoke),
     capability: RuntimeCapabilityIdSchema,
     op: RuntimeOperationIdSchema,
     version: z.string().min(1),
@@ -203,7 +211,7 @@ export const InvokeSpecSchema = z
 
 export const ConstraintSpecSchema = z
   .object({
-    kind: z.literal("constraint"),
+    kind: z.literal(RegistryInstructionKind.Constraint),
     capability: RuntimeCapabilityIdSchema,
     op: RuntimeOperationIdSchema,
     version: z.string().min(1),
@@ -213,7 +221,7 @@ export const ConstraintSpecSchema = z
     requiresInputs: z.array(RuntimeInputIdSchema).optional(),
     requiresResources: z.array(RuntimeNamespacedIdSchema).optional(),
     requiresEntities: z.array(RuntimeNamespacedIdSchema).optional(),
-    evaluationPhase: z.literal("constraints"),
+    evaluationPhase: z.literal(ConstraintEvaluationPhase.Constraints),
     deferredWhenMissing: z.boolean()
   })
   .strict();

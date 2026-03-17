@@ -1,17 +1,21 @@
 import { describe, expect, it } from "vitest";
 import * as schema from "./index";
-import type { ConditionExpr } from "./engineRuntimeConditionTypes";
+import {
+  ConditionExprOp,
+  ConditionOperandKind,
+  type ConditionExpr
+} from "./engineRuntimeConditionTypes";
 import { AuthenticityLockSchema, EntitySchema, FlowSchema, ManifestSchema } from "./index";
 
 const validTypedConditionExpr: ConditionExpr = {
-  op: "numeric-gte",
+  op: ConditionExprOp.NumericGte,
   left: {
-    kind: "selection-metric",
+    kind: ConditionOperandKind.SelectionMetric,
     schemaId: "sel:progression-track",
     refId: "class:paladin",
     field: "amount"
   },
-  right: { kind: "const", value: 4 }
+  right: { kind: ConditionOperandKind.Const, value: 4 }
 };
 
 void validTypedConditionExpr;
