@@ -1,5 +1,7 @@
 # Issue 233 Engine Capability Architecture Implementation Plan
 
+> Historical note: this file records the March 2026 implementation plan for codifying the then-current `#233` contract on the older refactor line. Current canonical architecture truth for the `engine-refactor` branch now lives outside `docs/plans/`, in `docs/architecture.md`, `docs/data/ENGINE_RUNTIME_ARCHITECTURE.md`, and `docs/engineering/ENGINE_REFACTOR_STATUS.md`.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Codify the approved issue #233 engine architecture as schema-level contracts and documentation without widening current engine execution work beyond the existing `#232` boundary.

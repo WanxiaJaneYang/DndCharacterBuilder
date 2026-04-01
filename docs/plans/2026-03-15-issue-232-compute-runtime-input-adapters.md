@@ -1,5 +1,7 @@
 # Issue 232 Compute-Runtime Input Adapters Implementation Plan
 
+> Historical note: this file records March 2026 implementation planning on the older refactor line. Current canonical architecture truth for the `engine-refactor` integration branch now lives in `docs/architecture.md`, `docs/data/ENGINE_RUNTIME_ARCHITECTURE.md`, and `docs/engineering/ENGINE_REFACTOR_STATUS.md`. Read this file as historical implementation context, not as the latest contract.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Land the first honest child lane under `#205` by removing `CharacterState` materialization from the public `compute()` path while preserving the existing `ComputeResult` contract and legacy API compatibility.

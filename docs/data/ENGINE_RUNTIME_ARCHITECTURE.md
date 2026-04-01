@@ -1,249 +1,157 @@
 # Engine Runtime Architecture
 
-This document defines the stable contract boundary for the engine runtime architecture approved under issue `#233`.
+This document defines the current runtime-contract direction on the `engine-refactor` integration branch. It supersedes branch-era plan text that lived only in `docs/plans/`.
 
-## Four Representations
+## Purpose
 
-The engine redesign separates four representations:
+The engine refactor is moving toward a backend-style domain service with a contract-first boundary:
+
+- rules data stays authoritative
+- the engine owns evaluation and flow resolution
+- the frontend owns rendering and interaction
+- API transport and deployment can be introduced later without changing the core contract
+
+## Canonical Runtime Boundary
+
+The runtime boundary now separates five things:
 
 1. Authored source
-   - Human-maintained pack data that stays close to sourcebook structure.
-   - Canonical home for text, tables, and pack-authored semantics.
 2. Normalized pack IR
-   - Compiler-owned intermediate representation.
-   - Resolves links, IDs, and capability-owned fragments before final bundle emission.
 3. Compiled runtime bundle
-   - Static engine execution input.
-   - Character-agnostic, cacheable, and reusable across requests.
-4. RuntimeRequest
-   - Per-character normalized change request.
-   - Carries normalized change records that seed runtime change propagation.
+4. `RulesContext`
+5. per-build request snapshot
 
-The engine executes `CompiledRuntimeBundle + RuntimeRequest`. It does not execute raw authored entity fields, and it does not keep per-character copies of a rules bundle. The architectural stance is change-driven: the runtime holds normalized changes, propagates them deterministically, and converges to fixed point. It is not a UI flow runner, and fixed-point convergence is not an implementation detail.
+The engine should execute a compiled bundle against rule-universe input plus per-build user input. It should not execute raw authored entity fields, and it should not depend on frontend click history or transient UI state.
+
+## RulesContext
+
+`RulesContext` is the rule-universe input. Typical examples include:
+
+- selected ruleset or edition
+- enabled packs or sources
+- optional-rule toggles
+- bans, overrides, or house-rule profiles
+
+`RulesContext` must be chosen before the engine resolves flow.
+
+## Flow Resolution
+
+The current direction is to treat flow as engine-owned output derived from `RulesContext`.
+
+At the contract level:
+
+- the frontend selects a `RulesContext`
+- the engine resolves a flow descriptor for that context
+- that flow is fixed for the chosen `RulesContext` in MVP
+- flow nodes use opaque IDs defined by the resolved flow, not engine-reserved domain nouns
+
+The frontend still owns presentation, layout, and component behavior, but it should not invent or reorder the authoritative flow on its own.
+
+## Request Snapshot
+
+After flow resolution, the frontend submits a durable request snapshot for evaluation.
+
+Important boundary rules:
+
+- submit durable user state, not raw UI events
+- clicks, hover state, open panels, and stepper mechanics stay in the frontend
+- the request remains generic and should avoid hardcoded D&D-specific engine primitives
+- the request-side vocabulary may continue to use generic concepts such as:
+  - input
+  - selection
+  - acquire
+
+Older branch-era docs may refer to the request half as `RuntimeRequest`. That historical naming is still useful, but it is no longer sufficient by itself to describe the whole runtime source model.
+
+## Two Main Contract Surfaces
+
+The current contract direction is best understood as two surfaces:
+
+### `resolveFlow(rulesContext)`
+
+Returns the fixed flow descriptor for the chosen `RulesContext`.
+
+That descriptor should define:
+
+- opaque node IDs
+- ordering
+- the structure needed for the frontend to render and navigate the builder
+
+### `evaluate(rulesContext, requestSnapshot)`
+
+Recomputes the current authoritative build result for the submitted source state.
+
+At a high level, it should return:
+
+- per-node legality or completion status
+- issues and blocking feedback
+- authoritative derived build state
+- builder-facing projections or summaries
+
+At terminal or explicitly requested points, evaluation may also return a full user-data sheet projection. That still counts as downstream output; it does not make the sheet the engine’s source of truth.
 
 ## Compiled Runtime Bundle
 
-Bundle statements are intentionally small:
+The compiled runtime bundle remains static and character-agnostic.
 
-```ts
-type BundleStatement =
-  | {
-      kind: "invoke";
-      capability: string;
-      op: string;
-      args: Record<string, unknown>;
-      when?: ConditionExpr;
-    }
-  | {
-      kind: "grant";
-      entity: string;
-      when?: ConditionExpr;
-    }
-  | {
-      kind: "constraint";
-      capability: string;
-      op: string;
-      args: Record<string, unknown>;
-      requiresFacts?: string[];
-      requiresInputs?: string[];
-      requiresResources?: string[];
-      requiresEntities?: string[];
-      when?: ConditionExpr;
-    };
-```
+It may contain:
 
-The bundle must not contain:
+- compiled rule fragments
+- selection or flow schema references
+- capability-owned runtime data
+- constraints, grants, and other execution metadata
 
-- request-side changes
-- acquire changes
-- direct user inputs
-- character-private runtime state
+It must not contain:
 
-## RuntimeRequest
+- request-side user state
+- frontend-local interaction state
+- per-character mutable build drafts
 
-`RuntimeRequest` is the dynamic change-request envelope:
+## Execution And Derived Output
 
-```ts
-type RuntimeRequest = {
-  changes: RuntimeChange[];
-};
-```
+The engine is responsible for more than legality checks.
 
-`RuntimeChange` is a discriminated union over:
+Evaluation should recompute the current authoritative build result from the submitted source state, including:
 
-- selection changes
-- raw input changes
-- acquire changes
+- derived build data
+- progression legality
+- node-level status
+- downstream projections needed by the builder or final review surfaces
 
-### Namespace rules
+This keeps the builder honest: the frontend displays engine-returned truth instead of reconstructing the character on its own.
 
-Request-side identifiers:
+## Projection
 
-- `sel:*` for selection schema IDs
-- `input:*` for request inputs
-- acquire change records in `RuntimeChange`
+Projection remains downstream of evaluation, not source truth.
 
-Runtime-state and published-surface identifiers:
+That means:
 
-- `entity:*`
-- `resource:*`
-- `private:*`
-- `constraint:*`
-- `fact:*`
+- builder summaries are projections
+- terminal full-sheet outputs are projections
+- review data is projection
+- explanation and provenance surfaces are projection
 
-`RuntimeRequest` must not inject `fact:*` directly. Inputs are normalized before facts are published.
+Projection is still important, but it should not become a back door for hiding engine state or frontend-owned logic inside the contract.
 
-## Dependency Semantics
+## Backend / Frontend Separation
 
-`dependsOn` remains reserved for static implementation dependencies, such as deferred mechanics waiting on missing capability support.
+The target deployment model is a real backend/frontend separation, but the refactor is intentionally contract-first.
 
-Runtime prerequisites use dedicated fields instead:
+Current stance:
 
-- `requiresFacts`
-- `requiresInputs`
-- `requiresResources`
-- `requiresEntities`
+- define the engine contract first
+- keep frontend and engine boundaries clean now
+- add API transport before or during implementation of the separated system
+- keep server-owned persistence or draft sessions out of MVP unless explicitly needed later
 
-This avoids overloading one field name with incompatible meanings.
+## Open Items
 
-## Typed Capability Registry
+The following details are still intentionally open:
 
-Runtime instructions are validated through a typed registry. The registry has two first-class instruction families:
+- the final transport/API shape
+- the exact normalized request type names
+- the exact schema of builder summaries and terminal full-sheet payloads
+- richer cleanup semantics such as active / blocked / orphaned projection surfaces
+- long-lived backend persistence
 
-```ts
-type InvokeSpec = {
-  kind: "invoke";
-  capability: string;
-  op: string;
-  version: string;
-  argsSchema: JsonSchema;
-  phase: RuntimeInvokePhase;
-  consumes: StateKey[];
-  produces: StateKey[];
-  publishes?: FactId[];
-  idempotent: boolean;
-  mayActivateEntities?: boolean;
-  mayMutateResources?: boolean;
-};
-
-type ConstraintSpec = {
-  kind: "constraint";
-  capability: string;
-  op: string;
-  version: string;
-  argsSchema: JsonSchema;
-  watches: StateKey[];
-  requiresFacts?: FactId[];
-  requiresInputs?: InputId[];
-  requiresResources?: ResourceId[];
-  requiresEntities?: EntityId[];
-  evaluationPhase: "constraints";
-  deferredWhenMissing: boolean;
-};
-```
-
-`InvokeSpec` declares change-consumption and change-production surfaces, not generic snapshot reads/writes. `ConstraintSpec` is first-class, but it is not a generic state-mutating invoke entry.
-
-## Shared Condition DSL
-
-`when` uses a shared condition DSL with typed operands. The engine does not provide a bare `level` primitive.
-
-Approved operand families:
-
-- constants
-- selection-derived metrics
-- published facts
-- resource amounts
-- boolean composition
-- numeric comparison
-
-If a ruleset needs a concept such as "paladin level", it must expose it as a typed metric or a published fact.
-
-## Runtime State Layers
-
-Runtime state is split into:
-
-- raw request inputs
-- owned entities
-- resources
-- capability-owned private state
-- published facts
-- constraint results
-
-Published facts are a narrow public interface for cross-capability reads. Internal caches, temporary calculations, and UI-only fields are not published facts.
-
-## Execution Model
-
-Execution is a deterministic global fixed-point over held changes:
-
-1. Activation
-2. Invoke execution
-3. Acquire resolution
-
-These three phases repeat as a super-cycle until there are no new observable changes across owned entities, published facts, resources, and unresolved acquire outcomes.
-
-This means the runtime is:
-
-- change-driven at the boundary
-- propagation-oriented in the core
-- convergence-bound by contract
-
-It is not:
-
-- a flow runner
-- a one-pass phase script
-- a pure snapshot calculator
-
-Only after convergence does the engine run:
-
-4. Constraint evaluation
-5. Projection
-
-Projection is intentionally open-ended. The runtime contract should expose projection fragments such as:
-
-```ts
-type RuntimeProjectionResult = {
-  projections: Array<{
-    projectionId: string;
-    schemaId: string;
-    data: Record<string, unknown>;
-  }>;
-};
-```
-
-This keeps runtime outputs extensible for rulesets and expansion packs. The engine must not imply one closed final result schema at this architecture layer, and new output semantics should not have to leak back into UI adapters just to exist.
-
-Execution order must be stable by:
-
-1. phase
-2. capability
-3. source entity order
-4. local statement order
-
-The runtime must also define:
-
-- idempotence requirements
-- maximum iteration count
-- cycle detection
-- non-convergence failure behavior
-
-## Imported State Rule
-
-Imported state is treated as raw input that still needs interpretation.
-
-It may enter only through `RuntimeRequest` and must pass through:
-
-- engine entry normalization
-- or a capability-owned adapter
-
-Imported data must not directly hydrate runtime internals unless a capability explicitly exposes a registry-validated import operation.
-
-## Issue Map
-
-This contract sits in the approved issue chain:
-
-- `#232`: `RuntimeRequest` adapter boundary
-- `#233`: architecture approval
-- `#235`: compiler scaffold
-- `#236`: selection-schema compilation
-- `#122`: first native capability slice
+Those should be decided on the `engine-refactor` line, but they should not force readers back into old plan docs just to understand the current architecture.
