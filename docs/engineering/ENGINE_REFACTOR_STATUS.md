@@ -62,6 +62,10 @@ This branch currently treats the redesign spine as:
 - Earlier PRs that materially belong to the redesign may be absorbed into this branch narrative when necessary, even if they were merged elsewhere before the branch strategy was clarified.
 - Internal executor, IR, and registry details should stay provisional until source state, ownership, and output guarantees are explicit.
 
+## Required Follow-Up Issues
+
+- `RulesContext` edit semantics must be treated as a separate follow-up architecture issue. This branch currently documents the MVP reset behavior, but that is not the final semantic answer for rule-universe edits. The follow-up must define what recomputation means when ruleset, packs, optional rules, bans, or overrides change mid-build, and whether reset remains only a temporary frontend policy.
+
 ## Historical Plan Index
 
 Readers looking for branch history can start with:
