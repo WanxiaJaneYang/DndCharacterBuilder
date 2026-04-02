@@ -1,200 +1,379 @@
 # Engine Runtime Architecture
 
-This document defines the current runtime-contract direction on the `engine-refactor` integration branch. It supersedes branch-era plan text that lived only in `docs/plans/`.
+This document defines the current `#240` runtime-contract direction on the `engine-refactor` integration branch.
 
-The most important architectural reset is sequencing: this contract now starts from product semantics, not from the old executor loop. The architecture must first define the rule-universe boundary, the committed build state, and the caller-facing guarantees before it freezes any instruction model, bundle protocol, or convergence strategy.
+The core reset is sheet-centric: after the user selects a `RulesContext`, the system compiles a static rules world, exposes the target character sheet that should be built under that world, and uses flow only as navigation around that sheet. Runtime evaluation then projects the user's current selections and inputs onto that target sheet.
 
 ## Purpose
 
 The engine refactor is moving toward a backend-style domain service with a contract-first boundary:
 
 - rules data stays authoritative
-- the engine owns evaluation and flow resolution
-- the frontend owns rendering and interaction
+- the engine owns compilation and evaluation
+- the frontend owns rendering and temporary interaction state
 - API transport and deployment can be introduced later without changing the core contract
 
-## Top-Level MVP Invariant
+## MVP Scope
 
-For MVP, the rule-universe lifecycle is intentionally simple:
+For `#240`, keep the rule-universe boundary intentionally small:
 
-- the user selects a `RulesContext`
-- the engine compiles or normalizes that rule universe
-- the engine resolves a fixed flow for that context
-- the user builds inside that context
-- if the `RulesContext` changes, the current build state is discarded and the flow restarts
+- no bans or overrides yet
+- additive packs only
+- no mid-build migration or preservation when the rule universe changes
+- no selection cleanup/orphan lifecycle design in this issue
 
-This keeps MVP honest. Cross-ruleset preservation, orphan handling, and cleanup are later extensions, not hidden assumptions in the initial runtime contract.
+The MVP policy is simple: if the `RulesContext` changes, the current build resets and the rules world is rebuilt from scratch.
 
-## Canonical Product Objects
-
-The current top-level architecture is built around five objects:
+## Object Model
 
 ### `RulesContext`
 
-The rule-universe input. Typical examples include:
+`RulesContext` defines the selected rule universe and nothing else.
 
-- selected ruleset or edition
-- enabled packs or sources
-- optional-rule toggles
-- bans, overrides, or house-rule profiles
+```ts
+export interface RulesContext {
+  rulesetId: string;
+  enabledPackIds: string[];
+  flowId?: string;
+}
+```
 
-`RulesContext` must be chosen before the engine resolves flow.
+MVP notes:
 
-### `CompiledRulesContext`
+- `enabledPackIds` are additive pack references only
+- pack order is not semantic; normalization should sort and dedupe them
+- `flowId` stays optional and only exists if a rules context supports multiple flow presets
 
-The normalized or compiled executable form of the selected rule universe.
+### `NormalizedRulesContext`
 
-This is important architecturally, but whether it becomes a public API object, a cache key, or a purely internal implementation detail is still open.
+`NormalizedRulesContext` is the stable compiled-input form.
+
+```ts
+export interface NormalizedRulesContext {
+  rulesetId: string;
+  enabledPackIds: string[];
+  flowId?: string;
+  contextKey: string;
+}
+```
+
+`contextKey` is the stable cache key for this rule universe.
+
+### `CompiledBundle`
+
+`CompiledBundle` represents the static compiled result of a normalized rules context.
+
+```ts
+export interface CompiledBundle {
+  context: NormalizedRulesContext;
+  bundleId: string;
+
+  statements: BundleStatement[];
+
+  registries: {
+    entities: EntityRegistry;
+    selections: SelectionRegistry;
+  };
+
+  targetSheetSchema: TargetCharacterSheetSchema;
+  flow: FlowDescriptor;
+
+  diagnostics: CompileDiagnostic[];
+}
+```
+
+This object has three caller-facing concerns:
+
+- rule execution assets: `statements`
+- static rules-world definitions: `registries.entities`, `registries.selections`
+- product-facing build target: `targetSheetSchema`, `flow`
+
+The bundle is:
+
+- compiled from `RulesContext`
+- cacheable by `contextKey`
+- independent from character selections and inputs
+
+For this issue, `resources` and generic `projection` registries are intentionally not part of the compiled public contract.
+
+### `TargetCharacterSheetSchema`
+
+This is not a final character sheet result. It is the target character representation that the current rules world expects the user to build.
+
+```ts
+export interface TargetCharacterSheetSchema {
+  schemaId: string;
+  contextKey: string;
+  sections: SheetSectionSchema[];
+}
+
+export interface SheetSectionSchema {
+  id: string;
+  title: string;
+  required: boolean;
+  order: number;
+  fields: SheetFieldSchema[];
+}
+
+export interface SheetFieldSchema {
+  id: string;
+  kind: "input" | "selection" | "derived" | "collection";
+  required: boolean;
+  source?: {
+    selectionId?: string;
+    inputKey?: string;
+    projectionKey?: string;
+  };
+}
+```
+
+Field kinds mean:
+
+- `input`: user enters a literal value
+- `selection`: user chooses from engine-provided options
+- `derived`: engine computes the value
+- `collection`: the field is a repeated list, such as feats, skills, or attacks
 
 ### `FlowDescriptor`
 
-The fixed builder flow derived from the chosen rules context.
+`FlowDescriptor` is not the primary build truth. It is the navigation structure used to progressively complete the target sheet.
 
-Flow nodes should use opaque IDs from the resolved flow. The engine should not hardcode domain-specific UI nouns as its stable public contract.
+```ts
+export interface FlowDescriptor {
+  flowId: string;
+  steps: FlowStep[];
+}
 
-### `CommittedBuildState`
+export interface FlowStep {
+  id: string;
+  title: string;
+  order: number;
+  coversSectionIds: string[];
+  requiredSelectionIds: string[];
+  requiredInputKeys: string[];
+}
+```
 
-The durable user-owned build state under one fixed rules context.
+This lets packs extend the build flow by extending the target sheet and then adding steps that cover the new sections.
 
-For MVP:
+### `RuntimeRequest`
 
-- it contains committed user data only
-- temporary in-step edits stay in the frontend until commit
-- it may be expressed in generic terms such as input, selection, and acquire
-- it does not include derived engine state, projection output, or raw UI events
+`RuntimeRequest` carries the user's committed build input under one compiled bundle.
 
-Older branch-era docs may refer to the dynamic input half as `RuntimeRequest`. That historical name is still useful context, but `RuntimeRequest = { changes[] }` is no longer treated as settled architecture truth.
+```ts
+export interface RuntimeRequest {
+  contextKey: string;
+  selections: SelectionBinding[];
+  inputs: RuntimeInput[];
+}
+
+export interface SelectionBinding {
+  selectionId: string;
+  selectedIds: string[];
+}
+
+export interface RuntimeInput {
+  key: string;
+  value: string | number | boolean | null;
+}
+```
+
+`RuntimeRequest` must not contain:
+
+- static rule-universe data such as ruleset or pack IDs
+- derived sheet values
+- transient UI state such as step index, hover state, or button clicks
 
 ### `EvaluationResult`
 
-The authoritative engine response for the current committed build state.
+Each evaluation returns the current build status projected onto the target sheet.
 
-It should cover legality, progression, explanation, and builder-facing outputs rather than acting as a thin legality-only answer.
+```ts
+export interface EvaluationResult {
+  contextKey: string;
+  bundleId: string;
 
-## MVP Lifecycle
+  status: "ok" | "invalid";
 
-The intended product flow is:
+  currentSheet: CurrentCharacterSheet;
+  completion: CompletionState;
 
-1. The user selects a `RulesContext`.
-2. The engine compiles or normalizes that rules context.
-3. The engine resolves a fixed `FlowDescriptor`.
-4. The frontend collects temporary step edits locally.
-5. When the user commits a step, the frontend submits the current `CommittedBuildState`.
-6. The engine evaluates that committed state and returns a new `EvaluationResult`.
-7. If the `RulesContext` changes, the current `CommittedBuildState` is dropped and the flow restarts.
+  facts: RuntimeFact[];
+  resources: RuntimeResourceState[];
+  constraints: ConstraintResult[];
+  diagnostics: RuntimeDiagnostic[];
+}
+```
+
+### `CurrentCharacterSheet`
+
+`CurrentCharacterSheet` is the current projected sheet instance for the submitted request.
+
+```ts
+export interface CurrentCharacterSheet {
+  schemaId: string;
+  sections: CurrentSheetSection[];
+}
+
+export interface CurrentSheetSection {
+  id: string;
+  title: string;
+  visible: boolean;
+  complete: boolean;
+  fields: CurrentSheetField[];
+}
+
+export interface CurrentSheetField {
+  id: string;
+  value: unknown;
+  status: "empty" | "filled" | "derived" | "invalid";
+}
+```
+
+### `CompletionState`
+
+`CompletionState` captures how far the current build has progressed toward the target sheet.
+
+```ts
+export interface CompletionState {
+  complete: boolean;
+  completedSectionIds: string[];
+  incompleteSectionIds: string[];
+  unresolvedSelections: UnresolvedSelection[];
+  missingInputs: MissingInput[];
+}
+
+export interface UnresolvedSelection {
+  selectionId: string;
+  reason: string;
+}
+
+export interface MissingInput {
+  key: string;
+  reason: string;
+}
+```
+
+## Lifecycle
+
+### Step 1: Choose `RulesContext`
+
+The build begins by selecting a rule universe.
+
+```ts
+const context: RulesContext = {
+  rulesetId: "dnd35-srd",
+  enabledPackIds: [],
+};
+```
+
+### Step 2: Compile The Rules World
+
+```ts
+const normalized = normalizeRulesContext(context);
+const bundle = compileRulesContext(normalized);
+```
+
+Compilation directly produces:
+
+- `bundle.targetSheetSchema`
+- `bundle.flow`
+
+In other words:
+
+- what kind of character sheet should be built under this rules world
+- how the frontend should guide the user through filling it in
+
+### Step 3: Start Building
+
+```ts
+const request: RuntimeRequest = {
+  contextKey: bundle.context.contextKey,
+  selections: [],
+  inputs: [],
+};
+```
+
+The user progressively submits committed selections and inputs.
+
+### Step 4: Evaluate
+
+```ts
+const result = evaluate(bundle, request);
+```
+
+Each evaluation returns:
+
+- the current projected character sheet
+- which sections are complete
+- which selections are still unresolved
+- which inputs are still missing
+- which constraints are currently invalid
+
+## Design Principles
+
+### Sheet Is Primary Truth, Flow Is Navigation
+
+The build should not revolve around page state. It should revolve around progressive completion of the target character sheet.
+
+Flow is still important, but only as a navigation structure around the target sheet.
+
+### Runtime Requests Operate On Source Input, Not Projection
+
+The caller submits:
+
+- `selections`
+- `inputs`
+
+The caller does not directly mutate:
+
+- `hp.total`
+- `ac.total`
+- attack bonuses
+- other derived sheet fields
+
+Those values are always projected by the engine.
+
+### RulesContext Changes Reset The Build In MVP
+
+For MVP, this policy is explicit:
+
+```ts
+if (oldBundle.context.contextKey !== newBundle.context.contextKey) {
+  resetBuild();
+}
+```
+
+No migration, orphan preservation, or partial carry-over is designed in this issue.
+
+### Packs Are Additive In MVP
+
+For MVP, packs may:
+
+- add entities
+- add selectable content
+- add rule statements
+- add target sheet sections
+- add flow steps
+
+Pack overrides and patch/ban semantics are deferred.
 
 ## Public Contract Surfaces
 
-The current contract direction is best understood as two public surfaces plus an internal compilation step:
+The public runtime story for this issue is:
 
-### `resolveFlow(rulesContext)`
+- normalize `RulesContext`
+- compile it into a `CompiledBundle`
+- evaluate `RuntimeRequest` against that bundle
 
-Returns the fixed flow descriptor for the chosen `RulesContext`.
+This is enough to define the boundary without prematurely freezing a broader executor or registry story.
 
-That descriptor should define:
+## Follow-Up Work
 
-- opaque node IDs
-- ordering
-- the structure needed for the frontend to render and navigate the builder
+The following remain explicit follow-up topics:
 
-The engine may compile or cache the rules context internally first. That compile step is architecturally important but not yet locked as its own public API surface.
-
-### `evaluate(rulesContext, committedBuildState)`
-
-Recomputes the current authoritative build result for the submitted committed state.
-
-At a high level, it should return:
-
-- per-node legality and completion status
-- issues, unresolved state, assumptions, and blocking feedback
-- authoritative derived build state
-- builder-facing projections or summaries
-- explanation and provenance surfaces
-
-At the terminal step, evaluation should also be able to return the full user-data sheet projection. That still counts as downstream output; it does not make the sheet the engine's source of truth.
-
-## Source-State Boundary Rules
-
-The engine boundary should obey these rules:
-
-- submit committed user state, not raw UI events
-- clicks, hover state, open panels, and stepper mechanics stay in the frontend
-- the frontend must not send derived stats or final projections back as source truth
-- the engine should evaluate authored or compiled rules data plus committed build state, not frontend-local drafts
-- the request-side vocabulary should stay generic rather than hardcoding product nouns into the core engine contract
-
-## User-Visible Guarantees Come Before Executor Design
-
-The engine contract must be able to support the following caller-facing guarantees:
-
-- authoritative node status for the current flow
-- validation, unresolved state, assumptions, and blocking feedback
-- explanation and provenance for why outcomes exist
-- stable builder-facing projections during the flow
-- terminal full user-data sheet output
-
-These guarantees are more important than the shape of the internal loop. The executor exists to deliver these outcomes, not the other way around.
-
-## Internal Architecture Still Intentionally Open
-
-The following internal decisions are not settled architecture truth yet:
-
-- whether evaluation uses a fixed-point executor
-- whether any surviving request object still looks like `changes[]`
-- whether capability behavior is modeled as `capability + op + args` or something more domain-shaped
-- the exact ownership, typing, and merge rules for cross-capability facts, resources, and entities
-- the final compiler IR and bundle statement model
-
-Earlier branch work around these ideas remains valuable implementation context, but those internal shapes should now be treated as provisional candidates rather than as already-approved architecture.
-
-## Cross-Capability Ownership Is A Required Follow-On
-
-Cross-capability surfaces cannot remain "just namespaced IDs" forever.
-
-The redesign still needs explicit ownership rules for:
-
-- which capability owns which facts, resources, and entities
-- which other capabilities may read them
-- whether anything may be multi-writer
-- how merge and conflict rules work
-- which changes are observable versus private
-
-Until that is defined, execution order must not quietly become the true conflict-resolution model.
-
-## Projection Remains Downstream Output
-
-Projection remains downstream of evaluation, not source truth.
-
-That means:
-
-- builder summaries are projections
-- terminal full-sheet outputs are projections
-- review data is projection
-- explanation and provenance surfaces are projection
-
-Projection is still first-class from a product perspective because the engine owes stable, explainable output surfaces to its callers.
-
-## Backend / Frontend Separation
-
-The target deployment model is a real backend/frontend separation, but the refactor remains contract-first.
-
-Current stance:
-
-- define source state and caller-facing guarantees first
-- keep frontend and engine boundaries clean now
-- add API transport before or during implementation of the separated system
-- keep server-owned persistence or draft sessions out of MVP unless explicitly needed later
-
-## Open Items
-
-The following details are still intentionally open:
-
-- the final transport/API shape
-- whether `CompiledRulesContext` becomes a public handle or remains internal
-- the exact normalized type names for committed build state and evaluation outputs
-- the exact schema of builder summaries and terminal full-sheet payloads
-- richer selection lifecycle semantics such as active, blocked, orphaned, cleanup reasons, and refunds
-- long-lived backend persistence
-- the final change algebra and executor model
-
-Those should be decided on the `engine-refactor` line, but they should not force readers back into old plan docs just to understand the current architecture.
+- deeper `RulesContext` edit semantics beyond MVP reset
+- selection lifecycle, cleanup, blocked/orphaned states, and refunds
+- stable output mapping to other public contracts such as `ComputeResult`
+- cross-capability ownership and merge rules for runtime facts/resources/entities
+- the final executor model and whether any legacy `changes[]` request shape survives internally

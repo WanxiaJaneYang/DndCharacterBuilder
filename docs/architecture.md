@@ -43,60 +43,62 @@ Important consequences:
 For MVP, the hardest invariant is the relationship between the selected rule universe and the current build:
 
 - the user first chooses a `RulesContext`
-- the engine compiles or normalizes that rule universe
-- the engine resolves a fixed flow for that context
-- the user then builds inside that context
+- the engine compiles that rule universe into a static `CompiledBundle`
+- the bundle exposes the target character sheet shape and the flow used to navigate it
+- the user then builds by progressively filling that target sheet
 - if the `RulesContext` changes, MVP resets the current build and starts fresh
 
-This means MVP does not yet preserve cross-ruleset build progress. That later preservation and cleanup story is important, but it should extend the architecture rather than distort the initial contract.
+This means MVP does not yet preserve cross-ruleset build progress. That later preservation and cleanup story is important, but it should extend the architecture rather than distort the initial contract. The reset rule is an MVP product policy, not the full long-term migration design.
 
 ## Core Product Objects
 
 The architecture should be understood in terms of these first-class objects:
 
 - `RulesContext`
-  The selected rule universe: ruleset, enabled packs, optional rules, bans, overrides, and similar choices.
-- `CompiledRulesContext`
-  The normalized or compiled executable form of that rule universe.
+  The selected rule universe. In MVP this stays minimal: `rulesetId`, additive `enabledPackIds`, and optional `flowId`.
+- `CompiledBundle`
+  The static compiled result of the selected rules context. It is cacheable and independent from character-specific selections.
+- `TargetCharacterSheetSchema`
+  The target character representation expected under the selected rules context.
 - `FlowDescriptor`
-  The fixed builder flow derived from the chosen rules context.
-- `CommittedBuildState`
-  The durable user-owned build state under the current rules context. For MVP, this contains committed user data only. Temporary edits stay in the frontend until the user commits a step.
+  The navigation structure that guides the user through completion of the target sheet. Flow is not primary truth; it is navigation around the sheet.
+- `RuntimeRequest`
+  The committed user-owned selections and inputs under the current rules context. It does not contain static rule data or derived sheet values.
 - `EvaluationResult`
-  The authoritative engine response for the current committed build state.
+  The authoritative engine response for the current runtime request, including the current projected sheet and completion state.
 
 ## MVP Lifecycle
 
 The top-down MVP flow is:
 
 1. The user chooses a `RulesContext`.
-2. The engine compiles or normalizes that rules context.
-3. The engine resolves a fixed `FlowDescriptor`.
+2. The engine compiles that rules context into a `CompiledBundle`.
+3. The bundle exposes both `TargetCharacterSheetSchema` and `FlowDescriptor`.
 4. The frontend gathers temporary edits locally while the user works through a step.
-5. When the user commits a step, such as clicking `Next`, the frontend submits the current `CommittedBuildState`.
-6. The engine evaluates that committed state and returns the updated authoritative result.
-7. If the `RulesContext` changes, the current `CommittedBuildState` is discarded and the flow starts over.
+5. When the user commits a step, such as clicking `Next`, the frontend submits a `RuntimeRequest`.
+6. The engine evaluates that request against the compiled bundle and returns the updated authoritative result.
+7. If the `RulesContext` changes, the current build is discarded and the flow starts over.
 
 ## Responsibilities
 
 ### Rules / compiler layer
 
 - author and organize rules content
-- normalize or compile it into an engine-executable form
-- keep authored source data separate from build state
+- compile the selected rules context into a static bundle
+- expose the target sheet shape and flow derived from that bundle
 
 ### Engine layer
 
-- accept the selected rule universe and committed build state
-- resolve flow after rules are selected
-- evaluate legality, progression, and derived build state
+- accept the compiled bundle and runtime request
+- evaluate legality, completion, and derived character state
+- project the current sheet and completion information
 - return authoritative builder-facing outputs and explanations
 
 ### Frontend layer
 
-- render the flow returned by the engine
+- render the flow returned by the bundle
 - manage interaction and temporary local edits
-- submit committed build state, not raw UI events
+- submit runtime selections and inputs, not raw UI events
 - present returned build status, issues, explanations, and projections
 
 ## Determinism
@@ -109,8 +111,9 @@ The top-down MVP flow is:
 
 For MVP, the engine must be able to:
 
-- return the flow after rules selection
-- return legality and completion status for the current flow
+- compile `RulesContext` into a reusable bundle
+- expose the target sheet and flow after rules selection
+- return legality and completion status for the current sheet and its covered flow
 - return issues, unresolved state, assumptions, and blocking feedback where applicable
 - return explanation and provenance surfaces so the frontend can answer why a result exists
 - return authoritative builder-facing summaries during the flow
@@ -121,7 +124,7 @@ For MVP, the engine must be able to:
 These are intentionally downstream of the product contract:
 
 - whether the runtime executor is fixed-point or something simpler
-- whether `RuntimeRequest = { changes[] }` survives in any public or internal form
+- the exact normalized shape of `RuntimeRequest`
 - whether capability behavior is modeled as `capability + op + args` or something more domain-shaped
 - the final ownership and merge rules for cross-capability facts, resources, and entities
 - the final transport/API shape and any long-lived backend persistence
