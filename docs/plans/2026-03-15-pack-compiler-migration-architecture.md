@@ -1,5 +1,7 @@
 # Pack Compiler Migration Architecture
 
+> Historical note: this file records the March 2026 compiler-migration framing on the older refactor line. Current canonical architecture truth for the `engine-refactor` integration branch now lives in `docs/architecture.md`, `docs/data/ENGINE_RUNTIME_ARCHITECTURE.md`, and `docs/engineering/ENGINE_REFACTOR_STATUS.md`. Read this file as historical rationale and migration context, not as the latest branch contract.
+
 Date: 2026-03-15
 
 ## Goal

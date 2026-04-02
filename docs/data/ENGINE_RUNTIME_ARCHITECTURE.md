@@ -1,249 +1,200 @@
 # Engine Runtime Architecture
 
-This document defines the stable contract boundary for the engine runtime architecture approved under issue `#233`.
-
-## Four Representations
-
-The engine redesign separates four representations:
-
-1. Authored source
-   - Human-maintained pack data that stays close to sourcebook structure.
-   - Canonical home for text, tables, and pack-authored semantics.
-2. Normalized pack IR
-   - Compiler-owned intermediate representation.
-   - Resolves links, IDs, and capability-owned fragments before final bundle emission.
-3. Compiled runtime bundle
-   - Static engine execution input.
-   - Character-agnostic, cacheable, and reusable across requests.
-4. RuntimeRequest
-   - Per-character normalized change request.
-   - Carries normalized change records that seed runtime change propagation.
-
-The engine executes `CompiledRuntimeBundle + RuntimeRequest`. It does not execute raw authored entity fields, and it does not keep per-character copies of a rules bundle. The architectural stance is change-driven: the runtime holds normalized changes, propagates them deterministically, and converges to fixed point. It is not a UI flow runner, and fixed-point convergence is not an implementation detail.
-
-## Compiled Runtime Bundle
-
-Bundle statements are intentionally small:
-
-```ts
-type BundleStatement =
-  | {
-      kind: "invoke";
-      capability: string;
-      op: string;
-      args: Record<string, unknown>;
-      when?: ConditionExpr;
-    }
-  | {
-      kind: "grant";
-      entity: string;
-      when?: ConditionExpr;
-    }
-  | {
-      kind: "constraint";
-      capability: string;
-      op: string;
-      args: Record<string, unknown>;
-      requiresFacts?: string[];
-      requiresInputs?: string[];
-      requiresResources?: string[];
-      requiresEntities?: string[];
-      when?: ConditionExpr;
-    };
-```
-
-The bundle must not contain:
-
-- request-side changes
-- acquire changes
-- direct user inputs
-- character-private runtime state
-
-## RuntimeRequest
-
-`RuntimeRequest` is the dynamic change-request envelope:
-
-```ts
-type RuntimeRequest = {
-  changes: RuntimeChange[];
-};
-```
-
-`RuntimeChange` is a discriminated union over:
-
-- selection changes
-- raw input changes
-- acquire changes
-
-### Namespace rules
-
-Request-side identifiers:
-
-- `sel:*` for selection schema IDs
-- `input:*` for request inputs
-- acquire change records in `RuntimeChange`
-
-Runtime-state and published-surface identifiers:
-
-- `entity:*`
-- `resource:*`
-- `private:*`
-- `constraint:*`
-- `fact:*`
-
-`RuntimeRequest` must not inject `fact:*` directly. Inputs are normalized before facts are published.
-
-## Dependency Semantics
-
-`dependsOn` remains reserved for static implementation dependencies, such as deferred mechanics waiting on missing capability support.
+This document defines the current runtime-contract direction on the `engine-refactor` integration branch. It supersedes branch-era plan text that lived only in `docs/plans/`.
 
-Runtime prerequisites use dedicated fields instead:
-
-- `requiresFacts`
-- `requiresInputs`
-- `requiresResources`
-- `requiresEntities`
+The most important architectural reset is sequencing: this contract now starts from product semantics, not from the old executor loop. The architecture must first define the rule-universe boundary, the committed build state, and the caller-facing guarantees before it freezes any instruction model, bundle protocol, or convergence strategy.
 
-This avoids overloading one field name with incompatible meanings.
+## Purpose
 
-## Typed Capability Registry
+The engine refactor is moving toward a backend-style domain service with a contract-first boundary:
 
-Runtime instructions are validated through a typed registry. The registry has two first-class instruction families:
-
-```ts
-type InvokeSpec = {
-  kind: "invoke";
-  capability: string;
-  op: string;
-  version: string;
-  argsSchema: JsonSchema;
-  phase: RuntimeInvokePhase;
-  consumes: StateKey[];
-  produces: StateKey[];
-  publishes?: FactId[];
-  idempotent: boolean;
-  mayActivateEntities?: boolean;
-  mayMutateResources?: boolean;
-};
+- rules data stays authoritative
+- the engine owns evaluation and flow resolution
+- the frontend owns rendering and interaction
+- API transport and deployment can be introduced later without changing the core contract
 
-type ConstraintSpec = {
-  kind: "constraint";
-  capability: string;
-  op: string;
-  version: string;
-  argsSchema: JsonSchema;
-  watches: StateKey[];
-  requiresFacts?: FactId[];
-  requiresInputs?: InputId[];
-  requiresResources?: ResourceId[];
-  requiresEntities?: EntityId[];
-  evaluationPhase: "constraints";
-  deferredWhenMissing: boolean;
-};
-```
+## Top-Level MVP Invariant
 
-`InvokeSpec` declares change-consumption and change-production surfaces, not generic snapshot reads/writes. `ConstraintSpec` is first-class, but it is not a generic state-mutating invoke entry.
+For MVP, the rule-universe lifecycle is intentionally simple:
 
-## Shared Condition DSL
+- the user selects a `RulesContext`
+- the engine compiles or normalizes that rule universe
+- the engine resolves a fixed flow for that context
+- the user builds inside that context
+- if the `RulesContext` changes, the current build state is discarded and the flow restarts
 
-`when` uses a shared condition DSL with typed operands. The engine does not provide a bare `level` primitive.
+This keeps MVP honest. Cross-ruleset preservation, orphan handling, and cleanup are later extensions, not hidden assumptions in the initial runtime contract.
 
-Approved operand families:
+## Canonical Product Objects
 
-- constants
-- selection-derived metrics
-- published facts
-- resource amounts
-- boolean composition
-- numeric comparison
+The current top-level architecture is built around five objects:
 
-If a ruleset needs a concept such as "paladin level", it must expose it as a typed metric or a published fact.
+### `RulesContext`
 
-## Runtime State Layers
+The rule-universe input. Typical examples include:
 
-Runtime state is split into:
+- selected ruleset or edition
+- enabled packs or sources
+- optional-rule toggles
+- bans, overrides, or house-rule profiles
 
-- raw request inputs
-- owned entities
-- resources
-- capability-owned private state
-- published facts
-- constraint results
+`RulesContext` must be chosen before the engine resolves flow.
 
-Published facts are a narrow public interface for cross-capability reads. Internal caches, temporary calculations, and UI-only fields are not published facts.
+### `CompiledRulesContext`
 
-## Execution Model
+The normalized or compiled executable form of the selected rule universe.
 
-Execution is a deterministic global fixed-point over held changes:
+This is important architecturally, but whether it becomes a public API object, a cache key, or a purely internal implementation detail is still open.
 
-1. Activation
-2. Invoke execution
-3. Acquire resolution
+### `FlowDescriptor`
 
-These three phases repeat as a super-cycle until there are no new observable changes across owned entities, published facts, resources, and unresolved acquire outcomes.
+The fixed builder flow derived from the chosen rules context.
 
-This means the runtime is:
+Flow nodes should use opaque IDs from the resolved flow. The engine should not hardcode domain-specific UI nouns as its stable public contract.
 
-- change-driven at the boundary
-- propagation-oriented in the core
-- convergence-bound by contract
+### `CommittedBuildState`
 
-It is not:
+The durable user-owned build state under one fixed rules context.
 
-- a flow runner
-- a one-pass phase script
-- a pure snapshot calculator
+For MVP:
 
-Only after convergence does the engine run:
+- it contains committed user data only
+- temporary in-step edits stay in the frontend until commit
+- it may be expressed in generic terms such as input, selection, and acquire
+- it does not include derived engine state, projection output, or raw UI events
 
-4. Constraint evaluation
-5. Projection
+Older branch-era docs may refer to the dynamic input half as `RuntimeRequest`. That historical name is still useful context, but `RuntimeRequest = { changes[] }` is no longer treated as settled architecture truth.
 
-Projection is intentionally open-ended. The runtime contract should expose projection fragments such as:
+### `EvaluationResult`
 
-```ts
-type RuntimeProjectionResult = {
-  projections: Array<{
-    projectionId: string;
-    schemaId: string;
-    data: Record<string, unknown>;
-  }>;
-};
-```
+The authoritative engine response for the current committed build state.
 
-This keeps runtime outputs extensible for rulesets and expansion packs. The engine must not imply one closed final result schema at this architecture layer, and new output semantics should not have to leak back into UI adapters just to exist.
+It should cover legality, progression, explanation, and builder-facing outputs rather than acting as a thin legality-only answer.
 
-Execution order must be stable by:
+## MVP Lifecycle
 
-1. phase
-2. capability
-3. source entity order
-4. local statement order
+The intended product flow is:
 
-The runtime must also define:
+1. The user selects a `RulesContext`.
+2. The engine compiles or normalizes that rules context.
+3. The engine resolves a fixed `FlowDescriptor`.
+4. The frontend collects temporary step edits locally.
+5. When the user commits a step, the frontend submits the current `CommittedBuildState`.
+6. The engine evaluates that committed state and returns a new `EvaluationResult`.
+7. If the `RulesContext` changes, the current `CommittedBuildState` is dropped and the flow restarts.
 
-- idempotence requirements
-- maximum iteration count
-- cycle detection
-- non-convergence failure behavior
+## Public Contract Surfaces
 
-## Imported State Rule
+The current contract direction is best understood as two public surfaces plus an internal compilation step:
 
-Imported state is treated as raw input that still needs interpretation.
+### `resolveFlow(rulesContext)`
 
-It may enter only through `RuntimeRequest` and must pass through:
+Returns the fixed flow descriptor for the chosen `RulesContext`.
 
-- engine entry normalization
-- or a capability-owned adapter
+That descriptor should define:
 
-Imported data must not directly hydrate runtime internals unless a capability explicitly exposes a registry-validated import operation.
+- opaque node IDs
+- ordering
+- the structure needed for the frontend to render and navigate the builder
 
-## Issue Map
+The engine may compile or cache the rules context internally first. That compile step is architecturally important but not yet locked as its own public API surface.
 
-This contract sits in the approved issue chain:
+### `evaluate(rulesContext, committedBuildState)`
 
-- `#232`: `RuntimeRequest` adapter boundary
-- `#233`: architecture approval
-- `#235`: compiler scaffold
-- `#236`: selection-schema compilation
-- `#122`: first native capability slice
+Recomputes the current authoritative build result for the submitted committed state.
+
+At a high level, it should return:
+
+- per-node legality and completion status
+- issues, unresolved state, assumptions, and blocking feedback
+- authoritative derived build state
+- builder-facing projections or summaries
+- explanation and provenance surfaces
+
+At the terminal step, evaluation should also be able to return the full user-data sheet projection. That still counts as downstream output; it does not make the sheet the engine's source of truth.
+
+## Source-State Boundary Rules
+
+The engine boundary should obey these rules:
+
+- submit committed user state, not raw UI events
+- clicks, hover state, open panels, and stepper mechanics stay in the frontend
+- the frontend must not send derived stats or final projections back as source truth
+- the engine should evaluate authored or compiled rules data plus committed build state, not frontend-local drafts
+- the request-side vocabulary should stay generic rather than hardcoding product nouns into the core engine contract
+
+## User-Visible Guarantees Come Before Executor Design
+
+The engine contract must be able to support the following caller-facing guarantees:
+
+- authoritative node status for the current flow
+- validation, unresolved state, assumptions, and blocking feedback
+- explanation and provenance for why outcomes exist
+- stable builder-facing projections during the flow
+- terminal full user-data sheet output
+
+These guarantees are more important than the shape of the internal loop. The executor exists to deliver these outcomes, not the other way around.
+
+## Internal Architecture Still Intentionally Open
+
+The following internal decisions are not settled architecture truth yet:
+
+- whether evaluation uses a fixed-point executor
+- whether any surviving request object still looks like `changes[]`
+- whether capability behavior is modeled as `capability + op + args` or something more domain-shaped
+- the exact ownership, typing, and merge rules for cross-capability facts, resources, and entities
+- the final compiler IR and bundle statement model
+
+Earlier branch work around these ideas remains valuable implementation context, but those internal shapes should now be treated as provisional candidates rather than as already-approved architecture.
+
+## Cross-Capability Ownership Is A Required Follow-On
+
+Cross-capability surfaces cannot remain "just namespaced IDs" forever.
+
+The redesign still needs explicit ownership rules for:
+
+- which capability owns which facts, resources, and entities
+- which other capabilities may read them
+- whether anything may be multi-writer
+- how merge and conflict rules work
+- which changes are observable versus private
+
+Until that is defined, execution order must not quietly become the true conflict-resolution model.
+
+## Projection Remains Downstream Output
+
+Projection remains downstream of evaluation, not source truth.
+
+That means:
+
+- builder summaries are projections
+- terminal full-sheet outputs are projections
+- review data is projection
+- explanation and provenance surfaces are projection
+
+Projection is still first-class from a product perspective because the engine owes stable, explainable output surfaces to its callers.
+
+## Backend / Frontend Separation
+
+The target deployment model is a real backend/frontend separation, but the refactor remains contract-first.
+
+Current stance:
+
+- define source state and caller-facing guarantees first
+- keep frontend and engine boundaries clean now
+- add API transport before or during implementation of the separated system
+- keep server-owned persistence or draft sessions out of MVP unless explicitly needed later
+
+## Open Items
+
+The following details are still intentionally open:
+
+- the final transport/API shape
+- whether `CompiledRulesContext` becomes a public handle or remains internal
+- the exact normalized type names for committed build state and evaluation outputs
+- the exact schema of builder summaries and terminal full-sheet payloads
+- richer selection lifecycle semantics such as active, blocked, orphaned, cleanup reasons, and refunds
+- long-lived backend persistence
+- the final change algebra and executor model
+
+Those should be decided on the `engine-refactor` line, but they should not force readers back into old plan docs just to understand the current architecture.

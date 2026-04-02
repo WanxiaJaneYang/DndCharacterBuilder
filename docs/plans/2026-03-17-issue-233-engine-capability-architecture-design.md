@@ -1,5 +1,7 @@
 # Issue 233 Engine Capability Architecture Design
 
+> Historical note: this file records the March 2026 branch-era architecture design that landed through `#237`. It remains useful historical context, but the current `engine-refactor` branch no longer treats `docs/plans/` as the canonical architecture source. For current truth, read `docs/architecture.md`, `docs/data/ENGINE_RUNTIME_ARCHITECTURE.md`, and `docs/engineering/ENGINE_REFACTOR_STATUS.md` first.
+
 **Date:** 2026-03-17
 **Issue:** #233
 **Parent:** #199
