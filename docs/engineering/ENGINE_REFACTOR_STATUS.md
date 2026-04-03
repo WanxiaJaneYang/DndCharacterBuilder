@@ -25,8 +25,10 @@ Historical reasoning and implementation notes remain in `docs/plans/`.
 - treat the engine as a backend-style domain service
 - keep the refactor contract-first; add API transport as the boundary stabilizes
 - start from source state and caller-facing guarantees before freezing executor internals
-- resolve flow after `RulesContext` selection
-- keep flow fixed for that `RulesContext` in MVP
+- define a minimal MVP `RulesContext` around `rulesetId`, additive `enabledPackIds`, and optional `flowId`
+- compile each normalized `RulesContext` into a cacheable `CompiledBundle`
+- treat the build as progressive completion of a target character sheet rather than progression through page state
+- keep flow fixed for that `RulesContext` in MVP, as navigation around the target sheet
 - reset the current build state when `RulesContext` changes in MVP
 - have evaluation return authoritative build feedback rather than legality-only answers
 - keep frontend rendering, temporary edits, and interaction out of engine truth
@@ -50,7 +52,7 @@ This branch currently treats the redesign spine as:
 - `#235`: compiler scaffold
 - `#236`: selection-schema compilation
 - `#238`: runtime state and change semantics that must be defined before executor freeze
-- `#240`: `RulesContext` and rule-universe semantics
+- `#240`: `RulesContext`, `CompiledBundle`, and the sheet-centric build model
 - `#239`: projection and output contract
 - `#241`: blocked/orphaned cleanup semantics and later selection lifecycle work
 - `#122`: first native capability slice
@@ -64,7 +66,9 @@ This branch currently treats the redesign spine as:
 
 ## Required Follow-Up Issues
 
-- `RulesContext` edit semantics must be treated as a separate follow-up architecture issue. This branch currently documents the MVP reset behavior, but that is not the final semantic answer for rule-universe edits. The follow-up must define what recomputation means when ruleset, packs, optional rules, bans, or overrides change mid-build, and whether reset remains only a temporary frontend policy.
+- `RulesContext` edit semantics must be treated as a separate follow-up architecture issue. `#240` defines the MVP reset policy and the static `RulesContext -> CompiledBundle -> RuntimeRequest` boundary, but it does not settle the final semantic answer for rule-universe edits.
+- Selection lifecycle, cleanup/refund semantics, and blocked/orphaned states remain follow-up work under the later cleanup/output issues.
+- Stable output mapping from `EvaluationResult` to longer-lived public response contracts remains follow-up work.
 
 ## Historical Plan Index
 
